@@ -139,18 +139,6 @@ local curPhase = 5;
 	end
 	local function _noop_()
 	end
-	local function tempty(t)
-		for _ in next, t do
-			return false;
-		end
-		return true;
-	end
-	local function tnotempty(t)
-		for _ in next, t do
-			return true;
-		end
-		return false;
-	end
 ----------------------------------------------------------------------------------------------------
 	-- "Interface\\Buttons\\WHITE8X8",	-- "Interface\\Tooltips\\UI-Tooltip-Background", -- "Interface\\ChatFrame\\ChatFrameBackground"
 	local ui_style = {
@@ -241,7 +229,8 @@ local curPhase = 5;
 		modernCheckButtonColorDisabledChecked = { 0.5, 0.5, 0.5, 0.4, },
 
 
-		listButtonHeight = 15,
+		skillListButtonHeight = 15,
+		supremeListButtonHeight = 32,
 		listButtonBackdrop = {
 			bgFile = "Interface\\Buttons\\WHITE8X8",
 			edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
@@ -2542,10 +2531,10 @@ do	--	MAIN
 			[24851] = {  nil, 5,  3, 24851, 20478, 300, 320, 330, 340,   1,   1, { 20501, 20498, 18512, 15407, }, { 3, 40, 2, 2, }, nil, nil, 20511, },
 			[28220] = {  nil, 6,  3, 28220, 22662, 300, 320, 330, 340,   1,   1, { 22682, 12810, 7080, 15407, 14227, }, { 5, 12, 2, 3, 4, }, { 16365, }, 0, nil, { 9233, }, },
 			[28224] = {  nil, 6,  3, 28224, 22665, 300, 320, 330, 340,   1,   1, { 22682, 15408, 7080, 15407, 14227, }, { 4, 16, 2, 2, 4, }, { 16365, }, 0, nil, { 9233, }, },
-			[28472] = {  nil, 5,  3, 28472, 22759, 300, 320, 330, 340,   1,   1, { 12810, 19726, 12803, 15407, }, { 12, 2, 2, 2, }, nil, nil, 22771, },
+			[28472] = {  nil, 6,  3, 28472, 22759, 300, 320, 330, 340,   1,   1, { 12810, 19726, 12803, 15407, }, { 12, 2, 2, 2, }, nil, nil, 22771, },
 			[28221] = {  nil, 6,  3, 28221, 22663, 300, 320, 330, 340,   1,   1, { 22682, 12810, 7080, 15407, 14227, }, { 4, 12, 2, 2, 4, }, { 16365, }, 0, nil, { 9233, }, },
 			[28223] = {  nil, 6,  3, 28223, 22666, 300, 320, 330, 340,   1,   1, { 22682, 15408, 7080, 15407, 14227, }, { 5, 16, 2, 3, 4, }, { 16365, }, 0, nil, { 9233, }, },
-			[28473] = {  nil, 5,  3, 28473, 22760, 300, 320, 330, 340,   1,   1, { 12810, 18512, 12803, 15407, }, { 6, 2, 2, 2, }, nil, nil, 22770, },
+			[28473] = {  nil, 6,  3, 28473, 22760, 300, 320, 330, 340,   1,   1, { 12810, 18512, 12803, 15407, }, { 6, 2, 2, 2, }, nil, nil, 22770, },
 			[28222] = {  nil, 6,  3, 28222, 22664, 300, 320, 330, 340,   1,   1, { 22682, 15408, 7080, 15407, 14227, }, { 7, 24, 2, 4, 4, }, { 16365, }, 0, nil, { 9233, }, },
 			[23704] = {  nil, 3,  3, 23704, 19049, 300, 320, 330, 340,   1,   1, { 12810, 12804, 12803, 15407, 14227, }, { 8, 6, 6, 2, 2, }, nil, nil, 19327, },
 			[24703] = {  nil, 5,  3, 24703, 20380, 300, 320, 330, 340,   1,   1, { 12810, 20381, 12803, 15407, 14227, }, { 12, 6, 4, 4, 6, }, nil, nil, 20382, },
@@ -2990,20 +2979,20 @@ do	--	MAIN
 			[22866] = {  nil, 2,  8, 22866, 18405, 300, 315, 330, 345,   1,   1, { 14048, 9210, 14342, 7080, 7078, 14344, 14341, }, { 16, 10, 10, 12, 12, 6, 6, }, nil, nil, 18414, },
 			[23665] = {  nil, 3,  8, 23665, 19059, 300, 315, 330, 345,   1,   1, { 14342, 12809, 14227, }, { 5, 2, 2, }, nil, nil, 19217, },
 			[24901] = {  nil, 4,  8, 24901, 20538, 300, 315, 330, 345,   1,   1, { 14048, 20520, 14256, 14227, }, { 6, 8, 6, 2, }, nil, nil, 20546, },
-			[28482] = {  nil, 5,  8, 28482, 22758, 300, 315, 330, 345,   1,   1, { 14048, 12803, 14227, }, { 2, 4, 2, }, nil, nil, 22772, },
+			[28482] = {  nil, 6,  8, 28482, 22758, 300, 315, 330, 345,   1,   1, { 14048, 12803, 14227, }, { 2, 4, 2, }, nil, nil, 22772, },
 			[18454] = {  nil, 1,  8, 18454, 14146, 300, 315, 330, 345,   1,   1, { 14048, 14342, 9210, 13926, 12364, 12810, 14341, }, { 10, 10, 10, 6, 6, 8, 2, }, nil, nil, 14511, },
 			[22867] = {  nil, 2,  8, 22867, 18407, 300, 315, 330, 345,   1,   1, { 14048, 14256, 12662, 12808, 14341, }, { 12, 20, 6, 8, 2, }, nil, nil, 18415, },
 			[22870] = {  nil, 2,  8, 22870, 18413, 300, 315, 330, 345,   1,   1, { 14048, 12809, 12360, 14341, }, { 12, 4, 1, 2, }, nil, nil, 18418, },
 			[18458] = {  nil, 1,  8, 18458, 14153, 300, 315, 330, 345,   1,   1, { 14048, 12662, 14256, 7078, 12808, 14341, }, { 12, 20, 40, 12, 12, 2, }, nil, nil, 14514, },
 			[28208] = {  nil, 6,  8, 28208, 22658, 300, 315, 330, 345,   1,   1, { 22682, 14048, 7080, 14227, }, { 5, 4, 2, 4, }, { 16365, }, 0, nil, { 9233, }, },
 			[20848] = {  nil, 1,  8, 20848, 16980, 300, 315, 330, 345,   1,   1, { 14048, 17010, 17011, 12810, 14341, }, { 12, 4, 4, 6, 2, }, nil, nil, 17017, },
-			[28481] = {  nil, 5,  8, 28481, 22757, 300, 315, 330, 345,   1,   1, { 14048, 14342, 12803, 14227, }, { 4, 2, 2, 2, }, nil, nil, 22773, },
+			[28481] = {  nil, 6,  8, 28481, 22757, 300, 315, 330, 345,   1,   1, { 14048, 14342, 12803, 14227, }, { 4, 2, 2, 2, }, nil, nil, 22773, },
 			[22759] = {  nil, 1,  8, 22759, 18263, 300, 320, 335, 350,   1,   1, { 14342, 17010, 7078, 12810, 14341, }, { 6, 8, 2, 6, 4, }, nil, nil, 18265, },
 			[24091] = {  nil, 4,  8, 24091, 19682, 300, 315, 330, 345,   1,   1, { 14342, 19726, 12804, 14048, 14227, }, { 3, 5, 4, 4, 2, }, nil, nil, 19764, },
 			[18453] = {  nil, 1,  8, 18453, 14112, 300, 315, 330, 345,   1,   1, { 14048, 14256, 12662, 8170, 14341, }, { 7, 6, 4, 4, 2, }, nil, nil, 14508, },
-			[28210] = {  nil, 5,  8, 28210, 22660, 300, 315, 330, 345,   1,   1, { 19726, 14342, 12803, 14227, }, { 1, 2, 4, 4, }, nil, nil, 22683, },
+			[28210] = {  nil, 6,  8, 28210, 22660, 300, 315, 330, 345,   1,   1, { 19726, 14342, 12803, 14227, }, { 1, 2, 4, 4, }, nil, nil, 22683, },
 			[18446] = {  nil, 1,  8, 18446, 14128, 300, 315, 330, 345,   1,   1, { 14048, 11176, 14341, }, { 8, 2, 1, }, nil, nil, 14500, },
-			[28480] = {  nil, 5,  8, 28480, 22756, 300, 315, 330, 345,   1,   1, { 14048, 19726, 12803, 14227, }, { 4, 2, 2, 2, }, nil, nil, 22774, },
+			[28480] = {  nil, 6,  8, 28480, 22756, 300, 315, 330, 345,   1,   1, { 14048, 19726, 12803, 14227, }, { 4, 2, 2, 2, }, nil, nil, 22774, },
 			[23663] = {  nil, 3,  8, 23663, 19050, 300, 315, 330, 345,   1,   1, { 14342, 7076, 12803, 14227, }, { 5, 5, 5, 2, }, nil, nil, 19218, },
 			[18449] = {  nil, 1,  8, 18449, 13867, 300, 315, 330, 345,   1,   1, { 14048, 14227, 8170, 14341, }, { 7, 2, 4, 1, }, nil, nil, 14504, },
 			[28207] = {  nil, 6,  8, 28207, 22652, 300, 315, 330, 345,   1,   1, { 22682, 14048, 7080, 14227, }, { 7, 8, 6, 8, }, { 16365, }, 0, nil, { 9233, }, },
@@ -5875,6 +5864,7 @@ do	--	MAIN
 			if frame.hooked_frame:IsShown() then
 				local skillName, cur_rank, max_rank = frame.pinfo();
 				local pid = NS.db_get_pid_by_pname(skillName);
+				frame.flag = pid;
 				if pid then
 					local set = SET[pid];
 					local var = VAR[pid];
@@ -6842,7 +6832,6 @@ do	--	MAIN
 				if type(sid) == 'table' then
 					sid = sid[1];
 				end
-				-- local pid = NS.db_get_pid_by_pname(frame.pname());
 				local pid = self.flag or NS.db_get_pid_by_sid(sid);
 				if pid then
 					local set = SET[pid];
@@ -7085,9 +7074,7 @@ do	--	MAIN
 				button:RegisterForClicks("AnyUp");
 				button:SetScript("OnClick", NS.ui_listButton_OnClick);
 				button:RegisterForDrag("LeftButton");
-				button:SetScript("OnHide", function(self)
-					ALADROP(self);
-				end);
+				button:SetScript("OnHide", ALADROP);
 
 				function button:Select()
 					glow:Show();
@@ -7203,7 +7190,7 @@ do	--	MAIN
 						button.icon:SetVertexColor(1.0, 0.0, 0.0, 1.0);
 						button.title:SetText(NS.db_spell_name_s(sid));
 						if SET.colored_rank_for_unknown and frame.flag ~= 'explorer' then
-							local pid = NS.db_get_pid_by_pname(frame.pname());
+							local pid = NS.db_get_pid_by_sid(sid);
 							local var = rawget(VAR, pid);
 							local cur_rank = var and var.cur_rank or 0;
 							button.title:SetTextColor(unpack(rank_color[NS.db_get_difficulty_rank_by_sid(sid, cur_rank)] or ui_style.color_white));
@@ -7301,9 +7288,7 @@ do	--	MAIN
 				button:RegisterForClicks("AnyUp");
 				button:SetScript("OnClick", NS.ui_listButton_OnClick);
 				button:RegisterForDrag("LeftButton");
-				button:SetScript("OnHide", function(self)
-					ALADROP(self);
-				end);
+				button:SetScript("OnHide", ALADROP);
 
 				function button:Select()
 					glow:Show();
@@ -7324,74 +7309,25 @@ do	--	MAIN
 				local list = button.list;
 				local hash = frame.hash;
 				if data_index <= #list then
-					local pid = NS.db_get_pid_by_pname(frame.pname());
-					if pid then
-						local set = SET[pid];
-						local sid = list[data_index];
-						local cid = NS.db_get_cid_by_sid(sid);
-						local data = hash[sid];
-						if data then
-							local name, rank, num = frame.recipe_info(data);
-							if name and rank ~= 'header' then
-								button:Show();
-								button:SetBackdropColor(unpack(ui_style.listButtonBackdropColor_Enabled));
-								local quality = cid and NS.db_item_rarity(cid);
-								button.icon:SetTexture(frame.recipe_icon(data));
-								button.icon:SetVertexColor(1.0, 1.0, 1.0, 1.0);
-								if num > 0 then
-									button.title:SetText(name .. " [" .. num .. "]");
-								else
-									button.title:SetText(name);
-								end
-								button.title:SetTextColor(unpack(rank_color[rank_index[rank]] or ui_style.color_white));
-								if set.showRank then
-									button.note:SetText(NS.db_get_difficulty_rank_list_text_by_sid(sid));
-								else
-									button.note:SetText("");
-								end
-								if quality then
-									local r, g, b, code = GetItemQualityColor(quality);
-									button.quality_glow:SetVertexColor(r, g, b);
-									button.quality_glow:Show();
-								else
-									button.quality_glow:Hide();
-								end
-								if FAV[sid] then
-									button.star:Show();
-								else
-									button.star:Hide();
-								end
-								if sid == frame.selected_sid then
-									button:Select();
-								else
-									button:Deselect();
-								end
-							else
-								button:Hide();
-							end
-						else
+					local sid = list[data_index];
+					local pid = frame.flag or NS.db_get_pid_by_sid(sid);
+					local set = SET[pid];
+					local cid = NS.db_get_cid_by_sid(sid);
+					local data = hash[sid];
+					if data then
+						local name, rank, num = frame.recipe_info(data);
+						if name and rank ~= 'header' then
 							button:Show();
-							if SET.colored_rank_for_unknown then
-								button:SetBackdropColor(unpack(ui_style.listButtonBackdropColor_Disabled));
+							button:SetBackdropColor(unpack(ui_style.listButtonBackdropColor_Enabled));
+							local quality = cid and NS.db_item_rarity(cid);
+							button.icon:SetTexture(frame.recipe_icon(data));
+							button.icon:SetVertexColor(1.0, 1.0, 1.0, 1.0);
+							if num > 0 then
+								button.title:SetText(name .. " [" .. num .. "]");
 							else
-								button:SetBackdropColor(unpack(ui_style.listButtonBackdropColor_Enabled));
+								button.title:SetText(name);
 							end
-							local _, quality, icon;
-							if cid then
-								_, _, quality, _, icon = NS.db_item_info(cid);
-							else
-								quality = nil;
-								icon = ICON_FOR_NO_CID;
-							end
-							button.icon:SetTexture(icon);
-							button.icon:SetVertexColor(1.0, 0.0, 0.0, 1.0);
-							button.title:SetText(NS.db_spell_name_s(sid));
-							if SET.colored_rank_for_unknown then
-								local var = rawget(VAR, pid);
-								button.title:SetTextColor(unpack(rank_color[NS.db_get_difficulty_rank_by_sid(sid, var and var.cur_rank or 0)] or ui_style.color_white));
-							else
-								button.title:SetTextColor(1.0, 0.0, 0.0, 1.0);
-							end
+							button.title:SetTextColor(unpack(rank_color[rank_index[rank]] or ui_style.color_white));
 							if set.showRank then
 								button.note:SetText(NS.db_get_difficulty_rank_list_text_by_sid(sid));
 							else
@@ -7409,18 +7345,62 @@ do	--	MAIN
 							else
 								button.star:Hide();
 							end
-							button:Deselect();
-						end
-						if GetMouseFocus() == button then
-							NS.ui_skillListButton_OnEnter(button);
-						end
-						if button.prev_sid ~= sid then
-							ALADROP(button);
-							button.prev_sid = sid;
+							if sid == frame.selected_sid then
+								button:Select();
+							else
+								button:Deselect();
+							end
+						else
+							button:Hide();
 						end
 					else
+						button:Show();
+						if SET.colored_rank_for_unknown then
+							button:SetBackdropColor(unpack(ui_style.listButtonBackdropColor_Disabled));
+						else
+							button:SetBackdropColor(unpack(ui_style.listButtonBackdropColor_Enabled));
+						end
+						local _, quality, icon;
+						if cid then
+							_, _, quality, _, icon = NS.db_item_info(cid);
+						else
+							quality = nil;
+							icon = ICON_FOR_NO_CID;
+						end
+						button.icon:SetTexture(icon);
+						button.icon:SetVertexColor(1.0, 0.0, 0.0, 1.0);
+						button.title:SetText(NS.db_spell_name_s(sid));
+						if SET.colored_rank_for_unknown then
+							local var = rawget(VAR, pid);
+							button.title:SetTextColor(unpack(rank_color[NS.db_get_difficulty_rank_by_sid(sid, var and var.cur_rank or 0)] or ui_style.color_white));
+						else
+							button.title:SetTextColor(1.0, 0.0, 0.0, 1.0);
+						end
+						if set.showRank then
+							button.note:SetText(NS.db_get_difficulty_rank_list_text_by_sid(sid));
+						else
+							button.note:SetText("");
+						end
+						if quality then
+							local r, g, b, code = GetItemQualityColor(quality);
+							button.quality_glow:SetVertexColor(r, g, b);
+							button.quality_glow:Show();
+						else
+							button.quality_glow:Hide();
+						end
+						if FAV[sid] then
+							button.star:Show();
+						else
+							button.star:Hide();
+						end
+						button:Deselect();
+					end
+					if GetMouseFocus() == button then
+						NS.ui_skillListButton_OnEnter(button);
+					end
+					if button.prev_sid ~= sid then
 						ALADROP(button);
-						button:Hide();
+						button.prev_sid = sid;
 					end
 				else
 					ALADROP(button);
@@ -7695,7 +7675,7 @@ do	--	MAIN
 						frame.prev_var_update_time = GetTime() - MAXIMUM_VAR_UPDATE_PERIOD;
 						hooked_frame.frame = frame;
 
-						local scroll = ALASCR(frame, nil, nil, ui_style.listButtonHeight, NS.ui_CreateSkillListButton, NS.ui_SetSkillListButton);
+						local scroll = ALASCR(frame, nil, nil, ui_style.skillListButtonHeight, NS.ui_CreateSkillListButton, NS.ui_SetSkillListButton);
 						scroll:SetPoint("BOTTOMLEFT", 4, 0);
 						scroll:SetPoint("TOPRIGHT", - 4, - 28);
 						NS.ui_ModifyALAScrollFrame(scroll);
@@ -7706,7 +7686,7 @@ do	--	MAIN
 						call:SetPoint("RIGHT", meta.normal_anchor_top, "LEFT", - 2, 0);
 						call:SetFrameLevel(127);
 						call:SetScript("OnClick", function(self)
-							local pid = NS.db_get_pid_by_pname(frame.pname());
+							local pid = frame.flag or NS.db_get_pid_by_pname(frame.pname());
 							if frame:IsShown() then
 								frame:Hide();
 								call:SetText(L["Open"]);
@@ -8304,7 +8284,7 @@ do	--	MAIN
 					call.info_lines = { L["TIP_PROFIT_FRAME_CALL_INFO"] };
 					call:SetScript("OnClick", function(self)
 						if merc then
-							local pid = NS.db_get_pid_by_pname(frame.pname());
+							local pid = frame.flag or NS.db_get_pid_by_pname(frame.pname());
 							if profitFrame:IsShown() then
 								profitFrame:Hide();
 								if pid then
@@ -8335,7 +8315,7 @@ do	--	MAIN
 						call:SetPushedTexture("interface\\buttons\\ui-grouploot-coin-down");
 					end);
 
-					local scroll = ALASCR(profitFrame, nil, nil, ui_style.listButtonHeight, NS.ui_CreateProfitSkillListButton, NS.ui_SetProfitSkillListButton);
+					local scroll = ALASCR(profitFrame, nil, nil, ui_style.skillListButtonHeight, NS.ui_CreateProfitSkillListButton, NS.ui_SetProfitSkillListButton);
 					scroll:SetPoint("BOTTOMLEFT", 4, 4);
 					scroll:SetPoint("TOPRIGHT", - 4, - 20);
 					profitFrame.scroll = scroll;
@@ -8353,7 +8333,7 @@ do	--	MAIN
 					costOnly.fontString = str;
 					costOnly:SetScript("OnClick", function(self)
 						local checked = self:GetChecked();
-						local pid = NS.db_get_pid_by_pname(frame.pname());
+						local pid = frame.flag or NS.db_get_pid_by_pname(frame.pname());
 						if pid then
 							SET[pid].costOnly = checked;
 							NS.process_profit_update(frame);
@@ -8370,7 +8350,7 @@ do	--	MAIN
 					close:GetHighlightTexture():SetVertexColor(unpack(ui_style.textureButtonColorHighlight));
 					close:SetPoint("TOPRIGHT", profitFrame, "TOPRIGHT", -4, -2);
 					close:SetScript("OnClick", function()
-						local pid = NS.db_get_pid_by_pname(frame.pname());
+						local pid = frame.flag or NS.db_get_pid_by_pname(frame.pname());
 						if pid then
 							SET[pid].showProfit = false;
 						end
@@ -8397,7 +8377,7 @@ do	--	MAIN
 					call:GetHighlightTexture():SetVertexColor(unpack(ui_style.textureButtonColorHighlight));
 					call:SetPoint("TOPRIGHT", frame, "TOPRIGHT", - 4, - 6);
 					call:SetScript("OnClick", function(self)
-						local pid = NS.db_get_pid_by_pname(frame.pname());
+						local pid = frame.flag or NS.db_get_pid_by_pname(frame.pname());
 						if setFrame:IsShown() then
 							frame:HideSetFrame();
 							if pid then
@@ -8445,7 +8425,7 @@ do	--	MAIN
 						end
 						if index == 1 or index == 2 or index == 3 or index == 6 then
 							check:SetScript("OnClick", function(self)
-								local pid = NS.db_get_pid_by_pname(frame.pname());
+								local pid = frame.flag or NS.db_get_pid_by_pname(frame.pname());
 								if pid then
 									NS.change_set_with_update(SET[pid], key, self:GetChecked());
 								end
@@ -8453,7 +8433,7 @@ do	--	MAIN
 							end);
 						else
 							check:SetScript("OnClick", function(self)
-								local pid = NS.db_get_pid_by_pname(frame.pname());
+								local pid = frame.flag or NS.db_get_pid_by_pname(frame.pname());
 								if pid then
 									NS.change_set_with_update(SET[pid], key, self:GetChecked());
 								end
@@ -8484,7 +8464,7 @@ do	--	MAIN
 					phaseSlider.High:SetText("\124cffff00006\124r");
 					phaseSlider:HookScript("OnValueChanged", function(self, value, userInput)
 						if userInput then
-							local pid = NS.db_get_pid_by_pname(frame.pname());
+							local pid = frame.flag or NS.db_get_pid_by_pname(frame.pname());
 							if pid then
 								NS.change_set_with_update(SET[pid], "phase", value);
 								frame.update_func();
@@ -8515,7 +8495,7 @@ do	--	MAIN
 						setFrame:Hide();
 					end
 					function frame:RefreshSetFrame()
-						local pid = NS.db_get_pid_by_pname(self.pname());
+						local pid = frame.flag or NS.db_get_pid_by_pname(self.pname());
 						if pid then
 							local set = SET[pid];
 							for index = 1, #checkBoxes do
@@ -8577,7 +8557,7 @@ do	--	MAIN
 					if frame:IsVisible() and addon ~= ADDON and not (BrowseName and BrowseName:IsVisible()) then
 						local name, _, _, _, _, _, _, _, loc = GetItemInfo(link);
 						if name and name ~= "" then
-							local pid = NS.db_get_pid_by_pname(frame.pname());
+							local pid = frame.flag or NS.db_get_pid_by_pname(frame.pname());
 							frame.searchEdit:ClearFocus();
 							if pid == 10 and loc and loc ~= "" then
 								local id = tonumber(select(3, strfind(link, "item:(%d+)")));
@@ -9025,9 +9005,7 @@ do	--	MAIN
 				button:RegisterForClicks("AnyUp");
 				button:SetScript("OnClick", NS.ui_listButton_OnClick);
 				button:RegisterForDrag("LeftButton");
-				button:SetScript("OnHide", function(self)
-					ALADROP(self);
-				end);
+				button:SetScript("OnHide", ALADROP);
 
 				function button:Select()
 					glow:Show();
@@ -9255,7 +9233,7 @@ do	--	MAIN
 				title:SetPoint("TOP", 0, -4);
 				title:SetText(L["EXPLORER_TITLE"]);
 
-				local scroll = ALASCR(frame, nil, nil, ui_style.listButtonHeight, NS.ui_CreateExplorerSkillListButton, NS.ui_SetExplorerSkillListButton);
+				local scroll = ALASCR(frame, nil, nil, ui_style.skillListButtonHeight, NS.ui_CreateExplorerSkillListButton, NS.ui_SetExplorerSkillListButton);
 				scroll:SetPoint("BOTTOMLEFT", 4, 4);
 				scroll:SetPoint("TOPRIGHT", - 4, - 40);
 				frame.scroll = scroll;
@@ -9382,7 +9360,7 @@ do	--	MAIN
 					call:SetPushedTexture("interface\\buttons\\ui-grouploot-coin-down");
 				end);
 
-				local scroll = ALASCR(profitFrame, nil, nil, ui_style.listButtonHeight, NS.ui_CreateProfitSkillListButton, NS.ui_SetProfitSkillListButton);
+				local scroll = ALASCR(profitFrame, nil, nil, ui_style.skillListButtonHeight, NS.ui_CreateProfitSkillListButton, NS.ui_SetProfitSkillListButton);
 				scroll:SetPoint("BOTTOMLEFT", 4, 4);
 				scroll:SetPoint("TOPRIGHT", - 4, - 20);
 				profitFrame.scroll = scroll;
@@ -9769,7 +9747,7 @@ do	--	MAIN
 							local var = rawget(VAR, pid);
 							if var and NS.db_is_pid(pid) then
 								local cool = var[3];
-								if cool and tnotempty(cool) then
+								if cool and next(cool) ~= nil then
 									if add_label then
 										add_label = false;
 										local lClass, class, lRace, race, sex, name = GetPlayerInfoByGUID(GUID);
@@ -10483,7 +10461,451 @@ do	--	MAIN
 	end
 
 	do	--	supreme craft
-		function NS.ui_CreateSupreme()
+			function NS.ui_supremeListButton_OnEnter(self)
+				local frame = self.frame;
+				local sid = self.list[self:GetDataIndex()];
+				if type(sid) == 'table' then
+					sid = sid[1];
+				end
+				-- local pid = NS.db_get_pid_by_pname(frame.pname());
+				local pid = self.flag or NS.db_get_pid_by_sid(sid);
+				if pid then
+					local set = SET[pid];
+					mouse_focus_sid = sid;
+					mouse_focus_phase = set.phase;
+					GameTooltip:SetOwner(self, "ANCHOR_RIGHT");
+					local info = NS.db_get_info_by_sid(sid);
+					if info then
+						if set.showItemInsteadOfSpell and info[index_cid] then
+							GameTooltip:SetItemByID(info[index_cid]);
+						else
+							GameTooltip:SetSpellByID(sid);
+						end
+						local phase = info[index_phase];
+						if phase > curPhase then
+							GameTooltip:AddLine("\124cffff0000" .. L["available_in_phase_"] .. phase .. "\124r");
+						end
+						GameTooltip:Show();
+					else
+						GameTooltip:SetSpellByID(sid);
+					end
+					local text = NS.db_get_difficulty_rank_list_text_by_sid(sid);
+					if text then
+						GameTooltip:AddDoubleLine(L["LABEL_RANK_LEVEL"], text);
+						GameTooltip:Show();
+					end
+					local data = frame.hash[sid];
+					if pid == 'explorer' then
+						local hash = explorer_hash[sid];
+						if hash then
+							local str = L["RECIPE_LEARNED"] .. ": ";
+							local index = 0;
+							for GUID, _ in next, hash do
+								if index ~= 0 and index % 3 == 0 then
+									str = str .. "\n        ";
+								end
+								local lClass, class, lRace, race, sex, name = GetPlayerInfoByGUID(GUID);
+								if name and class then
+									local classColorTable = RAID_CLASS_COLORS[strupper(class)];
+									name = format("\124cff%.2x%.2x%.2x", classColorTable.r * 255, classColorTable.g * 255, classColorTable.b * 255) .. name .. "\124r";
+									str = str .. " " .. name;
+								else
+									str = str .. " " .. GUID;
+								end
+								index = index + 1;
+							end
+							GameTooltip:AddLine(str);
+							GameTooltip:Show();
+						else
+						end
+						data = data and data[PLAYER_GUID];
+					end
+					if not data then
+						NS.ui_set_tooltip_mtsl(sid);
+					end
+				end
+			end
+			function NS.ui_supremeListButton_OnLeave(self)
+				mouse_focus_sid = nil;
+				button_info_OnLeave(self);
+			end
+			function NS.ui_supremeListButton_OnClick(self, button)
+				local frame = self.frame;
+				local sid = self.list[self:GetDataIndex()];
+				if type(sid) == 'table' then
+					sid = sid[1];
+				end
+				local data = frame.hash[sid];
+				if button == "LeftButton" then
+					if IsShiftKeyDown() then
+						local cid = NS.db_get_cid_by_sid(sid);
+						if cid then
+							ChatEdit_InsertLink(NS.db_item_link(cid), ADDON);
+						else
+							ChatEdit_InsertLink(NS.enchant_link(sid), ADDON);
+						end
+					elseif IsAltKeyDown() then
+						local text1 = nil;
+						local text2 = nil;
+						if data then
+							local n = frame.reagent_num(data);
+							if n and n > 0 then
+								local m1, m2 = frame.recipe_num_made(data);
+								if m1 == m2 then
+									text1 = frame.recipe_link(data) .. "x" .. m1 .. L["PRINT_MATERIALS: "];
+								else
+									text1 = frame.recipe_link(data) .. "x" .. m1 .. "-" .. m2 .. L["PRINT_MATERIALS: "];
+								end
+								text2 = "";
+								if n > 4 then
+									for i = 1, n do
+										text2 = text2 .. frame.reagent_info(data, i) .. "x" .. select(3, frame.reagent_info(data, i));
+									end
+								else
+									for i = 1, n do
+										text2 = text2 .. frame.reagent_link(data, i) .. "x" .. select(3, frame.reagent_info(data, i));
+									end
+								end
+							end
+						else
+							local info = NS.db_get_info_by_sid(sid);
+							local cid = info[index_cid];
+							if info then
+								if cid then
+									text1 = NS.db_item_link_s(cid) .. "x" .. (info[index_num_made_min] == info[index_num_made_max] and info[index_num_made_min] or (info[index_num_made_min] .. "-" .. info[index_num_made_max])) .. L["PRINT_MATERIALS: "];
+								else
+									text1 = NS.db_spell_name_s(sid) .. L["PRINT_MATERIALS: "];
+								end
+								text2 = "";
+								local rinfo = info[index_reagents_id];
+								if #rinfo > 4 then
+									for i = 1, #rinfo do
+										text2 = text2 .. NS.db_item_name_s(rinfo[i]) .. "x" .. info[index_reagents_count][i];
+									end
+								else
+									for i = 1, #rinfo do
+										text2 = text2 .. NS.db_item_link_s(rinfo[i]) .. "x" .. info[index_reagents_count][i];
+									end
+								end
+							end
+						end
+						if text1 and text2 then
+							local editBox = ChatEdit_ChooseBoxForSend();
+							editBox:Show();
+							editBox:SetFocus();
+							editBox:Insert(text1 .. " " .. text2);
+							-- ChatEdit_InsertLink(text1 .. " " .. text2, false);
+						end
+					elseif IsControlKeyDown() then
+						local cid = NS.db_get_cid_by_sid(sid);
+						if cid then
+							local link = NS.db_item_link(cid);
+							if link then
+								DressUpItemLink(link);
+							end
+						end
+					else
+						if data and type(data) == 'number' then
+							frame.select_func(data);
+							frame.hooked_frame.numAvailable = select(3, frame.recipe_info(data));
+							frame.selected_sid = sid;
+							frame.update_func();
+							frame.searchEdit:ClearFocus();
+							local scroll = frame.hooked_scrollBar;
+							local num = frame.recipe_num();
+							local minVal, maxVal = scroll:GetMinMaxValues();
+							local step = scroll:GetValueStep();
+							local cur = scroll:GetValue() + step;
+							local value = step * (data - 1);
+							if value < cur or value > (cur + num * step - maxVal) then
+								scroll:SetValue(min(maxVal, value));
+							end
+							frame.scroll:Update();
+							if frame.profitFrame:IsShown() then
+								frame.profitScroll:Update();
+							end
+						end
+					end
+				elseif button == "RightButton" then
+					frame.searchEdit:ClearFocus();
+					local pid = NS.db_get_pid_by_sid(sid);
+					if FAV[sid] then
+						list_drop_sub_fav.para[1] = frame;
+						list_drop_sub_fav.para[2] = pid;
+						list_drop_sub_fav.para[3] = sid;
+						list_drop_meta.elements[1] = list_drop_sub_fav;
+					else
+						list_drop_add_fav.para[1] = frame;
+						list_drop_add_fav.para[2] = pid;
+						list_drop_add_fav.para[3] = sid;
+						list_drop_meta.elements[1] = list_drop_add_fav;
+					end
+					list_drop_query_who_can_craft_it.para[1] = frame;
+					list_drop_query_who_can_craft_it.para[2] = pid;
+					list_drop_query_who_can_craft_it.para[3] = sid;
+					ALADROP(self, "BOTTOMLEFT", list_drop_meta);
+				end
+			end
+			function NS.ui_CreateSupremeListButton(parent, index, buttonHeight)
+				local frame = parent:GetParent():GetParent();
+
+				local button = CreateFrame("BUTTON", nil, parent);
+				button:SetHeight(buttonHeight);
+				button:SetBackdrop(ui_style.listButtonBackdrop);
+				button:SetBackdropColor(unpack(ui_style.listButtonBackdropColor_Enabled));
+				button:SetBackdropBorderColor(unpack(ui_style.listButtonBackdropBorderColor));
+				button:SetHighlightTexture(ui_style.texture_white);
+				button:GetHighlightTexture():SetVertexColor(unpack(ui_style.listButtonHighlightColor));
+				button:EnableMouse(true);
+				button:Show();
+
+				local del = CreateFrame("BUTTON", nil, button);
+				del:SetSize(buttonHeight / 2, buttonHeight / 2);
+				del:SetPoint("LEFT", 4, 0);
+				NS.ui_ModernButton(del, nil, ui_style.texture_modern_button_close);
+				del:SetScript("OnClick", frame.del);
+				button.del = del;
+
+				local icon = button:CreateTexture(nil, "BORDER");
+				icon:SetTexture(ui_style.texture_unk);
+				icon:SetSize(buttonHeight - 8, buttonHeight - 8);
+				icon:SetPoint("LEFT", del, "RIGHT", 8, 0);
+				button.icon = icon;
+
+				local title = button:CreateFontString(nil, "OVERLAY");
+				title:SetFont(ui_style.frameFont, ui_style.frameFontSize, ui_style.frameFontOutline);
+				title:SetPoint("LEFT", icon, "RIGHT", 4, 0);
+				-- title:SetWidth(160);
+				title:SetMaxLines(1);
+				title:SetJustifyH("LEFT");
+				title:SetPoint("LEFT", icon, "RIGHT", 8, 0);
+				button.title = title;
+
+				local num = CreateFrame("EDITBOX", nil, button);
+				num:SetHeight(16);
+				num:SetFont(ui_style.frameFont, ui_style.frameFontSize, ui_style.frameFontOutline);
+				num:SetAutoFocus(false);
+				num:SetJustifyH("LEFT");
+				num:Show();
+				num:EnableMouse(true);
+				num:ClearFocus();
+				num:SetPoint("LEFT", title, "RIGHT", 48, 0);
+				local numBG = num:CreateTexture(nil, "ARTWORK");
+				numBG:SetPoint("TOPLEFT");
+				numBG:SetPoint("BOTTOMRIGHT");
+				numBG:SetTexture("Interface\\Buttons\\greyscaleramp64");
+				numBG:SetTexCoord(0.0, 0.25, 0.0, 0.25);
+				numBG:SetAlpha(0.75);
+				numBG:SetBlendMode("ADD");
+				numBG:SetVertexColor(0.25, 0.25, 0.25);
+				num.BG = numBG;
+				num:SetScript("OnEditFocusGained", function(self) self.BG:Show(); end);
+				num:SetScript("OnEditFocusLost", function(self) self.BG:Hide(); end);
+				num:SetScript("OnEnterPressed", function(self) self:ClearFocus(); end);
+				num:SetScript("OnEscapePressed", function(self) self:ClearFocus(); end);
+				button.num = num;
+				
+				local up = CreateFrame("BUTTON", nil, button);
+				up:SetSize(buttonHeight / 2 - 3, buttonHeight / 2 - 3);
+				up:SetPoint("TOPRIGHT", -4, -2);
+				NS.ui_ModernButton(up, nil, ui_style.texture_modern_arrow_up);
+				up:SetScript("OnClick", frame.change_order_up);
+				button.up = up;
+
+				local down = CreateFrame("BUTTON", nil, button);
+				down:SetSize(buttonHeight / 2 - 3, buttonHeight / 2 - 3);
+				down:SetPoint("BOTTOMRIGHT", -4, 2);
+				NS.ui_ModernButton(down, nil, ui_style.texture_modern_arrow_down);
+				down:SetScript("OnClick", frame.change_order_down);
+				button.down = down;
+
+				local quality_glow = button:CreateTexture(nil, "ARTWORK");
+				quality_glow:SetTexture("Interface\\Buttons\\UI-ActionButton-Border");
+				quality_glow:SetBlendMode("ADD");
+				quality_glow:SetTexCoord(0.25, 0.75, 0.25, 0.75);
+				quality_glow:SetSize(buttonHeight - 2, buttonHeight - 2);
+				quality_glow:SetPoint("CENTER", icon);
+				-- quality_glow:SetAlpha(0.75);
+				quality_glow:Show();
+				button.quality_glow = quality_glow;
+
+				button:SetScript("OnEnter", NS.ui_supremeListButton_OnEnter);
+				button:SetScript("OnLeave", NS.ui_supremeListButton_OnLeave);
+				button:RegisterForClicks("AnyUp");
+				button:SetScript("OnClick", NS.ui_supremeListButton_OnClick);
+				button:RegisterForDrag("LeftButton");
+				button:SetScript("OnHide", ALADROP);
+
+				button.frame = frame;
+
+				return button;
+			end
+			function NS.ui_SetSupremeListButton(button, data_index)
+				local frame = button.frame;
+				local list = frame.list;
+				local hash = frame.hash;
+				if data_index <= #list then
+					local pid = NS.db_get_pid_by_pname(frame.pname());
+					if pid then
+						local set = SET[pid];
+						local sid = list[data_index];
+						local cid = NS.db_get_cid_by_sid(sid);
+						local data = hash[sid];
+						if data then
+							local name, rank, num = frame.recipe_info(data);
+							if name and rank ~= 'header' then
+								button:Show();
+								button:SetBackdropColor(unpack(ui_style.listButtonBackdropColor_Enabled));
+								local quality = cid and NS.db_item_rarity(cid);
+								button.icon:SetTexture(frame.recipe_icon(data));
+								button.icon:SetVertexColor(1.0, 1.0, 1.0, 1.0);
+								if num > 0 then
+									button.title:SetText(name .. " [" .. num .. "]");
+								else
+									button.title:SetText(name);
+								end
+								button.title:SetTextColor(unpack(rank_color[rank_index[rank]] or ui_style.color_white));
+								if set.showRank then
+									button.note:SetText(NS.db_get_difficulty_rank_list_text_by_sid(sid));
+								else
+									button.note:SetText("");
+								end
+								if quality then
+									local r, g, b, code = GetItemQualityColor(quality);
+									button.quality_glow:SetVertexColor(r, g, b);
+									button.quality_glow:Show();
+								else
+									button.quality_glow:Hide();
+								end
+								if FAV[sid] then
+									button.star:Show();
+								else
+									button.star:Hide();
+								end
+								if sid == frame.selected_sid then
+									button:Select();
+								else
+									button:Deselect();
+								end
+							else
+								button:Hide();
+							end
+						else
+							button:Show();
+							if SET.colored_rank_for_unknown then
+								button:SetBackdropColor(unpack(ui_style.listButtonBackdropColor_Disabled));
+							else
+								button:SetBackdropColor(unpack(ui_style.listButtonBackdropColor_Enabled));
+							end
+							local _, quality, icon;
+							if cid then
+								_, _, quality, _, icon = NS.db_item_info(cid);
+							else
+								quality = nil;
+								icon = ICON_FOR_NO_CID;
+							end
+							button.icon:SetTexture(icon);
+							button.icon:SetVertexColor(1.0, 0.0, 0.0, 1.0);
+							button.title:SetText(NS.db_spell_name_s(sid));
+							if SET.colored_rank_for_unknown then
+								local var = rawget(VAR, pid);
+								button.title:SetTextColor(unpack(rank_color[NS.db_get_difficulty_rank_by_sid(sid, var and var.cur_rank or 0)] or ui_style.color_white));
+							else
+								button.title:SetTextColor(1.0, 0.0, 0.0, 1.0);
+							end
+							if set.showRank then
+								button.note:SetText(NS.db_get_difficulty_rank_list_text_by_sid(sid));
+							else
+								button.note:SetText("");
+							end
+							if quality then
+								local r, g, b, code = GetItemQualityColor(quality);
+								button.quality_glow:SetVertexColor(r, g, b);
+								button.quality_glow:Show();
+							else
+								button.quality_glow:Hide();
+							end
+							if FAV[sid] then
+								button.star:Show();
+							else
+								button.star:Hide();
+							end
+							button:Deselect();
+						end
+						if GetMouseFocus() == button then
+							NS.ui_skillListButton_OnEnter(button);
+						end
+						if button.prev_sid ~= sid then
+							ALADROP(button);
+							button.prev_sid = sid;
+						end
+					else
+						ALADROP(button);
+						button:Hide();
+					end
+				else
+					ALADROP(button);
+					button:Hide();
+				end
+			end
+		function NS.ui_CreateSupreme(hooked_frame)
+			local supreme = CreateFrame("FRAME", nil, hooked_frame);
+			--	supreme
+				supreme:SetFrameStrata("HIGH");
+				supreme:EnableMouse(true);
+				supreme:SetSize(256, 256);
+				function supreme.update_func()
+					supreme.scroll:SetNumValue(#list);
+					supreme.scroll:Update();
+				end
+				function supreme.del(button)
+					local index = button:GetDataIndex();
+				end
+				function supreme.set_num(edit)
+					local index = edit:GetParent():GetDataIndex();
+				end
+				function supreme.change_order_up(button)
+					local index = button:GetDataIndex();
+				end
+				function supreme.change_order_down(button)
+					local index = button:GetDataIndex();
+				end
+				supreme:SetScript("OnShow", function(self)
+				end);
+				supreme:SetScript("OnHide", function(self)
+				end);
+				supreme.list = SET.supreme_list;
+				supreme.hooked_frame = hooked_frame;
+				supreme.frame = hooked_frame.frame;
+				hooked_frame.supreme = supreme;
+
+				local scroll = ALASCR(supreme, nil, nil, ui_style.supremeListButtonHeight, NS.ui_CreateSupremeListButton, NS.ui_SetSupremeListButton);
+				scroll:SetPoint("BOTTOMLEFT", 4, 0);
+				scroll:SetPoint("TOPRIGHT", - 4, - 28);
+				NS.ui_ModifyALAScrollFrame(scroll);
+				supreme.scroll = scroll;
+
+				local call = CreateFrame("BUTTON", nil, hooked_frame, "UIPanelButtonTemplate");
+				call:SetSize(18, 18);
+				call:SetPoint("LEFT", hooked_frame, "RIGHT", - 2, 0);
+				call:SetFrameLevel(127);
+				call:SetScript("OnClick", function(self)
+					if supreme:IsShown() then
+						supreme:Hide();
+						call:SetText(L["Open"]);
+						SET.show_supreme = false;
+					else
+						supreme:Show();
+						call:SetText(L["Close"]);
+						SET.show_supreme = true;
+						supreme.update_func();
+					end
+				end);
+				-- call:SetScript("OnEnter", Info_OnEnter);
+				-- call:SetScript("OnLeave", Info_OnLeave);
+				supreme.call = call;
+			--
+			return supreme;
 		end
 	end
 
@@ -12055,6 +12477,11 @@ do	--	INITIALIZE
 	};
 	function NS.MODIFY_SAVED_VARIABLE()
 		if alaTradeSkillSV then
+			if alaTradeSkillSV._version < 200730.0 then
+				for key, VAR in next, alaTradeSkillSV.var do
+					VAR.supreme_list = {  };
+				end
+			end
 		elseif alaTradeFrameSV and alaTradeFrameSV._version and alaTradeFrameSV._version >= 200505.1 then
 			if alaTradeFrameSV._version == nil then
 				alaTradeFrameSV._version = 0.0;
@@ -12094,7 +12521,7 @@ do	--	INITIALIZE
 				cmm = {  },
 			};
 		end
-		alaTradeSkillSV._version = 200602.0;
+		alaTradeSkillSV._version = 200730.0;
 		SET = setmetatable(alaTradeSkillSV.set, {
 			__index = function(t, pid)
 				if NS.db_is_pid(pid) then
@@ -12144,7 +12571,7 @@ do	--	INITIALIZE
 			end
 		end
 		if AVAR[PLAYER_GUID] == nil then
-			NS.func_add_char(PLAYER_GUID, { realm_id = PLAYER_REALM_ID, realm_name = PLAYER_REALM_NAME, }, true);
+			NS.func_add_char(PLAYER_GUID, { realm_id = PLAYER_REALM_ID, realm_name = PLAYER_REALM_NAME, supreme_list = {  }, }, true);
 		end
 		VAR = setmetatable(AVAR[PLAYER_GUID], {
 			__index = function(t, pid)
