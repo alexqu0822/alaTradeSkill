@@ -4,13 +4,17 @@
 local ADDON, NS = ...;
 _G.__ala_meta__ = _G.__ala_meta__ or {  };
 __ala_meta__.ADDON_MSG_CONTROL_CODE_LEN = __ala_meta__.ADDON_MSG_CONTROL_CODE_LEN or 6;
-local VERSION = 200810.0;
+local VERSION = 200901.0;
 if __ala_meta__.__rt and __ala_meta__.__rt.__version and __ala_meta__.__rt.__version >= VERSION then
 	return;
 end
-local __ns = __ala_meta__.__rt or {  };
+local __ns = __ala_meta__.__rt;
+if __ns == nil then
+	__ns = {  };
+	__ala_meta__.__rt = __ns;
+end
+__ns.__version = VERSION;
 NS.__rt = __ns;
-__ala_meta__.__rt = __ns;
 
 local _G = _G;
 do
@@ -419,50 +423,69 @@ local ADDON_MSG_CONTROL_CODE_LEN = __ala_meta__.ADDON_MSG_CONTROL_CODE_LEN;
 					return got_data, cache;
 				end
 			-->
+			local __REPLY_TALENTS_TIME = {  };
+			local __REPLY_EQUIPMENTS_TIME = {  };
 			__ns.prefixHandler[__emu_meta.ADDON_PREFIX] = function(prefix, msg, channel, sender)
 				local name = Ambiguate(sender, 'none');
 				local control_code = strsub(msg, 1, ADDON_MSG_CONTROL_CODE_LEN);
+				local now = GetTime();
 				if control_code == __emu_meta.ADDON_MSG_QUERY_TALENTS then
-					if channel == "INSTANCE_CHAT" then
-						local target = strsub(msg, ADDON_MSG_CONTROL_CODE_LEN + 2, - 1);
-						if target ~= __ns.playerFullName then
-							return;
-						end
-					end
-					local code = __ns.GetEncodedPlayerTalentData(60);
-					if code then
+					local prev = __REPLY_TALENTS_TIME[name];
+					if prev == nil or now - prev > 0.05 then
+						__REPLY_TALENTS_TIME[name] = now;
 						if channel == "INSTANCE_CHAT" then
-							SendAddonMessage(prefix, __emu_meta.ADDON_MSG_REPLY_ADDON_PACK .. __ns.GetAddonPackData(), "INSTANCE_CHAT");
-							SendAddonMessage(prefix, __emu_meta.ADDON_MSG_REPLY_TALENTS .. code .. "#" .. sender, "INSTANCE_CHAT");
-						else--if channel == "WHISPER" then
-							SendAddonMessage(prefix, __emu_meta.ADDON_MSG_REPLY_ADDON_PACK .. __ns.GetAddonPackData(), "WHISPER", sender);
-							SendAddonMessage(prefix, __emu_meta.ADDON_MSG_REPLY_TALENTS .. code, "WHISPER", sender);
+							local target = strsub(msg, ADDON_MSG_CONTROL_CODE_LEN + 2, - 1);
+							if target ~= __ns.playerFullName then
+								return;
+							end
+						end
+						local code = __ns.GetEncodedPlayerTalentData(60);
+						if code then
+							if channel == "INSTANCE_CHAT" then
+								SendAddonMessage(prefix, __emu_meta.ADDON_MSG_REPLY_ADDON_PACK .. __ns.GetAddonPackData(), "INSTANCE_CHAT");
+								SendAddonMessage(prefix, __emu_meta.ADDON_MSG_REPLY_TALENTS .. code .. "#" .. sender, "INSTANCE_CHAT");
+							else--if channel == "WHISPER" then
+								SendAddonMessage(prefix, __emu_meta.ADDON_MSG_REPLY_ADDON_PACK .. __ns.GetAddonPackData(), "WHISPER", sender);
+								SendAddonMessage(prefix, __emu_meta.ADDON_MSG_REPLY_TALENTS .. code, "WHISPER", sender);
+							end
 						end
 					end
 				elseif control_code == __emu_meta.ADDON_MSG_QUERY_TALENTS_ then
-					local code = __ns.GetEncodedPlayerTalentData(60);
-					if code then
-						SendAddonMessage(prefix, __emu_meta.ADDON_MSG_REPLY_TALENTS_ .. code, "WHISPER", sender);
-					end
-				elseif control_code == __emu_meta.ADDON_MSG_QUERY_EQUIPMENTS then
-					if channel == "INSTANCE_CHAT" then
-						local target = strsub(msg, ADDON_MSG_CONTROL_CODE_LEN + 2, - 1);
-						if target ~= __ns.playerFullName then
-							return;
+					local prev = __REPLY_TALENTS_TIME[name];
+					if prev == nil or now - prev > 0.05 then
+						__REPLY_TALENTS_TIME[name] = now;
+						local code = __ns.GetEncodedPlayerTalentData(60);
+						if code then
+							SendAddonMessage(prefix, __emu_meta.ADDON_MSG_REPLY_TALENTS_ .. code, "WHISPER", sender);
 						end
 					end
-					local data = __ns.EncodeEquipmentData();
-					for _, msg in next, data do
+				elseif control_code == __emu_meta.ADDON_MSG_QUERY_EQUIPMENTS then
+					local prev = __REPLY_EQUIPMENTS_TIME[name];
+					if prev == nil or now - prev >= 0.05 then
+						__REPLY_EQUIPMENTS_TIME[name] = now;
 						if channel == "INSTANCE_CHAT" then
-							SendAddonMessage(prefix, __emu_meta.ADDON_MSG_REPLY_EQUIPMENTS .. msg .. "#" .. sender .. "-" .. __ns.realm, "INSTANCE_CHAT");
-						else--if channel == "WHISPER" then
-							SendAddonMessage(prefix, __emu_meta.ADDON_MSG_REPLY_EQUIPMENTS .. msg, "WHISPER", sender);
+							local target = strsub(msg, ADDON_MSG_CONTROL_CODE_LEN + 2, - 1);
+							if target ~= __ns.playerFullName then
+								return;
+							end
+						end
+						local data = __ns.EncodeEquipmentData();
+						for _, msg in next, data do
+							if channel == "INSTANCE_CHAT" then
+								SendAddonMessage(prefix, __emu_meta.ADDON_MSG_REPLY_EQUIPMENTS .. msg .. "#" .. sender .. "-" .. __ns.realm, "INSTANCE_CHAT");
+							else--if channel == "WHISPER" then
+								SendAddonMessage(prefix, __emu_meta.ADDON_MSG_REPLY_EQUIPMENTS .. msg, "WHISPER", sender);
+							end
 						end
 					end
 				elseif control_code == __emu_meta.ADDON_MSG_QUERY_EQUIPMENTS_ then
-					local data = __ns.EncodeEquipmentData();
-					for _, msg in next, data do
-						SendAddonMessage(prefix, __emu_meta.ADDON_MSG_REPLY_EQUIPMENTS_ .. msg, "WHISPER", sender);
+					local prev = __REPLY_EQUIPMENTS_TIME[name];
+					if prev == nil or now - prev >= 0.05 then
+						__REPLY_EQUIPMENTS_TIME[name] = now;
+						local data = __ns.EncodeEquipmentData();
+						for _, msg in next, data do
+							SendAddonMessage(prefix, __emu_meta.ADDON_MSG_REPLY_EQUIPMENTS_ .. msg, "WHISPER", sender);
+						end
 					end
 				end
 			end
@@ -1117,7 +1140,7 @@ local ADDON_MSG_CONTROL_CODE_LEN = __ala_meta__.ADDON_MSG_CONTROL_CODE_LEN;
 			NAXX = 533,
 		};
 		__raid_meta.esMX = __raid_meta.esES;
-		local to = __raid_meta.L[GetLocale()];
+		local to = __raid_meta.L[GetLocale()] or __raid_meta.L['*'];
 		for key, id in next, L2 do
 			to[key] = GetRealZoneText(id) or to[key];
 		end
@@ -1159,6 +1182,49 @@ local ADDON_MSG_CONTROL_CODE_LEN = __ala_meta__.ADDON_MSG_CONTROL_CODE_LEN;
 			end
 		end
 	-->
+	-->		Map
+		local __map_meta = {  };
+		__ns.__map_meta = __map_meta;
+		__map_meta.ADDON_PREFIX = "AMSADD";
+		__map_meta.ADDON_MSG_MAP_PULL = "_pull_";
+		__map_meta.ADDON_MSG_MAP_PUSH = "_push_";
+		local function GetMapPosition()
+			local map = C_Map.GetBestMapForUnit('player');
+			local y, x, _z, instance = UnitPosition('player');
+			if x ~= nil and y ~= nil then
+				return map, x, y;
+			end
+		end
+		__ns.prefixHandler[__map_meta.ADDON_PREFIX] = function(prefix, msg, channel, sender)
+			local control_code = strsub(msg, 1, ADDON_MSG_CONTROL_CODE_LEN);
+			if control_code == __map_meta.ADDON_MSG_MAP_PULL then
+				local map, x, y = GetMapPosition();
+				if map == nil then
+					map = -1;
+					x, y = 0, 0;
+				end
+				SendAddonMessage(prefix, __map_meta.ADDON_MSG_MAP_PUSH .. map .. "#" .. x .. "#" .. y, "WHISPER", sender);
+			elseif control_code == __map_meta.ADDON_MSG_MAP_PUSH then
+				if __ala_meta__.____OnMapPositionReceived ~= nil then
+					local map, x, y = strsplit("#", strsub(msg, ADDON_MSG_CONTROL_CODE_LEN + 1));
+					if map ~= nil and x ~= nil and y ~= nil then
+						map = tonumber(map);
+						x = tonumber(x);
+						y = tonumber(y);
+						if map ~= nil and x ~= nil and y ~= nil then
+							__ala_meta__.____OnMapPositionReceived(sender, map, x, y);
+						end
+					end
+				end
+			end
+		end
+		function __ns.PullPosition(name)
+			SendAddonMessage(__map_meta.ADDON_PREFIX, "_pull_", "WHISPER", Ambiguate(name, 'none'));
+		end
+		function __ns.initializeMapPosition()
+			RegisterAddonMessagePrefix(__map_meta.ADDON_PREFIX);
+		end
+	-->
 -->		Core
 	function __ns.CHAT_MSG_ADDON(prefix, msg, channel, sender, target, zoneChannelID, localID, name, instanceID)
 		local handler = __ns.prefixHandler[prefix];
@@ -1170,6 +1236,7 @@ local ADDON_MSG_CONTROL_CODE_LEN = __ala_meta__.ADDON_MSG_CONTROL_CODE_LEN;
 		_EventHandler:RegEvent("CHAT_MSG_ADDON");
 		__ns.initializeTalentEmu();
 		__ns.initializeInstanceCapture();
+		__ns.initializeMapPosition();
 	end
 -->
 -->		Initialize
