@@ -89,7 +89,7 @@ do
 	setfenv(1, NS.__fenv);
 end
 
-local curPhase = 5;
+local curPhase = 6;
 ----------------------------------------------------------------------------------------------------upvalue
 	----------------------------------------------------------------------------------------------------LUA
 	local math, table, string, bit = math, table, string, bit;
@@ -12440,7 +12440,7 @@ do	--	INITIALIZE
 		show_call = true,
 		show_tab = true,
 		portrait_button = true,
-		show_board = true,
+		show_board = false,
 		lock_board = false,
 		board_pos = { "TOP", "UIParent", "BOTTOM", 260, 190, },
 		hide_mtsl = false,
