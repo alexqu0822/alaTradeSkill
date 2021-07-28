@@ -5,7 +5,14 @@
     <Include file = "..\..\sharedxml\hybridscrollframe.xml"/>
     <Include file = "template.xml"/>
 -->
-    <include file = "alaShared\alaShared.xml" />
+    <include file = "ala\main.xml" />
+
+    <script file = "Locale-classic.lua" />
+    <script file = "data-classic.lua" />
+
+    <script file = "Locale-bcc.lua" />
+    <script file = "data-bcc.lua" />
+
     <script file = "alaTradeSkill.lua" />
 
     <!-- <include file = "Bindings.xml" /> -->
