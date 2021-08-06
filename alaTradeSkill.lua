@@ -3838,7 +3838,8 @@ do	--	MAIN
 							skillListButtons[index] = getglobal(hooked_frame_objects.skillListButton_name .. index);
 						end
 						for index = getglobal(LAYOUT.skillListButton_num_name) + 1, LAYOUT.expand.scroll_button_num do
-							local button = CreateFrame("BUTTON", hooked_frame_objects.skillListButton_name .. index, hooked_frame, hooked_frame_objects.skillListButton_inherits);
+							local name = hooked_frame_objects.skillListButton_name .. index;
+							local button = getglobal(name) or CreateFrame("BUTTON", hooked_frame_objects.skillListButton_name .. index, hooked_frame, hooked_frame_objects.skillListButton_inherits);
 							button:SetPoint("TOPLEFT", skillListButtons[index - 1], "BOTTOMLEFT", 0, 0);
 							button:Hide();
 							skillListButtons[index] = button;
@@ -5030,18 +5031,9 @@ do	--	MAIN
 				end
 			end
 			--	set button handler
-				--	L.TRADESKILL_NAME
 				--	L.ITEM_TYPE_LIST
 				--	L.ITEM_SUB_TYPE_LIST
-				local index_bound = { skill = { BIG_NUMBER, -1, }, type = { BIG_NUMBER, -1, }, subType = {  }, eqLoc = { BIG_NUMBER, -1, }, };
-				for index, _ in next, L.TRADESKILL_NAME do
-					if index < index_bound.skill[1] then
-						index_bound.skill[1] = index;
-					end
-					if index > index_bound.skill[2] then
-						index_bound.skill[2] = index;
-					end
-				end
+				local index_bound = { skill = { NS.db_min_pid(), NS.db_max_pid(), }, type = { BIG_NUMBER, -1, }, subType = {  }, eqLoc = { BIG_NUMBER, -1, }, };
 				for index, _ in next, L.ITEM_TYPE_LIST do
 					if index < index_bound.type[1] then
 						index_bound.type[1] = index;
@@ -5125,7 +5117,7 @@ do	--	MAIN
 					if key == 'skill' then
 						for index = bound[1], bound[2] do
 							if stat[index] then
-								tinsert(elements, { text = L.TRADESKILL_NAME[index], para = { frame, key, index, }, });
+								tinsert(elements, { text = NS.db_get_pname_by_pid(index), para = { frame, key, index, }, });
 							end
 						end
 					elseif key == 'type' then
@@ -5524,7 +5516,7 @@ do	--	MAIN
 						dropDowns[1].fontString:SetText("-");
 						dropDowns[1].cancel:Hide();
 					else
-						dropDowns[1].fontString:SetText(L.TRADESKILL_NAME[filter.skill]);
+						dropDowns[1].fontString:SetText(NS.db_get_pname_by_pid(filter.skill));
 						dropDowns[1].cancel:Show();
 					end
 					if filter.type == nil then
@@ -7708,7 +7700,7 @@ do	--	MAIN
 				for index = 1, #list do
 					local data = list[index];
 					local sid = data[1];
-					if var.cur_rank >= data[2] then
+					if var.cur_rank ~= nil and var.cur_rank >= data[2] then
 						local cooling, start, duration = GetSpellModifiedCooldown(sid);
 						if cooling then
 							cool[sid] = GetServerTime() + duration + start - GetTime();
@@ -8061,11 +8053,13 @@ do	--	MAIN
 
 	do	--	ADDON_LOADED
 		local handler_table = {
+			["Blizzard_TradeSkillUI"] = NS.ui_hook_Blizzard_TradeSkillUI,
+			["Blizzard_CraftUI"] = NS.ui_hook_Blizzard_CraftUI,
 			["ElvUI"] = NS.ElvUI,
 			["CloudyTradeSkill"] = NS.CloudyTradeSkill,
 			["MissingTradeSkillsList"] = function()
 				if SET then
-					C_Timer.After(1.0, NS.hide_mtsl(SET.hide_mtsl));
+					C_Timer.After(1.0, function() NS.hide_mtsl(SET.hide_mtsl); end);
 				end
 			end,
 			["alaTrade"] = function()
@@ -8100,8 +8094,13 @@ do	--	MAIN
 				handler(addon);
 			end
 		end
-		function NS.add_AddonLoadedHandler(addon, handler)
-			handler_table[addon] = handler;
+		function NS.HookAddOns()
+			_EventHandler:RegEvent("ADDON_LOADED");
+			for addon, handler in next, handler_table do
+				if IsAddOnLoaded(addon) then
+					safe_call(handler, addon);
+				end
+			end
 		end
 	end
 
@@ -8295,18 +8294,6 @@ do	--	MAIN
 	function NS.init_hook()
 	end
 	function NS.init_createGUI()
-		----	hook TradeSkillUI CraftUI
-			if IsAddOnLoaded("Blizzard_TradeSkillUI") then
-				NS.ui_hook_Blizzard_TradeSkillUI("Blizzard_TradeSkillUI");
-			else
-				NS.add_AddonLoadedHandler("Blizzard_TradeSkillUI", NS.ui_hook_Blizzard_TradeSkillUI);
-			end
-			if IsAddOnLoaded("Blizzard_CraftUI") then
-				NS.ui_hook_Blizzard_CraftUI("Blizzard_CraftUI");
-			else
-				NS.add_AddonLoadedHandler("Blizzard_CraftUI", NS.ui_hook_Blizzard_CraftUI);
-			end
-		----
 		_, gui["EXPLORER"] = safe_call(NS.ui_CreateExplorer);
 		_, gui["CONFIG"] = safe_call(NS.ui_CreateConfigFrame);
 		_, gui["BOARD"] = safe_call(NS.ui_CreateBoard);
@@ -8496,6 +8483,7 @@ do	--	INITIALIZE
 		safe_call(NS.init_hash_known_recipe);
 		safe_call(NS.init_regEvent);
 		safe_call(NS.init_hook);
+		safe_call(NS.HookAddOns);
 		safe_call(NS.init_createGUI);
 		safe_call(NS.hook_tooltip);
 		for GUID, _ in next, AVAR do
@@ -8524,7 +8512,7 @@ do	--	INITIALIZE
 	-- _EventHandler:RegEvent("PLAYER_ENTERING_WORLD");
 	-- _EventHandler:RegEvent("LOADING_SCREEN_ENABLED");
 	_EventHandler:RegEvent("LOADING_SCREEN_DISABLED");
-	_EventHandler:RegEvent("ADDON_LOADED");
+	-- _EventHandler:RegEvent("ADDON_LOADED");
 	-->		fix for Leatrix_Plus
 		function NS.VARIABLES_LOADED()
 			_EventHandler:UnregEvent("VARIABLES_LOADED");

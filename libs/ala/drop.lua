@@ -1,7 +1,7 @@
 ﻿--[[--
 	alex@0
 --]]--
-local __version = 4;
+local __version = 5;
 
 local DropMenu = _G.alaDropMenu;
 if DropMenu ~= nil and DropMenu.__minor ~= nil and DropMenu.__minor >= __version then
@@ -27,7 +27,9 @@ local MenuButtonHeight = 16;
 local MenuButtonInterval = 0;
 local MenuButtonToHBorder = 2;
 local MenuButtonToVBorder = 2;
-local _LB_Event_GLOBAL_MOUSE_UP = select(4, GetBuildInfo()) >= 80300;
+local toc = select(4, GetBuildInfo());
+local isRetail = toc >= 80300;
+local isBCC = toc >= 20500 and toc < 30000;
 
 local MenuList = { total = 0, used = 0, prev = nil, };
 local frameToMenu = {  };
@@ -73,9 +75,21 @@ local function SetBackdrop(_F, inset, dr, dg, db, da, width, rr, rg, rb, ra)	--	
 	end
 end
 -->		Creator
-local function MenuOnEvent(self, event)
-	self:SetScript("OnEvent", nil);
-	self:Hide();
+local MenuOnEvent = nil;
+if isRetail then
+	function MenuOnEvent(self, event)
+		if self.__flag == "show" then
+			self.__flag = nil;
+		else
+			self:SetScript("OnEvent", nil);
+			self:Hide();
+		end
+	end
+else
+	function MenuOnEvent(self, event)
+		self:SetScript("OnEvent", nil);
+		self:Hide();
+	end
 end
 local function MenuOnUpdate(self, elasped)
 	self.CountingDownTimer = self.CountingDownTimer - elasped;
@@ -133,14 +147,15 @@ local function CreateMenu()
 	Menu:SetScript("OnLeave", MenuOnLeave);
 	Menu:SetScript("OnShow", MenuOnShow);
 	Menu:SetScript("OnHide", MenuOnHide);
-	if _LB_Event_GLOBAL_MOUSE_UP then
+	if isRetail then
 		Menu:RegisterEvent("GLOBAL_MOUSE_UP");
-	else
-		-- Menu:RegisterEvent("CURSOR_UPDATE");
+	elseif isBCC then
 		Menu:RegisterEvent("PLAYER_STARTED_LOOKING");
 		-- Menu:RegisterEvent("PLAYER_STOPPED_LOOKING");
 		Menu:RegisterEvent("PLAYER_STARTED_TURNING");
 		-- Menu:RegisterEvent("PLAYER_STOPPED_TURNING");
+	else
+		Menu:RegisterEvent("CURSOR_UPDATE");
 	end
 	Menu.buttons = {  };
 
@@ -259,15 +274,17 @@ local function GetMenu(parent, anchor, useMousePosition)
 	return Menu;
 end
 local function ShowMenu(parent, anchor, data, useMousePosition)
-	if frameToMenu[parent] and frameToMenu[parent]:IsShown() then
-		frameToMenu[parent]:Hide();
+	local Menu = frameToMenu[parent];
+	if Menu ~= nil and Menu:IsShown() then
+		Menu:Hide();
 		frameToMenu[parent] = nil;
+		Menu.__flag = nil;
 		return;
 	end
 	if type(data) ~= "table" or type(data.elements) ~= "table" then
 		return;
 	end
-	local Menu = GetMenu(parent, anchor, useMousePosition);
+	Menu = GetMenu(parent, anchor, useMousePosition);
 	Menu.handler = data.handler;
 	local buttons = Menu.buttons;
 	local elements = data.elements;
@@ -313,6 +330,7 @@ local function ShowMenu(parent, anchor, data, useMousePosition)
 	Menu:SetWidth(width + MenuButtonToHBorder * 2);
 	Menu:SetHeight(MenuButtonHeight * numButtons + MenuButtonInterval * (numButtons - 1) + MenuButtonToVBorder * 2);
 
+	Menu.__flag = "show";
 	Menu:Show();
 end
 
@@ -330,7 +348,7 @@ DropMenu.ShowMenu = ShowMenu;
 
 function DropMenu:Halt()
 	for index = 1, MenuList.total do
-		MenuOnEvent(MenuList[index], _LB_Event_GLOBAL_MOUSE_UP and "GLOBAL_MOUSE_UP" or "PLAYER_STARTED_LOOKING");
+		MenuOnEvent(MenuList[index], isRetail and "GLOBAL_MOUSE_UP" or (isBCC and "PLAYER_STARTED_LOOKING" or "CURSOR_UPDATE"));
 		MenuList[index]:SetScript("OnUpdate", nil);
 	end
 end

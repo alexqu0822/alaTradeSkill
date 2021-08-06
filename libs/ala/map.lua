@@ -1,7 +1,7 @@
 --[[--
 	ALA@163UI
 --]]--
-local __version = 2;
+local __version = 3;
 
 _G.__ala_meta__ = _G.__ala_meta__ or {  };
 local __mapshare = __ala_meta__.__mapshare
@@ -48,24 +48,26 @@ local function GetMapPosition()
 		return map, x, y;
 	end
 end
-local function CHAT_MSG_ADDON(prefix, msg, channel, sender)
-	local control_code = strsub(msg, 1, ADDON_MSG_CONTROL_CODE_LEN);
-	if control_code == __mapshare.ADDON_MSG_MAP_PULL then
-		local map, x, y = GetMapPosition();
-		if map == nil then
-			map = -1;
-			x, y = 0, 0;
-		end
-		SendAddonMessage(prefix, __mapshare.ADDON_MSG_MAP_PUSH .. map .. "#" .. x .. "#" .. y, "WHISPER", sender);
-	elseif control_code == __mapshare.ADDON_MSG_MAP_PUSH then
-		if __ala_meta__.____OnMapPositionReceived ~= nil then
-			local map, x, y = strsplit("#", strsub(msg, ADDON_MSG_CONTROL_CODE_LEN + 1));
-			if map ~= nil and x ~= nil and y ~= nil then
-				map = tonumber(map);
-				x = tonumber(x);
-				y = tonumber(y);
+local function CHAT_MSG_ADDON(_, _, prefix, msg, channel, sender)
+	if prefix == __mapshare.ADDON_PREFIX then
+		local control_code = strsub(msg, 1, ADDON_MSG_CONTROL_CODE_LEN);
+		if control_code == __mapshare.ADDON_MSG_MAP_PULL then
+			local map, x, y = GetMapPosition();
+			if map == nil then
+				map = -1;
+				x, y = 0, 0;
+			end
+			SendAddonMessage(prefix, __mapshare.ADDON_MSG_MAP_PUSH .. map .. "#" .. x .. "#" .. y, "WHISPER", sender);
+		elseif control_code == __mapshare.ADDON_MSG_MAP_PUSH then
+			if __ala_meta__.____OnMapPositionReceived ~= nil then
+				local map, x, y = strsplit("#", strsub(msg, ADDON_MSG_CONTROL_CODE_LEN + 1));
 				if map ~= nil and x ~= nil and y ~= nil then
-					__ala_meta__.____OnMapPositionReceived(sender, map, x, y);
+					map = tonumber(map);
+					x = tonumber(x);
+					y = tonumber(y);
+					if map ~= nil and x ~= nil and y ~= nil then
+						__ala_meta__.____OnMapPositionReceived(sender, map, x, y);
+					end
 				end
 			end
 		end
