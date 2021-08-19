@@ -27,20 +27,22 @@ do
 	setfenv(1, NS.__fenv);
 end
 
+local __is_dev = select(2, GetAddOnInfo("!!!!!DebugMe")) ~= nil;
 local curPhase = NS.curPhase;
 ----------------------------------------------------------------------------------------------------upvalue
 	----------------------------------------------------------------------------------------------------LUA
-	local math, table, string, bit = math, table, string, bit;
-	local type, tonumber, tostring = type, tonumber, tostring;
 	local getfenv, setfenv, pcall, xpcall, assert, error, loadstring = getfenv, setfenv, pcall, xpcall, assert, error, loadstring;
-	local abs, ceil, floor, max, min, random, sqrt = abs, ceil, floor, max, min, random, sqrt;
-	local format, gmatch, gsub, strbyte, strchar, strfind, strlen, strlower, strmatch, strrep, strrev, strsub, strupper, strtrim, strsplit, strjoin, strconcat =
-			format, gmatch, gsub, strbyte, strchar, strfind, strlen, strlower, strmatch, strrep, strrev, strsub, strupper, strtrim, strsplit, strjoin, strconcat;
 	local getmetatable, setmetatable, rawget, rawset = getmetatable, setmetatable, rawget, rawset;
-	local next, ipairs, pairs, sort, tContains, tinsert, tremove, wipe, unpack = next, ipairs, pairs, sort, tContains, tinsert, tremove, wipe, unpack;
-	local tConcat = table.concat;
 	local select = select;
 	local date, time = date, time;
+	local type, tonumber, tostring = type, tonumber, tostring;
+	local math, table, string, bit = math, table, string, bit;
+	local abs, ceil, floor, max, min, random, sqrt = abs, ceil, floor, max, min, random, sqrt;
+	local next, ipairs, pairs, sort, tContains, tinsert, tremove, wipe, unpack = next, ipairs, pairs, sort, tContains, tinsert, tremove, wipe, unpack;
+	local tconcat = table.concat;
+	local format, gmatch, gsub, strbyte, strchar, strfind, strlen, strlower, strmatch, strrep, strrev, strsub, strupper, strtrim, strsplit, strjoin, strconcat =
+			format, gmatch, gsub, strbyte, strchar, strfind, strlen, strlower, strmatch, strrep, strrev, strsub, strupper, strtrim, strsplit, strjoin, strconcat;
+	local bitband = bit.band;
 	----------------------------------------------------------------------------------------------------GAME
 	local print = print;
 	local GetServerTime = GetServerTime;
@@ -60,22 +62,28 @@ local curPhase = NS.curPhase;
 	--------------------------------------------------
 	local RAID_CLASS_COLORS = RAID_CLASS_COLORS;
 	local _ = nil;
-	local function _log_(...)
-		-- print(date('\124cff00ff00%H:%M:%S\124r'), ...);
-	end
-	local function _error_(header, child, ...)
-		-- print(date('\124cffff0000%H:%M:%S\124r'), header, child, ...);
-		-- if alaTradeSkillSV then
-		-- 	local err = alaTradeSkillSV.err;
-		-- 	if not err then
-		-- 		err = {  };
-		-- 		alaTradeSkillSV.err = err;
-		-- 	end
-		-- 	err[header] = err[header] or {  };
-		-- 	err[header][child] = (err[header][child] or 0) + 1;
-		-- end
-	end
 	local function _noop_()
+	end
+	local _log_, _error_;
+	if __is_dev then
+		function _log_(...)
+			-- print(date('|cff00ff00%H:%M:%S|r'), ...);
+		end
+		function _error_(header, child, ...)
+			print(date('|cffff0000%H:%M:%S|r'), header, child, ...);
+			-- if alaTradeSkillSV then
+			-- 	local err = alaTradeSkillSV.err;
+			-- 	if not err then
+			-- 		err = {  };
+			-- 		alaTradeSkillSV.err = err;
+			-- 	end
+			-- 	err[header] = err[header] or {  };
+			-- 	err[header][child] = (err[header][child] or 0) + 1;
+			-- end
+		end
+	else
+		_log_ = _noop_;
+		_error_ = _noop_;
 	end
 ----------------------------------------------------------------------------------------------------
 	-- "Interface\\Buttons\\WHITE8X8",	-- "Interface\\Tooltips\\UI-Tooltip-Background", -- "Interface\\ChatFrame\\ChatFrameBackground"
@@ -316,6 +324,7 @@ local PLAYER_REALM_ID = tonumber(GetRealmID());
 local PLAYER_REALM_NAME = GetRealmName();
 local PLAYER_GUID = UnitGUID('player');
 local PLAYER_NAME = UnitName('player');
+local PLAYER_RACE, PLAYER_RACE_FILE, PLAYER_RACE_ID = UnitRace('player');
 
 do	--	InsertLink
 	if not _G.ALA_HOOK_ChatEdit_InsertLink then
@@ -462,6 +471,8 @@ end
 	local index_rid = 16;
 	local index_quest = 17;
 	local index_object = 18;
+	local index_class = 19;
+	local index_spec = 20;
 	--
 	-- 1itemName, 2itemLink, 3itemRarity, 4itemLevel, 5itemMinLevel, 6itemType, 7itemSubType, 8itemStackCount,
 	-- 9itemEquipLoc, 10itemIcon, 11itemSellPrice, 12itemClassID, 13itemSubClassID, 14bindType, 15expacID, 16itemSetID, 
@@ -521,28 +532,32 @@ do	--	MAIN
 	end
 
 	do	--	db
+		local UCLASSBIT = NS.UCLASSBIT;
+		local CHARRACEBONUSPOINT = NS.RACEBONUSPOINT[PLAYER_RACE_ID] or {  };
 		--	skill list
-		local tradeskill_id = NS.tradeskill_id;
-		local tradeskill_name = {  };						--	[pid] = prof_name
-		local tradeskill_hash = {  };						--	[prof_name] = pid
-		local tradeskill_texture = NS.tradeskill_texture;
-		local tradeskill_check_id = NS.tradeskill_check_id;	--	[pid] = p_check_sid
-		local tradeskill_check_name = {  };					--	[pid] = p_check_sname
-		local tradeskill_has_win = NS.tradeskill_has_win;	--	[pid] = bool
+		local TradeSkill_ID = NS.TradeSkill_ID;
+		local TradeSkill_Name = {  };						--	[pid] = prof_name
+		local TradeSkill_Hash = {  };						--	[prof_name] = pid
+		local TradeSkill_Texture = NS.TradeSkill_Texture;
+		local TradeSkill_CheckID = NS.TradeSkill_CheckID;	--	[pid] = p_check_sid
+		local TradeSkill_CheckName = {  };					--	[pid] = p_check_sname
+		local TradeSkill_HasWin = NS.TradeSkill_HasWin;	--	[pid] = bool
+		local TradeSkill_Spec2Pid = NS.TradeSkill_Spec2Pid;
 		--	recipe db
-		local recipe_info = NS.recipe_info;
-		--[[	recipe_info[sid] = {
+		local Recipe_Data = NS.Recipe_Data;
+		--[[	Recipe_Data[sid] = {
 					1_validated, 2_phase, 3_pid, 4_sid, 5_cid,
 					6_learn, 7_yellow, 8_green, 9_grey,
 					10_made, 11_made, 12_reagents_id, 13_reagents_count, 
 					14_trainer, 15_train_price, 16_rid, 17_quest, 18_object
 				}
 		--]]
-		local recipe_sid_list_by_pid = NS.recipe_sid_list_by_pid;
+		local TradeSkill_RecipeList = NS.TradeSkill_RecipeList;
 		local pid_sname_to_sid = {  };	--	[pid][sname] = { sid }
 		local cid_to_sid = {  };		--	[cid] = { sid }
 		local cid_pid_to_sid = {  };	--	[cid][pid] = { sid }
 		local rid_to_sid = {  };		--	[rid] = sid
+		local is_spec_learned = {  };
 		--	id list
 		local recipe_sid_list = {  };	--	{ sid }			--	actually unused
 		local recipe_cid_list = {  };	--	{ cid }			--	actually unused
@@ -559,12 +574,12 @@ do	--	MAIN
 				local sinfo = {
 					sname,
 					sname_lower,
-					"\124cff71d5ff\124Hspell:" .. sid .. "\124h[" .. sname .. "]\124h\124r",
-					"\124cff71d5ff\124hspell:" .. sid .. "\124h[" .. sname_lower .. "]\124h\124r",
-					"\124cff71d5ff[" .. sname .. "]\124r",
+					"|cff71d5ff|Hspell:" .. sid .. "|h[" .. sname .. "]|h|r",
+					"|cff71d5ff|hspell:" .. sid .. "|h[" .. sname_lower .. "]|h|r",
+					"|cff71d5ff[" .. sname .. "]|r",
 				};
 				spell_info[sid] = sinfo;
-				local info = recipe_info[sid];
+				local info = Recipe_Data[sid];
 				if info then
 					local pid = info[index_pid];
 					local pt = pid_sname_to_sid[pid];
@@ -595,7 +610,7 @@ do	--	MAIN
 				if ITEM_QUALITY_COLORS then
 					local c = ITEM_QUALITY_COLORS[rarity];
 					if c then
-						str = c.hex .. "[" .. iname .. "]\124r";
+						str = c.hex .. "[" .. iname .. "]|r";
 					end
 				end
 				str = str or "[" .. iname .. "]";
@@ -615,52 +630,53 @@ do	--	MAIN
 				};
 				item_info[iid] = info;
 				return info;
-			else
+			-- else
 				-- RequestLoadItemDataByID(iid);
 				-- _error_("SPELL_DATA_LOAD_RESULT#1", iid);
 			end
 		end
 		do	--	PRELOAD
+			local temp_sid_list = {  };
 			function NS.SPELL_DATA_LOAD_RESULT(sid, success)
-				if success then
+				if success and temp_sid_list[sid] then
 					--	trade skill line
-					local pid = tradeskill_hash[sid];
+					local pid = TradeSkill_Hash[sid];
 					if pid then
 						local pname = GetSpellInfo(sid);
 						if pname then
 							local pname_lower = strlower(pname);
-							tradeskill_hash[sid] = nil;
-							if tradeskill_id[pid] == sid then
+							TradeSkill_Hash[sid] = nil;
+							if TradeSkill_ID[pid] == sid then
 								if L.extra_skill_name[pid] == nil then
-									tradeskill_hash[pname] = pid;
-									tradeskill_hash[pname_lower] = pid;
+									TradeSkill_Hash[pname] = pid;
+									TradeSkill_Hash[pname_lower] = pid;
 								else
-									tradeskill_hash[L.extra_skill_name[pid]] = pid;
-									tradeskill_hash[strlower(L.extra_skill_name[pid])] = pid;
+									TradeSkill_Hash[L.extra_skill_name[pid]] = pid;
+									TradeSkill_Hash[strlower(L.extra_skill_name[pid])] = pid;
 								end
-								tradeskill_name[pid] = pname;
+								TradeSkill_Name[pid] = pname;
 							end
-							if tradeskill_check_id[pid] == sid then
-								tradeskill_check_name[pid] = pname;
+							if TradeSkill_CheckID[pid] == sid then
+								TradeSkill_CheckName[pid] = pname;
 							end
 							spell_info[sid] = {
 								pname,
 								pname_lower,
-								"\124cff71d5ff\124Hspell:" .. sid .. "\124h[" .. pname .. "]\124h\124r",
-								"\124cff71d5ff\124hspell:" .. sid .. "\124h[" .. pname_lower .. "]\124h\124r",
-								"\124cff71d5ff[" .. pname .. "]\124r",
+								"|cff71d5ff|Hspell:" .. sid .. "|h[" .. pname .. "]|h|r",
+								"|cff71d5ff|hspell:" .. sid .. "|h[" .. pname_lower .. "]|h|r",
+								"|cff71d5ff[" .. pname .. "]|r",
 							};
 						-- else
 							-- RequestLoadSpellData(sid);
 						end
 						return;
 					end
-					--	trade skill recipe
-					if NS.db_is_tradeskill_sid(sid) then
+					--	trade skill recipe & spec
+					-- if NS.db_is_tradeskill_sid(sid) then
 						NS.db_cache_spell(sid);
-					end
+					-- end
 				-- else
-					-- local info = recipe_info[sid];
+					-- local info = Recipe_Data[sid];
 					-- RequestLoadSpellData(sid);
 					-- _error_("SPELL_DATA_LOAD_RESULT#0", sid);
 				end
@@ -668,15 +684,17 @@ do	--	MAIN
 			local function preload_check_spell()
 				local completed = true;
 				local maxonce = IsInRaid() and 500 or (IsInGroup() and 1000 or 10000);
-				for pid = NS.db_min_pid(), NS.db_max_pid() do
-					local sid = tradeskill_id[pid];
-					if not tradeskill_name[pid] then
+				for pid = NS.dbMinPid, NS.dbMaxPid do
+					local sid = TradeSkill_ID[pid];
+					if not TradeSkill_Name[pid] then
 						RequestLoadSpellData(sid);
-						tradeskill_hash[sid] = pid;
-						local csid = tradeskill_check_id[pid];
+						temp_sid_list[sid] = true;
+						TradeSkill_Hash[sid] = pid;
+						local csid = TradeSkill_CheckID[pid];
 						if csid and csid ~= sid then
 							RequestLoadSpellData(csid);
-							tradeskill_hash[csid] = pid;
+							temp_sid_list[csid] = true;
+							TradeSkill_Hash[csid] = pid;
 						end
 						completed = false;
 						maxonce = maxonce - 1;
@@ -685,9 +703,20 @@ do	--	MAIN
 						end
 					end
 				end
-				for sid, info in next, recipe_info do
+				for sid, info in next, Recipe_Data do
 					if not spell_info[sid] then
 						RequestLoadSpellData(sid);
+						temp_sid_list[sid] = true;
+						completed = false;
+						maxonce = maxonce - 1;
+						if maxonce <= 0 then
+							return false;
+						end
+					end
+					local spec = info[index_spec];
+					if spec ~= nil and not spell_info[spec] then
+						RequestLoadSpellData(spec);
+						temp_sid_list[spec] = true;
 						completed = false;
 						maxonce = maxonce - 1;
 						if maxonce <= 0 then
@@ -699,10 +728,10 @@ do	--	MAIN
 			end
 			local temp_iid_list = {  };	--	[iid] = 1	--	temp
 			function NS.ITEM_DATA_LOAD_RESULT(iid, success)
-				if temp_iid_list[iid] then
+				if success and temp_iid_list[iid] then
 					if success then
 						NS.db_cache_item(iid);
-					else
+					-- else
 						-- RequestLoadItemDataByID(iid);
 						-- _error_("SPELL_DATA_LOAD_RESULT#0", iid);
 					end
@@ -711,12 +740,12 @@ do	--	MAIN
 			local function preload_check_item()
 				local completed = true;
 				local maxonce = IsInRaid() and 500 or (IsInGroup() and 1000 or 10000);
-				for sid, info in next, recipe_info do
+				for sid, info in next, Recipe_Data do
 					local cid = info[index_cid];
 					if cid then
 						if not item_info[cid] then
 							RequestLoadItemDataByID(cid);
-							temp_iid_list[cid] = 1;
+							temp_iid_list[cid] = true;
 							completed = false;
 							maxonce = maxonce - 1;
 							if maxonce <= 0 then
@@ -728,7 +757,7 @@ do	--	MAIN
 					if rid then
 						if not item_info[rid] then
 							RequestLoadItemDataByID(rid);
-							temp_iid_list[rid] = 1;
+							temp_iid_list[rid] = true;
 							completed = false;
 							maxonce = maxonce - 1;
 							if maxonce <= 0 then
@@ -742,7 +771,7 @@ do	--	MAIN
 							local rid = reagent_ids[index2];
 							if not item_info[rid] then
 								RequestLoadItemDataByID(rid);
-								temp_iid_list[rid] = 1;
+								temp_iid_list[rid] = true;
 								completed = false;
 								maxonce = maxonce - 1;
 								if maxonce <= 0 then
@@ -792,14 +821,14 @@ do	--	MAIN
 			end
 		end
 		function NS.db_init()
-			for pid = NS.db_min_pid(), NS.db_max_pid() do
-				local list = recipe_sid_list_by_pid[pid];
+			for pid = NS.dbMinPid, NS.dbMaxPid do
+				local list = TradeSkill_RecipeList[pid];
 				if list then
 					pid_sname_to_sid[pid] = {  };
 					cid_pid_to_sid[pid] = cid_pid_to_sid[pid] or {  };
 					for index = 1, #list do
 						local sid = list[index];
-						local info = recipe_info[sid];
+						local info = Recipe_Data[sid];
 						info[index_validated] = true;
 						local cid = info[index_cid];
 						if cid then
@@ -841,9 +870,9 @@ do	--	MAIN
 					end
 				end
 			end
-			for sid, info in next, recipe_info do
+			for sid, info in next, Recipe_Data do
 				if not info[index_validated] then
-					recipe_info[sid] = nil;
+					Recipe_Data[sid] = nil;
 				end
 			end
 			if IsInRaid() then
@@ -853,78 +882,99 @@ do	--	MAIN
 			else
 				NS.db_preload();
 			end
+			for spec, pid in next, TradeSkill_Spec2Pid do
+				is_spec_learned[spec] = IsSpellKnown(spec) and true or nil;
+			end
+			_EventHandler:RegEvent("LEARNED_SPELL_IN_TAB");
+			_EventHandler:RegEvent("SPELLS_CHANGED");
+		end
+		function NS.LEARNED_SPELL_IN_TAB(id, tab, isGuild)
+			local pid = TradeSkill_Spec2Pid[id];
+			if pid ~= nil and is_spec_learned[id] ~= true then
+				is_spec_learned[id] = true;
+				SET[pid].update = true;
+			end
+		end
+		function NS.SPELLS_CHANGED()
+			for spec, pid in next, TradeSkill_Spec2Pid do
+				local val = IsSpellKnown(spec) and true or nil;
+				if is_spec_learned[spec] ~= val then
+					is_spec_learned[spec] = val;
+					SET[pid].update = true;
+				end
+			end
 		end
 		--	GET TABLE
-			--	| tradeskill_check_id{ [pid] = p_check_sid }
+			--	| TradeSkill_CheckID{ [pid] = p_check_sid }
 			function NS.db_table_tradeskill_check_id()
-				return tradeskill_check_id;
+				return TradeSkill_CheckID;
 			end
-			--	| tradeskill_check_name{ [pid] = p_check_sname }
+			--	| TradeSkill_CheckName{ [pid] = p_check_sname }
 			function NS.db_table_tradeskill_check_name()
-				return tradeskill_check_name;
+				return TradeSkill_CheckName;
 			end
 		--	QUERY RECIPE DB
 			--	pid | is_tradeskill
 			function NS.db_is_pid(pid)
-				return pid ~= nil and tradeskill_id[pid] ~= nil;
+				return pid ~= nil and TradeSkill_ID[pid] ~= nil;
 			end
 			--	pname | pid
 			function NS.db_get_pid_by_pname(pname)
 				if pname ~= nil then
-					return tradeskill_hash[pname];
+					return TradeSkill_Hash[pname];
 				end
 			end
 			--	pid | pname
 			function NS.db_get_pname_by_pid(pid)
 				if pid ~= nil then
-					return tradeskill_name[pid];
+					return TradeSkill_Name[pid];
 				end
 			end
 			--	pid | ptexture
 			function NS.db_get_texture_by_pid(pid)
 				if pid ~= nil then
-					return tradeskill_texture[pid];
+					return TradeSkill_Texture[pid];
 				end
 			end
 			--	pid | has_win
 			function NS.db_is_pid_has_win(pid)
 				if NS.db_is_pid(pid) then
-					return tradeskill_has_win[pid];
+					return TradeSkill_HasWin[pid];
 				end
 			end
 			--	pid | check_id
 			function NS.db_get_check_id_by_pid(pid)
 				if pid ~= nil then
-					return tradeskill_check_id[pid];
+					return TradeSkill_CheckID[pid];
 				end
 			end
 			--	pid | check_name
 			function NS.db_get_check_name_by_pid(pid)
 				if pid ~= nil then
-					return tradeskill_check_name[pid];
+					return TradeSkill_CheckName[pid];
 				end
 			end
 			--	sid | is_tradeskill
 			function NS.db_is_tradeskill_sid(sid)
-				return sid ~= nil and recipe_info[sid] ~= nil;
+				return sid ~= nil and Recipe_Data[sid] ~= nil;
 			end
 			--	pid | list{ sid, }
 			function NS.db_get_list_by_pid(pid)
 				if pid ~= nil then
-					return recipe_sid_list_by_pid[pid];
+					return TradeSkill_RecipeList[pid];
 				end
 			end
-			--	<query_recipe_info
+			--	<query_Recipe_Data
 			--	sid | info{  }
 			function NS.db_get_info_by_sid(sid)
 				if sid ~= nil then
-					return recipe_info[sid];
+					return Recipe_Data[sid];
 				end
 			end
 			--	sid | phase
 			function NS.db_get_phase_by_sid(sid)
 				if sid ~= nil then
-					local info = recipe_info[sid];
+					local info = Recipe_Data[sid];
 					if info then
 						return info[index_phase];
 					end
@@ -933,7 +983,7 @@ do	--	MAIN
 			--	sid | pid
 			function NS.db_get_pid_by_sid(sid)
 				if sid ~= nil then
-					local info = recipe_info[sid];
+					local info = Recipe_Data[sid];
 					if info then
 						return info[index_pid];
 					end
@@ -942,7 +992,7 @@ do	--	MAIN
 			--	sid | cid
 			function NS.db_get_cid_by_sid(sid)
 				if sid ~= nil then
-					local info = recipe_info[sid];
+					local info = Recipe_Data[sid];
 					if info then
 						return info[index_cid];
 					end
@@ -951,7 +1001,7 @@ do	--	MAIN
 			--	sid | learn_rank
 			function NS.db_get_learn_rank_by_sid(sid)
 				if sid ~= nil then
-					local info = recipe_info[sid];
+					local info = Recipe_Data[sid];
 					if info then
 						return info[index_learn_rank];
 					end
@@ -960,21 +1010,34 @@ do	--	MAIN
 			--	sid | learn_rank, yellow_rank, green_rank, grey_rank
 			function NS.db_get_difficulty_rank_list_by_sid(sid)
 				if sid ~= nil then
-					local info = recipe_info[sid];
+					local info = Recipe_Data[sid];
 					if info then
-						return info[index_learn_rank], info[index_yellow_rank], info[index_green_rank], info[index_grey_rank];
+						local bonus = CHARRACEBONUSPOINT[info[index_pid]];
+						if bonus ~= nil then
+							return info[index_learn_rank], info[index_yellow_rank] + bonus, info[index_green_rank] + bonus, info[index_grey_rank] + bonus, bonus;
+						else
+							return info[index_learn_rank], info[index_yellow_rank], info[index_green_rank], info[index_grey_rank];
+						end
 					end
 				end
 			end
 			--	sid | text"[[red ]yellow green grey]"
-			function NS.db_get_difficulty_rank_list_text_by_sid(sid)
+			function NS.db_get_difficulty_rank_list_text_by_sid(sid, tipbonus)
 				if sid ~= nil then
-					local red, yellow, green, grey = NS.db_get_difficulty_rank_list_by_sid(sid);
+					local red, yellow, green, grey, bonus = NS.db_get_difficulty_rank_list_by_sid(sid);
 					if red and yellow and green and grey then
-						if red < yellow then
-							return "\124cffff8f00" .. red .. " \124cffffff00" .. yellow .. " \124cff8fff00" .. green .. " \124cff8f8f8f" .. grey;
+						if bonus and tipbonus then
+							if red < yellow then
+								return "|cffff8f00" .. red .. "|r |cffffff00" .. yellow .. "|r |cff8fff00" .. green .. "|r |cff8f8f8f" .. grey .. "|r |cff00ff00*" .. PLAYER_RACE .. " " .. bonus .. "*|r";
+							else
+								return "|cffffff00" .. yellow .. "|r |cff8fff00" .. green .. "|r |cff8f8f8f" .. grey .. "|r |cff00ff00*" .. PLAYER_RACE .. " " .. bonus .. "*|r";
+							end
 						else
-							return "\124cffffff00" .. yellow .. " \124cff8fff00" .. green .. " \124cff8f8f8f" .. grey;
+							if red < yellow then
+								return "|cffff8f00" .. red .. "|r |cffffff00" .. yellow .. "|r |cff8fff00" .. green .. "|r |cff8f8f8f" .. grey .. "|r";
+							else
+								return "|cffffff00" .. yellow .. "|r |cff8fff00" .. green .. "|r |cff8f8f8f" .. grey .. "|r";
+							end
 						end
 					end
 				end
@@ -983,7 +1046,7 @@ do	--	MAIN
 			--	sid | difficulty	--	rank: red-1, yellow-2, green-3, grey-4
 			function NS.db_get_difficulty_rank_by_sid(sid, cur)
 				if sid ~= nil then
-					local info = recipe_info[sid];
+					local info = Recipe_Data[sid];
 					if info then
 						if cur >= info[index_grey_rank] then
 							return 4;
@@ -1003,7 +1066,7 @@ do	--	MAIN
 			--	sid | avg_made, min_made, max_made
 			function NS.db_get_num_made_by_sid(sid)
 				if sid ~= nil then
-					local info = recipe_info[sid];
+					local info = Recipe_Data[sid];
 					if info then
 						return (info[index_num_made_min] + info[index_num_made_max]) / 2, info[index_num_made_min], info[index_num_made_max];
 					end
@@ -1012,13 +1075,13 @@ do	--	MAIN
 			--	sid | reagent_ids{  }, reagent_nums{  }
 			function NS.db_get_reagents_by_sid(sid)
 				if sid ~= nil then
-					local info = recipe_info[sid];
+					local info = Recipe_Data[sid];
 					if info then
 						return info[index_reagents_id], info[index_reagents_count];
 					end
 				end
 			end
-			--	query_recipe_info>
+			--	query_Recipe_Data>
 			--	pid, sname | num, pids{  }
 			function NS.db_get_sid_by_pid_sname(pid, sname)
 				if pid ~= nil and sname ~= nil then
@@ -1040,7 +1103,7 @@ do	--	MAIN
 					if nsids > 0 then
 						for index = 1, #sids do
 							local sid = sids[index];
-							local info = recipe_info[sid];
+							local info = Recipe_Data[sid];
 							if info and cid == info[index_xid] then
 								return sid;
 							end
@@ -1251,21 +1314,26 @@ do	--	MAIN
 					return nil;
 				end
 			end
-		--	pid, list, check_hash, phase, rank, rankReversed, showKnown, showUnkown, showHighRank, donot_wipe_list | list{ sid, }
-		function NS.db_get_ordered_list(pid, list, check_hash, phase, rank, rankReversed, showKnown, showUnkown, showHighRank, donot_wipe_list)
+		--	pid, list, check_hash, phase, rank, rankReversed, showKnown, showUnkown, showHighRank, filterClass, filterSpec, donot_wipe_list | list{ sid, }
+		local function FilterAdd(list, sid, class, spec, filterClass, filterSpec)
+			if (class == nil or not filterClass or bitband(class, UCLASSBIT) ~= 0) and (spec == nil or not filterSpec or is_spec_learned[spec]) then
+				tinsert(list, sid);
+			end
+		end
+		function NS.db_get_ordered_list(pid, list, check_hash, phase, rank, rankReversed, showKnown, showUnkown, showHighRank, filterClass, filterSpec, donot_wipe_list)
 			if pid == nil then
-				_log_("NS.db_get_ordered_list\124cff00ff00#1L1\124r");
+				_log_("NS.db_get_ordered_list|cff00ff00#1L1|r");
 				if not donot_wipe_list then
 					wipe(list);
 				end
-				for pid = NS.db_min_pid(), NS.db_max_pid() do
-					if recipe_sid_list_by_pid[pid] then
-						NS.db_get_ordered_list(pid, list, check_hash, phase, rank, rankReversed, showKnown, showUnkown, showHighRank, true);
+				for pid = NS.dbMinPid, NS.dbMaxPid do
+					if TradeSkill_RecipeList[pid] then
+						NS.db_get_ordered_list(pid, list, check_hash, phase, rank, rankReversed, showKnown, showUnkown, showHighRank, filterClass, filterSpec, true);
 					end
 				end
-			elseif recipe_sid_list_by_pid[pid] ~= nil then
-				_log_("NS.db_get_ordered_list\124cff00ff00#1L2\124r", pid);
-				local recipe = recipe_sid_list_by_pid[pid];
+			elseif TradeSkill_RecipeList[pid] ~= nil then
+				_log_("NS.db_get_ordered_list|cff00ff00#1L2|r", pid);
+				local recipe = TradeSkill_RecipeList[pid];
 				if not donot_wipe_list then
 					wipe(list);
 				end
@@ -1275,38 +1343,38 @@ do	--	MAIN
 						if rankReversed then
 							for i = 1, #recipe do
 								local sid = recipe[i];
-								local info = recipe_info[sid]
+								local info = Recipe_Data[sid];
 								if info[index_phase] <= phase and info[index_grey_rank] <= rank then
-									tinsert(list, sid);
+									FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 								end
 							end
 							for i = 1, #recipe do
 								local sid = recipe[i];
-								local info = recipe_info[sid]
+								local info = Recipe_Data[sid];
 								if info[index_phase] <= phase and info[index_green_rank] <= rank and info[index_grey_rank] > rank then
-									tinsert(list, sid);
+									FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 								end
 							end
 							for i = 1, #recipe do
 								local sid = recipe[i];
-								local info = recipe_info[sid]
+								local info = Recipe_Data[sid];
 								if info[index_phase] <= phase and info[index_yellow_rank] <= rank and info[index_green_rank] > rank then
-									tinsert(list, sid);
+									FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 								end
 							end
 							for i = 1, #recipe do
 								local sid = recipe[i];
-								local info = recipe_info[sid]
+								local info = Recipe_Data[sid];
 								if info[index_phase] <= phase and info[index_learn_rank] <= rank and info[index_yellow_rank] > rank then
-									tinsert(list, sid);
+									FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 								end
 							end
 							if showHighRank then
 								for i = 1, #recipe do
 									local sid = recipe[i];
-									local info = recipe_info[sid]
+									local info = Recipe_Data[sid];
 									if info[index_phase] <= phase and info[index_learn_rank] > rank then
-										tinsert(list, sid);
+										FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 									end
 								end
 							end
@@ -1314,38 +1382,38 @@ do	--	MAIN
 							if showHighRank then
 								for i = #recipe, 1, -1 do
 									local sid = recipe[i];
-									local info = recipe_info[sid]
+									local info = Recipe_Data[sid];
 									if info[index_phase] <= phase and info[index_learn_rank] > rank then
-										tinsert(list, sid);
+										FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 									end
 								end
 							end
 							for i = #recipe, 1, -1 do
 								local sid = recipe[i];
-								local info = recipe_info[sid]
+								local info = Recipe_Data[sid];
 								if info[index_phase] <= phase and info[index_learn_rank] <= rank and info[index_yellow_rank] > rank then
-									tinsert(list, sid);
+									FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 								end
 							end
 							for i = #recipe, 1, -1 do
 								local sid = recipe[i];
-								local info = recipe_info[sid]
+								local info = Recipe_Data[sid];
 								if info[index_phase] <= phase and info[index_yellow_rank] <= rank and info[index_green_rank] > rank then
-									tinsert(list, sid);
+									FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 								end
 							end
 							for i = #recipe, 1, -1 do
 								local sid = recipe[i];
-								local info = recipe_info[sid]
+								local info = Recipe_Data[sid];
 								if info[index_phase] <= phase and info[index_green_rank] <= rank and info[index_grey_rank] > rank then
-									tinsert(list, sid);
+									FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 								end
 							end
 							for i = #recipe, 1, -1 do
 								local sid = recipe[i];
-								local info = recipe_info[sid]
+								local info = Recipe_Data[sid];
 								if info[index_phase] <= phase and info[index_grey_rank] <= rank then
-									tinsert(list, sid);
+									FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 								end
 							end
 						end
@@ -1353,59 +1421,59 @@ do	--	MAIN
 						if rankReversed then
 							for i = 1, #recipe do
 								local sid = recipe[i];
-								local info = recipe_info[sid]
+								local info = Recipe_Data[sid];
 								if info[index_phase] <= phase and check_hash[sid] ~= nil and info[index_grey_rank] <= rank then
-									tinsert(list, sid);
+									FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 								end
 							end
 							for i = 1, #recipe do
 								local sid = recipe[i];
-								local info = recipe_info[sid]
+								local info = Recipe_Data[sid];
 								if info[index_phase] <= phase and check_hash[sid] ~= nil and info[index_green_rank] <= rank and info[index_grey_rank] > rank then
-									tinsert(list, sid);
+									FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 								end
 							end
 							for i = 1, #recipe do
 								local sid = recipe[i];
-								local info = recipe_info[sid]
+								local info = Recipe_Data[sid];
 								if info[index_phase] <= phase and check_hash[sid] ~= nil and info[index_yellow_rank] <= rank and info[index_green_rank] > rank then
-									tinsert(list, sid);
+									FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 								end
 							end
 							for i = 1, #recipe do
 								local sid = recipe[i];
-								local info = recipe_info[sid]
+								local info = Recipe_Data[sid];
 								if info[index_phase] <= phase and check_hash[sid] ~= nil and info[index_learn_rank] <= rank and info[index_yellow_rank] > rank then
-									tinsert(list, sid);
+									FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 								end
 							end
 						else
 							for i = #recipe, 1, -1 do
 								local sid = recipe[i];
-								local info = recipe_info[sid]
+								local info = Recipe_Data[sid];
 								if info[index_phase] <= phase and check_hash[sid] ~= nil and info[index_learn_rank] <= rank and info[index_yellow_rank] > rank then
-									tinsert(list, sid);
+									FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 								end
 							end
 							for i = #recipe, 1, -1 do
 								local sid = recipe[i];
-								local info = recipe_info[sid]
+								local info = Recipe_Data[sid];
 								if info[index_phase] <= phase and check_hash[sid] ~= nil and info[index_yellow_rank] <= rank and info[index_green_rank] > rank then
-									tinsert(list, sid);
+									FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 								end
 							end
 							for i = #recipe, 1, -1 do
 								local sid = recipe[i];
-								local info = recipe_info[sid]
+								local info = Recipe_Data[sid];
 								if info[index_phase] <= phase and check_hash[sid] ~= nil and info[index_green_rank] <= rank and info[index_grey_rank] > rank then
-									tinsert(list, sid);
+									FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 								end
 							end
 							for i = #recipe, 1, -1 do
 								local sid = recipe[i];
-								local info = recipe_info[sid]
+								local info = Recipe_Data[sid];
 								if info[index_phase] <= phase and check_hash[sid] ~= nil and info[index_grey_rank] <= rank then
-									tinsert(list, sid);
+									FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 								end
 							end
 						end
@@ -1413,38 +1481,38 @@ do	--	MAIN
 						if rankReversed then
 							for i = 1, #recipe do
 								local sid = recipe[i];
-								local info = recipe_info[sid]
+								local info = Recipe_Data[sid];
 								if info[index_phase] <= phase and check_hash[sid] == nil and info[index_grey_rank] <= rank then
-									tinsert(list, sid);
+									FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 								end
 							end
 							for i = 1, #recipe do
 								local sid = recipe[i];
-								local info = recipe_info[sid]
+								local info = Recipe_Data[sid];
 								if info[index_phase] <= phase and check_hash[sid] == nil and info[index_green_rank] <= rank and info[index_grey_rank] > rank then
-									tinsert(list, sid);
+									FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 								end
 							end
 							for i = 1, #recipe do
 								local sid = recipe[i];
-								local info = recipe_info[sid]
+								local info = Recipe_Data[sid];
 								if info[index_phase] <= phase and check_hash[sid] == nil and info[index_yellow_rank] <= rank and info[index_green_rank] > rank then
-									tinsert(list, sid);
+									FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 								end
 							end
 							for i = 1, #recipe do
 								local sid = recipe[i];
-								local info = recipe_info[sid]
+								local info = Recipe_Data[sid];
 								if info[index_phase] <= phase and check_hash[sid] == nil and info[index_learn_rank] <= rank and info[index_yellow_rank] > rank then
-									tinsert(list, sid);
+									FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 								end
 							end
 							if showHighRank then
 								for i = 1, #recipe do
 									local sid = recipe[i];
-									local info = recipe_info[sid]
+									local info = Recipe_Data[sid];
 									if info[index_phase] <= phase and check_hash[sid] == nil and info[index_learn_rank] > rank then
-										tinsert(list, sid);
+										FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 									end
 								end
 							end
@@ -1452,38 +1520,38 @@ do	--	MAIN
 							if showHighRank then
 								for i = #recipe, 1, -1 do
 									local sid = recipe[i];
-									local info = recipe_info[sid]
+									local info = Recipe_Data[sid];
 									if info[index_phase] <= phase and check_hash[sid] == nil and info[index_learn_rank] > rank then
-										tinsert(list, sid);
+										FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 									end
 								end
 							end
 							for i = #recipe, 1, -1 do
 								local sid = recipe[i];
-								local info = recipe_info[sid]
+								local info = Recipe_Data[sid];
 								if info[index_phase] <= phase and check_hash[sid] == nil and info[index_learn_rank] <= rank and info[index_yellow_rank] > rank then
-									tinsert(list, sid);
+									FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 								end
 							end
 							for i = #recipe, 1, -1 do
 								local sid = recipe[i];
-								local info = recipe_info[sid]
+								local info = Recipe_Data[sid];
 								if info[index_phase] <= phase and check_hash[sid] == nil and info[index_yellow_rank] <= rank and info[index_green_rank] > rank then
-									tinsert(list, sid);
+									FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 								end
 							end
 							for i = #recipe, 1, -1 do
 								local sid = recipe[i];
-								local info = recipe_info[sid]
+								local info = Recipe_Data[sid];
 								if info[index_phase] <= phase and check_hash[sid] == nil and info[index_green_rank] <= rank and info[index_grey_rank] > rank then
-									tinsert(list, sid);
+									FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 								end
 							end
 							for i = #recipe, 1, -1 do
 								local sid = recipe[i];
-								local info = recipe_info[sid]
+								local info = Recipe_Data[sid];
 								if info[index_phase] <= phase and check_hash[sid] == nil and info[index_grey_rank] <= rank then
-									tinsert(list, sid);
+									FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 								end
 							end
 						end
@@ -1493,12 +1561,18 @@ do	--	MAIN
 						if rankReversed then
 							for i = 1, #recipe do
 								local sid = recipe[i];
-								tinsert(list, sid);
+								local info = Recipe_Data[sid];
+								if info[index_phase] <= phase then
+									FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
+								end
 							end
 						else
 							for i = #recipe, 1, -1 do
 								local sid = recipe[i];
-								tinsert(list, sid);
+								local info = Recipe_Data[sid];
+								if info[index_phase] <= phase then
+									FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
+								end
 							end
 						end
 					elseif showKnown then
@@ -1506,14 +1580,20 @@ do	--	MAIN
 							for i = 1, #recipe do
 								local sid = recipe[i];
 								if check_hash[sid] ~= nil then
-									tinsert(list, sid);
+									local info = Recipe_Data[sid];
+									if info[index_phase] <= phase then
+										FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
+									end
 								end
 							end
 						else
 							for i = #recipe, 1, -1 do
 								local sid = recipe[i];
 								if check_hash[sid] ~= nil then
-									tinsert(list, sid);
+									local info = Recipe_Data[sid];
+									if info[index_phase] <= phase then
+										FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
+									end
 								end
 							end
 						end
@@ -1522,14 +1602,20 @@ do	--	MAIN
 							for i = 1, #recipe do
 								local sid = recipe[i];
 								if check_hash[sid] == nil then
-									tinsert(list, sid);
+									local info = Recipe_Data[sid];
+									if info[index_phase] <= phase then
+										FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
+									end
 								end
 							end
 						else
 							for i = #recipe, 1, -1 do
 								local sid = recipe[i];
 								if check_hash[sid] == nil then
-									tinsert(list, sid);
+									local info = Recipe_Data[sid];
+									if info[index_phase] <= phase then
+										FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
+									end
 								end
 							end
 						end
@@ -1538,38 +1624,38 @@ do	--	MAIN
 					if rankReversed then
 						for i = 1, #recipe do
 							local sid = recipe[i];
-							local info = recipe_info[sid]
+							local info = Recipe_Data[sid];
 							if info[index_phase] <= phase and info[index_grey_rank] <= rank then
-								tinsert(list, sid);
+								FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 							end
 						end
 						for i = 1, #recipe do
 							local sid = recipe[i];
-							local info = recipe_info[sid]
+							local info = Recipe_Data[sid];
 							if info[index_phase] <= phase and info[index_green_rank] <= rank and info[index_grey_rank] > rank then
-								tinsert(list, sid);
+								FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 							end
 						end
 						for i = 1, #recipe do
 							local sid = recipe[i];
-							local info = recipe_info[sid]
+							local info = Recipe_Data[sid];
 							if info[index_phase] <= phase and info[index_yellow_rank] <= rank and info[index_green_rank] > rank then
-								tinsert(list, sid);
+								FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 							end
 						end
 						for i = 1, #recipe do
 							local sid = recipe[i];
-							local info = recipe_info[sid]
+							local info = Recipe_Data[sid];
 							if info[index_phase] <= phase and info[index_learn_rank] <= rank and info[index_yellow_rank] > rank then
-								tinsert(list, sid);
+								FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 							end
 						end
 						if showHighRank then
 							for i = 1, #recipe do
 								local sid = recipe[i];
-								local info = recipe_info[sid]
+								local info = Recipe_Data[sid];
 								if info[index_phase] <= phase and info[index_learn_rank] > rank then
-									tinsert(list, sid);
+									FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 								end
 							end
 						end
@@ -1577,60 +1663,69 @@ do	--	MAIN
 						if showHighRank then
 							for i = #recipe, 1, -1 do
 								local sid = recipe[i];
-								local info = recipe_info[sid]
+								local info = Recipe_Data[sid];
 								if info[index_phase] <= phase and info[index_learn_rank] > rank then
-									tinsert(list, sid);
+									FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 								end
 							end
 						end
 						for i = #recipe, 1, -1 do
 							local sid = recipe[i];
-							local info = recipe_info[sid]
+							local info = Recipe_Data[sid];
 							if info[index_phase] <= phase and info[index_learn_rank] <= rank and info[index_yellow_rank] > rank then
-								tinsert(list, sid);
+								FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 							end
 						end
 						for i = #recipe, 1, -1 do
 							local sid = recipe[i];
-							local info = recipe_info[sid]
+							local info = Recipe_Data[sid];
 							if info[index_phase] <= phase and info[index_yellow_rank] <= rank and info[index_green_rank] > rank then
-								tinsert(list, sid);
+								FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 							end
 						end
 						for i = #recipe, 1, -1 do
 							local sid = recipe[i];
-							local info = recipe_info[sid]
+							local info = Recipe_Data[sid];
 							if info[index_phase] <= phase and info[index_green_rank] <= rank and info[index_grey_rank] > rank then
-								tinsert(list, sid);
+								FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 							end
 						end
 						for i = #recipe, 1, -1 do
 							local sid = recipe[i];
-							local info = recipe_info[sid]
+							local info = Recipe_Data[sid];
 							if info[index_phase] <= phase and info[index_grey_rank] <= rank then
-								tinsert(list, sid);
+								FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 							end
 						end
 					end
 				else
 					if rankReversed then
-						Mixin(list, recipe);
+						for i = 1, #recipe do
+							local sid = recipe[i];
+							local info = Recipe_Data[sid];
+							if info[index_phase] <= phase then
+								FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
+							end
+						end
 					else
 						for i = #recipe, 1, -1 do
 							local sid = recipe[i];
-							tinsert(list, sid);
+							local info = Recipe_Data[sid];
+							if info[index_phase] <= phase then
+								FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
+							end
 						end
 					end
 				end
 			else
-				_log_("NS.db_get_ordered_list\124cff00ff00#1L3\124r", pid);
+				_log_("NS.db_get_ordered_list|cff00ff00#1L3|r", pid);
 			end
 			return list;
 		end
 		--
 		-- if select(2, BNGetInfo()) == 'alex#516722' then
-			function NS.link_db()	--	recipe_info, spell_info, item_info
-				return recipe_info, spell_info, item_info;
+			function NS.link_db()	--	Recipe_Data, spell_info, item_info
+				return Recipe_Data, spell_info, item_info;
 			end
 		-- end
 	end
@@ -1648,19 +1743,19 @@ do	--	MAIN
 		end
 		local function func_sub_known_recipe(sid, GUID)
 			local list = explorer_hash[sid];
-			if list then
+			if list ~= nil then
 				list[GUID] = nil;
+				for _ in next, list do
+					return;
+				end
+				explorer_hash[sid] = nil;
 			end
-			for _ in next, list do
-				return;
-			end
-			explorer_hash[sid] = nil;
 		end
 		--
 		function NS.init_hash_known_recipe()
 			for GUID, VAR in next, AVAR do
 				if VAR.realm_id == PLAYER_REALM_ID then
-					for pid = NS.db_min_pid(), NS.db_max_pid() do
+					for pid = NS.dbMinPid, NS.dbMaxPid do
 						local var = rawget(VAR, pid);
 						if var and NS.db_is_pid(pid) then
 							local list = var[1];
@@ -1674,9 +1769,14 @@ do	--	MAIN
 		end
 		--
 		function NS.SKILL_LINES_CHANGED()	--	Donot process the first trigger after login. And wait for 1sec.
+			if not NS.scheduled_SKILL_LINES_CHANGED then
+				return;
+			end
+			NS.scheduled_SKILL_LINES_CHANGED = true;
+			--
 			local func_SKILL_LINES_CHANGED = function()
 				local check_name = NS.db_table_tradeskill_check_name();
-				for pid = NS.db_min_pid(), NS.db_max_pid() do
+				for pid = NS.dbMinPid, NS.dbMaxPid do
 					local cpname = check_name[pid];
 					if cpname then
 						if not GetSpellInfo(cpname) then
@@ -1722,8 +1822,6 @@ do	--	MAIN
 				var[2][sid] = -1;
 				func_add_known_recipe(sid, PLAYER_GUID);
 				_EventHandler:FireEvent("USER_EVENT_RECIPE_LIST_UPDATE");
-			else
-				_error_("NS.NEW_RECIPE_LEARNED#0", sid);
 			end
 		end
 		--------
@@ -1812,7 +1910,7 @@ do	--	MAIN
 							local sids = var[1];
 							local hash = var[2];
 							if update_var then
-								_log_("NS.process_update\124cff00ff00#1L1\124r");
+								_log_("NS.process_update|cff00ff00#1L1|r");
 								local num = frame.recipe_num();
 								if num <= 0 then
 									-- frame.mute_update = false;
@@ -1853,7 +1951,7 @@ do	--	MAIN
 								var.update = nil;
 								frame.update = nil;
 							else
-								_log_("NS.process_update\124cff00ff00#1L2\124r");
+								_log_("NS.process_update|cff00ff00#1L2|r");
 							end
 							if #sids > 0 then
 								if frame.prev_pid ~= pid then
@@ -1874,7 +1972,7 @@ do	--	MAIN
 								frame.prev_pid = pid;
 								frame.hash = hash;
 								local list = frame.list;
-								NS.db_get_ordered_list(pid, list, hash, set.phase, cur_rank, set.rankReversed, set.showKnown, set.showUnkown, set.showHighRank);
+								NS.db_get_ordered_list(pid, list, hash, set.phase, cur_rank, set.rankReversed, set.showKnown, set.showUnkown, set.showHighRank, set.filterClass, set.filterSpec);
 								if set.haveMaterials then
 									for i = #list, 1, -1 do
 										local sid = list[i];
@@ -1913,7 +2011,7 @@ do	--	MAIN
 								-- frame.mute_update = false;
 							end
 						else
-							_log_("NS.process_update\124cff00ff00#2L1\124r");
+							_log_("NS.process_update|cff00ff00#2L1|r");
 							if #var[1] > 0 then
 								frame.scroll:Update();
 								if frame.profitFrame:IsShown() then
@@ -1931,7 +2029,7 @@ do	--	MAIN
 							local sids = var[1];
 							local hash = var[2];
 							if update_var then
-								_log_("NS.process_update\124cff00ff00#1L1\124r");
+								_log_("NS.process_update|cff00ff00#1L1|r");
 								local num = frame.recipe_num();
 								if num <= 0 then
 									-- frame.mute_update = false;
@@ -2015,7 +2113,7 @@ do	--	MAIN
 		function NS.process_profit_update(frame)
 			local profitFrame = frame.profitFrame;
 			if profitFrame:IsVisible() then
-				_log_("NS.process_profit_update\124cff00ff00#1L1\124r");
+				_log_("NS.process_profit_update|cff00ff00#1L1|r");
 				local list = profitFrame.list;
 				local pid = frame.flag or NS.db_get_pid_by_pname(frame.pname());
 				if profitFrame.costOnly then
@@ -2070,8 +2168,8 @@ do	--	MAIN
 					return loc and loc_to_lid[loc];
 				end,
 			};
-		function NS.process_explorer_update_list(frame, stat, filter, searchText, searchNameOnly, list, check_hash, phase, rank, rankReversed, showKnown, showUnkown, showHighRank, donot_wipe_list)
-			NS.db_get_ordered_list(filter.skill, list, check_hash, phase, rank, rankReversed, showKnown, showUnkown, showHighRank, donot_wipe_list);
+		function NS.process_explorer_update_list(frame, stat, filter, searchText, searchNameOnly, list, check_hash, phase, rank, rankReversed, showKnown, showUnkown, showHighRank, filterClass, filterSpec, donot_wipe_list)
+			NS.db_get_ordered_list(filter.skill, list, check_hash, phase, rank, rankReversed, showKnown, showUnkown, showHighRank, filterClass, filterSpec, donot_wipe_list);
 			do
 				local C_top = 1;
 				for index = 1, #list do
@@ -2144,7 +2242,7 @@ do	--	MAIN
 				local hash = frame.hash;
 				local list = frame.list;
 				if update_list then
-					_log_("NS.process_explorer_update\124cff00ff00#1L1\124r");
+					_log_("NS.process_explorer_update|cff00ff00#1L1|r");
 					if set.showProfit then
 						frame.profitFrame:Show();
 					else
@@ -2157,10 +2255,10 @@ do	--	MAIN
 					end
 					frame.searchEditNameOnly:SetChecked(set.searchNameOnly);
 					NS.process_explorer_update_list(frame, explorer_stat_list, set.filter, set.searchText, set.searchNameOnly,
-												list, hash, set.phase, nil, set.rankReversed, set.showKnown, set.showUnkown, set.showHighRank);
+												list, hash, set.phase, nil, set.rankReversed, set.showKnown, set.showUnkown, set.showHighRank, set.filterClass, set.filterSpec);
 					NS.process_profit_update(frame);
 				else
-					_log_("NS.process_explorer_update\124cff00ff00#1L2\124r");
+					_log_("NS.process_explorer_update|cff00ff00#1L2|r");
 				end
 				frame.scroll:SetNumValue(#list);
 				frame.scroll:Update();
@@ -2209,7 +2307,7 @@ do	--	MAIN
 			function NS.tradeskill_link(sid)
 				local name = GetSpellInfo(sid);
 				if name then
-					return "\124cffffffff\124Henchant:" .. sid .. "\124h[" .. name .. "]\124h\124r";
+					return "|cffffffff|Henchant:" .. sid .. "|h[" .. name .. "]|h|r";
 				else
 					return nil;
 				end
@@ -2227,7 +2325,7 @@ do	--	MAIN
 			function NS.tradeskill_link(sid)
 				local name = GetSpellInfo(sid);
 				if name then
-					return "\124cffffd000\124Henchant:" .. sid .. "\124h[" .. name .. "]\124h\124r";
+					return "|cffffd000|Henchant:" .. sid .. "|h[" .. name .. "]|h|r";
 				else
 					return nil;
 				end
@@ -2807,13 +2905,13 @@ do	--	MAIN
 						end
 						local phase = info[index_phase];
 						if phase > curPhase then
-							GameTooltip:AddLine("\124cffff0000" .. L["available_in_phase_"] .. phase .. "\124r");
+							GameTooltip:AddLine("|cffff0000" .. L["available_in_phase_"] .. phase .. "|r");
 						end
 						GameTooltip:Show();
 					else
 						GameTooltip:SetSpellByID(sid);
 					end
-					local text = NS.db_get_difficulty_rank_list_text_by_sid(sid);
+					local text = NS.db_get_difficulty_rank_list_text_by_sid(sid, true);
 					if text then
 						GameTooltip:AddDoubleLine(L["LABEL_RANK_LEVEL"], text);
 						GameTooltip:Show();
@@ -2831,7 +2929,7 @@ do	--	MAIN
 								local lClass, class, lRace, race, sex, name = GetPlayerInfoByGUID(GUID);
 								if name and class then
 									local classColorTable = RAID_CLASS_COLORS[strupper(class)];
-									name = format("\124cff%.2x%.2x%.2x", classColorTable.r * 255, classColorTable.g * 255, classColorTable.b * 255) .. name .. "\124r";
+									name = format("|cff%.2x%.2x%.2x", classColorTable.r * 255, classColorTable.g * 255, classColorTable.b * 255) .. name .. "|r";
 									str = str .. " " .. name;
 								else
 									str = str .. " " .. GUID;
@@ -3284,7 +3382,7 @@ do	--	MAIN
 							end
 							button.title:SetTextColor(unpack(rank_color[rank_index[rank]] or ui_style.color_white));
 							if set.showRank then
-								button.note:SetText(NS.db_get_difficulty_rank_list_text_by_sid(sid));
+								button.note:SetText(NS.db_get_difficulty_rank_list_text_by_sid(sid, false));
 							else
 								button.note:SetText("");
 							end
@@ -3332,7 +3430,7 @@ do	--	MAIN
 							button.title:SetTextColor(1.0, 0.0, 0.0, 1.0);
 						end
 						if set.showRank then
-							button.note:SetText(NS.db_get_difficulty_rank_list_text_by_sid(sid));
+							button.note:SetText(NS.db_get_difficulty_rank_list_text_by_sid(sid, false));
 						else
 							button.note:SetText("");
 						end
@@ -3394,12 +3492,12 @@ do	--	MAIN
 						if price_a_material > 0 then
 							price_info_in_frame[2]:SetText(
 								L["COST_PRICE"] .. ": " ..
-								(unk_in > 0 and (merc.MoneyString(price_a_material) .. " (\124cffff0000" .. unk_in .. L["ITEMS_UNK"] .. "\124r)") or merc.MoneyString(price_a_material))
+								(unk_in > 0 and (merc.MoneyString(price_a_material) .. " (|cffff0000" .. unk_in .. L["ITEMS_UNK"] .. "|r)") or merc.MoneyString(price_a_material))
 							);
 						else
 							price_info_in_frame[2]:SetText(
 								L["COST_PRICE"] .. ": " ..
-								"\124cffff0000" .. L["PRICE_UNK"] .. "\124r"
+								"|cffff0000" .. L["PRICE_UNK"] .. "|r"
 							);
 						end
 
@@ -3417,12 +3515,22 @@ do	--	MAIN
 								);
 								if price_a_material > 0 then
 									local diff = price_a_product - price_a_material;
+									local diffAH = price_a_product * 0.95 - price_a_material;
 									if diff > 0 then
-										price_info_in_frame[3]:SetText(L["PRICE_DIFF+"] .. ": " .. merc.MoneyString(diff));
+										if diffAH > 0 then
+											price_info_in_frame[3]:SetText(L["PRICE_DIFF+"] .. ": " .. merc.MoneyString(diff) .. " (" .. L["PRICE_DIFF_AH+"] .. " " .. merc.MoneyString(diffAH) .. ")");
+										elseif diffAH < 0 then
+											price_info_in_frame[3]:SetText(L["PRICE_DIFF+"] .. ": " .. merc.MoneyString(diff) .. " (" .. L["PRICE_DIFF_AH-"] .. " " .. merc.MoneyString(-diffAH) .. ")");
+										else
+											price_info_in_frame[3]:SetText(L["PRICE_DIFF+"] .. ": " .. merc.MoneyString(diff) .. " (" .. L["PRICE_DIFF_AH0"] .. " " .. L["PRICE_DIFF0"] .. ")");
+										end
 									elseif diff < 0 then
-										price_info_in_frame[3]:SetText(L["PRICE_DIFF-"] .. ": " .. merc.MoneyString(-diff));
+										price_info_in_frame[3]:SetText(L["PRICE_DIFF-"] .. ": " .. merc.MoneyString(-diff) .. " (" .. L["PRICE_DIFF_AH-"] .. " " .. merc.MoneyString(-diffAH) .. ")");
 									else
-										price_info_in_frame[3]:SetText(L["PRICE_DIFF0"]);
+										if diffAH < 0 then
+											price_info_in_frame[3]:SetText(L["PRICE_DIFF0"] .. " (" .. L["PRICE_DIFF_AH-"] .. " " .. merc.MoneyString(-diffAH) .. ")");
+										else
+										end
 									end
 								else
 									price_info_in_frame[3]:SetText(nil);
@@ -3437,7 +3545,7 @@ do	--	MAIN
 								else
 									price_info_in_frame[1]:SetText(
 										L["AH_PRICE"] .. ": " ..
-										"\124cffff0000" .. L["PRICE_UNK"] .. "\124r (" .. L["VENDOR_RPICE"] .. (price_v_product and merc.MoneyString(price_v_product) or L["NEED_UPDATE"]) .. ")"
+										"|cffff0000" .. L["PRICE_UNK"] .. "|r (" .. L["VENDOR_RPICE"] .. (price_v_product and merc.MoneyString(price_v_product) or L["NEED_UPDATE"]) .. ")"
 									);
 								end
 								price_info_in_frame[3]:SetText(nil);
@@ -3456,7 +3564,7 @@ do	--	MAIN
 			end
 			function NS.ui_updateRankInfoInFrame(frame)
 				if SET.show_tradeskill_frame_rank_info then
-					frame.rank_info_in_frame:SetText(NS.db_get_difficulty_rank_list_text_by_sid(frame.selected_sid));
+					frame.rank_info_in_frame:SetText(NS.db_get_difficulty_rank_list_text_by_sid(frame.selected_sid, true));
 				else
 					frame.rank_info_in_frame:SetText(nil);
 				end
@@ -4111,7 +4219,7 @@ do	--	MAIN
 						local elements = drop_meta.elements;
 						wipe(elements);
 						local pname = frame.pname();
-						for pid = NS.db_min_pid(), NS.db_max_pid() do
+						for pid = NS.dbMinPid, NS.dbMaxPid do
 							if rawget(VAR, pid) and NS.db_is_pid_has_win(pid) then
 								local name = NS.db_get_check_name_by_pid(pid);
 								if name and name ~= pname then
@@ -4195,7 +4303,7 @@ do	--	MAIN
 					end
 					function tabFrame:Update()
 						local numSkill = 0;
-						for pid = NS.db_min_pid(), NS.db_max_pid() do
+						for pid = NS.dbMinPid, NS.dbMaxPid do
 							if rawget(VAR, pid) and NS.db_is_pid_has_win(pid) then
 								numSkill = numSkill + 1;
 								self:SetTab(numSkill, NS.db_get_check_name_by_pid(pid), NS.db_get_texture_by_pid(pid));
@@ -4316,9 +4424,14 @@ do	--	MAIN
 				do	--	set_frame
 					local setFrame = CreateFrame("FRAME", nil, frame);
 					setFrame:SetFrameStrata("HIGH");
-					setFrame:SetSize(332, 48);
+					setFrame:SetSize(332, 66);
 					setFrame:Hide();
 					frame.setFrame = setFrame;
+
+					local tip = setFrame:CreateFontString(nil, "ARTWORK");
+					tip:SetFont(ui_style.frameFont, ui_style.frameFontSize - 1);
+					tip:SetPoint("RIGHT", setFrame, "BOTTOMRIGHT", -2, 9);
+					setFrame.tip = tip;
 
 					local call = CreateFrame("BUTTON", nil, frame);
 					call:SetSize(16, 16);
@@ -4353,7 +4466,7 @@ do	--	MAIN
 					end);
 
 					local checkBoxes = {  };
-					local keyTables = { "showUnkown", "showKnown", "showHighRank", "showItemInsteadOfSpell", "showRank", "haveMaterials", };
+					local keyTables = { "showUnkown", "showKnown", "showHighRank", "filterClass", "filterSpec", "showItemInsteadOfSpell", "showRank", "haveMaterials", };
 					for index = 1, #keyTables do
 						local key = keyTables[index];
 						local check = CreateFrame("CHECKBUTTON", nil, setFrame, "OptionsBaseCheckButtonTemplate");
@@ -4366,16 +4479,16 @@ do	--	MAIN
 						str:SetText(L[key]);
 						check.fontString = str;
 						str:SetPoint("LEFT", check, "RIGHT", 0, 0);
-						if index % 3 == 1 then
+						if index % 4 == 1 then
 							if index == 1 then
 								check:SetPoint("CENTER", setFrame, "TOPLEFT", 16, -12);
 							else
-								check:SetPoint("CENTER", checkBoxes[index - 3], "CENTER", 0, -24);
+								check:SetPoint("CENTER", checkBoxes[index - 4], "CENTER", 0, -24);
 							end
 						else
-							check:SetPoint("CENTER", checkBoxes[index - 1], "CENTER", 102, 0);
+							check:SetPoint("CENTER", checkBoxes[index - 1], "CENTER", 80, 0);
 						end
-						if index == 1 or index == 2 or index == 3 or index == 6 then
+						if index == 1 or index == 2 or index == 3 or index == 4 or index == 5 or index == 8 then
 							check:SetScript("OnClick", function(self)
 								local pid = frame.flag or NS.db_get_pid_by_pname(frame.pname());
 								if pid then
@@ -4394,26 +4507,35 @@ do	--	MAIN
 						end
 						check.key = key;
 						check.frame = frame;
+						local TipText = L[key .. "Tip"];
+						if TipText ~= nil then
+							check:SetScript("OnEnter", function(self)
+								tip:SetText(TipText);
+							end);
+							check:SetScript("OnLeave", function(self)
+								tip:SetText(nil);
+							end);
+						end
 						tinsert(checkBoxes, check);
 					end
 					setFrame.checkBoxes = checkBoxes;
 
 					local phaseSlider = CreateFrame("SLIDER", nil, setFrame, "OptionsSliderTemplate");
-					phaseSlider:SetPoint("BOTTOM", setFrame, "TOP", 0, 12);
+					phaseSlider:SetPoint("BOTTOM", setFrame, "TOP", 0, 10);
 					phaseSlider:SetPoint("LEFT", 4, 0);
 					phaseSlider:SetPoint("RIGHT", -4, 0);
-					phaseSlider:SetHeight(20);
+					phaseSlider:SetHeight(16);
 					phaseSlider:SetMinMaxValues(1, NS.maxPhase)
 					phaseSlider:SetValueStep(1);
 					phaseSlider:SetObeyStepOnDrag(true);
 					phaseSlider.Text:ClearAllPoints();
-					phaseSlider.Text:SetPoint("TOP", phaseSlider, "BOTTOM", 0, 3);
+					phaseSlider.Text:SetPoint("TOP", phaseSlider, "BOTTOM", 0, 4);
 					phaseSlider.Low:ClearAllPoints();
 					phaseSlider.Low:SetPoint("TOPLEFT", phaseSlider, "BOTTOMLEFT", 4, 3);
 					phaseSlider.High:ClearAllPoints();
 					phaseSlider.High:SetPoint("TOPRIGHT", phaseSlider, "BOTTOMRIGHT", -4, 3);
-					phaseSlider.Low:SetText("\124cff00ff001\124r");
-					phaseSlider.High:SetText("\124cffff0000" .. NS.maxPhase .. "\124r");
+					phaseSlider.Low:SetText("|cff00ff001|r");
+					phaseSlider.High:SetText("|cffff0000" .. NS.maxPhase .. "|r");
 					phaseSlider:HookScript("OnValueChanged", function(self, value, userInput)
 						if userInput then
 							local pid = frame.flag or NS.db_get_pid_by_pname(frame.pname());
@@ -4422,7 +4544,7 @@ do	--	MAIN
 								frame.update_func();
 							end
 						end
-						self.Text:SetText("\124cffffff00" .. L["phase"] .. "\124r " .. value);
+						self.Text:SetText("|cffffff00" .. L["phase"] .. "|r " .. value);
 					end);
 					phaseSlider.frame = frame;
 					setFrame.phaseSlider = phaseSlider;
@@ -4432,12 +4554,12 @@ do	--	MAIN
 							setFrame:ClearAllPoints();
 							setFrame:SetPoint("LEFT", self.BG);
 							-- setFrame:SetPoint("RIGHT", self);
-							setFrame:SetPoint("BOTTOM", self.tabFrame, "TOP", 0, 2);
+							setFrame:SetPoint("BOTTOM", self.tabFrame, "TOP", 0, -4);
 						else
 							setFrame:ClearAllPoints();
 							setFrame:SetPoint("LEFT", self.BG);
 							-- setFrame:SetPoint("RIGHT", self);
-							setFrame:SetPoint("BOTTOM", self.BG, "TOP", 0, 2);
+							setFrame:SetPoint("BOTTOM", self.BG, "TOP", 0, 1);
 						end
 						if show then
 							setFrame:Show();
@@ -4686,7 +4808,7 @@ do	--	MAIN
 
 				pname = GetTradeSkillLine,
 				pinfo = GetTradeSkillLine,
-				-- pinfo = function(...) return GetTradeSkillLine(...), 375, 375; end,
+				-- pinfo = function(...) return GetTradeSkillLine(...), NS.maxRank, NS.maxRank; end,
 					--	skillName, cur_rank, max_rank
 
 				recipe_num = GetNumTradeSkills,
@@ -4817,7 +4939,7 @@ do	--	MAIN
 
 				pname = GetCraftName,
 				pinfo = GetCraftDisplaySkillLine,
-				-- pinfo = function(...) return GetCraftDisplaySkillLine(...), 375, 375; end,
+				-- pinfo = function(...) return GetCraftDisplaySkillLine(...), NS.maxRank, NS.maxRank; end,
 					--	skillName, cur_rank, max_rank
 
 				recipe_num = GetNumCrafts,
@@ -5001,7 +5123,7 @@ do	--	MAIN
 					end
 					local set = SET.explorer;
 					if set.showRank then
-						button.note:SetText(NS.db_get_difficulty_rank_list_text_by_sid(sid));
+						button.note:SetText(NS.db_get_difficulty_rank_list_text_by_sid(sid, false));
 					else
 						button.note:SetText("");
 					end
@@ -5033,7 +5155,7 @@ do	--	MAIN
 			--	set button handler
 				--	L.ITEM_TYPE_LIST
 				--	L.ITEM_SUB_TYPE_LIST
-				local index_bound = { skill = { NS.db_min_pid(), NS.db_max_pid(), }, type = { BIG_NUMBER, -1, }, subType = {  }, eqLoc = { BIG_NUMBER, -1, }, };
+				local index_bound = { skill = { NS.dbMinPid, NS.dbMaxPid, }, type = { BIG_NUMBER, -1, }, subType = {  }, eqLoc = { BIG_NUMBER, -1, }, };
 				for index, _ in next, L.ITEM_TYPE_LIST do
 					if index < index_bound.type[1] then
 						index_bound.type[1] = index;
@@ -5105,7 +5227,7 @@ do	--	MAIN
 							temp_filter.subType = nil;
 						end
 						NS.process_explorer_update_list(frame, temp_stat_list, temp_filter, set.searchText, set.searchNameOnly,
-													temp_list, frame.hash, set.phase, nil, set.rankReversed, set.showKnown, set.showUnkown, set.showHighRank);
+													temp_list, frame.hash, set.phase, nil, set.rankReversed, set.showKnown, set.showUnkown, set.showHighRank, false, false);
 						stat_list = temp_stat_list;
 					else
 						stat_list = explorer_stat_list;
@@ -5340,12 +5462,17 @@ do	--	MAIN
 			do	--	set_frame
 				local setFrame = CreateFrame("FRAME", nil, frame);
 				setFrame:SetFrameStrata("HIGH");
-				setFrame:SetHeight(64);
+				setFrame:SetHeight(82);
 				setFrame:SetPoint("LEFT", frame);
 				setFrame:SetPoint("RIGHT", frame);
-				setFrame:SetPoint("BOTTOM", frame, "TOP", 0, 2);
+				setFrame:SetPoint("BOTTOM", frame, "TOP", 0, 1);
 				setFrame:Hide();
 				frame.setFrame = setFrame;
+
+				local tip = setFrame:CreateFontString(nil, "ARTWORK");
+				tip:SetFont(ui_style.frameFont, ui_style.frameFontSize - 1);
+				tip:SetPoint("RIGHT", setFrame, "BOTTOMRIGHT", -2, 9);
+				setFrame.tip = tip;
 
 				local call = CreateFrame("BUTTON", nil, frame);
 				call:SetSize(16, 16);
@@ -5399,7 +5526,7 @@ do	--	MAIN
 					else
 						check:SetPoint("CENTER", checkBoxes[index - 1], "CENTER", 94, 0);
 					end
-					if index <= 2 then
+					if index == 1 or index == 2 then
 						check:SetScript("OnClick", function(self)
 							SET.explorer[key] = self:GetChecked()
 							frame.update_func();
@@ -5411,6 +5538,15 @@ do	--	MAIN
 						end);
 					end
 					check.key = key;
+					local TipText = L[key .. "Tip"];
+					if TipText ~= nil then
+						check:SetScript("OnEnter", function(self)
+							tip:SetText(TipText);
+						end);
+						check:SetScript("OnLeave", function(self)
+							tip:SetText(nil);
+						end);
+					end
 					tinsert(checkBoxes, check);
 				end
 				setFrame.checkBoxes = checkBoxes;
@@ -5494,14 +5630,14 @@ do	--	MAIN
 				phaseSlider.Low:SetPoint("TOPLEFT", phaseSlider, "BOTTOMLEFT", 4, 3);
 				phaseSlider.High:ClearAllPoints();
 				phaseSlider.High:SetPoint("TOPRIGHT", phaseSlider, "BOTTOMRIGHT", -4, 3);
-				phaseSlider.Low:SetText("\124cff00ff001\124r");
-				phaseSlider.High:SetText("\124cffff0000" .. NS.maxPhase .. "\124r");
+				phaseSlider.Low:SetText("|cff00ff001|r");
+				phaseSlider.High:SetText("|cffff0000" .. NS.maxPhase .. "|r");
 				phaseSlider:HookScript("OnValueChanged", function(self, value, userInput)
 					if userInput then
 						SET.explorer.phase = value;
 						frame.update_func();
 					end
-					self.Text:SetText("\124cffffff00" .. L["phase"] .. "\124r " .. value);
+					self.Text:SetText("|cffffff00" .. L["phase"] .. "|r " .. value);
 				end);
 				setFrame.phaseSlider = phaseSlider;
 
@@ -5680,7 +5816,7 @@ do	--	MAIN
 					board:Clear();
 					for GUID, VAR in next, AVAR do
 						local add_label = true;
-						for pid = NS.db_min_pid(), NS.db_max_pid() do
+						for pid = NS.dbMinPid, NS.dbMaxPid do
 							local var = rawget(VAR, pid);
 							if var and NS.db_is_pid(pid) then
 								local cool = var[3];
@@ -5690,7 +5826,7 @@ do	--	MAIN
 										local lClass, class, lRace, race, sex, name = GetPlayerInfoByGUID(GUID);
 										if name and class then
 											local classColorTable = RAID_CLASS_COLORS[strupper(class)];
-											name = format(">>\124cff%.2x%.2x%.2x", classColorTable.r * 255, classColorTable.g * 255, classColorTable.b * 255) .. name .. "\124r<<";
+											name = format(">>|cff%.2x%.2x%.2x", classColorTable.r * 255, classColorTable.g * 255, classColorTable.b * 255) .. name .. "|r<<";
 											board:AddLine(nil, name);
 										else
 											board:AddLine(nil, GUID);
@@ -5698,13 +5834,13 @@ do	--	MAIN
 									end
 									local texture = NS.db_get_texture_by_pid(pid);
 									if var.cur_rank and var.max_rank then
-										board:AddLine("\124T" .. (texture or ui_style.texture_unk) .. ":12:12:0:0\124t " .. (NS.db_get_pname_by_pid(pid) or ""), nil, var.cur_rank .. " / " .. var.max_rank);
+										board:AddLine("|T" .. (texture or ui_style.texture_unk) .. ":12:12:0:0|t " .. (NS.db_get_pname_by_pid(pid) or ""), nil, var.cur_rank .. " / " .. var.max_rank);
 									else
-										board:AddLine("\124T" .. (texture or ui_style.texture_unk) .. ":12:12:0:0\124t " .. (NS.db_get_pname_by_pid(pid) or ""));
+										board:AddLine("|T" .. (texture or ui_style.texture_unk) .. ":12:12:0:0|t " .. (NS.db_get_pname_by_pid(pid) or ""));
 									end
 									for sid, c in next, cool do
 										local texture = NS.db_item_icon(NS.db_get_cid_by_sid(sid));
-										local sname = "\124T" .. (texture or ui_style.texture_unk) .. ":12:12:0:0\124t " .. NS.db_spell_name_s(sid);
+										local sname = "|T" .. (texture or ui_style.texture_unk) .. ":12:12:0:0|t " .. NS.db_spell_name_s(sid);
 										if c > 0 then
 											local diff = c - GetServerTime();
 											if diff > 0 then
@@ -5752,6 +5888,7 @@ do	--	MAIN
 		--
 		function NS.ui_CreateBoard()
 			local board = CreateFrame("FRAME", nil, UIParent);
+			board:SetClampedToScreen(true);
 			if LOCALE == 'zhCN' or LOCALE == 'zhTW' or LOCALE == 'koKR' then
 				board:SetWidth(260);
 			else
@@ -5841,11 +5978,14 @@ do	--	MAIN
 					lines[index][2]:Hide();
 					lines[index][3]:Hide();
 					self:SetHeight(16);
+					board:SetClampRectInsets(200, -200, 0, 0);
 				end
 				self.curLine = 0;
 			end
 			function board:Update()
-				self:SetHeight(16 * max(self.curLine, 1));
+				local h = 16 * max(self.curLine, 1);
+				self:SetHeight(h);
+				board:SetClampRectInsets(200, -200, 16 - h, h - 16);
 			end
 			board.info_lines = { L["BOARD_TIP"], };
 			board.lines = {  };
@@ -5915,7 +6055,7 @@ do	--	MAIN
 						GameTooltip:AddLine(key, 1.0, 1.0, 1.0);
 					end
 					local add_blank = true;
-					for pid = NS.db_min_pid(), NS.db_max_pid() do
+					for pid = NS.dbMinPid, NS.dbMaxPid do
 						local var = rawget(VAR, pid);
 						if var and NS.db_is_pid(pid) then
 							if add_blank then
@@ -6394,6 +6534,20 @@ do	--	MAIN
 	end
 
 	do	--	supreme craft
+		--[==[
+			UPDATE_TRADESKILL_RECAST
+			UNIT_SPELLCAST_SENT: unit, target, castGUID, spellID
+			UNIT_SPELLCAST_START: unitTarget, castGUID, spellID
+			--
+			UNIT_SPELLCAST_SUCCEEDED: unitTarget, castGUID, spellID
+			UNIT_SPELLCAST_STOP: unitTarget, castGUID, spellID
+			--
+			UNIT_SPELLCAST_INTERRUPTED: unitTarget, castGUID, spellID
+			UNIT_SPELLCAST_STOP: unitTarget, castGUID, spellID
+			UNIT_SPELLCAST_INTERRUPTED: unitTarget, castGUID, spellID
+			UNIT_SPELLCAST_INTERRUPTED: unitTarget, castGUID, spellID
+			UNIT_SPELLCAST_INTERRUPTED: unitTarget, castGUID, spellID
+		]==]
 			function NS.ui_supremeListButton_OnEnter(self)
 				local frame = self.frame;
 				local sid = self.list[self:GetDataIndex()];
@@ -6416,13 +6570,13 @@ do	--	MAIN
 						end
 						local phase = info[index_phase];
 						if phase > curPhase then
-							GameTooltip:AddLine("\124cffff0000" .. L["available_in_phase_"] .. phase .. "\124r");
+							GameTooltip:AddLine("|cffff0000" .. L["available_in_phase_"] .. phase .. "|r");
 						end
 						GameTooltip:Show();
 					else
 						GameTooltip:SetSpellByID(sid);
 					end
-					local text = NS.db_get_difficulty_rank_list_text_by_sid(sid);
+					local text = NS.db_get_difficulty_rank_list_text_by_sid(sid, true);
 					if text then
 						GameTooltip:AddDoubleLine(L["LABEL_RANK_LEVEL"], text);
 						GameTooltip:Show();
@@ -6440,7 +6594,7 @@ do	--	MAIN
 								local lClass, class, lRace, race, sex, name = GetPlayerInfoByGUID(GUID);
 								if name and class then
 									local classColorTable = RAID_CLASS_COLORS[strupper(class)];
-									name = format("\124cff%.2x%.2x%.2x", classColorTable.r * 255, classColorTable.g * 255, classColorTable.b * 255) .. name .. "\124r";
+									name = format("|cff%.2x%.2x%.2x", classColorTable.r * 255, classColorTable.g * 255, classColorTable.b * 255) .. name .. "|r";
 									str = str .. " " .. name;
 								else
 									str = str .. " " .. GUID;
@@ -6694,7 +6848,7 @@ do	--	MAIN
 								end
 								button.title:SetTextColor(unpack(rank_color[rank_index[rank]] or ui_style.color_white));
 								if set.showRank then
-									button.note:SetText(NS.db_get_difficulty_rank_list_text_by_sid(sid));
+									button.note:SetText(NS.db_get_difficulty_rank_list_text_by_sid(sid, false));
 								else
 									button.note:SetText("");
 								end
@@ -6742,7 +6896,7 @@ do	--	MAIN
 								button.title:SetTextColor(1.0, 0.0, 0.0, 1.0);
 							end
 							if set.showRank then
-								button.note:SetText(NS.db_get_difficulty_rank_list_text_by_sid(sid));
+								button.note:SetText(NS.db_get_difficulty_rank_list_text_by_sid(sid, false));
 							else
 								button.note:SetText("");
 							end
@@ -6838,11 +6992,11 @@ do	--	MAIN
 	end
 
 	do	-- 	tooltip
-		local recipe_black_list_sid = NS.recipe_black_list_sid;
-		local recipe_black_list_cid = NS.recipe_black_list_cid;
+		local PriceSpellBlackList = NS.PriceSpellBlackList;
+		local PriceItemBlackList = NS.PriceItemBlackList;
 		local space_table = setmetatable({}, {
 			__index = function(t, k)
-				local str = "\124cff000000" .. strrep("*", 2 * k) .. "\124r";
+				local str = "|cff000000" .. strrep("*", 2 * k) .. "|r";
 				t[k] = str;
 				return str;
 			end,
@@ -6872,7 +7026,7 @@ do	--	MAIN
 							local num = reagnum[i];
 							local p, c = nil, nil;
 							local got = false;
-							if not recipe_black_list_cid[iid] then
+							if not PriceItemBlackList[iid] then
 								if iid == cid then
 									got = true;
 									c = 0;
@@ -6910,7 +7064,7 @@ do	--	MAIN
 								local quality = merc.query_quality_by_id(iid) or NS.db_item_rarity(iid);
 								if quality then
 									local _, _, _, code = GetItemQualityColor(quality);
-									name = "\124c" .. code .. name .. "\124r";
+									name = "|c" .. code .. name .. "|r";
 								end
 								if iid ~= cid then
 									p = merc.query_ah_price_by_id(iid);
@@ -6982,7 +7136,7 @@ do	--	MAIN
 				local quality = cid and (merc.query_quality_by_id(cid) or NS.db_item_rarity(cid));
 				if quality then
 					local _, _, _, code = GetItemQualityColor(quality);
-					name = name and ("\124c" .. code .. name .. "\124r") or "";
+					name = name and ("|c" .. code .. name .. "|r") or "";
 				else
 					name = name or "";
 				end
@@ -6993,32 +7147,43 @@ do	--	MAIN
 						end
 						if is_enchanting then
 							if cost then
-								tinsert(lines, "\124cffff7f00**\124r" .. "\124cffffffff" .. NS.db_spell_name_s(sid) .. "\124r" or L["COST_PRICE"]);
+								tinsert(lines, "|cffff7f00**|r" .. "|cffffffff" .. NS.db_spell_name_s(sid) .. "|r" or L["COST_PRICE"]);
 								tinsert(lines, L["COST_PRICE"] .. merc.MoneyString(cost));
 							else
-								tinsert(lines, "\124cffff7f00**\124r" .. "\124cffffffff" .. NS.db_spell_name_s(sid) .. "\124r" or L["COST_PRICE"]);
+								tinsert(lines, "|cffff7f00**|r" .. "|cffffffff" .. NS.db_spell_name_s(sid) .. "|r" or L["COST_PRICE"]);
 								tinsert(lines, L["COST_PRICE_KNOWN"] .. merc.MoneyString(cost_known));
 							end
 						else
 							if cost then
-								tinsert(lines, "\124cffff7f00**\124r" .. name .. "x" .. num);
+								tinsert(lines, "|cffff7f00**|r" .. name .. "x" .. num);
 								tinsert(lines, L["COST_PRICE"] .. merc.MoneyString(cost));
 							else
-								tinsert(lines, "\124cffff7f00**\124r" .. name .. "x" .. num);
+								tinsert(lines, "|cffff7f00**|r" .. name .. "x" .. num);
 								tinsert(lines, L["COST_PRICE_KNOWN"] .. merc.MoneyString(cost_known));
 							end
 							if price then
-								tinsert(lines, "\124cff00ff00**\124r" .. name .. "x" .. num);
+								tinsert(lines, "|cff00ff00**|r" .. name .. "x" .. num);
 								tinsert(lines, L["AH_PRICE"] .. merc.MoneyString(price));
 							end
 							if cost and price then
 								local diff = price - cost;
+								local diffAH = price * 0.95 - cost;
 								if diff > 0 then
-									tinsert(lines, "\124cff00ff00**\124r" .. L["PRICE_DIFF+"]);
+									tinsert(lines, "|cff00ff00**|r" .. L["PRICE_DIFF+"]);
 									tinsert(lines, L["PRICE_DIFF_INFO+"] .. merc.MoneyString(diff));
+									if diffAH > 0 then
+										tinsert(lines, "|cff00ff00**|r" .. L["PRICE_DIFF_AH+"]);
+										tinsert(lines, L["PRICE_DIFF_INFO+"] .. merc.MoneyString(diffAH));
+									elseif diffAH < 0 then
+										tinsert(lines, "|cffff0000**|r" .. L["PRICE_DIFF_AH-"]);
+										tinsert(lines, L["PRICE_DIFF_INFO-"] .. merc.MoneyString(-diffAH));
+									else
+									end
 								elseif diff < 0 then
-									tinsert(lines, "\124cffff0000**\124r" .. L["PRICE_DIFF-"]);
+									tinsert(lines, "|cffff0000**|r" .. L["PRICE_DIFF-"]);
 									tinsert(lines, L["PRICE_DIFF_INFO-"] .. merc.MoneyString(-diff));
+									tinsert(lines, "|cffff0000**|r" .. L["PRICE_DIFF_AH-"]);
+									tinsert(lines, L["PRICE_DIFF_INFO-"] .. merc.MoneyString(-diffAH));
 								end
 							end
 						end
@@ -7062,15 +7227,15 @@ do	--	MAIN
 				local pid = info[index_pid];
 				local texture = NS.db_get_texture_by_pid(pid);
 				-- local rank = info[index_learn_rank];
-				local name = NS.db_get_pname_by_pid(pid);
+				local pname = NS.db_get_pname_by_pid(pid) or "";
 				if texture then
-					name = "\124T" .. texture .. ":12:12:0:0\124t " .. name;
+					pname = "|T" .. texture .. ":12:12:0:0|t " .. pname;
 				end
 				-- if rank then
-				-- 	name = name .. "(" .. rank .. ")";
+				-- 	pname = pname .. "(" .. rank .. ")";
 				-- end
-				name = name .. " " .. NS.db_get_difficulty_rank_list_text_by_sid(sid) .. "";
-				tip:AddLine("\124cff00afff" .. name .. "\124r");
+				pname = pname .. " " .. NS.db_get_difficulty_rank_list_text_by_sid(sid, true) .. "";
+				tip:AddLine("|cff00afff" .. pname .. "|r");
 				local detail_lines = {  };
 				NS.price_gen_info_by_sid(mouse_focus_sid == sid and mouse_focus_phase or curPhase, sid, (info[index_num_made_min] + info[index_num_made_max]) / 2, detail_lines, 0, cid == nil);
 				if #detail_lines > 0 then
@@ -7092,15 +7257,15 @@ do	--	MAIN
 						local pid = info[index_pid];
 						local texture = NS.db_get_texture_by_pid(pid);
 						-- local rank = info[index_learn_rank];
-						local name = NS.db_get_pname_by_pid(pid) or "";
+						local pname = NS.db_get_pname_by_pid(pid) or "";
 						if texture then
-							name = "\124T" .. texture .. ":12:12:0:0\124t " .. name;
+							pname = "|T" .. texture .. ":12:12:0:0|t " .. pname;
 						end
 						-- if rank then
-						-- 	name = name .. "(" .. rank .. ")";
+						-- 	pname = pname .. "(" .. rank .. ")";
 						-- end
-						name = name .. " " .. NS.db_get_difficulty_rank_list_text_by_sid(sid) .. "";
-						tip:AddLine("\124cff00afff" .. name .. "\124r");
+						pname = pname .. " " .. NS.db_get_difficulty_rank_list_text_by_sid(sid, true) .. "";
+						tip:AddLine("|cff00afff" .. pname .. "|r");
 						local detail_lines = {  };
 						NS.price_gen_info_by_sid(mouse_focus_sid == sid and mouse_focus_phase or curPhase, sid, (info[index_num_made_min] + info[index_num_made_max]) / 2, detail_lines, 0, false);
 						if #detail_lines > 0 then
@@ -7132,20 +7297,20 @@ do	--	MAIN
 								local lClass, class, lRace, race, sex, name = GetPlayerInfoByGUID(GUID);
 								if name and class then
 									local classColorTable = RAID_CLASS_COLORS[strupper(class)];
-									name = format("\124cff%.2x%.2x%.2x", classColorTable.r * 255, classColorTable.g * 255, classColorTable.b * 255) .. name .. "\124r";
+									name = format("|cff%.2x%.2x%.2x", classColorTable.r * 255, classColorTable.g * 255, classColorTable.b * 255) .. name .. "|r";
 								else
 									name = GUID;
 								end
 								if var[2][sid] then
-									name = space_table[1] .. L["RECIPE_LEARNED"] .. "  " .. name .. "  \124cffffffff" .. var.cur_rank .. "/" .. var.max_rank .. "\124r";
+									name = space_table[1] .. L["RECIPE_LEARNED"] .. "  " .. name .. "  |cffffffff" .. var.cur_rank .. "/" .. var.max_rank .. "|r";
 								else
 									name = space_table[1] .. L["RECIPE_NOT_LEARNED"] .. "  " .. name
-												.. ((var.cur_rank >= learn_rank) and "  \124cff00ff00" or "  \124cffff0000") .. var.cur_rank
-												.. ((var.max_rank >= learn_rank) and "\124r\124cffffffff/\124r\124cff00ff00" or "\124r\124cffffffff/\124r\124cffff0000") .. var.max_rank .. "\124r";
+												.. ((var.cur_rank >= learn_rank) and "  |cff00ff00" or "  |cffff0000") .. var.cur_rank
+												.. ((var.max_rank >= learn_rank) and "|r|cffffffff/|r|cff00ff00" or "|r|cffffffff/|r|cffff0000") .. var.max_rank .. "|r";
 									-- if var.cur_rank >= learn_rank then
-									-- 	name = space_table[1] .. L["RECIPE_NOT_LEARNED"] .. "  " .. name .. "  \124cff00ff00" .. var.cur_rank .. "\124r\124cffffffff/" .. var.max_rank .. "\124r";
+									-- 	name = space_table[1] .. L["RECIPE_NOT_LEARNED"] .. "  " .. name .. "  |cff00ff00" .. var.cur_rank .. "|r|cffffffff/" .. var.max_rank .. "|r";
 									-- else
-									-- 	name = space_table[1] .. L["RECIPE_NOT_LEARNED"] .. "  " .. name .. "  \124cffff0000" .. var.cur_rank .. "\124r\124cffffffff/" .. var.max_rank .. "\124r";
+									-- 	name = space_table[1] .. L["RECIPE_NOT_LEARNED"] .. "  " .. name .. "  |cffff0000" .. var.cur_rank .. "|r|cffffffff/" .. var.max_rank .. "|r";
 									-- end
 								end
 								tip:AddLine(name);
@@ -7169,20 +7334,21 @@ do	--	MAIN
 					local sid = sids[index];
 					local num = nums[index];
 					if not_show_all and nLines >= 8 then
-						tip:AddLine(space_table[1] .. "\124cffff0000...\124r");
+						tip:AddLine(space_table[1] .. "|cffff0000...|r");
 						break;
 					end
 					local info = NS.db_get_info_by_sid(sid);
 					if info then
 						local cid = info[index_cid];
+						local pname = NS.db_get_pname_by_pid(info[index_pid]) or "";
 						if cid then
 							lineL = space_table[1] .. NS.db_item_string_s(cid) .. "x" .. num;
-							-- lineR = "\124cff00afff" .. NS.db_get_pname_by_pid(info[index_pid]) .. info[index_learn_rank] .. "\124r";
+							-- lineR = "|cff00afff" .. pname .. info[index_learn_rank] .. "|r";
 						else
 							lineL = space_table[1] .. NS.db_spell_string_s(sid) .. "x" .. num;
-							-- lineR = "\124cff00afff" .. NS.db_get_pname_by_pid(info[index_pid]) .. info[index_learn_rank] .. "\124r";
+							-- lineR = "|cff00afff" .. pname .. info[index_learn_rank] .. "|r";
 						end
-							lineR = "\124cff00afff" .. NS.db_get_pname_by_pid(info[index_pid]) .. " " .. NS.db_get_difficulty_rank_list_text_by_sid(sid) .. "\124r";
+							lineR = "|cff00afff" .. pname .. " " .. NS.db_get_difficulty_rank_list_text_by_sid(sid, true) .. "|r";
 						tip:AddDoubleLine(lineL, lineR);
 						nLines = nLines + 1;
 					end
@@ -7319,7 +7485,7 @@ do	--	MAIN
 				if fv.id == fid then
 					local name = fv.name[MTSL_LOCALE];
 					if name then
-						line = "\124cffff7f00" .. name .. "\124r";
+						line = "|cffff7f00" .. name .. "|r";
 					end
 					break;
 				end
@@ -7330,7 +7496,7 @@ do	--	MAIN
 				if lv.id == lid then
 					local name = lv.name[MTSL_LOCALE];
 					if name then
-						line = line .. format("\124cff%.2xff00", min(255, max(0, 64 * (8 - lid) - 1))) .. name .. "\124r";
+						line = line .. format("|cff%.2xff00", min(255, max(0, 64 * (8 - lid) - 1))) .. name .. "|r";
 					end
 					break;
 				end
@@ -7340,18 +7506,18 @@ do	--	MAIN
 		end
 		local npc_prefix = {	--	== "Alliance"
 			[true] = {
-				Alliance = ": \124Tinterface\\timer\\Alliance-logo:20\124t\124cff00ff00",
-				Horde = ": \124Tinterface\\timer\\Horde-logo:20\124t\124cffff0000",
-				Neutral = ": \124cffffff00",
-				Hostile = ": \124cffff0000",
-				["*"] = ": \124cffffffff",
+				Alliance = ": |Tinterface\\timer\\Alliance-logo:20|t|cff00ff00",
+				Horde = ": |Tinterface\\timer\\Horde-logo:20|t|cffff0000",
+				Neutral = ": |cffffff00",
+				Hostile = ": |cffff0000",
+				["*"] = ": |cffffffff",
 			},
 			[false] = {
-				Alliance = ": \124Tinterface\\timer\\Alliance-logo:20\124t\124cffff0000",
-				Horde = ": \124Tinterface\\timer\\Horde-logo:20\124t\124cff00ff00",
-				Neutral = ": \124cffffff00",
-				Hostile = ": \124cffff0000",
-				["*"] = ": \124cffffffff",
+				Alliance = ": |Tinterface\\timer\\Alliance-logo:20|t|cffff0000",
+				Horde = ": |Tinterface\\timer\\Horde-logo:20|t|cff00ff00",
+				Neutral = ": |cffffff00",
+				Hostile = ": |cffff0000",
+				["*"] = ": |cffffffff",
 			},
 		};
 		tooltip_set_npc = function(pid, nid, label, alliance_green, prefix, suffix, stack_size)
@@ -7409,7 +7575,7 @@ do	--	MAIN
 							end
 						end
 						if not got_one_data then
-							GameTooltip:AddDoubleLine(" ", L["sold_by"] .. ": \124cffff0000unknown\124r, npcID: " .. nid);
+							GameTooltip:AddDoubleLine(" ", L["sold_by"] .. ": |cffff0000unknown|r, npcID: " .. nid);
 						end
 						GameTooltip:Show();
 					end
@@ -7430,7 +7596,7 @@ do	--	MAIN
 								if name then
 									line = line .. qv.name[MTSL_LOCALE] .. "]";
 								else
-									line = line .. "\124cffffff00" .. L["quest"] .. "\124r ID: " .. qid .. "]";
+									line = line .. "|cffffff00" .. L["quest"] .. "|r ID: " .. qid .. "]";
 								end
 								local min_xp_level = qv.min_xp_level;
 								if min_xp_level then
@@ -7440,10 +7606,10 @@ do	--	MAIN
 								if phase and phase > curPhase then
 									line = line .. " " .. L["phase"] .. phase;
 								end
-								GameTooltip:AddDoubleLine(label, L["quest_reward"] .. ": \124cffffff00" .. line .. "\124r");
+								GameTooltip:AddDoubleLine(label, L["quest_reward"] .. ": |cffffff00" .. line .. "|r");
 								if qv.npcs then
 									for _, nid in next, qv.npcs do
-										tooltip_set_npc(pid, nid, " ", UnitFactionGroup('player') == "Alliance", L["quest_accepted_from"], "\124r", stack_size + 1);
+										tooltip_set_npc(pid, nid, " ", UnitFactionGroup('player') == "Alliance", L["quest_accepted_from"], "|r", stack_size + 1);
 									end
 								end
 								if qv.items then
@@ -7465,7 +7631,7 @@ do	--	MAIN
 									if sav and sav.name then
 										local sa = sav.name[MTSL_LOCALE];
 										if sa then
-											GameTooltip:AddDoubleLine(" ", "\124cffffffff" .. sa .. "\124r");
+											GameTooltip:AddDoubleLine(" ", "|cffffffff" .. sa .. "|r");
 										end
 									end
 								end
@@ -7473,7 +7639,7 @@ do	--	MAIN
 							end
 						end
 						if not got_one_data then
-							GameTooltip:AddDoubleLine(label, "\124cffffff00" .. L["quest"] .. "\124r ID: " .. qid);
+							GameTooltip:AddDoubleLine(label, "|cffffff00" .. L["quest"] .. "|r ID: " .. qid);
 						end
 					end
 					GameTooltip:Show();
@@ -7484,18 +7650,18 @@ do	--	MAIN
 			if stack_size <= 8 then
 				local _, line, _, _, _, _, _, _, bind = NS.db_item_info(iid);
 				if not line then
-					line = "\124cffffffff" .. L["item"] .. "\124r ID: " .. iid;
+					line = "|cffffffff" .. L["item"] .. "|r ID: " .. iid;
 				end
 				if bind ~= 1 and bind ~= 4 then
-					line = line .. "(\124cff00ff00" .. L["tradable"] .. "\124r)";
+					line = line .. "(|cff00ff00" .. L["tradable"] .. "|r)";
 					if merc then
 						local price = merc.query_ah_price_by_id(iid);
 						if price and price > 0 then
-							line = line .. " \124cff00ff00AH\124r " .. merc.MoneyString(price);
+							line = line .. " |cff00ff00AH|r " .. merc.MoneyString(price);
 						end
 					end
 				else
-					line = line .. "(\124cffff0000" .. L["non_tradable"] .. "\124r)";
+					line = line .. "(|cffff0000" .. L["non_tradable"] .. "|r)";
 				end
 				GameTooltip:AddDoubleLine(label, line);
 				if MTSL_DATA then
@@ -7507,21 +7673,21 @@ do	--	MAIN
 								local vendors = iv.vendors;
 								if vendors then
 									for _, nid in next, vendors.sources do
-										tooltip_set_npc(pid, nid, " ", UnitFactionGroup('player') == "Alliance", L["sold_by"], "\124r", stack_size + 1);
+										tooltip_set_npc(pid, nid, " ", UnitFactionGroup('player') == "Alliance", L["sold_by"], "|r", stack_size + 1);
 									end
 								end
 								local drops = iv.drops;
 								if drops then
 									if drops.sources then
 										for _, nid in next, drops.sources do
-											tooltip_set_npc(pid, nid, " ", UnitFactionGroup('player') ~= "Alliance", L["dropped_by"], "\124r", stack_size + 1);
+											tooltip_set_npc(pid, nid, " ", UnitFactionGroup('player') ~= "Alliance", L["dropped_by"], "|r", stack_size + 1);
 										end
 									end
 									local range = drops.range;
 									if range then
 										if range.min_xp_level and range.max_xp_level then
 											local line = range.min_xp_level .. "-" .. range.max_xp_level;
-											GameTooltip:AddDoubleLine(" ", L["world_drop"] .. ": \124cffff0000" .. L["dropped_by_mod_level"] .. line .. "\124r");
+											GameTooltip:AddDoubleLine(" ", L["world_drop"] .. ": |cffff0000" .. L["dropped_by_mod_level"] .. line .. "|r");
 										else
 											GameTooltip:AddDoubleLine(" ", L["world_drop"]);
 										end
@@ -7548,7 +7714,7 @@ do	--	MAIN
 											local h = hv.name[MTSL_LOCALE];
 											if h then
 												-- GameTooltip:AddDoubleLine(" ", h);
-												line2 = "\124cff00ffff" .. h .. "\124r";
+												line2 = "|cff00ffff" .. h .. "|r";
 											end
 											break;
 										end
@@ -7562,9 +7728,9 @@ do	--	MAIN
 										if sa then
 											-- GameTooltip:AddDoubleLine(" ", sa);
 											if line2 then
-												line2 = line2 .. "\124cffffffff" .. sa .. "\124r";
+												line2 = line2 .. "|cffffffff" .. sa .. "|r";
 											else
-												line2 = "\124cffffffff" .. sa .. "\124r";
+												line2 = "|cffffffff" .. sa .. "|r";
 											end
 										end
 									end
@@ -7589,7 +7755,7 @@ do	--	MAIN
 						for _, ov in next, objects do
 							if ov.id == oid then
 								got_one_data = true;
-								local line = ov.name[MTSL_LOCALE] or ("\124cffffffff" .. L["object"] .. "\124r ID: " .. oid);
+								local line = ov.name[MTSL_LOCALE] or ("|cffffffff" .. L["object"] .. "|r ID: " .. oid);
 								line = line .. " [" .. C_Map.GetAreaInfo(ov.zone_id);
 								local location = ov.location;
 								if location and location.x ~= "-" and location.y ~= "-" then
@@ -7601,14 +7767,14 @@ do	--	MAIN
 								if phase and phase > curPhase then
 									line = line .. " " .. L["phase"] .. phase;
 								end
-								GameTooltip:AddDoubleLine(label, L["object"] .. ": \124cffffffff" .. line .. "\124r");
+								GameTooltip:AddDoubleLine(label, L["object"] .. ": |cffffffff" .. line .. "|r");
 								local special_action = ov.special_action;
 								if special_action then
 									local sav = MTSL_DATA["special_actions"][special_action];
 									if sav and sav.name then
 										local sa = sav.name[MTSL_LOCALE];
 										if sa then
-											GameTooltip:AddDoubleLine(" ", "\124cffffffff" .. sa .. "\124r");
+											GameTooltip:AddDoubleLine(" ", "|cffffffff" .. sa .. "|r");
 										end
 									end
 								end
@@ -7616,7 +7782,7 @@ do	--	MAIN
 							end
 						end
 						if not got_one_data then
-							GameTooltip:AddDoubleLine(label, "\124cffffffff" .. L["object"] .. "\124r ID: " .. oid);
+							GameTooltip:AddDoubleLine(label, "|cffffffff" .. L["object"] .. "|r ID: " .. oid);
 						end
 						GameTooltip:Show();
 					end
@@ -7627,7 +7793,7 @@ do	--	MAIN
 			local info = NS.db_get_info_by_sid(sid);
 			if info then
 				if info[index_trainer] then			-- trainer
-					GameTooltip:AddDoubleLine(L["LABEL_GET_FROM"], "\124cffff00ff" .. L["trainer"] .. "\124r");
+					GameTooltip:AddDoubleLine(L["LABEL_GET_FROM"], "|cffff00ff" .. L["trainer"] .. "|r");
 					GameTooltip:Show();
 				end
 				if info[index_rid] then					-- recipe
@@ -7660,7 +7826,7 @@ do	--	MAIN
 									if stable then
 										for _, spv in next, stable do
 											if spv.id == specialisation then
-												GameTooltip:AddDoubleLine(" ", "\124cffffffff" .. spv.name[MTSL_LOCALE] .. "\124r");
+												GameTooltip:AddDoubleLine(" ", "|cffffffff" .. spv.name[MTSL_LOCALE] .. "|r");
 												GameTooltip:Show();
 											end
 										end
@@ -7714,7 +7880,7 @@ do	--	MAIN
 			end
 		end
 		function NS.BAG_UPDATE_COOLDOWN(...)
-			for pid = NS.db_min_pid(), NS.db_max_pid() do
+			for pid = NS.dbMinPid, NS.dbMaxPid do
 				local var = rawget(VAR, pid);
 				if var and NS.db_is_pid(pid) then
 					NS.cooldown_check(pid, var);
@@ -7773,7 +7939,7 @@ do	--	MAIN
 		local function skill_msg(header)	--	head#pid:cur:max
 			local msg = header;
 			local valid = false;
-			for pid = NS.db_min_pid(), NS.db_max_pid() do
+			for pid = NS.dbMinPid, NS.dbMaxPid do
 				local var = rawget(VAR, pid);
 				if var and NS.db_is_pid(pid) then
 					if var.cur_rank and var.max_rank then
@@ -7796,16 +7962,16 @@ do	--	MAIN
 			local lClass, class, lRace, race, sex, name = GetPlayerInfoByGUID(GUID);
 			if name and class then
 				local classColorTable = RAID_CLASS_COLORS[strupper(class)];
-				return format("\124cff%.2x%.2x%.2x", classColorTable.r * 255, classColorTable.g * 255, classColorTable.b * 255) .. name .. "\124r";
+				return format("|cff%.2x%.2x%.2x", classColorTable.r * 255, classColorTable.g * 255, classColorTable.b * 255) .. name .. "|r";
 			end
 		end
 		local function get_PlayerLink(GUID)
 			local lClass, class, lRace, race, sex, name = GetPlayerInfoByGUID(GUID);
 			if name and class then
 				local classColorTable = RAID_CLASS_COLORS[strupper(class)];
-				return "\124Hplayer:" .. name .. ":0:WHISPER\124h" .. 
-							format("\124cff%.2x%.2x%.2x[", classColorTable.r * 255, classColorTable.g * 255, classColorTable.b * 255) .. name .. "]\124r"
-							.. "\124h";
+				return "|Hplayer:" .. name .. ":0:WHISPER|h" .. 
+							format("|cff%.2x%.2x%.2x[", classColorTable.r * 255, classColorTable.g * 255, classColorTable.b * 255) .. name .. "]|r"
+							.. "|h";
 			end
 		end
 		function NS.CHAT_MSG_ADDON(prefix, msg, channel, sender, target, zoneChannelID, localID, name, instanceID)
@@ -8333,6 +8499,8 @@ do	--	INITIALIZE
 		showKnown = true,
 		showUnkown = true,
 		showHighRank = false,
+		filterClass = true,
+		filterSpec = true,
 		showItemInsteadOfSpell = false,
 		showRank = true,
 		haveMaterials = false,
@@ -8381,7 +8549,18 @@ do	--	INITIALIZE
 		else
 		end
 		alaTradeSkillSV._version = 210605.1;
-		SET = setmetatable(alaTradeSkillSV.set, {
+		SET = alaTradeSkillSV.set;
+		for pid = NS.dbMinPid, NS.dbMaxPid do
+			local set = rawget(SET, pid);
+			if set ~= nil then
+				for key, val in next, default_set do
+					if set[key] == nil then
+						set[key] = val;
+					end
+				end
+			end
+		end
+		setmetatable(SET, {
 			__index = function(t, pid)
 				if NS.db_is_pid(pid) then
 					local temp = Mixin({  }, default_set);
@@ -8411,7 +8590,7 @@ do	--	INITIALIZE
 			end
 		end
 		for GUID, VAR in next, AVAR do
-			for pid = NS.db_min_pid(), NS.db_max_pid() do
+			for pid = NS.dbMinPid, NS.dbMaxPid do
 				local var = rawget(VAR, pid);
 				if var and NS.db_is_pid(pid) then
 					var.cur_rank = var.cur_rank or "-";
@@ -8443,7 +8622,7 @@ do	--	INITIALIZE
 				end
 			end,
 		});
-		for pid = NS.db_min_pid(), NS.db_max_pid() do
+		for pid = NS.dbMinPid, NS.dbMaxPid do
 			local var = rawget(VAR, pid);
 			if var and NS.db_is_pid(pid) then
 				var.update = true;
@@ -8477,7 +8656,7 @@ do	--	INITIALIZE
 					alaTradeSkillSV.fav = fav;
 				end
 			else
-				print("\124cffff0000alaTradeSkill fetal error", err);
+				print("|cffff0000alaTradeSkill fetal error", err);
 			end
 		end
 		safe_call(NS.init_hash_known_recipe);
@@ -8914,7 +9093,7 @@ do	--	SLASH
 									NS.ON_SET_CHANGED(cmd[3], val);
 								end
 							else
-								print("\124cffff0000Invalid parameter: ", pattern2);
+								print("|cffff0000Invalid parameter: ", pattern2);
 							end
 						end
 					end
@@ -9233,9 +9412,9 @@ do	--	EXTERN SUPPORT
 	function alt_merc.query_quality_by_id(id)
 		return nil;
 	end
-	local goldicon    = "\124TInterface\\MoneyFrame\\UI-GoldIcon:12:12:0:0\124t"
-	local silvericon  = "\124TInterface\\MoneyFrame\\UI-SilverIcon:12:12:0:0\124t"
-	local coppericon  = "\124TInterface\\MoneyFrame\\UI-CopperIcon:12:12:0:0\124t"
+	local goldicon    = "|TInterface\\MoneyFrame\\UI-GoldIcon:12:12:0:0|t"
+	local silvericon  = "|TInterface\\MoneyFrame\\UI-SilverIcon:12:12:0:0|t"
+	local coppericon  = "|TInterface\\MoneyFrame\\UI-CopperIcon:12:12:0:0|t"
 	function alt_merc.MoneyString(copper)
 		-- GetCoinTextureString
 		local g = floor(copper / 10000);
@@ -9388,223 +9567,12 @@ do	--	DEV
 	function _G.ATS_DEBUG(on)
 		if on or on == nil then
 			_log_ = function(...)
-				print(date('\124cff00ff00%H:%M:%S\124r'), ...);
+				print(date('|cff00ff00%H:%M:%S|r'), ...);
 			end
 		else
 			_log_ = _noop_;
 		end		
 	end
-	--	dev
-		function _G.alatsdev_mtsl()
-			if MTSL_DATA then
-				local db, sinfo, iinfo = NS.link_db();	--	recipe_info, spell_info, item_info
-				if db then
-					local mtsl = MTSL_DATA["skills"];
-					for p, mdb in next, mtsl do
-						for _, m in next, mdb do
-							local sid = m.id;
-							if sid then
-								local info = db[sid];
-								if info then
-									if m.phase ~= info[index_phase] then
-										print(p, sid, 'phase', m.phase, info[index_phase]);
-									end
-									if m.min_skill and m.min_skill ~= info[index_learn_rank] then
-										print(p, sid, 'min_skill', m.min_skill, info[index_learn_rank]);
-									end
-									if m.items and #m.items > 0 then
-										if #m.items > 1 then
-											print(p, sid, 'items', #m.items);
-										end
-										if info[index_rid] ~= m.items[1] then
-											print(p, sid, 'items', info[index_rid], m.items[1]);
-										end
-									end
-									if m.quests and #m.quests > 0 then
-										if info[index_quest] and #info[index_quest] then
-											if #m.quests == #info[index_quest] then
-												for index = 1, #m.quests do
-													if m.quests[index] ~= info[index_quest][index] then
-														print(p, sid, 'quests', 'seq');
-														break;
-													end
-												end
-											else
-												print(p, sid, 'quests#', #m.quests, #info[index_quest]);
-											end
-										else
-											print(p, sid, 'quests');
-										end
-									end
-									if m.objects and #m.objects > 0 then
-										if #m.objects > 1 then
-											print(p, sid, 'objects', #m.objects);
-										end
-										if info[index_object] ~= m.objects[1] then
-											print(p, sid, 'objects', info[index_object], m.objects[1]);
-										end
-									end
-									if m.trainers then
-										if info[index_train_price] ~= m.trainers.price then
-											print(p, sid, 'trainprice', info[index_train_price], m.trainers.price)
-										end
-										if info[index_trainer] then
-											if #m.trainers.sources == #info[index_trainer] then
-												for index = 1, #m.trainers.sources do
-													if m.trainers.sources[index] ~= info[index_trainer][index] then
-														print(p, sid, 'trainers', 'seq');
-														break;
-													end
-												end
-											else
-												print(p, sid, 'trainers#', #m.trainers.sources, #info[index_trainer]);
-											end
-										else
-											print(p, sid, 'trainers');
-										end
-									end
-								else
-									print(p, sid, 'missing');
-								end
-							else
-								print(p, sid);
-							end
-						end
-					end
-				end
-			end
-		end
-		function _G.alatsdev_atlas()
-			if AtlasLoot and AtlasLoot.Data then
-				local db, sinfo, iinfo = NS.link_db();	--	recipe_info, spell_info, item_info
-				if db then
-					_G.alaDevSV = alaDevSV or {  };
-					alaDevSV.atf = alaDevSV.atf or {  };
-					local atf = alaDevSV.atf;
-					local function _print_(key, ...)
-						print(key, ...)
-						local t = atf[key];
-						if t == nil then
-							t = {  };
-							atf[key] = t;
-						end
-						tinsert(t, { ... })
-					end
-					local atlasPhase = AtlasLoot.Data.ContentPhase;
-					local atlasDB = AtlasLoot.Data.Profession;
-					for sid, info in next, db do
-						local pid = info[index_pid];
-						local p = info[index_phase];
-						if true then
-							local cid = info[index_cid];
-							local rid = info[index_rid];
-							if cid == nil then
-								if rid == nil then
-									if p ~= 1 then
-										_print_('p', pid, sid, 1, p)
-									end
-								else
-									local p3 = atlasPhase:GetForItemID(rid);
-									if (p > 4 and (p ~= p3)) or (p == 4 and p3 and p3 ~= 4) or (p < 4 and p3) then
-										_print_('p', pid, sid, 2, p, p2);
-									end
-								end
-							else
-								if rid == nil then
-									local p2 = atlasPhase:GetForItemID(cid);
-									if (p > 4 and (p ~= p2)) or (p == 4 and p2 and p2 ~= 4) or (p < 4 and p2) then
-										_print_('p', pid, sid, 3, p, p2);
-									end
-								else
-									local p2 = atlasPhase:GetForItemID(cid);
-									local p3 = atlasPhase:GetForItemID(rid);
-									if p2 and p3 and p2 ~= p3 then
-										_print_('p', pid, sid, 4, p, p2, p3);
-									end
-									if (p > 4 and (p ~= p3)) or (p == 4 and p3 and p3 ~= 4) or (p < 4 and p3) then
-										_print_('p', pid, sid, 5, p, p2, p3);
-									end
-								end
-							end
-						end
-						if true then
-							local info2 = atlasDB.GetProfessionData(sid);
-							-- [spellID] = { createdItemID, prof, minLvl, lowLvl, highLvl, reagents{}, reagentsCount{}, numCreatedItems }
-							if info2 then
-								if info2[1] ~= info[index_cid] then
-									_print_('c', pid, sid, info[index_cid], info2[1]);
-								end
-								if info2[3] ~= info[index_learn_rank] then
-									_print_('l', pid, sid, info[index_learn_rank], info2[3]);
-								end
-								if info2[4] ~= info[index_yellow_rank] then
-									_print_('y', pid, sid, info[index_yellow_rank], info2[4]);
-								end
-								if info2[5] ~= info[index_grey_rank] then
-									_print_('g', pid, sid, info[index_grey_rank], info2[5]);
-								end
-								if #info2[6] ~= #info[index_reagents_id] then
-									_print_('r', pid, sid, 1, #info[index_reagents_id], #info2[6], #info2[7]);
-								else
-									if #info2[7] ~= #info2[6] then
-										_print_('r', pid, sid, 2, #info2[7], #info2[6]);
-									else
-										for idx1, id1 in next, info[index_reagents_id] do
-											local val = false;
-											for idx2, id2 in next, info2[6] do
-												if id1 == id2 then
-													val = true;
-													if info[index_reagents_count][idx1] ~= info2[7][idx2] then
-														_print_('r', pid, sid, 3, info[index_reagents_count][idx1], info2[7][idx2]);
-													end
-													break;
-												end
-											end
-											if not val then
-												_print_('r', pid, sid, 4, idx1, id1);
-											end
-										end
-									end
-								end
-								if info2[8] then
-									if info[index_num_made_min] and info[index_num_made_max] then
-										if info2[8] * 2 ~= info[index_num_made_min] + info[index_num_made_max] then
-											_print_('n', pid, sid, 1, (info[index_num_made_min] + info[index_num_made_max]) * 0.5, info2[8]);
-										end
-									else
-										_print_('n', pid, sid, 2, info2[8]);
-									end
-								end
-							else
-								_print_('m', pid, sid);
-							end
-						end
-					end
-				end
-			end
-		end
-		function _G.alatsdev_atlas_recipe()
-			_G.alaDevSV = alaDevSV or {  };
-			alaDevSV.atf = alaDevSV.atf or {  };
-			alaDevSV.atf.rid = {}
-			local recipe = alaDevSV.atf.rid;
-			local RECIPE = {};	--	manual
-			local db, sinfo, iinfo = NS.link_db();	--	recipe_info, spell_info, item_info
-			for rid, v in next, RECIPE do
-				local sid = v[3];
-				local info = db[sid];
-				if info then
-					local rid1 = info[index_rid];
-					if rid1 == nil then
-						tinsert(recipe, {'m', sid, rid})
-					elseif rid1 ~= rid then
-						tinsert(recipe, {'d', sid, rid, rid1})
-					end
-				else
-					tinsert(recipe, {'e',sid,rid})
-				end
-			end
-		end			
 	--
 	-- WorldFrame:EnableKeyboard();
 	-- WorldFrame:HookScript("OnKeyDown", function(self, key)

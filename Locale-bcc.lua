@@ -105,12 +105,24 @@ if LOCALE == "zhCN" or LOCALE == "zhTW" then
 	L["add_fav"] = "添加收藏";
 	L["sub_fav"] = "取消收藏";
 	L["query_who_can_craft_it"] = "谁会做它？";
-	L["showKnown"] = "已学";
+	--
 	L["showUnkown"] = "未学";
+	L["showKnown"] = "已学";
 	L["showHighRank"] = "高等级";
+	L["filterClass"] = UnitClass('player');
+	L["filterSpec"] = "专精";
 	L["showItemInsteadOfSpell"] = "物品";
 	L["showRank"] = "等级";
-	L["haveMaterials"] = "材料足够";
+	L["haveMaterials"] = "材料";
+	L["showUnkownTip"] = "显示已经学会的配方";
+	L["showKnownTip"] = "显示还没学会的配方";
+	L["showHighRankTip"] = "显示高等级的配方";
+	L["filterClassTip"] = "是否过滤掉" .. UnitClass('player') .. "不能学到的配方";
+	L["filterSpecTip"] = "是否过滤掉当前专精不能学到的配方";
+	L["showItemInsteadOfSpellTip"] = "鼠标提示显示物品而不是技能";
+	L["showRankTip"] = "显示难度等级";
+	L["haveMaterialsTip"] = "只显示有足够材料的配方";
+	--
 	L["costOnly"] = "只显示成本";
 	--
 	L["LABEL_RANK_LEVEL"] = "\124cffff7f00技能等级: \124r";
@@ -148,6 +160,9 @@ if LOCALE == "zhCN" or LOCALE == "zhTW" then
 	L["PRICE_DIFF+"] = "\124cff00ff00差价\124r";
 	L["PRICE_DIFF-"] = "\124cffff0000差价\124r";
 	L["PRICE_DIFF0"] = "持平";
+	L["PRICE_DIFF_AH+"] = "\124cff00ff00AH5%\124r";
+	L["PRICE_DIFF_AH-"] = "\124cffff0000AH5%\124r";
+	L["PRICE_DIFF_AH0"] = "AH";
 	L["PRICE_DIFF_INFO+"] = "\124cff00ff00利润\124r";
 	L["PRICE_DIFF_INFO-"] = "\124cffff0000亏损\124r";
 	L["CRAFT_INFO"] = "\124cffff7f00商业技能制造信息: \124r";
@@ -449,12 +464,24 @@ elseif LOCALE == "koKR" then
 	L["add_fav"] = "즐겨찾기";
 	L["sub_fav"] = "즐겨찾기 해제";
 	L["query_who_can_craft_it"] = "누가 제작 가능?";
-	L["showKnown"] = "알려짐";
+	--
 	L["showUnkown"] = "알 수 없음";
+	L["showKnown"] = "알려짐";
 	L["showHighRank"] = "높은 랭크";
+	L["filterClass"] = "class";
+	L["filterSpec"] = "spec";
 	L["showItemInsteadOfSpell"] = "아이템";
 	L["showRank"] = "랭크";
 	L["haveMaterials"] = "보유 재료";
+	L["showUnkownTip"] = "Show unlearned recipes";
+	L["showKnownTip"] = "Show learned recipes";
+	L["showHighRankTip"] = "Show recipes of higher rank";
+	L["filterClassTip"] = "Hide recipes unavailable to" .. UnitClass('player');
+	L["filterSpecTip"] = "Hide recipes unavailable to current specialization";
+	L["showItemInsteadOfSpellTip"] = "Show item in tip instead of spell";
+	L["showRankTip"] = "Show color of difficulty";
+	L["haveMaterialsTip"] = "Show recipes that u have enough materials";
+	--
 	L["costOnly"] = "가격만 표시";
 	--
 	L["LABEL_RANK_LEVEL"] = "\124cffff7f00랭크: \124r";
@@ -492,6 +519,9 @@ elseif LOCALE == "koKR" then
 	L["PRICE_DIFF+"] = "\124cff00ff00가격 차이 \124r";
 	L["PRICE_DIFF-"] = "\124cffff0000가격 차이 \124r";
 	L["PRICE_DIFF0"] = "똑같음";
+	L["PRICE_DIFF_AH+"] = "\124cff00ff00AH5%\124r";
+	L["PRICE_DIFF_AH-"] = "\124cffff0000AH5%\124r";
+	L["PRICE_DIFF_AH0"] = "AH";
 	L["PRICE_DIFF_INFO+"] = "\124cff00ff00+\124r";
 	L["PRICE_DIFF_INFO-"] = "\124cffff0000-\124r";
 	L["CRAFT_INFO"] = "\124cffff7f00제작 정보: \124r";
@@ -792,12 +822,24 @@ else
 	L["add_fav"] = "Favorite";
 	L["sub_fav"] = "Unfavorite";
 	L["query_who_can_craft_it"] = "Who can craft it ?";
-	L["showKnown"] = "Known";
+	--
 	L["showUnkown"] = "Unknown";
-	L["showHighRank"] = "High Rank";
-	L["showItemInsteadOfSpell"] = "Items";
+	L["showKnown"] = "Known";
+	L["showHighRank"] = "HighRank";
+	L["filterClass"] = "MyClass";
+	L["filterSpec"] = "MySpec";
+	L["showItemInsteadOfSpell"] = "ItemTip";
 	L["showRank"] = "Rank";
 	L["haveMaterials"] = "haveMaterials";
+	L["showUnkownTip"] = "Show unlearned recipes";
+	L["showKnownTip"] = "Show learned recipes";
+	L["showHighRankTip"] = "Show recipes of higher rank";
+	L["filterClassTip"] = "Hide recipes unavailable to" .. UnitClass('player');
+	L["filterSpecTip"] = "Hide recipes unavailable to current specialization";
+	L["showItemInsteadOfSpellTip"] = "Show item in tip instead of spell";
+	L["showRankTip"] = "Show color of difficulty";
+	L["haveMaterialsTip"] = "Show recipes that u have enough materials";
+	--
 	L["costOnly"] = "Show cost only";
 	--
 	L["LABEL_RANK_LEVEL"] = "\124cffff7f00Rank: \124r";
@@ -835,6 +877,9 @@ else
 	L["PRICE_DIFF+"] = "\124cff00ff00Diff\124r";
 	L["PRICE_DIFF-"] = "\124cffff0000Diff\124r";
 	L["PRICE_DIFF0"] = "The same";
+	L["PRICE_DIFF_AH+"] = "\124cff00ff00AH5%\124r";
+	L["PRICE_DIFF_AH-"] = "\124cffff0000AH5%\124r";
+	L["PRICE_DIFF_AH0"] = "AH";
 	L["PRICE_DIFF_INFO+"] = "\124cff00ff00+\124r";
 	L["PRICE_DIFF_INFO-"] = "\124cffff0000-\124r";
 	L["CRAFT_INFO"] = "\124cffff7f00Craft info: \124r";

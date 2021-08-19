@@ -108,6 +108,8 @@ if LOCALE == "zhCN" or LOCALE == "zhTW" then
 	L["showKnown"] = "已学";
 	L["showUnkown"] = "未学";
 	L["showHighRank"] = "高等级";
+	L["filterClass"] = "职业";
+	L["filterSpec"] = "专精";
 	L["showItemInsteadOfSpell"] = "物品";
 	L["showRank"] = "等级";
 	L["haveMaterials"] = "材料足够";
@@ -455,6 +457,8 @@ elseif LOCALE == "koKR" then
 	L["showKnown"] = "알려짐";
 	L["showUnkown"] = "알 수 없음";
 	L["showHighRank"] = "높은 랭크";
+	L["filterClass"] = "class";
+	L["filterSpec"] = "spec";
 	L["showItemInsteadOfSpell"] = "아이템";
 	L["showRank"] = "랭크";
 	L["haveMaterials"] = "보유 재료";
@@ -800,7 +804,9 @@ else
 	L["query_who_can_craft_it"] = "Who can craft it ?";
 	L["showKnown"] = "Known";
 	L["showUnkown"] = "Unknown";
-	L["showHighRank"] = "High Rank";
+	L["showHighRank"] = "HighRank";
+	L["filterClass"] = "class";
+	L["filterSpec"] = "spec";
 	L["showItemInsteadOfSpell"] = "Items";
 	L["showRank"] = "Rank";
 	L["haveMaterials"] = "haveMaterials";
