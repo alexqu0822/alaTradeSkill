@@ -94,6 +94,17 @@ local LT_MTSL_LocaleKey = {
 	["esES"] = "Spanish",
 	["ptBR"] = "Portuguese",
 };
+local LT_MTSL_SkillName = {
+	[1] = "First Aid",
+	[2] = "Blacksmithing",
+	[3] = "Leatherworking",
+	[4] = "Alchemy",
+	[6] = "Cooking",
+	[7] = "Mining",
+	[8] = "Tailoring",
+	[9] = "Engineering",
+	[10] = "Enchanting",
+};
 local MTSL_LOCALE = LT_MTSL_LocaleKey[LOCALE] or LT_MTSL_LocaleKey.enUS;
 local LF_MTSL_SetQuest;
 local LF_MTSL_SetItem;
@@ -125,7 +136,7 @@ local function LF_MTSL_AddReputation(Tip, reputation)
 	Tip:AddDoubleLine(" ", line);
 	Tip:Show();
 end
-local LT_MTSL_UnitPrefix = {	--	== "Alliance"
+local LT_MTSL_UnitPrefix = {	--	FactionGroup == "Alliance"
 	[true] = {
 		Alliance = ": |Tinterface\\timer\\Alliance-logo:20|t|cff00ff00",
 		Horde = ": |Tinterface\\timer\\Horde-logo:20|t|cffff0000",
@@ -141,22 +152,22 @@ local LT_MTSL_UnitPrefix = {	--	== "Alliance"
 		["*"] = ": |cffffffff",
 	},
 };
-LF_MTSL_SetUnit = function(Tip, pid, nid, label, alliance_green, prefix, suffix, stack_size)
+LF_MTSL_SetUnit = function(Tip, pid, uid, label, isAlliance, prefix, suffix, stack_size)
 	if stack_size < 8 then
 		if MTSL_DATA then
 			local npcs = MTSL_DATA["npcs"];
 			if npcs then
 				local got_one_data = false;
 				for _, nv in next, npcs do
-					if nv.id == nid then
+					if nv.id == uid then
 						got_one_data = true;
-						local colorTable = LT_MTSL_UnitPrefix[alliance_green];
+						local colorTable = LT_MTSL_UnitPrefix[isAlliance];
 						local line = prefix .. (colorTable[nv.reacts] or colorTable["*"]);
 						local name = nv.name[MTSL_LOCALE];
 						if name then
 							line = line .. name;
 						else
-							line = line .. "npcID: " .. nid;
+							line = line .. "npcID: " .. uid;
 						end
 						local xp_level = nv.xp_level;
 						if xp_level then
@@ -196,7 +207,7 @@ LF_MTSL_SetUnit = function(Tip, pid, nid, label, alliance_green, prefix, suffix,
 					end
 				end
 				if not got_one_data then
-					Tip:AddDoubleLine(" ", L["sold_by"] .. ": |cffff0000unknown|r, npcID: " .. nid);
+					Tip:AddDoubleLine(" ", L["sold_by"] .. ": |cffff0000unknown|r, npcID: " .. uid);
 				end
 				Tip:Show();
 			end
@@ -229,8 +240,8 @@ LF_MTSL_SetQuest = function(Tip, pid, qid, label, stack_size)
 						end
 						Tip:AddDoubleLine(label, L["quest_reward"] .. ": |cffffff00" .. line .. "|r");
 						if qv.npcs then
-							for _, nid in next, qv.npcs do
-								LF_MTSL_SetUnit(Tip, pid, nid, " ", UnitFactionGroup('player') == "Alliance", L["quest_accepted_from"], "|r", stack_size + 1);
+							for _, uid in next, qv.npcs do
+								LF_MTSL_SetUnit(Tip, pid, uid, " ", UnitFactionGroup('player') == "Alliance", L["quest_accepted_from"], "|r", stack_size + 1);
 							end
 						end
 						if qv.items then
@@ -286,22 +297,22 @@ LF_MTSL_SetItem = function(Tip, pid, iid, label, stack_size)
 		end
 		Tip:AddDoubleLine(label, line);
 		if MTSL_DATA then
-			local pname = __db__.get_mtsl_pname(pid);
+			local pname = LT_MTSL_SkillName[pid];
 			local data = MTSL_DATA["items"][pname];
 			if data then
 				for i, iv in next, data do
 					if iv.id == iid then
 						local vendors = iv.vendors;
 						if vendors then
-							for _, nid in next, vendors.sources do
-								LF_MTSL_SetUnit(Tip, pid, nid, " ", UnitFactionGroup('player') == "Alliance", L["sold_by"], "|r", stack_size + 1);
+							for _, uid in next, vendors.sources do
+								LF_MTSL_SetUnit(Tip, pid, uid, " ", UnitFactionGroup('player') == "Alliance", L["sold_by"], "|r", stack_size + 1);
 							end
 						end
 						local drops = iv.drops;
 						if drops then
 							if drops.sources then
-								for _, nid in next, drops.sources do
-									LF_MTSL_SetUnit(Tip, pid, nid, " ", UnitFactionGroup('player') ~= "Alliance", L["dropped_by"], "|r", stack_size + 1);
+								for _, uid in next, drops.sources do
+									LF_MTSL_SetUnit(Tip, pid, uid, " ", UnitFactionGroup('player') ~= "Alliance", L["dropped_by"], "|r", stack_size + 1);
 								end
 							end
 							local range = drops.range;
@@ -417,26 +428,27 @@ local function LF_MTSL_SetSpellTip(Tip, sid)
 			Tip:AddDoubleLine(L["LABEL_GET_FROM"], "|cffff00ff" .. L["trainer"] .. "|r");
 			Tip:Show();
 		end
+		local pid = info[index_pid];
 		if info[index_rid] then				-- recipe
-			LF_MTSL_SetItem(Tip, info[index_pid], info[index_rid], L["LABEL_GET_FROM"], 1)
+			LF_MTSL_SetItem(Tip, pid, info[index_rid], L["LABEL_GET_FROM"], 1)
 		end
 		if info[index_quest] then			-- quests
 			for _, qid in next, info[index_quest] do
-				LF_MTSL_SetQuest(Tip, info[index_pid], qid, L["LABEL_GET_FROM"], 1);
+				LF_MTSL_SetQuest(Tip, pid, qid, L["LABEL_GET_FROM"], 1);
 			end
 		end
 		if info[index_object] then			-- objects
 			if type(info[index_object]) == 'table' then
 				for _, oid in next, info[index_object] do
-					LF_MTSL_SetObject(Tip, info[index_pid], oid, L["LABEL_GET_FROM"], 1);
+					LF_MTSL_SetObject(Tip, pid, oid, L["LABEL_GET_FROM"], 1);
 				end
 			else
-				LF_MTSL_SetObject(Tip, info[index_pid], info[index_object], L["LABEL_GET_FROM"], 1);
+				LF_MTSL_SetObject(Tip, pid, info[index_object], L["LABEL_GET_FROM"], 1);
 			end
 		end
 		--
 		if MTSL_DATA then
-			local pname = __db__.get_mtsl_pname(info[index_pid]);
+			local pname = LT_MTSL_SkillName[pid];
 			local data = MTSL_DATA["skills"][pname];
 			if data then
 				for _, sv in next, data do

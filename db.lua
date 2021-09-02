@@ -800,25 +800,6 @@ end
 	function __db__.item_string_s(iid)
 		return __db__.item_string(iid) or ("itemId:" .. iid);
 	end
---	MTSL
-	local tradeskill_mtsl_name = {
-		[1] = "First Aid",
-		[2] = "Blacksmithing",
-		[3] = "Leatherworking",
-		[4] = "Alchemy",
-		[6] = "Cooking",
-		[7] = "Mining",
-		[8] = "Tailoring",
-		[9] = "Engineering",
-		[10] = "Enchanting",
-	};
-	function __db__.get_mtsl_pname(pid)
-		if pid ~= nil then
-			return tradeskill_mtsl_name[pid];
-		else
-			return nil;
-		end
-	end
 --	pid, list, check_hash, phase, rank, rankReversed, showKnown, showUnkown, showHighRank, filterClass, filterSpec, donot_wipe_list | list{ sid, }
 local function FilterAdd(list, sid, class, spec, filterClass, filterSpec)
 	if (class == nil or not filterClass or bitband(class, UCLASSBIT) ~= 0) and (spec == nil or not filterSpec or T_IsSpecLearned[spec]) then
