@@ -7,12 +7,15 @@ if WOW_PROJECT_ID ~= WOW_PROJECT_CLASSIC then
 end
 
 
-local ADDON, NS = ...;
-NS.curPhase = 6;
-NS.maxPhase = 6;
-NS.maxRank = 300;
-NS.dbMinPid = 1;
-NS.dbMaxPid = 14;
+local __addon_, __namespace__ = ...;
+__namespace__.__db__ = {  };
+local __db__ = __namespace__.__db__;
+
+__db__.CURPHASE = 6;
+__db__.MAXPHASE = 6;
+__db__.MAXRANK = 300;
+__db__.DBMINPID = 1;
+__db__.DBMAXPID = 14;
 
 --[==[--
 	by ALA @ 163UI
@@ -90,7 +93,7 @@ local bitclass = {
 	["WARLOCK"] = 256,
 	["DRUID"] = 1024,
 };
-NS.UCLASSBIT = bitclass[UnitClassBase('player')];
+__db__.UCLASSBIT = bitclass[UnitClassBase('player')];
 
 --[==[
 	--	P1	MC ONYX
@@ -111,7 +114,7 @@ NS.UCLASSBIT = bitclass[UnitClassBase('player')];
 	地精工程学	20222
 --]==]
 
-NS.TradeSkill_ID = {
+__db__.T_TradeSkill_ID = {
 	[1] = 3273,		--	FirstAid
 	[2] = 2018,		--	Blacksmithing
 	[3] = 2108,		--	Leatherworking
@@ -128,7 +131,7 @@ NS.TradeSkill_ID = {
 	[14] = 5149,	--	Beast Training	--	UNUSED	--	Hunter
 	-- [15] = 25229,	--	Jewelcrafting
 };
-NS.TradeSkill_Texture = {
+__db__.T_TradeSkill_Texture = {
 	[1] = "Interface\\Icons\\spell_holy_sealofsacrifice",
 	[2] = "Interface\\Icons\\trade_blacksmithing",
 	[3] = "Interface\\Icons\\trade_leatherworking",
@@ -145,7 +148,7 @@ NS.TradeSkill_Texture = {
 	[14] = 132162,
 	-- [15] = 134071,
 };
-NS.TradeSkill_CheckID = {		--	[pid] = p_check_sid
+__db__.T_TradeSkill_CheckID = {		--	[pid] = p_check_sid
 	[1] = 3273,		--	FirstAid
 	[2] = 2018,		--	Blacksmithing
 	[3] = 2108,		--	Leatherworking
@@ -162,7 +165,7 @@ NS.TradeSkill_CheckID = {		--	[pid] = p_check_sid
 	[14] = 5149,	--	Beast Training	--	UNUSED	--	Hunter
 	-- [15] = 25229,	--	Jewelcrafting
 };
-NS.TradeSkill_HasWin = {		--	[pid] = bool
+__db__.T_TradeSkill_HasUI = {		--	[pid] = bool
 	[1] = true,		--	FirstAid
 	[2] = true,		--	Blacksmithing
 	[3] = true,		--	Leatherworking
@@ -201,7 +204,7 @@ local index_object = 18;
 local index_class = 19;
 local index_spec = 20;
 
-local Recipe_Data = {
+local T_Recipe_Data = {
 	[19566] = { nil, 1,  3, 19566, 15409, 250, 250, 250, 250,   1,   1, { 8150, }, { 1, }, },
 	[3275]  = { nil, 1,  1,  3275,  1251,   1,  30,  45,  60,   1,   1, { 2589, }, { 1, }, },
 	[3276]  = { nil, 1,  1,  3276,  2581,  40,  50,  75, 100,   1,   1, { 2589, }, { 2, }, true, 100, },
@@ -1455,14 +1458,14 @@ local Recipe_Data = {
 	[11343] = { nil, 1, 13, 11343,  8928, 280, 325, 350, 375,   1,   1, { 8924, 8925, }, { 4, 1, }, true, 54000, },
 	[25347] = { nil, 5, 13, 25347, 20844, 300, 300, 325, 350,   1,   1, { 5173, 8925, }, { 7, 1, }, nil, nil, 21302, },
 };
-NS.Recipe_Data = Recipe_Data;
--- local TradeSkill_RecipeList = {  };	--	[pid] = { sid }
--- for sid, info in next, Recipe_Data do
+__db__.T_Recipe_Data = T_Recipe_Data;
+-- local T_TradeSkill_RecipeList = {  };	--	[pid] = { sid }
+-- for sid, info in next, T_Recipe_Data do
 -- 	local pid = info[3];
--- 	TradeSkill_RecipeList[pid] = TradeSkill_RecipeList[pid] or {  };
--- 	tinsert(TradeSkill_RecipeList[pid], sid);
+-- 	T_TradeSkill_RecipeList[pid] = T_TradeSkill_RecipeList[pid] or {  };
+-- 	tinsert(T_TradeSkill_RecipeList[pid], sid);
 -- end
-local TradeSkill_RecipeList = {	--	[pid] = { sid }
+local T_TradeSkill_RecipeList = {	--	[pid] = { sid }
 	[1] = {
 		3275,
 		3276,
@@ -2736,18 +2739,18 @@ local TradeSkill_RecipeList = {	--	[pid] = { sid }
 		25347,
 	},
 };
-NS.TradeSkill_RecipeList = TradeSkill_RecipeList;
+__db__.T_TradeSkill_RecipeList = T_TradeSkill_RecipeList;
 
-local TradeSkill_Spec2Pid = {  };
-for sid, info in next, Recipe_Data do
+local T_TradeSkill_Spec2Pid = {  };
+for sid, info in next, T_Recipe_Data do
 	local spec = info[index_spec];
 	if spec then
-		TradeSkill_Spec2Pid[spec] = info[index_pid];
+		T_TradeSkill_Spec2Pid[spec] = info[index_pid];
 	end
 end
-NS.TradeSkill_Spec2Pid = TradeSkill_Spec2Pid;
+__db__.T_TradeSkill_Spec2Pid = T_TradeSkill_Spec2Pid;
 
-NS.cooldown_list = {
+__db__.T_TradeSkill_CooldownList = {
 	[3] = {
 		{ 19566, 250, },	--	筛盐器
 	},
@@ -2760,7 +2763,7 @@ NS.cooldown_list = {
 	},
 };
 
-NS.PriceSpellBlackList = {
+__db__.T_PriceSpellBlackList = {
 --	炼金
 	--	元素精华
 	[17559] = 1,	--	7078
@@ -2780,7 +2783,7 @@ NS.PriceSpellBlackList = {
 	--	熟化毛皮
 	[19047] = 1,	--	15407
 };
-NS.PriceItemBlackList = {
+__db__.T_PriceItemBlackList = {
 --	炼金
 	--	元素精华
 	[7076] = 1,
@@ -2799,7 +2802,7 @@ NS.PriceItemBlackList = {
 	[15407] = 1,
 };
 
-NS.material_sold_by_vendor = {
+__db__.T_MaterialVendorPrice = {
 	--	BLACKSMITHING	ENGINEERING
 	-- [5956] = 18,		-- 铁匠之锤
 	-- [2901] = 81,		-- 矿工锄
@@ -2913,14 +2916,14 @@ NS.material_sold_by_vendor = {
 	37	Mechagnome				Mechagnome				Alliance	Alliance,
 ]==]
 
-NS.RACEBONUSPOINT = {
+__db__.T_RaceBonus = {
 	--	Gnome
 	[7] = {
 		[9] = 15,
 	},
 };
 
-NS.Trainer = {
+__db__.Trainer = {
 	[8483] = { 1346, 2399, 4576, 11052, 11557, },
 	[12072] = { 2399, 11052, 11557, },
 	[12076] = { 4578, 9584, },

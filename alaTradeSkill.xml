@@ -13,10 +13,17 @@
     <script file = "Locale-bcc.lua" />
     <script file = "data-bcc.lua" />
 
-    <script file = "alaTradeSkill.lua" />
+    <script file = "main.lua" />
+    <script file = "db.lua" />
+    <script file = "ui.lua" />
+    <script file = "tooltip.lua" />
+    <script file = "cooldown.lua" />
+    <script file = "communication.lua" />
+    <script file = "minor.lua" />
 
+    <include file = "plugin\plugin.xml" />
     <!-- <include file = "Bindings.xml" /> -->
-    
+
 
 </Ui>
 
