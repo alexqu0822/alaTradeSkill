@@ -3010,7 +3010,7 @@ end
 					frame:F_FrameUpdateRankInfo();
 				end
 				local prev_sid = nil;
-				hooksecurefunc(frame.T_FunctionName.F_SetSelection, function()
+				local function LF_OnSelection()
 					if not frame:IsShown() then
 						local index = frame.F_GetSelection();
 						if index ~= nil then
@@ -3024,7 +3024,9 @@ end
 						T_PriceInfoInFrame[3]:SetText(nil);
 					end
 					C_Timer_After(0.5, LF_DelayUpdateInfoInFrame);
-				end);
+				end
+				hooksecurefunc(frame.T_FunctionName.F_SetSelection, LF_OnSelection);
+				frame.F_OnSelection = LF_OnSelection;
 				frame.F_SetSelection = _G[frame.T_FunctionName.F_SetSelection];
 				frame.F_FrameUpdatePriceInfo = F_FrameUpdatePriceInfo;
 				frame.F_FrameUpdateRankInfo = F_FrameUpdateRankInfo;
@@ -5444,11 +5446,11 @@ function __namespace__.init_ui()
 		F.SKILL_LINES_CHANGED();
 		local TFrame = T_uiFrames["BLIZZARD_TRADESKILLUI"];
 		if TFrame ~= nil and TFrame:IsShown() then
-			TFrame.F_SetSelection(TFrame.F_GetSelection());
+			TFrame.F_OnSelection();
 		end
 		local CFrame = T_uiFrames["BLIZZARD_CRAFTUI"];
 		if CFrame ~= nil and CFrame:IsShown() then
-			CFrame.F_SetSelection(CFrame.F_GetSelection());
+			CFrame.F_OnSelection();
 		end
 	end);
 	__namespace__:AddCallback("USER_EVENT_RECIPE_LIST_UPDATE", __namespace__.F_uiUpdateAllFrames);
