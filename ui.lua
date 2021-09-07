@@ -138,7 +138,7 @@ F:SetScript("OnEvent", function(self, event, ...)
 	return self[event](...);
 end);
 
-local SkillTip = CreateFrame('GAMETOOLTIP', "_TradeSkillTooltip", UIParent, "GameTooltipTemplate");
+local SkillTip = GameTooltip;	--	CreateFrame('GAMETOOLTIP', "_TradeSkillTooltip", UIParent, "GameTooltipTemplate");
 
 local T_UIDefinition = {
 	texture_white = "Interface\\Buttons\\WHITE8X8",
@@ -5441,7 +5441,7 @@ function __namespace__.init_ui()
 	_, T_uiFrames["BOARD"] = __namespace__.F_SafeCall(LF_CreateBoard);
 	F:RegisterEvent("SKILL_LINES_CHANGED");
 	F:RegisterEvent("NEW_RECIPE_LEARNED");
-	__namespace__.F_HookTip(SkillTip);
+	__namespace__.F_HookTooltip(SkillTip);
 	__namespace__:AddCallback("USER_EVENT_SPELL_DATA_LOADED", function()
 		F.SKILL_LINES_CHANGED();
 		local TFrame = T_uiFrames["BLIZZARD_TRADESKILLUI"];

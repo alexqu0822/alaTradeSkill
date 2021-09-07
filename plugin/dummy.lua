@@ -35,15 +35,7 @@
 			function F_QueryPriceByName(name, num)			return AHPrice;			--	nilable			--	not used actually
 			alias	query_ah_price_by_name
 
-		--	optional. build-in alternative method
-			function F_QueryNameByID(id)					return name;			--	nilable
-			alias	query_name_by_id
-
-			function F_QueryQualityByID(id)					return quality;			--	nilable
-			alias	query_quality_by_id
-
-
-		--	optional. because a built-in method is declared in AuctionBase.lua. Define here will override the build-in methods.
+		--	optional. built-in alternative method declared in AuctionBase.lua. Define here will override the build-in methods.
 			function F_QueryVendorPriceByLink(link, num)	return VendorPrice;		--	nilable
 			alias	get_material_vendor_price_by_link
 
@@ -53,6 +45,11 @@
 			function F_QueryVendorPriceByName(name, num)	return VendorPrice;		--	nilable
 			alias	get_material_vendor_price_by_name
 
+			function F_QueryNameByID(id)					return name;			--	nilable
+			alias	query_name_by_id
+
+			function F_QueryQualityByID(id)					return quality;			--	nilable
+			alias	query_quality_by_id
 
 			function F_GetMoneyString(copper)				return string;			--	"%d%s %02d%s %02d%s"	"%d%s %02d%s"	"%d%s"
 			alias	MoneyString

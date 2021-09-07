@@ -131,7 +131,7 @@ local function F_GetPriceInfoBySID(phase, sid, num, lines, stack_level, is_encha
 					local num = reagnum[i];
 					local p, c = nil, nil;
 					local got = false;
-					if not T_PriceItemBlackList[iid] then
+					if T_PriceItemBlackList[iid] == nil then
 						if iid == cid then
 							got = true;
 							c = 0;
@@ -153,8 +153,8 @@ local function F_GetPriceInfoBySID(phase, sid, num, lines, stack_level, is_encha
 									if __db__.get_pid_by_sid(sid) == pid then
 										local p2, c2 = F_GetPriceInfoBySID(phase, sid, num, detail_lines, stack_level + 1, nil, cid, ...);
 										p = p or p2;
-										if c2 then
-											if c and c > c2 or not c then
+										if c2 ~= nil then
+											if c ~= nil and c > c2 or c == nil then
 												c = c2;
 											end
 										end
@@ -167,26 +167,26 @@ local function F_GetPriceInfoBySID(phase, sid, num, lines, stack_level, is_encha
 					if not got then
 						local name = AuctionMod.F_QueryNameByID(iid) or __db__.item_name_s(iid);
 						local quality = AuctionMod.F_QueryQualityByID(iid) or __db__.item_rarity(iid);
-						if quality then
+						if quality ~= nil then
 							local _, _, _, code = GetItemQualityColor(quality);
 							name = "|c" .. code .. name .. "|r";
 						end
 						if iid ~= cid then
 							p = AuctionMod.F_QueryPriceByID(iid);
 							local v = AuctionMod.F_QueryVendorPriceByID(iid);
-							if v then
+							if v ~= nil then
 								if p == nil or p > v then
 									p = v;
 								end
 							end
-							if p then
+							if p ~= nil then
 								p = p * num;
-								if detail_lines then
+								if detail_lines ~= nil then
 									tinsert(detail_lines, T_SpaceTable[stack_level + 1] .. name .. "x" .. num);
 									tinsert(detail_lines, AuctionMod.F_GetMoneyString(p));
 								end
 							else
-								if detail_lines then
+								if detail_lines ~= nil then
 									local bindType = __db__.item_bindType(iid);
 									if bindType == 1 or bindType == 4 then
 										tinsert(detail_lines, T_SpaceTable[stack_level + 1] .. name .. "x" .. num);
@@ -198,27 +198,27 @@ local function F_GetPriceInfoBySID(phase, sid, num, lines, stack_level, is_encha
 								end
 							end
 						else
-							if detail_lines then
+							if detail_lines ~= nil then
 								tinsert(detail_lines, T_SpaceTable[stack_level + 1] .. name .. "x" .. num);
 								tinsert(detail_lines, "-");
 							end
 						end
 					end
-					if not p and not c then
+					if p == nil and c == nil then
 						cost = nil;
 						if stack_level > 0 then
 							break;
 						end
 						missing = missing + 1;
 					else
-						if p then
-							if c and p > c then
+						if p ~= nil then
+							if c ~= nil and p > c then
 								p = c;
 							end
 						else
 							p = c;
 						end
-						if cost then
+						if cost ~= nil then
 							cost = cost + p;
 						end
 						cost_known = cost_known + p;
@@ -228,7 +228,7 @@ local function F_GetPriceInfoBySID(phase, sid, num, lines, stack_level, is_encha
 		end
 		local vendorPrice = cid and AuctionMod.F_QueryVendorPriceByID(cid);
 		local price = cid and AuctionMod.F_QueryPriceByID(cid);
-		if vendorPrice then
+		if vendorPrice ~= nil then
 			if price == nil or vendorPrice < price then
 				price = vendorPrice;
 			end
@@ -236,22 +236,22 @@ local function F_GetPriceInfoBySID(phase, sid, num, lines, stack_level, is_encha
 		price = price and price * num;
 		local nMade = (info[index_num_made_min] + info[index_num_made_max]) / 2;
 		cost = cost and cost * num / nMade;
-		cost_known = cost_known and cost_known * num / nMade;
+		cost_known = cost_known * num / nMade;
 		local name = cid and (AuctionMod.F_QueryNameByID(cid) or __db__.item_name_s(cid));
 		local quality = cid and (AuctionMod.F_QueryQualityByID(cid) or __db__.item_rarity(cid));
-		if quality then
+		if quality ~= nil then
 			local _, _, _, code = GetItemQualityColor(quality);
 			name = name and ("|c" .. code .. name .. "|r") or "";
 		else
 			name = name or "";
 		end
 		if stack_level == 0 then
-			if lines then
+			if lines ~= nil then
 				for index = 1, #detail_lines do
 					tinsert(lines, detail_lines[index]);
 				end
 				if is_enchanting then
-					if cost then
+					if cost ~= nil then
 						tinsert(lines, "|cffff7f00**|r" .. "|cffffffff" .. __db__.spell_name_s(sid) .. "|r" or L["COST_PRICE"]);
 						tinsert(lines, L["COST_PRICE"] .. AuctionMod.F_GetMoneyString(cost));
 					else
@@ -259,18 +259,18 @@ local function F_GetPriceInfoBySID(phase, sid, num, lines, stack_level, is_encha
 						tinsert(lines, L["COST_PRICE_KNOWN"] .. AuctionMod.F_GetMoneyString(cost_known));
 					end
 				else
-					if cost then
+					if cost ~= nil then
 						tinsert(lines, "|cffff7f00**|r" .. name .. "x" .. num);
 						tinsert(lines, L["COST_PRICE"] .. AuctionMod.F_GetMoneyString(cost));
 					else
 						tinsert(lines, "|cffff7f00**|r" .. name .. "x" .. num);
 						tinsert(lines, L["COST_PRICE_KNOWN"] .. AuctionMod.F_GetMoneyString(cost_known));
 					end
-					if price then
+					if price ~= nil then
 						tinsert(lines, "|cff00ff00**|r" .. name .. "x" .. num);
 						tinsert(lines, L["AH_PRICE"] .. AuctionMod.F_GetMoneyString(price));
 					end
-					if cost and price then
+					if cost ~= nil and price ~= nil then
 						local diff = price - cost;
 						local diffAH = price * 0.95 - cost;
 						if diff > 0 then
@@ -294,12 +294,12 @@ local function F_GetPriceInfoBySID(phase, sid, num, lines, stack_level, is_encha
 				end
 			end
 		else
-			if price and (not cost or cost >= price) then
+			if price ~= nil and (cost == nil or cost >= price) then
 				if lines then
 					tinsert(lines, T_SpaceTable[stack_level] .. name .. "x" .. num);
 					tinsert(lines, AuctionMod.F_GetMoneyString(price));
 				end
-			elseif cost and (not price or cost < price) then
+			elseif cost ~= nil and (price == nil or cost < price) then
 				if lines then
 					tinsert(lines, T_SpaceTable[stack_level] .. name .. "x" .. num);
 					tinsert(lines, AuctionMod.F_GetMoneyString(cost));
@@ -309,7 +309,7 @@ local function F_GetPriceInfoBySID(phase, sid, num, lines, stack_level, is_encha
 				end
 				price = nil;
 			else
-				if lines then
+				if lines ~= nil then
 					local bindType = __db__.item_bindType(cid);
 					if bindType == 1 or bindType == 4 then
 						tinsert(lines, T_SpaceTable[stack_level] .. name .. "x" .. num);
@@ -324,37 +324,37 @@ local function F_GetPriceInfoBySID(phase, sid, num, lines, stack_level, is_encha
 		return price, cost, cost_known, missing, cid;
 	end
 end
-local function set_tip_by_sid(tip, sid)
+local function set_tip_by_sid(Tooltip, sid)
 	local info = __db__.get_info_by_sid(sid);
 	if info ~= nil then
-		tip:AddLine(L["CRAFT_INFO"]);
+		Tooltip:AddLine(L["CRAFT_INFO"]);
 		local cid = info[index_cid];
 		local pid = info[index_pid];
 		local texture = __db__.get_texture_by_pid(pid);
 		-- local rank = info[index_learn_rank];
 		local pname = __db__.get_pname_by_pid(pid) or "";
-		if texture then
+		if texture ~= nil then
 			pname = "|T" .. texture .. ":12:12:0:0|t " .. pname;
 		end
-		-- if rank then
+		-- if rank ~= nil then
 		-- 	pname = pname .. "(" .. rank .. ")";
 		-- end
 		pname = pname .. " " .. __db__.get_difficulty_rank_list_text_by_sid(sid, true) .. "";
-		tip:AddLine("|cff00afff" .. pname .. "|r");
+		Tooltip:AddLine("|cff00afff" .. pname .. "|r");
 		local detail_lines = {  };
-		F_GetPriceInfoBySID(tip.__phase or CURPHASE, sid, (info[index_num_made_min] + info[index_num_made_max]) / 2, detail_lines, 0, cid == nil);
+		F_GetPriceInfoBySID(Tooltip.__phase or CURPHASE, sid, (info[index_num_made_min] + info[index_num_made_max]) / 2, detail_lines, 0, cid == nil);
 		if #detail_lines > 0 then
 			for i = 1, #detail_lines, 2 do
-				tip:AddDoubleLine(detail_lines[i], detail_lines[i + 1]);
+				Tooltip:AddDoubleLine(detail_lines[i], detail_lines[i + 1]);
 			end
-			tip:Show();
+			Tooltip:Show();
 		end
 	end
 end
-local function set_tip_by_cid(tip, cid)
+local function set_tip_by_cid(Tooltip, cid)
 	local nsids, sids = __db__.get_sid_by_cid(cid);
 	if nsids > 0 then
-		tip:AddLine(L["CRAFT_INFO"]);
+		Tooltip:AddLine(L["CRAFT_INFO"]);
 		for index = 1, #sids do
 			local sid = sids[index];
 			local info = __db__.get_info_by_sid(sid);
@@ -363,29 +363,29 @@ local function set_tip_by_cid(tip, cid)
 				local texture = __db__.get_texture_by_pid(pid);
 				-- local rank = info[index_learn_rank];
 				local pname = __db__.get_pname_by_pid(pid) or "";
-				if texture then
+				if texture ~= nil then
 					pname = "|T" .. texture .. ":12:12:0:0|t " .. pname;
 				end
-				-- if rank then
+				-- if rank ~= nil then
 				-- 	pname = pname .. "(" .. rank .. ")";
 				-- end
 				pname = pname .. " " .. __db__.get_difficulty_rank_list_text_by_sid(sid, true) .. "";
-				tip:AddLine("|cff00afff" .. pname .. "|r");
+				Tooltip:AddLine("|cff00afff" .. pname .. "|r");
 				local detail_lines = {  };
-				F_GetPriceInfoBySID(tip.__phase or CURPHASE, sid, (info[index_num_made_min] + info[index_num_made_max]) / 2, detail_lines, 0, false);
+				F_GetPriceInfoBySID(Tooltip.__phase or CURPHASE, sid, (info[index_num_made_min] + info[index_num_made_max]) / 2, detail_lines, 0, false);
 				if #detail_lines > 0 then
 					for i = 1, #detail_lines, 2 do
-						tip:AddDoubleLine(detail_lines[i], detail_lines[i + 1]);
+						Tooltip:AddDoubleLine(detail_lines[i], detail_lines[i + 1]);
 					end
 				end
 			end
 		end
-		tip:Show();
+		Tooltip:Show();
 	end
 end
-local function LF_AddAccountLearnedInfo(tip, rid, sid)
+local function LF_AddAccountLearnedInfo(Tooltip, rid, sid)
 	sid = sid or __db__.get_sid_by_rid(rid);
-	if sid then
+	if sid ~= nil then
 		local info = __db__.get_info_by_sid(sid);
 		if info ~= nil then
 			local pid = info[index_pid];
@@ -394,13 +394,13 @@ local function LF_AddAccountLearnedInfo(tip, rid, sid)
 			for GUID, VAR in next, AVAR do
 				-- if PLAYER_GUID ~= GUID then
 					local var = rawget(VAR, pid);
-					if var then
+					if var ~= nil then
 						if add_head then
-							tip:AddLine(L["LABEL_ACCOUT_RECIPE_LEARNED"]);
+							Tooltip:AddLine(L["LABEL_ACCOUT_RECIPE_LEARNED"]);
 							add_head = false;
 						end
 						local lClass, class, lRace, race, sex, name = GetPlayerInfoByGUID(GUID);
-						if name and class then
+						if name ~= nil and class ~= nil then
 							local classColorTable = RAID_CLASS_COLORS[strupper(class)];
 							name = format("|cff%.2x%.2x%.2x", classColorTable.r * 255, classColorTable.g * 255, classColorTable.b * 255) .. name .. "|r";
 						else
@@ -418,19 +418,19 @@ local function LF_AddAccountLearnedInfo(tip, rid, sid)
 							-- 	name = T_SpaceTable[1] .. L["RECIPE_NOT_LEARNED"] .. "  " .. name .. "  |cffff0000" .. var.cur_rank .. "|r|cffffffff/" .. var.max_rank .. "|r";
 							-- end
 						end
-						tip:AddLine(name);
+						Tooltip:AddLine(name);
 					end
 				-- end
 			end
-			tip:Show();
+			Tooltip:Show();
 		end
 	end
 end
-local function LF_AddMaterialCraftInfo(tip, iid)
+local function LF_AddMaterialCraftInfo(Tooltip, iid)
 	local data = __db__.get_sid_by_reagent(iid);
-	if data then
+	if data ~= nil then
 		local not_show_all = not IsShiftKeyDown();
-		tip:AddLine(L["LABEL_USED_AS_MATERIAL_IN"]);
+		Tooltip:AddLine(L["LABEL_USED_AS_MATERIAL_IN"]);
 		local lineL = nil;
 		local lineR = nil;
 		local nLines = 0;
@@ -439,14 +439,14 @@ local function LF_AddMaterialCraftInfo(tip, iid)
 			local sid = sids[index];
 			local num = nums[index];
 			if not_show_all and nLines >= 8 then
-				tip:AddLine(T_SpaceTable[1] .. "|cffff0000...|r");
+				Tooltip:AddLine(T_SpaceTable[1] .. "|cffff0000...|r");
 				break;
 			end
 			local info = __db__.get_info_by_sid(sid);
 			if info ~= nil then
 				local cid = info[index_cid];
 				local pname = __db__.get_pname_by_pid(info[index_pid]) or "";
-				if cid then
+				if cid ~= nil then
 					lineL = T_SpaceTable[1] .. __db__.item_string_s(cid) .. "x" .. num;
 					-- lineR = "|cff00afff" .. pname .. info[index_learn_rank] .. "|r";
 				else
@@ -454,172 +454,173 @@ local function LF_AddMaterialCraftInfo(tip, iid)
 					-- lineR = "|cff00afff" .. pname .. info[index_learn_rank] .. "|r";
 				end
 					lineR = "|cff00afff" .. pname .. " " .. __db__.get_difficulty_rank_list_text_by_sid(sid, true) .. "|r";
-				tip:AddDoubleLine(lineL, lineR);
+				Tooltip:AddDoubleLine(lineL, lineR);
 				nLines = nLines + 1;
 			end
 		end
-		tip:Show();
+		Tooltip:Show();
 	end
 end
-local function LF_TooltipSetSpellByID(tip, sid)
+local function LF_TooltipSetSpellByID(Tooltip, sid)
 	if AuctionMod ~= nil then
 		if SET.show_tradeskill_tip_craft_spell_price then
 			if sid and __db__.is_tradeskill_sid(sid) then
-				set_tip_by_sid(tip, sid);
+				set_tip_by_sid(Tooltip, sid);
 			end
 		end
 	end
 end
-local function LF_TooltipSetItemByID(tip, iid)
+local function LF_TooltipSetItemByID(Tooltip, iid)
 	if SET.show_tradeskill_tip_recipe_account_learned then
-		LF_AddAccountLearnedInfo(tip, iid);
+		LF_AddAccountLearnedInfo(Tooltip, iid);
 	end
 	if SET.show_tradeskill_tip_material_craft_info then
-		LF_AddMaterialCraftInfo(tip, iid);
+		LF_AddMaterialCraftInfo(Tooltip, iid);
 	end
 	if AuctionMod ~= nil then
 		if SET.show_tradeskill_tip_craft_item_price then
 			if iid and __db__.is_tradeskill_cid(iid) then
-				set_tip_by_cid(tip, iid);
+				set_tip_by_cid(Tooltip, iid);
 			end
 		end
 		if SET.show_tradeskill_tip_recipe_price then
 			local sid = __db__.get_sid_by_rid(iid);
 			if sid then
-				set_tip_by_sid(tip, sid);
+				set_tip_by_sid(Tooltip, sid);
 			end
 		end
 	end
 end
-local function LF_TooltipSetHyperlink(tip, link)
-	local _, sid = tip:GetSpell();
+local function LF_TooltipSetHyperlink(Tooltip, link)
+	local _, sid = Tooltip:GetSpell();
 	if sid then
-		LF_TooltipSetSpellByID(tip, sid);
+		LF_TooltipSetSpellByID(Tooltip, sid);
 		return;
 	end
 	if link then
 		local cid = tonumber(select(3, strfind(link, "item:(%d+)")) or nil);
 		if cid then
-			LF_TooltipSetItemByID(tip, cid);
+			LF_TooltipSetItemByID(Tooltip, cid);
 		end
 	end
 end
-local function LF_TooltipGUISetSpell(tip)
-	local _, sid = tip:GetSpell();
-	if sid then
-		LF_TooltipSetSpellByID(tip, sid);
+local function LF_TooltipGUISetSpell(Tooltip)
+	local _, sid = Tooltip:GetSpell();
+	if sid ~= nil then
+		LF_TooltipSetSpellByID(Tooltip, sid);
 	end
 end
-local function LF_TooltipGUISetItem(tip)
-	local _, link = tip:GetItem();
-	if link then
+local function LF_TooltipGUISetItem(Tooltip)
+	local _, link = Tooltip:GetItem();
+	if link ~= nil then
 		local iid = tonumber(select(3, strfind(link, "item:(%d+)")) or nil);
-		if iid then
-			LF_TooltipSetItemByID(tip, iid);
+		if iid ~= nil then
+			LF_TooltipSetItemByID(Tooltip, iid);
 		end
 	end
 end
-local function LF_TooltipSetCraftSpell(tip)
-	local _, sid = tip:GetSpell();
-	if sid then
-		LF_TooltipSetSpellByID(tip, sid);
+local function LF_TooltipSetCraftSpell(Tooltip)
+	local _, sid = Tooltip:GetSpell();
+	if sid ~= nil then
+		LF_TooltipSetSpellByID(Tooltip, sid);
 	else
-		local _, link = tip:GetItem();
+		local _, link = Tooltip:GetItem();
 		local iid = link and tonumber(select(3, strfind(link, "item:(%d+)")) or nil);
-		if iid then
-			LF_TooltipSetItemByID(tip, iid);
+		if iid ~= nil then
+			LF_TooltipSetItemByID(Tooltip, iid);
 		end
 	end
 end
-local function F_HookTip(tip)
-	hooksecurefunc(tip, "SetHyperlink", LF_TooltipSetHyperlink);
-	hooksecurefunc(tip, "SetSpellByID", LF_TooltipSetSpellByID);
-	hooksecurefunc(tip, "SetItemByID", LF_TooltipSetItemByID);
-	hooksecurefunc(tip, "SetCraftSpell", LF_TooltipSetCraftSpell);
+local LT_HookedTooltip = {  };
+local function F_HookTooltip(Tooltip)
+	if LT_HookedTooltip[Tooltip] ~= nil then
+		return;
+	end
+	LT_HookedTooltip[Tooltip] = true;
 	--
-	hooksecurefunc(tip, "SetMerchantItem", LF_TooltipGUISetItem);
-	hooksecurefunc(tip, "SetBuybackItem", LF_TooltipGUISetItem);
-	hooksecurefunc(tip, "SetBagItem", LF_TooltipGUISetItem);
-	hooksecurefunc(tip, "SetAuctionItem", LF_TooltipGUISetItem);
-	hooksecurefunc(tip, "SetAuctionSellItem", LF_TooltipGUISetItem);
-	hooksecurefunc(tip, "SetLootItem", LF_TooltipGUISetItem);
-	hooksecurefunc(tip, "SetLootRollItem", LF_TooltipGUISetItem);
-	hooksecurefunc(tip, "SetInventoryItem", LF_TooltipGUISetItem);
-	hooksecurefunc(tip, "SetTradePlayerItem", LF_TooltipGUISetItem);
-	hooksecurefunc(tip, "SetTradeTargetItem", LF_TooltipGUISetItem);
-	hooksecurefunc(tip, "SetQuestItem", LF_TooltipGUISetItem);
-	hooksecurefunc(tip, "SetQuestLogItem", LF_TooltipGUISetItem);
-	hooksecurefunc(tip, "SetInboxItem", LF_TooltipGUISetItem);
-	hooksecurefunc(tip, "SetSendMailItem", LF_TooltipGUISetItem);
-	hooksecurefunc(tip, "SetTradeSkillItem", LF_TooltipGUISetItem);
-	hooksecurefunc(tip, "SetCraftItem", function(tip, recipe_index, reagent_index)
+	hooksecurefunc(Tooltip, "SetHyperlink", LF_TooltipSetHyperlink);
+	hooksecurefunc(Tooltip, "SetSpellByID", LF_TooltipSetSpellByID);
+	hooksecurefunc(Tooltip, "SetItemByID", LF_TooltipSetItemByID);
+	hooksecurefunc(Tooltip, "SetCraftSpell", LF_TooltipSetCraftSpell);
+	--
+	hooksecurefunc(Tooltip, "SetMerchantItem", LF_TooltipGUISetItem);
+	hooksecurefunc(Tooltip, "SetBuybackItem", LF_TooltipGUISetItem);
+	hooksecurefunc(Tooltip, "SetBagItem", LF_TooltipGUISetItem);
+	hooksecurefunc(Tooltip, "SetAuctionItem", LF_TooltipGUISetItem);
+	hooksecurefunc(Tooltip, "SetAuctionSellItem", LF_TooltipGUISetItem);
+	hooksecurefunc(Tooltip, "SetLootItem", LF_TooltipGUISetItem);
+	hooksecurefunc(Tooltip, "SetLootRollItem", LF_TooltipGUISetItem);
+	hooksecurefunc(Tooltip, "SetInventoryItem", LF_TooltipGUISetItem);
+	hooksecurefunc(Tooltip, "SetTradePlayerItem", LF_TooltipGUISetItem);
+	hooksecurefunc(Tooltip, "SetTradeTargetItem", LF_TooltipGUISetItem);
+	hooksecurefunc(Tooltip, "SetQuestItem", LF_TooltipGUISetItem);
+	hooksecurefunc(Tooltip, "SetQuestLogItem", LF_TooltipGUISetItem);
+	hooksecurefunc(Tooltip, "SetInboxItem", LF_TooltipGUISetItem);
+	hooksecurefunc(Tooltip, "SetSendMailItem", LF_TooltipGUISetItem);
+	hooksecurefunc(Tooltip, "SetTradeSkillItem", LF_TooltipGUISetItem);
+	hooksecurefunc(Tooltip, "SetCraftItem", function(Tooltip, recipe_index, reagent_index)
 		local link = GetCraftReagentItemLink(recipe_index, reagent_index);
-		if link then
+		if link ~= nil then
 			local iid = tonumber(select(3, strfind(link, "item:(%d+)")) or nil);
-			if iid then
-				LF_TooltipSetItemByID(tip, iid);
+			if iid ~= nil then
+				LF_TooltipSetItemByID(Tooltip, iid);
 			end
 		end
 	end);
-	hooksecurefunc(tip, "SetTrainerService", LF_TooltipGUISetItem);
+	hooksecurefunc(Tooltip, "SetTrainerService", LF_TooltipGUISetItem);
 end
 
-__namespace__.F_HookTip = F_HookTip;
+__namespace__.F_HookTooltip = F_HookTooltip;
 __namespace__.F_GetPriceInfoBySID = F_GetPriceInfoBySID;
 
 local N_RecipeSourceMOD = 0;
 local T_RecipeSourceMOD = {  };
--- function __namespace__:AddRecipeSourceMOD(mod)
---	-- N_RecipeSourceMOD = N_RecipeSourceMOD + 1;
--- 	-- T_RecipeSourceMOD[N_RecipeSourceMOD] = mod;
--- 	__namespace__:FireEvent("RECIPESOURCE_MOD_LOADED", mod);
--- end
 __namespace__:AddCallback("RECIPESOURCE_MOD_LOADED", function(mod)
 	if mod ~= nil then
 		N_RecipeSourceMOD = N_RecipeSourceMOD + 1;
 		T_RecipeSourceMOD[N_RecipeSourceMOD] = mod;
 	end
 end);
-function __namespace__.F_TooltipAddSource(Tip, sid)
+function __namespace__.F_TooltipAddSource(Tooltip, sid)
 	if N_RecipeSourceMOD > 0 then
 		for index = N_RecipeSourceMOD, 1, -1 do
 			local mod = T_RecipeSourceMOD[index];
-			if mod.Tip ~= nil then
-				return mod.Tip(Tip, sid);
+			if mod.Tooltip ~= nil then
+				return mod.Tooltip(Tooltip, sid);
 			end
 		end
 	end
 end
 
-local function LF_SetRecipeSourceTip(Tip, sid)
+local function LF_SetRecipeSourceTip(Tooltip, sid)
 	local info = __db__.get_info_by_sid(sid);
 	if info ~= nil then
 		if info[index_trainer] ~= nil then			-- trainer
-			Tip:AddDoubleLine(L["LABEL_GET_FROM"], "|cffff00ff" .. L["trainer"] .. "|r");
-			Tip:Show();
+			Tooltip:AddDoubleLine(L["LABEL_GET_FROM"], "|cffff00ff" .. L["trainer"] .. "|r");
+			Tooltip:Show();
 		end
 		local rid = info[index_rid];
 		if rid ~= nil then				-- recipe
 			local _, line, _, _, _, _, _, _, bind = __db__.item_info(rid);
-			if not line then
+			if line == nil then
 				line = "|cffffffff" .. L["item"] .. "|r ID: " .. rid;
 			end
 			if bind ~= 1 and bind ~= 4 then
 				line = line .. "(|cff00ff00" .. L["tradable"] .. "|r)";
 				if AuctionMod ~= nil then
 					local price = AuctionMod.F_QueryPriceByID(rid);
-					if price and price > 0 then
+					if price ~= nil and price > 0 then
 						line = line .. " |cff00ff00AH|r " .. AuctionMod.F_GetMoneyString(price);
 					end
 				end
 			else
 				line = line .. "(|cffff0000" .. L["non_tradable"] .. "|r)";
 			end
-			Tip:AddDoubleLine(L["LABEL_GET_FROM"], line);
+			Tooltip:AddDoubleLine(L["LABEL_GET_FROM"], line);
 		end
 		local qid = info[index_quest];
 		if qid ~= nil then			-- quests
-			Tip:AddDoubleLine(L["LABEL_GET_FROM"], "Quest: " .. qid);
+			Tooltip:AddDoubleLine(L["LABEL_GET_FROM"], "Quest: " .. qid);
 		end
 		-- if info[index_object] ~= nil then			-- objects
 		-- 	if type(info[index_object]) == 'table' then
@@ -630,21 +631,21 @@ local function LF_SetRecipeSourceTip(Tip, sid)
 		-- 		LF_MTSL_SetObject(info[index_pid], info[index_object], L["LABEL_GET_FROM"], 1);
 		-- 	end
 		-- end
-		Tip:Show();
+		Tooltip:Show();
 	end
 end
 
 function __namespace__.init_tooltip()
 	AVAR, VAR, SET, FAV = __namespace__.AVAR, __namespace__.VAR, __namespace__.SET, __namespace__.FAV;
-	F_HookTip(GameTooltip);
-	F_HookTip(ItemRefTooltip);
+	F_HookTooltip(_G.GameTooltip);
+	F_HookTooltip(_G.ItemRefTooltip);
 	__namespace__:AddCallback("AUCTION_MOD_LOADED", function(mod)
 		if mod ~= nil then
 			AuctionMod = mod;
 		end
 	end);
 	__namespace__:FireEvent("RECIPESOURCE_MOD_LOADED", {
-		Tip = LF_SetRecipeSourceTip,
+		Tooltip = LF_SetRecipeSourceTip,
 		SetItem = __namespace__._noop_,
 		SetUnit = __namespace__._noop_,
 		SetObject = __namespace__._noop_,
