@@ -585,8 +585,8 @@ function __namespace__.F_TooltipAddSource(Tooltip, sid)
 	if N_RecipeSourceMOD > 0 then
 		for index = N_RecipeSourceMOD, 1, -1 do
 			local mod = T_RecipeSourceMOD[index];
-			if mod.Tooltip ~= nil then
-				return mod.Tooltip(Tooltip, sid);
+			if mod.SetSpell ~= nil then
+				return mod.SetSpell(Tooltip, sid);
 			end
 		end
 	end
@@ -645,7 +645,7 @@ function __namespace__.init_tooltip()
 		end
 	end);
 	__namespace__:FireEvent("RECIPESOURCE_MOD_LOADED", {
-		Tooltip = LF_SetRecipeSourceTip,
+		SetSpell = LF_SetRecipeSourceTip,
 		SetItem = __namespace__._noop_,
 		SetUnit = __namespace__._noop_,
 		SetObject = __namespace__._noop_,

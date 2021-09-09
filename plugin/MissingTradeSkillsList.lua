@@ -486,7 +486,7 @@ end
 
 local function callback()
 	__namespace__:FireEvent("RECIPESOURCE_MOD_LOADED", {
-		Tip = LF_MTSL_SetSpellTip,
+		SetSpell = LF_MTSL_SetSpellTip,
 		SetItem = LF_MTSL_SetItem,
 		SetUnit = LF_MTSL_SetUnit,
 		SetObject = LF_MTSL_SetObject,
