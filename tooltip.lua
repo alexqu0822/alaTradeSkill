@@ -18,6 +18,7 @@ local L = __namespace__.L;
 	local max = math.max;
 	local strrep = string.rep;
 	local strupper = string.upper;
+	local strsplit = string.split;
 	local strfind = string.find;
 	local format = string.format;
 	local tinsert = table.insert;
@@ -41,6 +42,7 @@ local L = __namespace__.L;
 local CURPHASE = __db__.CURPHASE;
 
 local PLAYER_GUID = UnitGUID('player');
+local _, C_PLAYER_GUID_REALM_ID = strsplit("-", PLAYER_GUID);
 
 
 local AVAR, VAR, SET, FAV = nil, nil, nil, nil;
@@ -392,6 +394,8 @@ local function LF_AddAccountLearnedInfo(Tooltip, rid, sid)
 			local add_head = true;
 			local learn_rank = info[index_learn_rank];
 			for GUID, VAR in next, AVAR do
+				local _, R = strsplit("-", GUID);
+				if R == C_PLAYER_GUID_REALM_ID then
 				-- if PLAYER_GUID ~= GUID then
 					local var = rawget(VAR, pid);
 					if var ~= nil then
@@ -420,7 +424,7 @@ local function LF_AddAccountLearnedInfo(Tooltip, rid, sid)
 						end
 						Tooltip:AddLine(name);
 					end
-				-- end
+				end
 			end
 			Tooltip:Show();
 		end
@@ -595,9 +599,24 @@ end
 local function LF_SetRecipeSourceTip(Tooltip, sid)
 	local info = __db__.get_info_by_sid(sid);
 	if info ~= nil then
+		local spec = info[index_spec];
+		if spec ~= nil then
+			local name = __db__.spell_name(spec);
+			if name ~= nil then
+				if __db__.is_spec_learned(spec) then
+					Tooltip:AddDoubleLine(" ", name, 1, 1, 1, 0, 1, 0);
+				else
+					Tooltip:AddDoubleLine(" ", name, 1, 1, 1, 1, 0, 0);
+				end
+			end
+		end
 		if info[index_trainer] ~= nil then			-- trainer
-			Tooltip:AddDoubleLine(L["LABEL_GET_FROM"], "|cffff00ff" .. L["trainer"] .. "|r");
-			Tooltip:Show();
+			local price = info[index_train_price];
+			if price ~= nil and price > 0 then
+				Tooltip:AddDoubleLine(L["LABEL_GET_FROM"], "|cffff00ff" .. L["trainer"] .. "|r " ..  AuctionMod.F_GetMoneyString(price));
+			else
+				Tooltip:AddDoubleLine(L["LABEL_GET_FROM"], "|cffff00ff" .. L["trainer"] .. "|r");
+			end
 		end
 		local rid = info[index_rid];
 		if rid ~= nil then				-- recipe

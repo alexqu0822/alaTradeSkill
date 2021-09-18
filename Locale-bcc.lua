@@ -468,8 +468,8 @@ elseif LOCALE == "koKR" then
 	L["showUnkown"] = "알 수 없음";
 	L["showKnown"] = "알려짐";
 	L["showHighRank"] = "높은 랭크";
-	L["filterClass"] = "class";
-	L["filterSpec"] = "spec";
+	L["filterClass"] = UnitClass('player');
+	L["filterSpec"] = "MySpec";
 	L["showItemInsteadOfSpell"] = "아이템";
 	L["showRank"] = "랭크";
 	L["haveMaterials"] = "보유 재료";
@@ -826,7 +826,7 @@ else
 	L["showUnkown"] = "Unknown";
 	L["showKnown"] = "Known";
 	L["showHighRank"] = "HighRank";
-	L["filterClass"] = "MyClass";
+	L["filterClass"] = UnitClass('player');
 	L["filterSpec"] = "MySpec";
 	L["showItemInsteadOfSpell"] = "ItemTip";
 	L["showRank"] = "Rank";

@@ -309,6 +309,10 @@ local function LF_RequestSpell()
 			end
 		end
 	end
+	if completed then
+		wipe(T_Temp_SpellHash);
+		-- T_Temp_SpellHash = nil;
+	end
 	return completed;
 end
 local LN_Limited_RequestSpell = 0;
@@ -371,7 +375,7 @@ local function LF_RequestItem()
 	end
 	if completed then
 		wipe(T_Temp_ItemHash);
-		T_Temp_ItemHash = nil;
+		-- T_Temp_ItemHash = nil;
 	end
 	return completed;
 end
@@ -799,6 +803,10 @@ end
 	end
 	function __db__.item_string_s(iid)
 		return __db__.item_string(iid) or ("itemId:" .. iid);
+	end
+--
+	function __db__.is_spec_learned(spec)
+		return T_IsSpecLearned[spec];
 	end
 --	pid, list, check_hash, phase, rank, rankReversed, showKnown, showUnkown, showHighRank, filterClass, filterSpec, donot_wipe_list | list{ sid, }
 local function FilterAdd(list, sid, class, spec, filterClass, filterSpec)
