@@ -8,6 +8,7 @@
     <script file = "Auctioneer.lua" />
     <script file = "AuctionFaster.lua" />
     <script file = "AuctionMaster.lua" />
+    <script file = "Auctipus.lua" />
     <script file = "aux-addon.lua" />
     <script file = "tdAuction.lua" />
     <script file = "TradeSkillMaster.lua" />
