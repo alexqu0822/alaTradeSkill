@@ -3548,12 +3548,12 @@ local function LF_AddOnCallback_Blizzard_CraftUI(addon)
 		F_GetSelection = GetCraftSelectionIndex,
 		-- expand = ExpandCraftSkillLine,
 		-- collapse = CollapseCraftSkillLine,
-		F_ClearFilter = function()
+		F_ClearFilter = __namespace__.__is_bcc and function()
 			CraftOnlyShowMakeable(false);
 			CraftFrameAvailableFilterCheckButton:SetChecked(false);
 			SetCraftFilter(1);
 			UIDropDownMenu_SetSelectedID(CraftFrameFilterDropDown, 1);
-		end,
+		end or _noop_,
 		-- F_DoTradeCraft = DoCraft,
 		F_CloseSkill = CloseCraft,
 
@@ -3587,8 +3587,10 @@ local function LF_AddOnCallback_Blizzard_CraftUI(addon)
 		},
 
 		F_WithDisabledFrame = function(self, func)
-			func(CraftFrameAvailableFilterCheckButton);
-			func(CraftFrameFilterDropDown);
+			if __namespace__.__is_bcc then
+				func(CraftFrameAvailableFilterCheckButton);
+				func(CraftFrameFilterDropDown);
+			end
 			func(CraftListScrollFrame);
 			func(CraftListScrollFrameScrollBar);
 			func(CraftHighlightFrame);
@@ -3612,10 +3614,12 @@ local function LF_AddOnCallback_Blizzard_CraftUI(addon)
 	local frame = LF_HookFrame(addon, meta);
 	T_uiFrames[addon] = frame;
 	--
-	CraftFrameFilterDropDown:ClearAllPoints();
-	CraftFrameFilterDropDown:SetPoint("RIGHT", CraftFrame, "TOPLEFT", 359, -82);
-	CraftFrameAvailableFilterCheckButton:ClearAllPoints();
-	CraftFrameAvailableFilterCheckButton:SetPoint("LEFT", CraftFrame, "TOPLEFT", 68, -82);
+	if __namespace__.__is_bcc then
+		CraftFrameAvailableFilterCheckButton:ClearAllPoints();
+		CraftFrameAvailableFilterCheckButton:SetPoint("LEFT", CraftFrame, "TOPLEFT", 68, -82);
+		CraftFrameFilterDropDown:ClearAllPoints();
+		CraftFrameFilterDropDown:SetPoint("RIGHT", CraftFrame, "TOPLEFT", 359, -82);
+	end
 	--
 	local ENCHANT_FILTER = L.ENCHANT_FILTER;
 	--	Dropdown Filter
