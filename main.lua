@@ -349,6 +349,8 @@ local F_SafeCall = __namespace__.F_SafeCall;
 		lock_board = false,
 		board_pos = { "TOP", "UIParent", "BOTTOM", 260, 190, },
 		hide_mtsl = false,
+		show_DBIcon = true,
+		minimapPos = 0,
 	};
 	local default_set = {
 		shown = true,
@@ -524,6 +526,7 @@ local F_SafeCall = __namespace__.F_SafeCall;
 			F_SafeCall(__namespace__.init_cooldown);
 			F_SafeCall(__namespace__.init_communication);
 			F_SafeCall(LF_StartMonitoringAddOnLoad);
+			F_SafeCall(__namespace__.init_libentry);
 			for GUID, _ in next, AVAR do
 				GetPlayerInfoByGUID(GUID);
 			end
@@ -533,6 +536,8 @@ local F_SafeCall = __namespace__.F_SafeCall;
 					__namespace__.ON_SET_CHANGED(key, val, true);
 				end
 			end
+			EnableAddOn("MissingTradeSkillsList_TBC_Data");
+			LoadAddOn("MissingTradeSkillsList_TBC_Data");
 		end
 	end
 	local function LOADING_SCREEN_DISABLED()
@@ -866,6 +871,29 @@ do	--	SLASH
 				end
 			end,
 		},
+		{	--	show_DBIcon
+			'bool',
+			"^show" .. SEPARATOR .. "dbicon" .. SEPARATOR .. "(.+)" .. SEPARATOR .. "$",
+			"show_DBIcon",
+			L.SLASH_NOTE["show_DBIcon"],
+			function(key, val)
+				local LDI = LibStub("LibDBIcon-1.0", true);
+				if LDI ~= nil then
+					if val then
+						LDI:Show("alaTradeSkill");
+					else
+						LDI:Hide("alaTradeSkill");
+					end
+				end
+			end,
+			[8] = function(self)
+				if self:GetChecked() then
+					SlashCmdList["ALATRADEFRAME"]("setshowdbicon1");
+				else
+					SlashCmdList["ALATRADEFRAME"]("setshowdbicon0");
+				end
+			end,
+		},
 		{	--	hide_mtsl
 			'bool',
 			"^hide" .. SEPARATOR .. "mtsl" .. SEPARATOR .. "(.+)" .. SEPARATOR .. "$",
@@ -1007,6 +1035,50 @@ do	--	SLASH
 	end
 end
 
+local function DBIcon_OnClick(self, button)
+	if button == "RightButton" then
+		__namespace__.F_uiToggleFrame("CONFIG");
+	else
+		__namespace__.F_uiToggleFrame("EXPLORER");
+	end
+end
+function __namespace__.init_libentry()
+	if LibStub ~= nil then
+		local LDI = LibStub("LibDBIcon-1.0", true);
+		if LDI ~= nil then
+			LDI:Register("alaTradeSkill",
+				{
+					icon = [[Interface\AddOns\alaTradeSkill\ARTWORK\alaTradeSkill]],
+					OnClick = DBIcon_OnClick,
+					text = L.DBIcon_Text,
+					OnTooltipShow = function(tt)
+						tt:AddLine("alaTradeSkill");
+						tt:AddLine(" ");
+						for _, text in next, L.TooltipLines do
+							tt:AddLine(text);
+						end
+					end
+				},
+				{
+					minimapPos = SET.minimapPos,
+				}
+			);
+			if SET.show_DBIcon then
+				LDI:Show("alaTradeSkill");
+			else
+				LDI:Hide("alaTradeSkill");
+			end
+			local mb = LDI:GetMinimapButton("alaTradeSkill");
+			mb:RegisterEvent("PLAYER_LOGOUT");
+			mb:HookScript("OnEvent", function(self)
+				SET.minimapPos = self.minimapPos or self.db.minimapPos;
+			end);
+			mb:HookScript("OnDragStop", function(self)
+				SET.minimapPos = self.minimapPos or self.db.minimapPos;
+			end);
+		end
+	end
+end
 
 local extern_setting = {  };
 __ala_meta__.prof.extern_setting = extern_setting;

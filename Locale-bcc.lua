@@ -451,11 +451,16 @@ if LOCALE == "zhCN" or LOCALE == "zhTW" then
 		["show_board"] = "显示冷却面板",
 		["lock_board"] = "锁定冷却面板",
 		["hide_mtsl"] = "隐藏MTSL界面",
+		["show_DBIcon"] = "显示小地图按钮",
 	};
 	L.ALPHA = "透明度";
 	L.CHAR_LIST = "角色列表";
 	L.CHAR_DEL = "删除角色";
 	L["INVALID_COMMANDS"] = "无效命令参数，使用\124cff00ff00true、1、on、enable\124r 或者 \124cffff0000false、0、off、disable\124r.";
+	L.TooltipLines = {
+		"左键打开浏览器",
+		"右键打开设置",
+	};
 elseif LOCALE == "koKR" then
 	L["OK"] = "확인";
 	L["Search"] = "검색";
@@ -809,11 +814,16 @@ elseif LOCALE == "koKR" then
 		["show_board"] = "변환 쿨타임 보드 표시",
 		["lock_board"] = "변환 쿨타임 보드 잠금",
 		["hide_mtsl"] = "MTSL 숨김",
+		["show_DBIcon"] = "Show DBIcon on minimap",
 	};
 	L.ALPHA = "Alpha";
 	L.CHAR_LIST = "캐릭터 목록";
 	L.CHAR_DEL = "캐릭터 삭제";
 	L["INVALID_COMMANDS"] = "잘못된 명령. 사용 \124cff00ff00true, 1, on, enable\124r or \124cffff0000false, 0, off, disable\124r instead.";
+	L.TooltipLines = {
+		"Left Click: Open Explorer",
+		"Right Click: Open SettingUI",
+	};
 else
 	L["OK"] = "OK";
 	L["Search"] = "Search";
@@ -1167,11 +1177,16 @@ else
 		["show_board"] = "Show board",
 		["lock_board"] = "Lock board",
 		["hide_mtsl"] = "Hide MTSL",
+		["show_DBIcon"] = "Show DBIcon on minimap",
 	};
 	L.ALPHA = "Alpha";
 	L.CHAR_LIST = "Character list";
 	L.CHAR_DEL = "Del character";
 	L["INVALID_COMMANDS"] = "Invalid commonds. Use \124cff00ff00true, 1, on, enable\124r or \124cffff0000false, 0, off, disable\124r instead.";
+	L.TooltipLines = {
+		"Left Click: Open Explorer",
+		"Right Click: Open SettingUI",
+	};
 end
 --
 L.ENCHANT_FILTER = {  };

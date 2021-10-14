@@ -525,3 +525,18 @@ end
 __namespace__:AddAddOnCallback("MissingTradeSkillsList", callback);
 __namespace__:AddAddOnCallback("MissingTradeSkillsList_TBC", callback);
 
+__namespace__:AddAddOnCallback("MissingTradeSkillsList_TBC_Data", function()
+	__namespace__:FireEvent("RECIPESOURCE_MOD_LOADED", {
+		SetSpell = LF_MTSL_SetSpellTip,
+		SetItem = LF_MTSL_SetItem,
+		SetUnit = LF_MTSL_SetUnit,
+		SetObject = LF_MTSL_SetObject,
+		SetQuest = LF_MTSL_SetQuest,
+	});
+	__namespace__:AddCallback("AUCTION_MOD_LOADED", function(mod)
+		if mod ~= nil then
+			AuctionMod = mod;
+		end
+	end);
+end);
+
