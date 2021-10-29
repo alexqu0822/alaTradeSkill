@@ -456,8 +456,10 @@ if LOCALE == "zhCN" or LOCALE == "zhTW" then
 		["portrait_button"] = "商业技能头像下拉菜单",
 		["show_board"] = "显示冷却面板",
 		["lock_board"] = "锁定冷却面板",
-		["hide_mtsl"] = "隐藏MTSL界面",
 		["show_DBIcon"] = "显示小地图按钮",
+		["hide_mtsl"] = "隐藏MTSL界面",
+		["first_auction_mod"] = "首选拍卖插件",
+		["first_auction_mod:*"] = "自动选择",
 	};
 	L.ALPHA = "透明度";
 	L.CHAR_LIST = "角色列表";
@@ -822,8 +824,10 @@ elseif LOCALE == "koKR" then
 		["portrait_button"] = "Dropdown menu on portrait of tradeskill frame",
 		["show_board"] = "변환 쿨타임 보드 표시",
 		["lock_board"] = "변환 쿨타임 보드 잠금",
-		["hide_mtsl"] = "MTSL 숨김",
 		["show_DBIcon"] = "Show DBIcon on minimap",
+		["hide_mtsl"] = "MTSL 숨김",
+		["first_auction_mod"] = "Use this auction addon first",
+		["first_auction_mod:*"] = "Auto",
 	};
 	L.ALPHA = "Alpha";
 	L.CHAR_LIST = "캐릭터 목록";
@@ -1188,8 +1192,10 @@ else
 		["portrait_button"] = "Dropdown menu on portrait of tradeskill frame",
 		["show_board"] = "Show board",
 		["lock_board"] = "Lock board",
-		["hide_mtsl"] = "Hide MTSL",
 		["show_DBIcon"] = "Show DBIcon on minimap",
+		["hide_mtsl"] = "Hide MTSL",
+		["first_auction_mod"] = "Use this auction addon first",
+		["first_auction_mod:*"] = "Auto",
 	};
 	L.ALPHA = "Alpha";
 	L.CHAR_LIST = "Character list";

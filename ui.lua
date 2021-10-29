@@ -145,20 +145,21 @@ local T_UIDefinition = {
 	texture_unk = "Interface\\Icons\\inv_misc_questionmark",
 	texture_highlight = "Interface\\Buttons\\UI-Common-MouseHilight",
 	texture_triangle = "interface\\transmogrify\\transmog-tooltip-arrow",
-	texture_color_select = "Interface\\AddOns\\alaTradeSkill\\ARTWORK\\ColorSelect",
-	texture_alpha_ribbon = "Interface\\AddOns\\alaTradeSkill\\ARTWORK\\AlphaRibbon",
+	texture_color_select = "Interface\\AddOns\\alaTradeSkill\\Media\\Textures\\ColorSelect",
+	texture_alpha_ribbon = "Interface\\AddOns\\alaTradeSkill\\Media\\Textures\\AlphaRibbon",
 	texture_config = "interface\\buttons\\ui-optionsbutton",
-	texture_explorer = "Interface\\AddOns\\alaTradeSkill\\ARTWORK\\explorer",
+	texture_explorer = "Interface\\AddOns\\alaTradeSkill\\Media\\Textures\\explorer",
+	texture_toggle = "Interface\\AddOns\\alaTradeSkill\\Media\\Textures\\UI",
 
-	texture_modern_arrow_down = "Interface\\AddOns\\alaTradeSkill\\ARTWORK\\ArrowDown",
-	texture_modern_arrow_up = "Interface\\AddOns\\alaTradeSkill\\ARTWORK\\ArrowUp",
-	texture_modern_arrow_left = "Interface\\AddOns\\alaTradeSkill\\ARTWORK\\ArrowLeft",
-	texture_modern_arrow_right = "Interface\\AddOns\\alaTradeSkill\\ARTWORK\\ArrowRight",
-	texture_modern_button_minus = "Interface\\AddOns\\alaTradeSkill\\ARTWORK\\MinusButton",
-	texture_modern_button_plus = "Interface\\AddOns\\alaTradeSkill\\ARTWORK\\PlusButton",
-	texture_modern_button_close = "Interface\\AddOns\\alaTradeSkill\\ARTWORK\\Close",
-	texture_modern_check_button_border = "Interface\\AddOns\\alaTradeSkill\\ARTWORK\\CheckButtonBorder",
-	texture_modern_check_button_center = "Interface\\AddOns\\alaTradeSkill\\ARTWORK\\CheckButtonCenter",
+	texture_modern_arrow_down = "Interface\\AddOns\\alaTradeSkill\\Media\\Textures\\ArrowDown",
+	texture_modern_arrow_up = "Interface\\AddOns\\alaTradeSkill\\Media\\Textures\\ArrowUp",
+	texture_modern_arrow_left = "Interface\\AddOns\\alaTradeSkill\\Media\\Textures\\ArrowLeft",
+	texture_modern_arrow_right = "Interface\\AddOns\\alaTradeSkill\\Media\\Textures\\ArrowRight",
+	texture_modern_button_minus = "Interface\\AddOns\\alaTradeSkill\\Media\\Textures\\MinusButton",
+	texture_modern_button_plus = "Interface\\AddOns\\alaTradeSkill\\Media\\Textures\\PlusButton",
+	texture_modern_button_close = "Interface\\AddOns\\alaTradeSkill\\Media\\Textures\\Close",
+	texture_modern_check_button_border = "Interface\\AddOns\\alaTradeSkill\\Media\\Textures\\CheckButtonBorder",
+	texture_modern_check_button_center = "Interface\\AddOns\\alaTradeSkill\\Media\\Textures\\CheckButtonCenter",
 
 	color_white = { 1.0, 1.0, 1.0, 1.0, },
 
@@ -423,6 +424,7 @@ end
 		-- end
 		-- frame.mute_update = true;
 		if frame.HookedFrame:IsShown() then
+			frame:F_LayoutOnShow();
 			local skillName, cur_rank, max_rank = frame.F_GetSkillInfo();
 			local pid = __db__.get_pid_by_pname(skillName);
 			frame.flag = pid;
@@ -451,6 +453,7 @@ end
 				if SET.show_call then
 					frame.ToggleButton:Show();
 				end
+				frame:F_ToggleOnSkill(true);
 				if frame:IsShown() then
 					if update_list then
 						local sids = var[1];
@@ -611,6 +614,7 @@ end
 			else
 				frame:Hide();
 				frame.ToggleButton:Hide();
+				frame:F_ToggleOnSkill(false);
 			end
 		end
 		-- frame.mute_update = false;
@@ -2368,6 +2372,20 @@ end
 			frame.F_HookedFrameUpdate();
 		end
 	end
+	local function LF_FrameFixSkillList(frame, expanded)
+		local layout = frame.T_StyleLayout[expanded and 'expand' or 'normal'];
+		local pref = frame.T_HookedFrameWidgets.C_SkillListButtonNamePrefix;
+		local index = layout.scroll_button_num + 1;
+		while true do
+			local Skill = _G[pref .. index];
+			if Skill == nil then
+				return;
+			end
+			Skill:Hide();
+			frame.T_SkillListButtons[index] = frame.T_SkillListButtons[index] or Skill;
+			index = index + 1;
+		end
+	end
 	local function LF_HookFrame(addon, meta)
 		local HookedFrame = meta.HookedFrame;
 		local frame = CreateFrame("FRAME", nil, HookedFrame);
@@ -2408,6 +2426,24 @@ end
 			frame[key] = val;
 		end
 
+		local function LF_ToggleFrame()
+			local pid = frame.flag or __db__.get_pid_by_pname(frame.F_GetSkillName());
+			if frame:IsShown() then
+				frame:Hide();
+				frame.ToggleButton:SetText(L["Open"]);
+				if pid ~= nil then
+					SET[pid].shown = false;
+				end
+			else
+				frame:Show();
+				frame.ToggleButton:SetText(L["Close"]);
+				if pid ~= nil then
+					SET[pid].shown = true;
+				end
+				frame.update = true;
+				frame.F_Update();
+			end
+		end
 		do	--	frame & HookedFrame
 			--	frame
 				frame:SetFrameStrata("HIGH");
@@ -2453,24 +2489,10 @@ end
 				local ToggleButton = CreateFrame("BUTTON", nil, HookedFrame, "UIPanelButtonTemplate");
 				ToggleButton:SetSize(70, 18);
 				ToggleButton:SetPoint("RIGHT", meta.Widget_AnchorTop, "LEFT", -2, 0);
+				-- ToggleButton:SetPoint("TOPRIGHT", -2, -42);
 				ToggleButton:SetFrameLevel(127);
 				ToggleButton:SetScript("OnClick", function(self)
-					local pid = frame.flag or __db__.get_pid_by_pname(frame.F_GetSkillName());
-					if frame:IsShown() then
-						frame:Hide();
-						ToggleButton:SetText(L["Open"]);
-						if pid ~= nil then
-							SET[pid].shown = false;
-						end
-					else
-						frame:Show();
-						ToggleButton:SetText(L["Close"]);
-						if pid ~= nil then
-							SET[pid].shown = true;
-						end
-						frame.update = true;
-						frame.F_Update();
-					end
+					LF_ToggleFrame();
 				end);
 				-- ToggleButton:SetScript("OnEnter", Info_OnEnter);
 				-- ToggleButton:SetScript("OnLeave", Info_OnLeave);
@@ -2523,10 +2545,10 @@ end
 				end
 				local T_HookedFrameButtons = T_HookedFrameWidgets.T_HookedFrameButtons;
 				T_HookedFrameButtons.CancelButton:SetSize(72, 18);
-				T_HookedFrameButtons.CreateButton:SetSize(72, 18);
 				T_HookedFrameButtons.CancelButton:ClearAllPoints();
-				T_HookedFrameButtons.CreateButton:ClearAllPoints();
 				T_HookedFrameButtons.CancelButton:SetPoint("TOPRIGHT", -42, -415);
+				T_HookedFrameButtons.CreateButton:SetSize(72, 18);
+				T_HookedFrameButtons.CreateButton:ClearAllPoints();
 				T_HookedFrameButtons.CreateButton:SetPoint("RIGHT", T_HookedFrameButtons.CancelButton, "LEFT", -7, 0);
 				T_HookedFrameButtons.CloseButton:ClearAllPoints();
 				T_HookedFrameButtons.CloseButton:SetPoint("CENTER", HookedFrame, "TOPRIGHT", -51, -24);
@@ -2661,8 +2683,33 @@ end
 				end);
 			--
 
+			function frame:F_LayoutOnShow()
+				local HookedFrame = self.HookedFrame;
+				local T_HookedFrameWidgets = self.T_HookedFrameWidgets;
+				local T_HookedFrameButtons = T_HookedFrameWidgets.T_HookedFrameButtons;
+				T_HookedFrameButtons.CancelButton:SetSize(72, 18);
+				T_HookedFrameButtons.CancelButton:ClearAllPoints();
+				T_HookedFrameButtons.CancelButton:SetPoint("TOPRIGHT", -42, -415);
+				T_HookedFrameButtons.CreateButton:SetSize(72, 18);
+				T_HookedFrameButtons.CreateButton:ClearAllPoints();
+				T_HookedFrameButtons.CreateButton:SetPoint("RIGHT", T_HookedFrameButtons.CancelButton, "LEFT", -7, 0);
+				T_HookedFrameButtons.CloseButton:ClearAllPoints();
+				T_HookedFrameButtons.CloseButton:SetPoint("CENTER", HookedFrame, "TOPRIGHT", -51, -24);
+			end
 			frame.F_Expand = LF_FrameExpand;
+			frame.F_FixSkillList = LF_FrameFixSkillList;
 			frame.F_BlzStyle = LF_FrameBlzStyle;
+			if meta.T_ToggleOnSkill == nil then
+				frame.F_ToggleOnSkill = _noop_;
+			else
+				function frame:F_ToggleOnSkill(val)
+					val = not val;
+					local T_ToggleOnSkill = frame.T_ToggleOnSkill;
+					for index = 1, #T_ToggleOnSkill do
+						T_ToggleOnSkill[index]:SetShown(val);
+					end
+				end
+			end
 		end
 
 		do	--	PortraitButton
@@ -2731,11 +2778,13 @@ end
 				Tab:EnableMouse(true);
 				Tab:SetScript("OnClick", function(self)
 					local pname = self.pname;
-					if pname ~= nil and pname ~= frame.F_GetSkillName() then
+					if pname ~= nil and not __db__.is_name_same_skill(pname, frame.F_GetSkillName()) then
 						if pname == '@explorer' then
 							__namespace__.F_uiToggleFrame("EXPLORER");
 						elseif pname == '@config' then
 							__namespace__.F_uiToggleFrame("CONFIG");
+						elseif pname == '@toggle' then
+							LF_ToggleFrame();
 						else
 							CastSpellByName(pname);
 						end
@@ -2747,6 +2796,24 @@ end
 				else
 					Tab:SetPoint("LEFT", T_Tabs[index - 1], "RIGHT", T_UIDefinition.tabInterval, 0);
 				end
+				--
+				local L = Tab:CreateTexture(nil, "OVERLAY");
+				L:SetSize(2, T_UIDefinition.tabSize - 2);
+				L:SetPoint("BOTTOMLEFT", Tab, "BOTTOMLEFT", 0, 0);
+				L:SetColorTexture(0.0, 0.0, 0.0, 1.0);
+				local T = Tab:CreateTexture(nil, "OVERLAY");
+				T:SetSize(T_UIDefinition.tabSize - 2, 2);
+				T:SetPoint("TOPLEFT", Tab, "TOPLEFT", 0, 0);
+				T:SetColorTexture(0.0, 0.0, 0.0, 1.0);
+				local R = Tab:CreateTexture(nil, "OVERLAY");
+				R:SetSize(2, T_UIDefinition.tabSize - 2);
+				R:SetPoint("TOPRIGHT", Tab, "TOPRIGHT", 0, 0);
+				R:SetColorTexture(0.0, 0.0, 0.0, 1.0);
+				local B = Tab:CreateTexture(nil, "OVERLAY");
+				B:SetSize(T_UIDefinition.tabSize - 2, 2);
+				B:SetPoint("BOTTOMRIGHT", Tab, "BOTTOMRIGHT", 0, 0);
+				B:SetColorTexture(0.0, 0.0, 0.0, 1.0);
+				--
 				return Tab;
 			end
 			function TabFrame:F_SetNumTabs(num)
@@ -2777,14 +2844,19 @@ end
 				local numSkill = 0;
 				for pid = __db__.DBMINPID, __db__.DBMAXPID do
 					if rawget(VAR, pid) ~= nil and __db__.is_pid_has_win(pid) then
-						numSkill = numSkill + 1;
-						self:F_SetTab(numSkill, __db__.get_check_name_by_pid(pid), __db__.get_texture_by_pid(pid));
+						local pname = __db__.get_check_name_by_pid(pid);
+						if pname ~= nil then
+							numSkill = numSkill + 1;
+							self:F_SetTab(numSkill, pname, __db__.get_texture_by_pid(pid));
+						end
 					end
 				end
 				numSkill = numSkill + 1;
 				self:F_SetTab(numSkill, '@explorer', T_UIDefinition.texture_explorer);
 				numSkill = numSkill + 1;
 				self:F_SetTab(numSkill, '@config', T_UIDefinition.texture_config);
+				numSkill = numSkill + 1;
+				self:F_SetTab(numSkill, '@toggle', T_UIDefinition.texture_toggle);
 				self:F_SetNumTabs(numSkill);
 			end
 			frame.TabFrame = TabFrame;
@@ -3183,6 +3255,7 @@ end
 		frame.TabFrame:F_Update();
 		frame.PortraitButton:F_Update();
 		frame:F_Expand(SET.expand);
+		frame:F_FixSkillList(SET.expand);
 		frame:F_BlzStyle(SET.blz_style, true);
 		if SET.show_call then
 			frame.ToggleButton:Show();
@@ -3542,6 +3615,10 @@ local function LF_AddOnCallback_Blizzard_CraftUI(addon)
 			T_HookedFrameChecks = {
 				AvailableFilterCheckButton = CraftFrameAvailableFilterCheckButton,
 			},
+		},
+		T_ToggleOnSkill = {
+			CraftFramePointsLabel,
+			CraftFramePointsText,
 		},
 
 		F_SetSelection = CraftFrame_SetSelection,		-- SelectCraft
@@ -4929,7 +5006,11 @@ end
 		return CheckButton;
 	end
 	local function LF_ConfigDrop_OnClick(self)
-		ALADROP(self, "BOTTOM", self.meta);
+		if type(self.meta) == 'function' then
+			ALADROP(self, "BOTTOM", self.meta());
+		else
+			ALADROP(self, "BOTTOM", self.meta);
+		end
 	end 
 	local function LF_ConfigCreateDrop(parent, key, text, meta)
 		local Dropdown = CreateFrame("BUTTON", nil, parent);
@@ -4958,21 +5039,9 @@ end
 
 		Dropdown.key = key;
 		Dropdown.meta = meta;
-		local elements = meta.elements;
-		for index = 1, #elements do
-			elements[index].para[1] = Dropdown;
+		function Dropdown:SetVal(val)
 		end
 		Dropdown:SetScript("OnClick", LF_ConfigDrop_OnClick);
-		function Dropdown:SetVal(val)
-			local elements = self.meta.elements;
-			for index = 1, #elements do
-				local element = elements[index];
-				if element.para[2] == val then
-					self.Text:SetText(element.text);
-					break;
-				end
-			end
-		end
 		Dropdown.Right = Label;
 		return Dropdown;
 	end
@@ -5130,7 +5199,7 @@ local function LF_CreateConfigFrame()
 			Dropdown:SetPoint("TOPLEFT", frame, "TOPLEFT", 10 + 150 * px, -25 - 25 * py);
 			T_SetWidgets[key] = Dropdown;
 			px = px + 1;
-			h = max(h, 2);
+			h = max(h, 1);
 		elseif cmd[7] == 'slider' then
 			if px > 2 then
 				px = 0;
@@ -5432,6 +5501,16 @@ end
 			CFrame:F_Expand(val);
 		end
 	end
+	function __namespace__.F_uiFrameFixSkillList()
+		local TFrame = T_uiFrames["BLIZZARD_TRADESKILLUI"];
+		if TFrame ~= nil then
+			TFrame:F_FixSkillList(SET.expand);
+		end
+		local CFrame = T_uiFrames["BLIZZARD_CRAFTUI"];
+		if CFrame ~= nil then
+			CFrame:F_FixSkillList(SET.expand);
+		end
+	end
 	function __namespace__.F_uiToggleFrameRankInfo(val)
 		local TFrame = T_uiFrames["BLIZZARD_TRADESKILLUI"];
 		if TFrame ~= nil then
@@ -5543,15 +5622,21 @@ function __namespace__.init_ui()
 	F:RegisterEvent("SKILL_LINES_CHANGED");
 	F:RegisterEvent("NEW_RECIPE_LEARNED");
 	__namespace__.F_HookTooltip(SkillTip);
-	__namespace__:AddCallback("USER_EVENT_SPELL_DATA_LOADED", function()
+	__namespace__:AddCallback("USER_EVENT_DATA_LOADED", function()
 		F.SKILL_LINES_CHANGED();
 		local TFrame = T_uiFrames["BLIZZARD_TRADESKILLUI"];
-		if TFrame ~= nil and TFrame:IsShown() then
-			TFrame.F_OnSelection();
+		if TFrame ~= nil then
+			if TFrame:IsShown() then
+				TFrame.F_OnSelection();
+			end
+			TFrame.TabFrame:F_Update();
 		end
 		local CFrame = T_uiFrames["BLIZZARD_CRAFTUI"];
-		if CFrame ~= nil and CFrame:IsShown() then
-			CFrame.F_OnSelection();
+		if CFrame ~= nil then
+			if CFrame:IsShown() then
+				CFrame.F_OnSelection();
+			end
+			CFrame.TabFrame:F_Update();
 		end
 	end);
 	__namespace__:AddCallback("USER_EVENT_RECIPE_LIST_UPDATE", __namespace__.F_uiUpdateAllFrames);

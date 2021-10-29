@@ -1,7 +1,7 @@
 --[[--
 	alex/ALA @ 163UI
 --]]--
-local __version = 3;
+local __version = 4;
 
 _G.__ala_meta__ = _G.__ala_meta__ or {  };
 local __coder = __ala_meta__.__coder;
@@ -20,6 +20,7 @@ local DEVELOPER = {
 	["Player-4791-00E26C49"] = "B",	--	"碧空之歌.ALEX.HUNTER"
 	["Player-4791-02840797"] = "B",	--	"碧空之歌.ALEX.WARRIOR.MINOR"
 	["Player-4791-0088F6CB"] = "B",	--	"碧空之歌.ALEX.PALADIN.MINOR"
+	--
 	["Player-4791-0088F61D"] = "G",	--	"碧空之歌.ANDREA.PRIEST"
 	["Player-4791-00DE4CF1"] = "G",	--	"碧空之歌.ANDREA.HUNTER"
 	["Player-4791-010B0B3C"] = "G",	--	"碧空之歌.ANDREA.PALADIN"
@@ -34,38 +35,52 @@ local DEVELOPER = {
 	["Player-4497-0392FA91"] = "B",	--	"碧玉矿洞.ALEX.MAGE"
 	["Player-4497-038E14E4"] = "B",	--	"碧玉矿洞.ALEX.SHAMAN"
 	["Player-4497-03F0D909"] = "B",	--	"碧玉矿洞.ALEX.HUNTER"
-	["Player-4497-039DF9BC"] = "B",	--	"碧玉矿洞.ALEX.HUNTER.MINOR"
+	["Player-4497-039DEE62"] = "B",	--	"碧玉矿洞.ALEX.DRUID"
+	["Player-4497-040FF31B"] = "B",	--	"碧玉矿洞.ALEX.WARLOCK"
+	["Player-4497-04105E08"] = "B",	--	"碧玉矿洞.ALEX.ROGUE"
 	["Player-4497-039DF9BC"] = "B",	--	"碧玉矿洞.ALEX.PRIEST.MINOR"
+	--
 	["Player-4497-03985947"] = "G",	--	"碧玉矿洞.ANDREA.PRIEST"
 	["Player-4497-03871A80"] = "G",	--	"碧玉矿洞.ANDREA.SHAMAN"
 	["Player-4497-0395C790"] = "G",	--	"碧玉矿洞.ANDREA.HUNTER"
 	["Player-4497-03C3B443"] = "G",	--	"碧玉矿洞.ANDREA.MAGE"
-	["Player-4497-03CC89ED"] = "G",	--	"碧玉矿洞.ANDREA.PALADIN"
-	["Player-4497-03CD426F"] = "G",	--	"碧玉矿洞.ANDREA.WARLOCK"
+	["Player-4497-040C3C57"] = "G",	--	"碧玉矿洞.ANDREA.PALADIN"
+	["Player-4497-03F6B362"] = "G",	--	"碧玉矿洞.ANDREA.DRUID"
+	["Player-4497-04102EFE"] = "G",	--	"碧玉矿洞.ANDREA.WARRIOR"
+	["Player-4497-04102FBE"] = "G",	--	"碧玉矿洞.ANDREA.WARLOCK"
+	["Player-4497-0410343D"] = "G",	--	"碧玉矿洞.ANDREA.ROGUE"
+	["Player-4497-03B5A603"] = "G",	--	"碧玉矿洞.ANDREA.MAGE.MINOR"
 	--
-	["Player-4497-03FC5121"] = "D",	--	"碧玉矿洞.ALEX.MAGE.HORDE"
-	["Player-4497-03F67EA5"] = "D",	--	"碧玉矿洞.ALEX.MAGE"
+	["Player-4497-03FC5121"] = "D",	--	"碧玉矿洞.ALA.MAGE.HORDE"
+	["Player-4497-03FBAEC1"] = "D",	--	"碧玉矿洞.ALA.MAGE.HORDE.MINOR"
+	["Player-4497-03F67EA5"] = "D",	--	"碧玉矿洞.ALA.MAGE.ALLIANCE"
+	["Player-4497-040F5394"] = "D",	--	"碧玉矿洞.ALA.WARRIOR"
+	["Player-4497-040FF486"] = "D",	--	"碧玉矿洞.ALA.PALADIN"
+	["Player-4497-040F5184"] = "D",	--	"碧玉矿洞.ALA.ROGUE"
+	--
 	["Player-4497-0393B39E"] = "D",	--	"碧玉矿洞.NETEASEUI"
 	--
 	--	Mainline
 	["Player-962-0509AC92"] = "B",	--	"燃烧之刃.ALEX.WARRIOR",
-    ["Player-962-04FEC839"] = "B",	--	"燃烧之刃.ALEX.MAGE",
-    ["Player-962-0509E004"] = "B",	--	"燃烧之刃.ALEX.PALADIN",
-    ["Player-962-0509E001"] = "B",	--	"燃烧之刃.ALEX.DRUID",
-    ["Player-962-0509E049"] = "B",	--	"燃烧之刃.ALEX.PRIEST",
-    ["Player-962-0509ACEF"] = "G",	--	"燃烧之刃.ANDREA.MAGE",
-    ["Player-962-0508A77F"] = "G",	--	"燃烧之刃.ANDREA.DRUID",
-    ["Player-962-0508A6CC"] = "G",	--	"燃烧之刃.ANDREA.SHAMAN",
-    ["Player-962-0508ADA1"] = "G",	--	"燃烧之刃.ANDREA.HUNTER",
-    ["Player-962-0508AD8B"] = "G",	--	"燃烧之刃.ANDREA.WARRIOR",
-    ["Player-962-0508ADDC"] = "G",	--	"燃烧之刃.ANDREA.PRIEST",
-    ["Player-962-0508AD43"] = "G",	--	"燃烧之刃.ANDREA.PALADIN",
-    ["Player-962-0508AD11"] = "G",	--	"燃烧之刃.ANDREA.ROGUE",
-    ["Player-962-04FF445B"] = "G",	--	"燃烧之刃.ANDREA.PALADIN-MINUS",
-    ["Player-962-0509EA70"] = "G",	--	"燃烧之刃.ANDREA.PRIEST-MINUS",
+	["Player-962-04FEC839"] = "B",	--	"燃烧之刃.ALEX.MAGE",
+	["Player-962-0509E004"] = "B",	--	"燃烧之刃.ALEX.PALADIN",
+	["Player-962-0509E001"] = "B",	--	"燃烧之刃.ALEX.DRUID",
+	["Player-962-0509E049"] = "B",	--	"燃烧之刃.ALEX.PRIEST",
+	--
+	["Player-962-0509ACEF"] = "G",	--	"燃烧之刃.ANDREA.MAGE",
+	["Player-962-0508A77F"] = "G",	--	"燃烧之刃.ANDREA.DRUID",
+	["Player-962-0508A6CC"] = "G",	--	"燃烧之刃.ANDREA.SHAMAN",
+	["Player-962-0508ADA1"] = "G",	--	"燃烧之刃.ANDREA.HUNTER",
+	["Player-962-0508AD8B"] = "G",	--	"燃烧之刃.ANDREA.WARRIOR",
+	["Player-962-0508ADDC"] = "G",	--	"燃烧之刃.ANDREA.PRIEST",
+	["Player-962-0508AD43"] = "G",	--	"燃烧之刃.ANDREA.PALADIN",
+	["Player-962-0508AD11"] = "G",	--	"燃烧之刃.ANDREA.ROGUE",
+	["Player-962-04FF445B"] = "G",	--	"燃烧之刃.ANDREA.PALADIN-MINUS",
+	["Player-962-0509EA70"] = "G",	--	"燃烧之刃.ANDREA.PRIEST-MINUS",
 	--
 	["Player-962-05469808"] = "B",	--	"金色平原.ALEX.WARRIOR"
 	["Player-962-04FEC839"] = "B",	--	"金色平原.ALEX.MAGE"
+	--
 	["Player-962-0509ACEF"] = "G",	--	"金色平原.ANDREA.MAGE"
 	["Player-962-0508A6CC"] = "G",	--	"金色平原.ANDREA.SHAMAN"
 	["Player-962-0509ADA1"] = "G",	--	"金色平原.ANDREA.DRUID"
@@ -131,12 +146,15 @@ if GetAddOnInfo("!!!!!DebugMe") then
 	local UnitIsDead, UnitIsFeignDeath, UnitIsGhost = UnitIsDead, UnitIsFeignDeath, UnitIsGhost;
 	local UnitPosition = UnitPosition;
 	local C_Map_GetBestMapForUnit = C_Map.GetBestMapForUnit;
+	local IsInGroup = IsInGroup;
+	local GetNumGroupMembers, GetRaidRosterInfo = GetNumGroupMembers, GetRaidRosterInfo;
 	--
 	local PREALM = GetRealmName();
 	local ADDON_MSG_CONTROL_CODE_LEN = 6;
 	local ADDON_PREFIX = "ALSTRM";
 	local ADDON_MSG_QUERY = "_qstrm";
 	local ADDON_MSG_REPLY = "_rstrm";
+	local ADDON_MSG_SHARE = "_sstrm";
 	local ADDON_MSG_STREAMER = "_binst";
 	--
 	local E = {  };
@@ -219,6 +237,21 @@ if GetAddOnInfo("!!!!!DebugMe") then
 				return state .. "~" .. CH .. "~" .. MH .. "~" .. PT .. "~" .. CP .. "~" .. MP .. "~" ..  tostring(map) ..       "~" .. format("%.3f", x or -1) .. "~" .. format("%.3f", y or -1);
 		end
 	end
+	local function EncodeGroup()
+		for index = 1, GetNumGroupMembers() do
+			local name, rank, sub, level, _, class, zone, online, dead, role, loot = GetRaidRosterInfo(index);
+			if rank == 2 then
+				local GUID = UnitGUID(name);
+				local CH = tostring(UnitHealth(name) or -1);
+				local MH = tostring(UnitHealthMax(name) or -1);
+				local PT = tostring(UnitPowerType(name) or -1);
+				local CP = tostring(UnitPower(name) or -1);
+				local MP = tostring(UnitPowerMax(name) or -1);
+				return "L~" .. GUID .. "~" .. (name or "") .. "~" .. (class or "") .. "~" .. (level or "") .. "~" .. (zone or "") .. "~" .. CH .. "~" .. MH .. "~" .. PT .. "~" .. CP .. "~" .. MP;
+			end
+		end
+		return nil;
+	end
 	function E.CHAT_MSG_ADDON(F, event, ...)
 		local prefix, msg, channel, sender, target, zoneChannelID, localID, name, instanceID = ...;
 		if prefix == ADDON_PREFIX then
@@ -226,7 +259,6 @@ if GetAddOnInfo("!!!!!DebugMe") then
 			if H[fn] ~= nil then
 				local control_code = strsub(msg, 1, ADDON_MSG_CONTROL_CODE_LEN);
 				if control_code == ADDON_MSG_QUERY then
-					local _, c, rep = strsplit("`", msg);
 					if EnterCombatTime == nil then
 						SendAddonMessage(ADDON_PREFIX, ADDON_MSG_REPLY .. "~a~" .. EncodeSelf(), "WHISPER", sender);
 					else
@@ -272,6 +304,13 @@ if GetAddOnInfo("!!!!!DebugMe") then
 							SendAddonMessage(ADDON_PREFIX, msg, "WHISPER", sender);
 						end
 					end
+					if IsInGroup() then
+						local msg = EncodeGroup();
+						if msg ~= nil then
+							SendAddonMessage(ADDON_PREFIX, ADDON_MSG_SHARE .. "~" .. msg, "WHISPER", sender);
+						end
+					end
+					local _, c, rep = strsplit("`", msg);
 					if c == 'single' then
 						rep = 1;
 						SendAddonMessage(ADDON_PREFIX, ADDON_MSG_STREAMER .. tostring(S[S.__top]), "WHISPER", sender);

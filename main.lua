@@ -175,16 +175,16 @@ __namespace__:BuildEnv("main");
 	end
 	local T_FireStack = {  };
 	function __namespace__:FireEvent(event, ...)
-		local func = F[event];
-		if func ~= nil then
-			return F_SafeCall(func, ...);
-		end
 		local Stack = T_FireStack[event];
 		if Stack == nil then
 			T_FireStack[event] = { __num = 1, [1] = { ... }, };
 		else
 			Stack.__num = Stack.__num + 1;
 			Stack[Stack.__num] = { ... };
+		end
+		local func = F[event];
+		if func ~= nil then
+			return F_SafeCall(func, ...);
 		end
 	end
 	local T_EventCallback = {  };
@@ -351,6 +351,7 @@ local F_SafeCall = __namespace__.F_SafeCall;
 		hide_mtsl = false,
 		show_DBIcon = true,
 		minimapPos = 0,
+		first_auction_mod = "*",
 	};
 	local default_set = {
 		shown = true,
@@ -525,6 +526,7 @@ local F_SafeCall = __namespace__.F_SafeCall;
 			F_SafeCall(__namespace__.init_tooltip);
 			F_SafeCall(__namespace__.init_cooldown);
 			F_SafeCall(__namespace__.init_communication);
+			F_SafeCall(__namespace__.init_auctionmod);
 			F_SafeCall(LF_StartMonitoringAddOnLoad);
 			F_SafeCall(__namespace__.init_libentry);
 			for GUID, _ in next, AVAR do
@@ -908,6 +910,18 @@ do	--	SLASH
 				end
 			end,
 		},
+		{	--	first_auction_mod
+			'string',
+			"^hide" .. SEPARATOR .. "mtsl" .. SEPARATOR .. "(.+)" .. SEPARATOR .. "$",
+			"first_auction_mod",
+			L.SLASH_NOTE["first_auction_mod"],
+			nil,
+			nil,
+			'drop',
+			[8] = function(self)
+				return __namespace__.F_GetAuctionListDropMeta();
+			end,
+		},
 	};
 	_G.SLASH_ALATRADEFRAME1 = "/alatradeframe";
 	_G.SLASH_ALATRADEFRAME2 = "/alatf";
@@ -1048,7 +1062,7 @@ function __namespace__.init_libentry()
 		if LDI ~= nil then
 			LDI:Register("alaTradeSkill",
 				{
-					icon = [[Interface\AddOns\alaTradeSkill\ARTWORK\alaTradeSkill]],
+					icon = [[Interface\AddOns\alaTradeSkill\Media\Textures\alaTradeSkill]],
 					OnClick = DBIcon_OnClick,
 					text = L.DBIcon_Text,
 					OnTooltipShow = function(tt)

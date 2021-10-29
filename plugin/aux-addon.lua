@@ -36,6 +36,6 @@ function mod.F_QueryPriceByID(id, num)
 end
 
 
-__namespace__:AddAddOnCallback("aux-addon", function()
-	__namespace__:FireEvent("AUCTION_MOD_LOADED", mod);
+__namespace__.F_AuctionModCallback("aux-addon", function()
+	__namespace__.F_AddAuctionMod("aux-addon", mod);
 end);

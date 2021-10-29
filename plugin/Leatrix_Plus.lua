@@ -11,8 +11,9 @@ __namespace__:BuildEnv("Leatrix_Plus");
 
 
 __namespace__:AddAddOnCallback("Leatrix_Plus", function()
-	if LeaPlusDB then
+	if LeaPlusDB ~= nil then
 		LeaPlusDB["EnhanceProfessions"] = "Off";
 	end
+	__namespace__.F_uiFrameFixSkillList();
 end);
 

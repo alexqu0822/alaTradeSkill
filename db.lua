@@ -134,6 +134,7 @@ local T_cidpid2sid = {  };	--	[cid][pid] = { sid }
 local T_rid2sid = {  };		--	[rid] = sid
 local T_IsSpecLearned = {  };
 local T_material2sid = {  };
+local T_TradeSkill_SameSkillName = {  };
 --	no-use list
 local recipe_sid_list = {  };	--	{ sid }			--	actually unused
 local recipe_cid_list = {  };	--	{ cid }			--	actually unused
@@ -210,6 +211,8 @@ local function LF_CacheItem(iid)
 	end
 end
 -->		preload
+local LB_PreloadSpellFinished = false;
+local LB_PreloadItemFinished = false;
 function F.SPELL_DATA_LOAD_RESULT(sid, success)
 	if success and T_Temp_SpellHash[sid] then
 		--	trade skill line
@@ -281,6 +284,7 @@ local function LF_RequestSpell()
 		if T_SpellData[sid] == nil then
 			RequestLoadSpellData(sid);
 			T_Temp_SpellHash[sid] = true;
+			T_Temp_pid[sid] = pid;
 			completed = false;
 			maxonce = maxonce - 1;
 			if maxonce <= 0 then
@@ -320,6 +324,10 @@ local function LF_PreloadSpell()
 	if LF_RequestSpell() then
 		F:UnregisterEvent("SPELL_DATA_LOAD_RESULT");
 		__namespace__:FireEvent("USER_EVENT_SPELL_DATA_LOADED");
+		LB_PreloadSpellFinished = true;
+		if LB_PreloadItemFinished then
+			__namespace__:FireEvent("USER_EVENT_DATA_LOADED");
+		end
 	else
 		F:RegisterEvent("SPELL_DATA_LOAD_RESULT");	--	Events registered before loading screen went out may not work well. So reg here everytime.
 		C_Timer_After(2.0, LF_PreloadSpell);
@@ -384,6 +392,17 @@ local function LF_PreloadItem()
 	if LF_RequestItem() then
 		F:UnregisterEvent("ITEM_DATA_LOAD_RESULT");
 		__namespace__:FireEvent("USER_EVENT_ITEM_DATA_LOADED");
+		LB_PreloadItemFinished = true;
+		if LB_PreloadSpellFinished then
+			__namespace__:FireEvent("USER_EVENT_DATA_LOADED");
+		end
+		for pid = __db__.DBMINPID, __db__.DBMAXPID do
+			local n1, n2 = T_TradeSkill_Name[pid], T_TradeSkill_CheckName[pid];
+			if n1 ~= nil and n2 ~= nil then
+				T_TradeSkill_SameSkillName[n1] = n2;
+				T_TradeSkill_SameSkillName[n2] = n1;
+			end
+		end
 	else
 		F:RegisterEvent("ITEM_DATA_LOAD_RESULT");	--	Events registered before loading screen went out may not work well. So reg here everytime.
 		C_Timer_After(2.0, LF_PreloadItem);
@@ -804,9 +823,12 @@ end
 	function __db__.item_string_s(iid)
 		return __db__.item_string(iid) or ("itemId:" .. iid);
 	end
---
+--	MISC
 	function __db__.is_spec_learned(spec)
 		return T_IsSpecLearned[spec];
+	end
+	function __db__.is_name_same_skill(name1, name2)
+		return name1 == name2 or name1 == T_TradeSkill_SameSkillName[name2];
 	end
 --	pid, list, check_hash, phase, rank, rankReversed, showKnown, showUnkown, showHighRank, filterClass, filterSpec, donot_wipe_list | list{ sid, }
 local function FilterAdd(list, sid, class, spec, filterClass, filterSpec)

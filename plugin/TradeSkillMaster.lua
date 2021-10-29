@@ -38,6 +38,6 @@ function mod.F_QueryPriceByID(id, num)
 end
 
 
-__namespace__:AddAddOnCallback("TradeSkillMaster", function()
-	__namespace__:FireEvent("AUCTION_MOD_LOADED", mod);
+__namespace__.F_AuctionModCallback("TradeSkillMaster", function()
+	__namespace__.F_AddAuctionMod("TradeSkillMaster", mod);
 end);
