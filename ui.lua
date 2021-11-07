@@ -23,6 +23,7 @@ local __ala_meta__ = __ala_meta__;
 	local floor = math.floor;
 	local strlower = string.lower;
 	local strupper = string.upper;
+	local strmatch = string.match;
 	local strfind = string.find;
 	local format = string.format;
 	local gsub = string.gsub;
@@ -3194,7 +3195,7 @@ end
 					local pid = frame.flag or __db__.get_pid_by_pname(frame.F_GetSkillName());
 					frame.SearchEditBox:ClearFocus();
 					if pid == 10 and loc and loc ~= "" then
-						local id = tonumber(select(3, strfind(link, "item:(%d+)")));
+						local id = tonumber(strmatch(link, "item:(%d+)"));
 						if id ~= 11287 and id ~= 11288 and id ~= 11289 and id ~= 11290 then
 							if L.ENCHANT_FILTER[loc] ~= nil then
 								frame:F_Search(L.ENCHANT_FILTER[loc]);
@@ -3444,7 +3445,7 @@ local function LF_AddOnCallback_Blizzard_TradeSkillUI(addon)
 		F_GetRecipeNumAvailable = GetNumTradeSkills,
 		F_GetRecipeInfo = GetTradeSkillInfo,
 			--	skillName, difficult & header, numAvailable, isExpanded = GetTradeSkillInfo(skillIndex)
-		F_GetRecipeItemID = function(arg1) local link = GetTradeSkillItemLink(arg1); return link and tonumber(select(3, strfind(link, "[a-zA-Z]:(%d+)"))) or 0; end,
+		F_GetRecipeItemID = function(arg1) local link = GetTradeSkillItemLink(arg1); return link and tonumber(strmatch(link, "[a-zA-Z]:(%d+)")) or 0; end,
 		F_GetRecipeItemLink = GetTradeSkillItemLink,
 		F_GetRecipeIcon = GetTradeSkillIcon,
 		F_GetRecipeDesc = function() return ""; end,
@@ -3455,7 +3456,7 @@ local function LF_AddOnCallback_Blizzard_TradeSkillUI(addon)
 
 		F_GetRecipeNumReagents = GetTradeSkillNumReagents,
 		F_GetRecipeReagentLink = GetTradeSkillReagentItemLink,
-		F_GetRecipeReagentID = function(i, j) return tonumber(select(3, strfind(GetTradeSkillReagentItemLink(i, j), "[a-zA-Z]:(%d+)"))); end,
+		F_GetRecipeReagentID = function(i, j) return tonumber(strmatch(GetTradeSkillReagentItemLink(i, j), "[a-zA-Z]:(%d+)")); end,
 		F_GetRecipeReagentInfo = GetTradeSkillReagentInfo,
 			--	name, texture, numRequired, numHave = GetTradeSkillReagentInfo(tradeSkillRecipeId, reagentId);
 
@@ -3642,7 +3643,7 @@ local function LF_AddOnCallback_Blizzard_CraftUI(addon)
 		F_GetRecipeNumAvailable = GetNumCrafts,
 		F_GetRecipeInfo = function(arg1) local _1, _2, _3, _4, _5, _6, _7 = GetCraftInfo(arg1); return _1, _3, _4, _5, _6, _7; end,
 			--	craftName, craftSubSpellName(""), difficult, numAvailable, isExpanded, trainingPointCost, requiredLevel = GetCraftInfo(index)
-		F_GetRecipeItemID = function(arg1) local link = GetCraftItemLink(arg1); return link and tonumber(select(3, strfind(link, "[a-zA-Z]:(%d+)"))) or 0; end,
+		F_GetRecipeItemID = function(arg1) local link = GetCraftItemLink(arg1); return link and tonumber(strmatch(link, "[a-zA-Z]:(%d+)")) or 0; end,
 		F_GetRecipeItemLink = GetCraftItemLink,
 		F_GetRecipeIcon = GetCraftIcon,
 		F_GetRecipeDesc = GetCraftDescription,
@@ -3652,7 +3653,7 @@ local function LF_AddOnCallback_Blizzard_CraftUI(addon)
 
 		F_GetRecipeNumReagents = GetCraftNumReagents,
 		F_GetRecipeReagentLink = GetCraftReagentItemLink,
-		F_GetRecipeReagentID = function(i, j) return tonumber(select(3, strfind(GetCraftReagentItemLink(i, j), "[a-zA-Z]:(%d+)"))); end,
+		F_GetRecipeReagentID = function(i, j) return tonumber(strmatch(GetCraftReagentItemLink(i, j), "[a-zA-Z]:(%d+)")); end,
 		F_GetRecipeReagentInfo = GetCraftReagentInfo,
 			-- name, texture, numRequired, numHave = GetCraftReagentInfo(tradeSkillRecipeId, reagentId);
 

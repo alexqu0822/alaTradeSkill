@@ -19,6 +19,7 @@ local L = __namespace__.L;
 	local strrep = string.rep;
 	local strupper = string.upper;
 	local strsplit = string.split;
+	local strmatch = string.match;
 	local strfind = string.find;
 	local format = string.format;
 	local tinsert = table.insert;
@@ -28,6 +29,7 @@ local L = __namespace__.L;
 	local GetPlayerInfoByGUID = GetPlayerInfoByGUID;
 	local UnitFactionGroup = UnitFactionGroup;
 	local GetCraftReagentItemLink = GetCraftReagentItemLink;
+	local GetGuildBankItemLink = GetGuildBankItemLink;
 	local RAID_CLASS_COLORS = RAID_CLASS_COLORS;
 
 	local _G = _G;
@@ -502,7 +504,7 @@ local function LF_TooltipSetHyperlink(Tooltip, link)
 		return;
 	end
 	if link then
-		local cid = tonumber(select(3, strfind(link, "item:(%d+)")) or nil);
+		local cid = tonumber(strmatch(link, "item:(%d+)") or nil);
 		if cid then
 			LF_TooltipSetItemByID(Tooltip, cid);
 		end
@@ -517,7 +519,7 @@ end
 local function LF_TooltipGUISetItem(Tooltip)
 	local _, link = Tooltip:GetItem();
 	if link ~= nil then
-		local iid = tonumber(select(3, strfind(link, "item:(%d+)")) or nil);
+		local iid = tonumber(strmatch(link, "item:(%d+)") or nil);
 		if iid ~= nil then
 			LF_TooltipSetItemByID(Tooltip, iid);
 		end
@@ -529,7 +531,7 @@ local function LF_TooltipSetCraftSpell(Tooltip)
 		LF_TooltipSetSpellByID(Tooltip, sid);
 	else
 		local _, link = Tooltip:GetItem();
-		local iid = link and tonumber(select(3, strfind(link, "item:(%d+)")) or nil);
+		local iid = link and tonumber(strmatch(link, "item:(%d+)") or nil);
 		if iid ~= nil then
 			LF_TooltipSetItemByID(Tooltip, iid);
 		end
@@ -565,13 +567,24 @@ local function F_HookTooltip(Tooltip)
 	hooksecurefunc(Tooltip, "SetCraftItem", function(Tooltip, recipe_index, reagent_index)
 		local link = GetCraftReagentItemLink(recipe_index, reagent_index);
 		if link ~= nil then
-			local iid = tonumber(select(3, strfind(link, "item:(%d+)")) or nil);
+			local iid = tonumber(strmatch(link, "item:(%d+)") or nil);
 			if iid ~= nil then
 				LF_TooltipSetItemByID(Tooltip, iid);
 			end
 		end
 	end);
 	hooksecurefunc(Tooltip, "SetTrainerService", LF_TooltipGUISetItem);
+	if Tooltip.SetGuildBankItem ~= nil then
+		hooksecurefunc(Tooltip, "SetGuildBankItem", function(Tooltip, tab, index)
+			local link = GetGuildBankItemLink(tab, index);
+			if link ~= nil then
+				local iid = tonumber(strmatch(link, "item:(%d+)") or nil);
+				if iid ~= nil then
+					LF_TooltipSetItemByID(Tooltip, iid);
+				end
+			end
+		end);
+	end
 end
 
 __namespace__.F_HookTooltip = F_HookTooltip;

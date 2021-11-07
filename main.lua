@@ -509,7 +509,7 @@ local F_SafeCall = __namespace__.F_SafeCall;
 	local function LF_Init()
 		if not isInitialized then
 			isInitialized = true;
-			F_SafeCall(__namespace__.init_db);		--	!!!must be run earlier than any others!!!
+			F_SafeCall(__namespace__.init_db);		--	!!!must be earlier than any others!!!
 			if not F_SafeCall(LF_ModifySavedVariable) then
 				local fav = alaTradeSkillSV.fav;
 				alaTradeSkillSV = nil;

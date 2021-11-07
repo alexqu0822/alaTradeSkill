@@ -9,6 +9,7 @@ local L = __namespace__.L;
 -->		upvalue
 	local next = next;
 	local floor = math.floor;
+	local strmatch = string.match;
 	local format = string.format;
 	local RequestLoadItemDataByID = RequestLoadItemDataByID or C_Item.RequestLoadItemDataByID;
 	local GetItemInfo = GetItemInfo;
@@ -61,7 +62,7 @@ for id, price in next, T_MaterialVendorPrice do
 end
 --
 function AuctionBase.F_QueryVendorPriceByLink(link, num)
-	local id = tonumber(select(3, strfind(link, "item:(%d+)")));
+	local id = tonumber(strmatch(link, "item:(%d+)"));
 	return id ~= nil and AuctionBase.F_QueryVendorPriceByID(id, num);
 end
 function AuctionBase.F_QueryVendorPriceByID(id, num)

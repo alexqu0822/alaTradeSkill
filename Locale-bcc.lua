@@ -114,8 +114,8 @@ if LOCALE == "zhCN" or LOCALE == "zhTW" then
 	L["showItemInsteadOfSpell"] = "物品";
 	L["showRank"] = "等级";
 	L["haveMaterials"] = "材料";
-	L["showUnkownTip"] = "显示已经学会的配方";
-	L["showKnownTip"] = "显示还没学会的配方";
+	L["showUnkownTip"] = "显示还没学会的配方";
+	L["showKnownTip"] = "显示已经学会的配方";
 	L["showHighRankTip"] = "显示高等级的配方";
 	L["filterClassTip"] = "是否过滤掉" .. UnitClass('player') .. "不能学到的配方";
 	L["filterSpecTip"] = "是否过滤掉当前专精不能学到的配方";
