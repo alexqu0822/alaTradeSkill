@@ -48,7 +48,7 @@ local AuctionMod = nil;
 	local index_reagents_count = 13;
 	local index_trainer = 14;
 	local index_train_price = 15;
-	local index_rid = 16;
+	local index_recipe = 16;
 	local index_quest = 17;
 	local index_object = 18;
 	local index_class = 19;
@@ -429,21 +429,26 @@ local function LF_MTSL_SetSpellTip(Tip, sid)
 			Tip:Show();
 		end
 		local pid = info[index_pid];
-		if info[index_rid] then				-- recipe
-			LF_MTSL_SetItem(Tip, pid, info[index_rid], L["LABEL_GET_FROM"], 1)
+		local rids = info[index_recipe];
+		if rids then				-- recipe
+			for index = 1, #rids do
+				local rid = rids[index];
+				LF_MTSL_SetItem(Tip, pid, rid, L["LABEL_GET_FROM"], 1);
+			end
 		end
 		if info[index_quest] then			-- quests
 			for _, qid in next, info[index_quest] do
 				LF_MTSL_SetQuest(Tip, pid, qid, L["LABEL_GET_FROM"], 1);
 			end
 		end
-		if info[index_object] then			-- objects
-			if type(info[index_object]) == 'table' then
-				for _, oid in next, info[index_object] do
+		local oid = info[index_object];
+		if oid ~= nil then			-- objects
+			if type(oid) == 'table' then
+				for _, oid in next, oid do
 					LF_MTSL_SetObject(Tip, pid, oid, L["LABEL_GET_FROM"], 1);
 				end
 			else
-				LF_MTSL_SetObject(Tip, pid, info[index_object], L["LABEL_GET_FROM"], 1);
+				LF_MTSL_SetObject(Tip, pid, oid, L["LABEL_GET_FROM"], 1);
 			end
 		end
 		--

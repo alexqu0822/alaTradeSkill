@@ -299,7 +299,7 @@ function __namespace__.init_communication()
 		-- 		end
 		-- 	end
 		-- end);
-		C_Timer_NewTicker(60.0, LF_Broadcast);
+		-- C_Timer_NewTicker(60.0, LF_Broadcast);
 	else
 		_error_("RegisterAddonMessagePrefix", ADDON_PREFIX);
 	end

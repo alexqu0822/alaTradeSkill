@@ -1,7 +1,8 @@
 --[[--
 	ALA@163UI
 --]]--
-local __version = 2;
+
+local __version = 5;
 
 _G.__ala_meta__ = _G.__ala_meta__ or {  };
 local __commlib = __ala_meta__.__commlib;

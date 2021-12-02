@@ -413,7 +413,7 @@ do	--	supreme craft
 				button:Hide();
 			end
 		end
-	function __namespace__.ui_CreateSupreme(hooked_frame)
+	local function LF_CreateSupreme(hooked_frame)
 		local supreme = CreateFrame("FRAME", nil, hooked_frame);
 		--	supreme
 			supreme:SetFrameStrata("HIGH");

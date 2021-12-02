@@ -67,7 +67,7 @@ local AuctionMod = nil;
 	local index_reagents_count = 13;
 	local index_trainer = 14;
 	local index_train_price = 15;
-	local index_rid = 16;
+	local index_recipe = 16;
 	local index_quest = 17;
 	local index_object = 18;
 	local index_class = 19;
@@ -573,8 +573,10 @@ local function F_HookTooltip(Tooltip)
 			end
 		end
 	end);
-	hooksecurefunc(Tooltip, "SetTrainerService", LF_TooltipGUISetItem);
-	if Tooltip.SetGuildBankItem ~= nil then
+	if __namespace__.__is_classic then
+		hooksecurefunc(Tooltip, "SetTrainerService", LF_TooltipGUISetItem);
+	elseif __namespace__.__is_bcc then
+		hooksecurefunc(Tooltip, "SetTrainerService", LF_TooltipGUISetSpell);
 		hooksecurefunc(Tooltip, "SetGuildBankItem", function(Tooltip, tab, index)
 			local link = GetGuildBankItemLink(tab, index);
 			if link ~= nil then
@@ -631,24 +633,27 @@ local function LF_SetRecipeSourceTip(Tooltip, sid)
 				Tooltip:AddDoubleLine(L["LABEL_GET_FROM"], "|cffff00ff" .. L["trainer"] .. "|r");
 			end
 		end
-		local rid = info[index_rid];
-		if rid ~= nil then				-- recipe
-			local _, line, _, _, _, _, _, _, bind = __db__.item_info(rid);
-			if line == nil then
-				line = "|cffffffff" .. L["item"] .. "|r ID: " .. rid;
-			end
-			if bind ~= 1 and bind ~= 4 then
-				line = line .. "(|cff00ff00" .. L["tradable"] .. "|r)";
-				if AuctionMod ~= nil then
-					local price = AuctionMod.F_QueryPriceByID(rid);
-					if price ~= nil and price > 0 then
-						line = line .. " |cff00ff00AH|r " .. AuctionMod.F_GetMoneyString(price);
-					end
+		local rids = info[index_recipe];
+		if rids ~= nil then				-- recipe
+			for index = 1, #rids do
+				local rid = rids[index];
+				local _, line, _, _, _, _, _, _, bind = __db__.item_info(rid);
+				if line == nil then
+					line = "|cffffffff" .. L["item"] .. "|r ID: " .. rid;
 				end
-			else
-				line = line .. "(|cffff0000" .. L["non_tradable"] .. "|r)";
+				if bind ~= 1 and bind ~= 4 then
+					line = line .. "(|cff00ff00" .. L["tradable"] .. "|r)";
+					if AuctionMod ~= nil then
+						local price = AuctionMod.F_QueryPriceByID(rid);
+						if price ~= nil and price > 0 then
+							line = line .. " |cff00ff00AH|r " .. AuctionMod.F_GetMoneyString(price);
+						end
+					end
+				else
+					line = line .. "(|cffff0000" .. L["non_tradable"] .. "|r)";
+				end
+				Tooltip:AddDoubleLine(L["LABEL_GET_FROM"], line);
 			end
-			Tooltip:AddDoubleLine(L["LABEL_GET_FROM"], line);
 		end
 		local qid = info[index_quest];
 		if qid ~= nil then			-- quests

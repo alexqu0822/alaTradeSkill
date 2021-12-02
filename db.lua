@@ -60,7 +60,7 @@ local _noop_, _log_, _error_ = __namespace__._noop_, __namespace__._log_, __name
 	local index_reagents_count = 13;
 	local index_trainer = 14;
 	local index_train_price = 15;
-	local index_rid = 16;
+	local index_recipe = 16;
 	local index_quest = 17;
 	local index_object = 18;
 	local index_class = 19;
@@ -353,22 +353,25 @@ local function LF_RequestItem()
 				end
 			end
 		end
-		local rid = info[index_rid]
-		if rid ~= nil then
-			if T_ItemData[rid] == nil then
-				RequestLoadItemDataByID(rid);
-				T_Temp_ItemHash[rid] = true;
-				completed = false;
-				maxonce = maxonce - 1;
-				if maxonce <= 0 then
-					return false;
+		local rids = info[index_recipe]
+		if rids ~= nil then
+			for index = 1, #rids do
+				local rid = rids[index];
+				if T_ItemData[rid] == nil then
+					RequestLoadItemDataByID(rid);
+					T_Temp_ItemHash[rid] = true;
+					completed = false;
+					maxonce = maxonce - 1;
+					if maxonce <= 0 then
+						return false;
+					end
 				end
 			end
 		end
 		local reagent_ids = info[index_reagents_id];
 		if reagent_ids ~= nil then
-			for index2 = 1, #reagent_ids do
-				local rid = reagent_ids[index2];
+			for index = 1, #reagent_ids do
+				local rid = reagent_ids[index];
 				if T_ItemData[rid] == nil then
 					RequestLoadItemDataByID(rid);
 					T_Temp_ItemHash[rid] = true;
@@ -1268,9 +1271,12 @@ function __namespace__.init_db()
 					end
 					tinsert(h2, sid);
 				end
-				local rid = info[index_rid];
-				if rid ~= nil then
-					T_rid2sid[rid] = sid;
+				local rids = info[index_recipe];
+				if rids ~= nil then
+					for index = 1, #rids do
+						local rid = rids[index];
+						T_rid2sid[rid] = sid;
+					end
 				end
 				--	list
 				tinsert(recipe_sid_list, sid);

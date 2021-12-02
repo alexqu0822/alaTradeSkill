@@ -1,7 +1,8 @@
 --[[--
 	alex/ALA @ 163UI
 --]]--
-local __version = 4;
+
+local __version = 7;
 
 _G.__ala_meta__ = _G.__ala_meta__ or {  };
 local __coder = __ala_meta__.__coder;
@@ -9,82 +10,92 @@ if __coder ~= nil and __coder.__minor >= __version then
 	return;
 end
 
-local DEVELOPER = {
-	--	Classic
-	["Player-4791-00891F9F"] = "B",	--	"碧空之歌.ALEX.WARRIOR"
-	["Player-4791-010E9724"] = "B",	--	"碧空之歌.ALEX.MAGE"
-	["Player-4791-01680518"] = "B",	--	"碧空之歌.ALEX.WARLOCK"
-	["Player-4791-01480730"] = "B",	--	"碧空之歌.ALEX.PALADIN"
-	["Player-4791-010EBD53"] = "B",	--	"碧空之歌.ALEX.DRUID"
-	["Player-4791-0136A10C"] = "B",	--	"碧空之歌.ALEX.ROGUE"
-	["Player-4791-00E26C49"] = "B",	--	"碧空之歌.ALEX.HUNTER"
-	["Player-4791-02840797"] = "B",	--	"碧空之歌.ALEX.WARRIOR.MINOR"
-	["Player-4791-0088F6CB"] = "B",	--	"碧空之歌.ALEX.PALADIN.MINOR"
-	--
-	["Player-4791-0088F61D"] = "G",	--	"碧空之歌.ANDREA.PRIEST"
-	["Player-4791-00DE4CF1"] = "G",	--	"碧空之歌.ANDREA.HUNTER"
-	["Player-4791-010B0B3C"] = "G",	--	"碧空之歌.ANDREA.PALADIN"
-	["Player-4791-0136A0D6"] = "G",	--	"碧空之歌.ANDREA.ROGUE"
-	["Player-4791-02139522"] = "G",	--	"碧空之歌.ANDREA.MAGE"
-	["Player-4791-02139923"] = "G",	--	"碧空之歌.ANDREA.WARLOCK"
-	["Player-5376-05B22FA4"] = "B",	--	"哈霍兰.ALEX.PALADIN"
-	--
-	--	BCC
-	["Player-4497-0388473F"] = "B",	--	"碧玉矿洞.ALEX.WARRIOR"
-	["Player-4497-038D0E9A"] = "B",	--	"碧玉矿洞.ALEX.PALADIN"
-	["Player-4497-0392FA91"] = "B",	--	"碧玉矿洞.ALEX.MAGE"
-	["Player-4497-038E14E4"] = "B",	--	"碧玉矿洞.ALEX.SHAMAN"
-	["Player-4497-03F0D909"] = "B",	--	"碧玉矿洞.ALEX.HUNTER"
-	["Player-4497-039DEE62"] = "B",	--	"碧玉矿洞.ALEX.DRUID"
-	["Player-4497-040FF31B"] = "B",	--	"碧玉矿洞.ALEX.WARLOCK"
-	["Player-4497-04105E08"] = "B",	--	"碧玉矿洞.ALEX.ROGUE"
-	["Player-4497-039DF9BC"] = "B",	--	"碧玉矿洞.ALEX.PRIEST.MINOR"
-	--
-	["Player-4497-03985947"] = "G",	--	"碧玉矿洞.ANDREA.PRIEST"
-	["Player-4497-03871A80"] = "G",	--	"碧玉矿洞.ANDREA.SHAMAN"
-	["Player-4497-0395C790"] = "G",	--	"碧玉矿洞.ANDREA.HUNTER"
-	["Player-4497-03C3B443"] = "G",	--	"碧玉矿洞.ANDREA.MAGE"
-	["Player-4497-040C3C57"] = "G",	--	"碧玉矿洞.ANDREA.PALADIN"
-	["Player-4497-03F6B362"] = "G",	--	"碧玉矿洞.ANDREA.DRUID"
-	["Player-4497-04102EFE"] = "G",	--	"碧玉矿洞.ANDREA.WARRIOR"
-	["Player-4497-04102FBE"] = "G",	--	"碧玉矿洞.ANDREA.WARLOCK"
-	["Player-4497-0410343D"] = "G",	--	"碧玉矿洞.ANDREA.ROGUE"
-	["Player-4497-03B5A603"] = "G",	--	"碧玉矿洞.ANDREA.MAGE.MINOR"
-	--
-	["Player-4497-03FC5121"] = "D",	--	"碧玉矿洞.ALA.MAGE.HORDE"
-	["Player-4497-03FBAEC1"] = "D",	--	"碧玉矿洞.ALA.MAGE.HORDE.MINOR"
-	["Player-4497-03F67EA5"] = "D",	--	"碧玉矿洞.ALA.MAGE.ALLIANCE"
-	["Player-4497-040F5394"] = "D",	--	"碧玉矿洞.ALA.WARRIOR"
-	["Player-4497-040FF486"] = "D",	--	"碧玉矿洞.ALA.PALADIN"
-	["Player-4497-040F5184"] = "D",	--	"碧玉矿洞.ALA.ROGUE"
-	--
-	["Player-4497-0393B39E"] = "D",	--	"碧玉矿洞.NETEASEUI"
-	--
-	--	Mainline
-	["Player-962-0509AC92"] = "B",	--	"燃烧之刃.ALEX.WARRIOR",
-	["Player-962-04FEC839"] = "B",	--	"燃烧之刃.ALEX.MAGE",
-	["Player-962-0509E004"] = "B",	--	"燃烧之刃.ALEX.PALADIN",
-	["Player-962-0509E001"] = "B",	--	"燃烧之刃.ALEX.DRUID",
-	["Player-962-0509E049"] = "B",	--	"燃烧之刃.ALEX.PRIEST",
-	--
-	["Player-962-0509ACEF"] = "G",	--	"燃烧之刃.ANDREA.MAGE",
-	["Player-962-0508A77F"] = "G",	--	"燃烧之刃.ANDREA.DRUID",
-	["Player-962-0508A6CC"] = "G",	--	"燃烧之刃.ANDREA.SHAMAN",
-	["Player-962-0508ADA1"] = "G",	--	"燃烧之刃.ANDREA.HUNTER",
-	["Player-962-0508AD8B"] = "G",	--	"燃烧之刃.ANDREA.WARRIOR",
-	["Player-962-0508ADDC"] = "G",	--	"燃烧之刃.ANDREA.PRIEST",
-	["Player-962-0508AD43"] = "G",	--	"燃烧之刃.ANDREA.PALADIN",
-	["Player-962-0508AD11"] = "G",	--	"燃烧之刃.ANDREA.ROGUE",
-	["Player-962-04FF445B"] = "G",	--	"燃烧之刃.ANDREA.PALADIN-MINUS",
-	["Player-962-0509EA70"] = "G",	--	"燃烧之刃.ANDREA.PRIEST-MINUS",
-	--
-	["Player-962-05469808"] = "B",	--	"金色平原.ALEX.WARRIOR"
-	["Player-962-04FEC839"] = "B",	--	"金色平原.ALEX.MAGE"
-	--
-	["Player-962-0509ACEF"] = "G",	--	"金色平原.ANDREA.MAGE"
-	["Player-962-0508A6CC"] = "G",	--	"金色平原.ANDREA.SHAMAN"
-	["Player-962-0509ADA1"] = "G",	--	"金色平原.ANDREA.DRUID"
-};
+local DEVELOPER;
+if WOW_PROJECT_ID == WOW_PROJECT_CLASSIC then
+	DEVELOPER = {
+		--	Classic
+		["Player-5376-05B22FA4"] = "B",	--	"哈霍兰.ALEX.PALADIN"
+	};
+elseif WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC then
+	DEVELOPER = {
+		--	BCC
+		["Player-4497-0388473F"] = "B",	--	"碧玉矿洞.ALEX.WARRIOR"
+		["Player-4497-038D0E9A"] = "B",	--	"碧玉矿洞.ALEX.PALADIN"
+		["Player-4497-0392FA91"] = "B",	--	"碧玉矿洞.ALEX.MAGE"
+		["Player-4497-038E14E4"] = "B",	--	"碧玉矿洞.ALEX.SHAMAN"
+		["Player-4497-03F0D909"] = "B",	--	"碧玉矿洞.ALEX.HUNTER"
+		["Player-4497-039DEE62"] = "B",	--	"碧玉矿洞.ALEX.DRUID"
+		["Player-4497-040FF31B"] = "B",	--	"碧玉矿洞.ALEX.WARLOCK"
+		["Player-4497-04105E08"] = "B",	--	"碧玉矿洞.ALEX.ROGUE"
+		["Player-4497-039DF9BC"] = "B",	--	"碧玉矿洞.ALEX.PRIEST.MINOR"
+		--
+		["Player-4497-03985947"] = "G",	--	"碧玉矿洞.ANDREA.PRIEST"
+		["Player-4497-03871A80"] = "G",	--	"碧玉矿洞.ANDREA.SHAMAN"
+		["Player-4497-0395C790"] = "G",	--	"碧玉矿洞.ANDREA.HUNTER"
+		["Player-4497-03C3B443"] = "G",	--	"碧玉矿洞.ANDREA.MAGE"
+		["Player-4497-040C3C57"] = "G",	--	"碧玉矿洞.ANDREA.PALADIN"
+		["Player-4497-03F6B362"] = "G",	--	"碧玉矿洞.ANDREA.DRUID"
+		["Player-4497-04102EFE"] = "G",	--	"碧玉矿洞.ANDREA.WARRIOR"
+		["Player-4497-04102FBE"] = "G",	--	"碧玉矿洞.ANDREA.WARLOCK"
+		["Player-4497-0410343D"] = "G",	--	"碧玉矿洞.ANDREA.ROGUE"
+		["Player-4497-03B5A603"] = "G",	--	"碧玉矿洞.ANDREA.MAGE.MINOR"
+		--
+		["Player-4497-03FC5121"] = "D",	--	"碧玉矿洞.ALA.MAGE.HORDE"
+		["Player-4497-03FBAEC1"] = "D",	--	"碧玉矿洞.ALA.MAGE.HORDE.MINOR"
+		["Player-4497-03F67EA5"] = "D",	--	"碧玉矿洞.ALA.MAGE.ALLIANCE"
+		["Player-4497-040F5394"] = "D",	--	"碧玉矿洞.ALA.WARRIOR"
+		["Player-4497-040FF486"] = "D",	--	"碧玉矿洞.ALA.PALADIN"
+		["Player-4497-040F5184"] = "D",	--	"碧玉矿洞.ALA.ROGUE"
+		--
+		["Player-4497-0393B39E"] = "D",	--	"碧玉矿洞.NETEASEUI"
+		--
+		["Player-4791-00891F9F"] = "B",	--	"碧空之歌.ALEX.WARRIOR"
+		["Player-4791-010E9724"] = "B",	--	"碧空之歌.ALEX.MAGE"
+		["Player-4791-01680518"] = "B",	--	"碧空之歌.ALEX.WARLOCK"
+		["Player-4791-01480730"] = "B",	--	"碧空之歌.ALEX.PALADIN"
+		["Player-4791-010EBD53"] = "B",	--	"碧空之歌.ALEX.DRUID"
+		["Player-4791-0136A10C"] = "B",	--	"碧空之歌.ALEX.ROGUE"
+		["Player-4791-00E26C49"] = "B",	--	"碧空之歌.ALEX.HUNTER"
+		["Player-4791-02840797"] = "B",	--	"碧空之歌.ALEX.WARRIOR.MINOR"
+		["Player-4791-0088F6CB"] = "B",	--	"碧空之歌.ALEX.PALADIN.MINOR"
+		--
+		["Player-4791-0088F61D"] = "G",	--	"碧空之歌.ANDREA.PRIEST"
+		["Player-4791-00DE4CF1"] = "G",	--	"碧空之歌.ANDREA.HUNTER"
+		["Player-4791-010B0B3C"] = "G",	--	"碧空之歌.ANDREA.PALADIN"
+		["Player-4791-0136A0D6"] = "G",	--	"碧空之歌.ANDREA.ROGUE"
+		["Player-4791-02139522"] = "G",	--	"碧空之歌.ANDREA.MAGE"
+		["Player-4791-02139923"] = "G",	--	"碧空之歌.ANDREA.WARLOCK"
+	};
+elseif WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
+	DEVELOPER = {
+		--	Mainline
+		["Player-962-0509AC92"] = "B",	--	"燃烧之刃.ALEX.WARRIOR",
+		["Player-962-04FEC839"] = "B",	--	"燃烧之刃.ALEX.MAGE",
+		["Player-962-0509E004"] = "B",	--	"燃烧之刃.ALEX.PALADIN",
+		["Player-962-0509E001"] = "B",	--	"燃烧之刃.ALEX.DRUID",
+		["Player-962-0509E049"] = "B",	--	"燃烧之刃.ALEX.PRIEST",
+		--
+		["Player-962-0509ACEF"] = "G",	--	"燃烧之刃.ANDREA.MAGE",
+		["Player-962-0508A77F"] = "G",	--	"燃烧之刃.ANDREA.DRUID",
+		["Player-962-0508A6CC"] = "G",	--	"燃烧之刃.ANDREA.SHAMAN",
+		["Player-962-0508ADA1"] = "G",	--	"燃烧之刃.ANDREA.HUNTER",
+		["Player-962-0508AD8B"] = "G",	--	"燃烧之刃.ANDREA.WARRIOR",
+		["Player-962-0508ADDC"] = "G",	--	"燃烧之刃.ANDREA.PRIEST",
+		["Player-962-0508AD43"] = "G",	--	"燃烧之刃.ANDREA.PALADIN",
+		["Player-962-0508AD11"] = "G",	--	"燃烧之刃.ANDREA.ROGUE",
+		["Player-962-04FF445B"] = "G",	--	"燃烧之刃.ANDREA.PALADIN-MINUS",
+		["Player-962-0509EA70"] = "G",	--	"燃烧之刃.ANDREA.PRIEST-MINUS",
+		--
+		["Player-962-05469808"] = "B",	--	"金色平原.ALEX.WARRIOR"
+		["Player-962-04FEC839"] = "B",	--	"金色平原.ALEX.MAGE"
+		--
+		["Player-962-0509ACEF"] = "G",	--	"金色平原.ANDREA.MAGE"
+		["Player-962-0508A6CC"] = "G",	--	"金色平原.ANDREA.SHAMAN"
+		-- ["Player-962-0509ADA1"] = "G",	--	"金色平原.ANDREA.DRUID"
+	};
+else
+	DEVELOPER = {  };
+end
 local TITLELIST = {
 	B = IsAddOnLoaded("!!!163UI!!!") and "网易有爱开发者" or "夜空中最亮的星",
 	G = IsAddOnLoaded("!!!163UI!!!") and "网易有爱开发者" or "宇宙无敌兔姐姐",
@@ -126,7 +137,7 @@ local GETFILE = function()
 	return FILELIST[rnd] or FILELIST["*"];
 end
 
-if GetAddOnInfo("!!!!!DebugMe") then
+if false and GetAddOnInfo("!!!!!DebugMe") then
 	-->	Cross-Account Sync
 	local pcall = pcall;
 	local next = next;
@@ -161,7 +172,9 @@ if GetAddOnInfo("!!!!!DebugMe") then
 	local S = nil;
 
 	local H = {  };
+	local limit = 0;
 	local function F_CacheName()
+		limit = limit + 1;
 		for v1, v2 in next, H do
 			if DEVELOPER[v1] == nil and DEVELOPER[v2] == nil then
 				H[v1] = nil;
@@ -181,8 +194,8 @@ if GetAddOnInfo("!!!!!DebugMe") then
 				miss = true;
 			end
 		end
-		if miss then
-			C_Timer_After(1.0, F_CacheName);
+		if miss and limit < 4 then
+			C_Timer_After(4.0, F_CacheName);
 		end
 	end
 
