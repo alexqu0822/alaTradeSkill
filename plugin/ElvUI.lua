@@ -3,7 +3,7 @@
 --]]--
 do return end	--	no need to do this
 
-local __addon_, __namespace__ = ...;
+local __addon__, __namespace__ = ...;
 
 
 -->		****

@@ -7,9 +7,11 @@ if WOW_PROJECT_ID ~= WOW_PROJECT_CLASSIC then
 end
 
 
-local __addon_, __namespace__ = ...;
+local __addon__, __namespace__ = ...;
 __namespace__.__db__ = {  };
 local __db__ = __namespace__.__db__;
+
+__db__.__DataVersion = 211227;
 
 __db__.CURPHASE = 6;
 __db__.MAXPHASE = 6;

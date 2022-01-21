@@ -6,14 +6,14 @@
 		supreme craft
 --]]--
 
-local __addon_, __namespace__ = ...;
+local __addon__, __namespace__ = ...;
 _G.__ala_meta__ = _G.__ala_meta__ or {  };
 __ala_meta__.prof = __namespace__;
 local __ala_meta__ = __ala_meta__;
 
 local __db__ = __namespace__.__db__;
 local L = __namespace__.L;
-local __is_dev = select(2, GetAddOnInfo("!!!!!DebugMe")) ~= nil;
+__namespace__.__is_dev = select(2, GetAddOnInfo("!!!!!DebugMe")) ~= nil;
 __namespace__.__is_classic = WOW_PROJECT_ID == WOW_PROJECT_CLASSIC;
 __namespace__.__is_bcc = WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC;
 
@@ -64,29 +64,37 @@ __namespace__.__is_bcc = WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC;
 -->
 
 
-local _GLOBAL = {  };
 local setfenv = setfenv;
+local _GlobalRef = {  };
+local _GlobalAssign = {  };
 function __namespace__:BuildEnv(category)
 	local _G = _G;
-	_GLOBAL[category] = _GLOBAL[category] or {  };
-	local G = _GLOBAL[category];
+	_GlobalRef[category] = _GlobalRef[category] or {  };
+	_GlobalAssign[category] = _GlobalAssign[category] or {  };
+	local Ref = _GlobalRef[category];
+	local Assign = _GlobalAssign[category];
 	setfenv(2, setmetatable(
 		{  },
 		{
 			__index = function(tbl, key, val)
-				G[key] = (G[key] or 0) + 1;
+				Ref[key] = (Ref[key] or 0) + 1;
 				return _G[key];
+			end,
+			__newindex = function(tbl, key, value)
+				rawset(tbl, key, value);
+				Assign[key] = (Assign[key] or 0) + 1;
+				return value;
 			end,
 		}
 	));
 end
 function __namespace__:MergeGlobal(DB)
-	local _G2 = DB._GLOBAL;
-	if _G2 ~= nil then
-		for category, db in next, _G2 do
-			local to = _GLOBAL[category];
+	local _Ref = DB._GlobalRef;
+	if _Ref ~= nil then
+		for category, db in next, _Ref do
+			local to = _GlobalRef[category];
 			if to == nil then
-				_GLOBAL[category] = db;
+				_GlobalRef[category] = db;
 			else
 				for key, val in next, db do
 					to[key] = (to[key] or 0) + val;
@@ -94,7 +102,21 @@ function __namespace__:MergeGlobal(DB)
 			end
 		end
 	end
-	DB._GLOBAL = _GLOBAL;
+	DB._GlobalRef = _GlobalRef;
+	local _Assign = DB._GlobalAssign;
+	if _Assign ~= nil then
+		for category, db in next, _Assign do
+			local to = _GlobalAssign[category];
+			if to == nil then
+				_GlobalAssign[category] = db;
+			else
+				for key, val in next, db do
+					to[key] = (to[key] or 0) + val;
+				end
+			end
+		end
+	end
+	DB._GlobalAssign = _GlobalAssign;
 end
 
 local CURPHASE = __db__.CURPHASE;
@@ -148,7 +170,7 @@ __namespace__:BuildEnv("main");
 		sch[2] = true;
 		C_Timer_After(delay or 0.2, sch[1]);
 	end
-	if __is_dev then
+	if __namespace__.__is_dev then
 		__namespace__._noop_ = function() end;
 		__namespace__._log_ = function(...)
 			-- print(date('|cff00ff00%H:%M:%S|r'), ...);
@@ -399,6 +421,7 @@ local F_SafeCall = __namespace__.F_SafeCall;
 		-- costOnly = false,
 	};
 	local function LF_ModifySavedVariable()
+		local alaTradeSkillSV = _G.alaTradeSkillSV;
 		if alaTradeSkillSV == nil or alaTradeSkillSV._version == nil or alaTradeSkillSV._version < 210605.1 then
 			alaTradeSkillSV = {
 				set = {
@@ -407,11 +430,13 @@ local F_SafeCall = __namespace__.F_SafeCall;
 				var = {  },
 				fav = alaTradeSkillSV ~= nil and alaTradeSkillSV.fav or {  },
 				cmm = {  },
+				cache = {  },
 			};
 			_G.alaTradeSkillSV = alaTradeSkillSV;
-		else
+		elseif alaTradeSkillSV._version < 211227.0 then
+			alaTradeSkillSV.cache = {  };
 		end
-		alaTradeSkillSV._version = 210605.1;
+		alaTradeSkillSV._version = 211227.0;
 		__namespace__:MergeGlobal(alaTradeSkillSV);
 		SET = alaTradeSkillSV.set;
 		for pid = __db__.DBMINPID, __db__.DBMAXPID do
@@ -502,14 +527,15 @@ local F_SafeCall = __namespace__.F_SafeCall;
 			CMM = {  };
 			alaTradeSkillSV.cmm[PLAYER_REALM_ID] = CMM;
 		end
+		__namespace__.SavedVar = alaTradeSkillSV;
 		__namespace__.AVAR, __namespace__.VAR, __namespace__.SET, __namespace__.FAV, __namespace__.CMM = AVAR, VAR, SET, FAV, CMM;
+		__namespace__.CACHE = alaTradeSkillSV.cache;
 	end
 -->		Initialize
 	local isInitialized = false;
 	local function LF_Init()
 		if not isInitialized then
 			isInitialized = true;
-			F_SafeCall(__namespace__.init_db);		--	!!!must be earlier than any others!!!
 			if not F_SafeCall(LF_ModifySavedVariable) then
 				local fav = alaTradeSkillSV.fav;
 				alaTradeSkillSV = nil;
@@ -522,6 +548,8 @@ local F_SafeCall = __namespace__.F_SafeCall;
 					__namespace__._error_("|cffff0000alaTradeSkill fetal error");
 				end
 			end
+			--
+			F_SafeCall(__namespace__.init_db);		--	!!!must be earlier than any others!!!
 			F_SafeCall(__namespace__.init_ui);
 			F_SafeCall(__namespace__.init_tooltip);
 			F_SafeCall(__namespace__.init_cooldown);
@@ -1237,9 +1265,9 @@ if __namespace__.__is_classic then
 		local set = SET[pid];
 		local cid = __db__.get_cid_by_sid(sid);
 		if cid then
-			ChatEdit_InsertLink(__db__.item_link(cid), __addon_);
+			ChatEdit_InsertLink(__db__.item_link(cid), __addon__);
 		else
-			ChatEdit_InsertLink(F_GetSkillLink(sid), __addon_);
+			ChatEdit_InsertLink(F_GetSkillLink(sid), __addon__);
 		end
 	end
 elseif __namespace__.__is_bcc then
@@ -1257,12 +1285,12 @@ elseif __namespace__.__is_bcc then
 		if set.showItemInsteadOfSpell then
 			local cid = __db__.get_cid_by_sid(sid);
 			if cid then
-				ChatEdit_InsertLink(__db__.item_link(cid), __addon_);
+				ChatEdit_InsertLink(__db__.item_link(cid), __addon__);
 			else
-				ChatEdit_InsertLink(F_GetSkillLink(sid), __addon_);
+				ChatEdit_InsertLink(F_GetSkillLink(sid), __addon__);
 			end
 		else
-			ChatEdit_InsertLink(F_GetSkillLink(sid), __addon_);
+			ChatEdit_InsertLink(F_GetSkillLink(sid), __addon__);
 		end
 	end
 else

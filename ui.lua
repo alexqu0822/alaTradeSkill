@@ -2,7 +2,7 @@
 	by ALA @ 163UI
 --]]--
 ----------------------------------------------------------------------------------------------------
-local __addon_, __namespace__ = ...;
+local __addon__, __namespace__ = ...;
 local __db__ = __namespace__.__db__;
 local L = __namespace__.L;
 local __ala_meta__ = __ala_meta__;
@@ -79,8 +79,6 @@ local BIG_NUMBER = 4294967295;
 local ICON_FOR_NO_CID = 135913;
 local PERIODIC_UPDATE_PERIOD = 1.0;
 local MAXIMUM_VAR_UPDATE_PERIOD = 4.0;
-local LOCALE = GetLocale();
-local PLAYER_REALM_ID = tonumber(GetRealmID());
 local PLAYER_GUID = UnitGUID('player');
 
 local _noop_, _log_, _error_ = __namespace__._noop_, __namespace__._log_, __namespace__._error_;
@@ -192,31 +190,10 @@ local T_UIDefinition = {
 	frameBackdropBorderColor = { 0.0, 0.0, 0.0, 1.0, },
 	modernDividerColor = { 0.75, 1.0, 1.0, 0.125, },
 
-	scrollBackdrop = {
-		bgFile = nil,
-		edgeFile = "Interface\\Buttons\\WHITE8X8",
-		tile = false,
-		tileSize = 16,
-		edgeSize = 1,
-		insets = { left = 0, right = 0, top = 0, bottom = 0, },
-	},
-	modernScrollBackdropBorderColor = { 0.25, 0.25, 0.25, 1.0, },
-	blzScrollBackdropBorderColor = { 0.5, 0.5, 0.5, 0.5, },
-
 	textureButtonColorNormal = { 0.75, 0.75, 0.75, 0.75, },
 	textureButtonColorPushed = { 0.25, 0.25, 0.25, 1.0, },
 	textureButtonColorHighlight= { 0.25, 0.25, 0.75, 1.0, },
 	textureButtonColorDisabled= { 0.5, 0.5, 0.5, 0.25, },
-	modernButtonBackdrop = {
-		bgFile = "Interface\\Buttons\\WHITE8X8",
-		edgeFile = "Interface\\Buttons\\WHITE8X8",
-		tile = false,
-		tileSize = 16,
-		edgeSize = 1,
-		insets = { left = 1, right = 1, top = 1, bottom = 1, },
-	},
-	modernButtonBackdropColor = { 0.0, 0.0, 0.0, 0.25, },
-	modernButtonBackdropBorderColor = { 0.75, 1.0, 1.0, 0.25, },
 	modernColorButtonColorNormal = { 0.0, 0.0, 0.0, 0.25, },
 	modernColorButtonColorPushed = { 0.75, 1.0, 1.0, 0.125, },
 	modernColorButtonColorHighlight = { 0.75, 1.0, 1.0, 0.125, },
@@ -232,17 +209,6 @@ local T_UIDefinition = {
 
 	skillListButtonHeight = 15,
 	supremeListButtonHeight = 32,
-	listButtonBackdrop = {
-		bgFile = "Interface\\Buttons\\WHITE8X8",
-		edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
-		tile = false,
-		tileSize = 16,
-		edgeSize = 1,
-		insets = { left = 1, right = 1, top = 1, bottom = 1 },
-	},
-	listButtonBackdropColor_Enabled = { 0.0, 0.0, 0.0, 0.0, },
-	listButtonBackdropColor_Disabled = { 0.5, 0.25, 0.25, 0.5, },
-	listButtonBackdropBorderColor = { 0.0, 0.0, 0.0, 0.0, },
 	listButtonHighlightColor = { 0.5, 0.5, 0.75, 0.25, },
 	listButtonSelectedColor = { 0.5, 0.5, 0.5, 0.25, },
 
@@ -792,14 +758,14 @@ end
 					obj:ClearAllPoints();
 					obj:SetPoint("TOPRIGHT", ScrollFrame, "TOPRIGHT", 0, -16);
 					obj:SetPoint("BOTTOMRIGHT", ScrollFrame, "BOTTOMRIGHT", 0, 16);
-					local up = CreateFrame("BUTTON", nil, obj);
+					local up = CreateFrame("BUTTON", nil, obj, "BackdropTemplate");
 					up:SetSize(18, 16);
 					up:SetPoint("BOTTOM", obj, "TOP");
 					up:SetScript("OnClick", function(self)
 						obj:SetValue(obj:GetValue() - obj:GetValueStep());
 					end);
 					obj.ScrollUpButton = up;
-					local down = CreateFrame("BUTTON", nil, obj);
+					local down = CreateFrame("BUTTON", nil, obj, "BackdropTemplate");
 					down:SetSize(18, 16);
 					down:SetPoint("TOP", obj, "BOTTOM");
 					down:SetScript("OnClick", function(self)
@@ -864,7 +830,7 @@ end
 			htex = htex or Button:SetHighlightTexture(T_UIDefinition.texture_unk) or Button:GetHighlightTexture();
 			dtex = dtex or Button:SetDisabledTexture(T_UIDefinition.texture_unk) or Button:GetDisabledTexture();
 			if texture then
-				Button:SetBackdrop(nil);
+				__ala_meta__._SetBackdrop(Button, 0, 0.0, 0.0, 0.0, 0.0, 1, 0.0, 0.0, 0.0, 0.0);
 				Button:SetNormalTexture(texture);
 				Button:SetPushedTexture(texture);
 				Button:SetHighlightTexture(texture);
@@ -878,9 +844,7 @@ end
 				htex:SetVertexColor(unpack(T_UIDefinition.textureButtonColorHighlight));
 				dtex:SetVertexColor(unpack(T_UIDefinition.textureButtonColorDisabled));
 			else
-				Button:SetBackdrop(T_UIDefinition.modernButtonBackdrop);
-				Button:SetBackdropColor(unpack(T_UIDefinition.modernButtonBackdropColor));
-				Button:SetBackdropBorderColor(unpack(T_UIDefinition.modernButtonBackdropBorderColor));
+				__ala_meta__._SetBackdrop(Button, 0, 0.0, 0.0, 0.0, 0.25, 1, 0.75, 1.0, 1.0, 0.25);
 				Button:SetPushedTextOffset(0.0, 0.0);
 				if ntex then ntex:SetColorTexture(unpack(T_UIDefinition.modernColorButtonColorNormal)); end
 				if ptex then ptex:SetColorTexture(unpack(T_UIDefinition.modernColorButtonColorPushed)); end
@@ -904,7 +868,7 @@ end
 				Button:SetHighlightTexture(bak[3]);
 				Button:SetDisabledTexture(bak[4]);
 			end
-			Button:SetBackdrop(nil);
+			__ala_meta__._SetBackdrop(Button, 0, 0.0, 0.0, 0.0, 0.0, 1, 0.0, 0.0, 0.0, 0.0);
 			Button:SetPushedTextOffset(1.55, -1.55);
 			local ntex = Button:GetNormalTexture();
 			local ptex = Button:GetPushedTexture();
@@ -927,14 +891,13 @@ end
 			end
 			--
 			local bar = ScrollFrame.ScrollBar;
-			bar:SetBackdrop(T_UIDefinition.scrollBackdrop);
-			bar:SetBackdropBorderColor(unpack(T_UIDefinition.modernScrollBackdropBorderColor));
+			__ala_meta__._SetBackdrop(bar, 0, 0.0, 0.0, 0.0, 0.0, 1, 0.25, 0.25, 0.25, 1.0);
 			local thumb = bar:GetThumbTexture();
 			if thumb == nil then
 				bar:SetThumbTexture("Interface\\Buttons\\UI-ScrollBar-Knob");
 				thumb = bar:GetThumbTexture();
 			end
-			thumb:SetColorTexture(unpack(T_UIDefinition.modernScrollBackdropBorderColor));
+			thumb:SetColorTexture(0.25, 0.25, 0.25, 1.0);
 			thumb:SetWidth(bar:GetWidth());
 			local up = bar.ScrollUpButton;
 			up:SetNormalTexture(T_UIDefinition.texture_modern_arrow_up);
@@ -979,8 +942,7 @@ end
 			end
 			--
 			local bar = ScrollFrame.ScrollBar;
-			bar:SetBackdrop(T_UIDefinition.scrollBackdrop);
-			bar:SetBackdropBorderColor(unpack(T_UIDefinition.blzScrollBackdropBorderColor));
+			__ala_meta__._SetBackdrop(bar, 0, 0.0, 0.0, 0.0, 0.0, 1, 0.5, 0.5, 0.5, 0.5);
 			bar:SetThumbTexture("Interface\\Buttons\\UI-ScrollBar-Knob");
 			bar:GetThumbTexture():SetWidth(bar:GetWidth());
 			local up = bar.ScrollUpButton;
@@ -1034,9 +996,7 @@ end
 			Dropdown.Left:Hide();
 			Dropdown.Middle:Hide();
 			Dropdown.Right:Hide();
-			Dropdown:SetBackdrop(T_UIDefinition.modernButtonBackdrop);
-			Dropdown:SetBackdropColor(unpack(T_UIDefinition.modernButtonBackdropColor));
-			Dropdown:SetBackdropBorderColor(unpack(T_UIDefinition.modernButtonBackdropBorderColor));
+			__ala_meta__._SetBackdrop(Dropdown, 0, 0.0, 0.0, 0.0, 0.25, 1, 0.75, 1.0, 1.0, 0.25);
 			local Button = Dropdown.Button;
 			Button:SetSize(17, 16);
 			Button:SetNormalTexture(T_UIDefinition.texture_modern_arrow_down);
@@ -1052,7 +1012,7 @@ end
 			Dropdown.Left:Show();
 			Dropdown.Middle:Show();
 			Dropdown.Right:Show();
-			Dropdown:SetBackdrop(nil);
+			__ala_meta__._SetBackdrop(Dropdown, 0, 0.0, 0.0, 0.0, 0.0, 1, 0.0, 0.0, 0.0, 0.0);
 			local Button = Dropdown.Button;
 			Button:SetSize(24, 24);
 			Button:SetNormalTexture("Interface\\ChatFrame\\UI-ChatIcon-ScrollDown-Up");
@@ -1072,16 +1032,14 @@ end
 					obj:Hide();
 				end
 			end
-			EditBox:SetBackdrop(T_UIDefinition.modernButtonBackdrop);
-			EditBox:SetBackdropColor(unpack(T_UIDefinition.modernButtonBackdropColor));
-			EditBox:SetBackdropBorderColor(unpack(T_UIDefinition.modernButtonBackdropBorderColor));
+			__ala_meta__._SetBackdrop(EditBox, 0, 0.0, 0.0, 0.0, 0.25, 1, 0.75, 1.0, 1.0, 0.25);
 		end
 		local function LF_StyleBLZEditBox(EditBox)
 			local regions = { EditBox:GetRegions() };
 			for index = 1, #regions do
 				regions[index]:Show();
 			end
-			EditBox:SetBackdrop(nil);
+			__ala_meta__._SetBackdrop(EditBox, 0, 0.0, 0.0, 0.0, 0.0, 1, 0.0, 0.0, 0.0, 0.0);
 		end
 		local function LF_StyleModernCheckButton(CheckButton)
 			CheckButton:SetNormalTexture(T_UIDefinition.texture_modern_check_button_border);
@@ -1231,7 +1189,7 @@ end
 		end
 	--
 	local function ui_CreateSearchBox(frame)
-		local SearchEditBox = CreateFrame("EDITBOX", nil, frame);
+		local SearchEditBox = CreateFrame("EDITBOX", nil, frame, "BackdropTemplate");
 		SearchEditBox:SetHeight(16);
 		SearchEditBox:SetFont(T_UIDefinition.frameFont, T_UIDefinition.frameFontSize, T_UIDefinition.frameFontOutline);
 		SearchEditBox:SetAutoFocus(false);
@@ -1259,14 +1217,14 @@ end
 		SearchEditBoxNote:SetText(L["Search"]);
 		SearchEditBoxNote:Show();
 
-		local SearchEditBoxCancel = CreateFrame("BUTTON", nil, SearchEditBox);
+		local SearchEditBoxCancel = CreateFrame("BUTTON", nil, SearchEditBox, "BackdropTemplate");
 		SearchEditBoxCancel:SetSize(16, 16);
 		SearchEditBoxCancel:SetPoint("RIGHT", SearchEditBox);
 		SearchEditBoxCancel:Hide();
 		SearchEditBoxCancel:SetNormalTexture(T_UIDefinition.texture_modern_button_close);	--	("interface\\petbattles\\deadpeticon");
 		SearchEditBoxCancel:SetScript("OnClick", function(self) SearchEditBox:SetText(""); frame:F_Search(""); SearchEditBox:ClearFocus(); end);
 
-		local SearchEditBoxOK = CreateFrame("BUTTON", nil, frame);
+		local SearchEditBoxOK = CreateFrame("BUTTON", nil, frame, "BackdropTemplate");
 		SearchEditBoxOK:SetSize(32, 16);
 		SearchEditBoxOK:Disable();
 		SearchEditBoxOK:SetNormalTexture(T_UIDefinition.texture_unk);
@@ -1285,7 +1243,7 @@ end
 		SearchEditBoxOK:Disable();
 		frame.SearchEditBoxOK = SearchEditBoxOK;
 
-		local SearchEditBoxNameOnly = CreateFrame("CHECKBUTTON", nil, frame, "OptionsBaseCheckButtonTemplate");
+		local SearchEditBoxNameOnly = CreateFrame("CHECKBUTTON", nil, frame, "OptionsBaseCheckButtonTemplate,BackdropTemplate");
 		SearchEditBoxNameOnly:SetSize(24, 24);
 		SearchEditBoxNameOnly:SetHitRectInsets(0, 0, 0, 0);
 		SearchEditBoxNameOnly:Show();
@@ -1362,30 +1320,32 @@ end
 		return SearchEditBox, SearchEditBoxOK, SearchEditBoxNameOnly;
 	end
 	--	list button handler
-		local T_SkillListDrop_AddFav = {
-			handler = function(_, frame, pid, sid)
-				SET[pid].update = true;
-				FAV[sid] = 1;
-				frame.F_Update();
-			end,
-			text = L["add_fav"],
-			para = {  },
-		};
-		local T_SkillListDrop_SubFav = {
-			handler = function(_, frame, pid, sid)
-				SET[pid].update = true;
-				FAV[sid] = nil;
-				frame.F_Update();
-			end,
-			text = L["sub_fav"],
-			para = {  },
-		};
-		local T_SkillListDrop_QueryWhoCanCraftIt = {
-			handler = function(_, frame, pid, sid)
-				__namespace__.F_cmmQuerySpell(sid);
-			end,
-			text = L["query_who_can_craft_it"],
-			para = {  },
+		local T_SkillListDropList = {
+			AddFav = {
+				handler = function(_, frame, pid, sid)
+					SET[pid].update = true;
+					FAV[sid] = 1;
+					frame.F_Update();
+				end,
+				text = L["add_fav"],
+				para = {  },
+			},
+			SubFav = {
+				handler = function(_, frame, pid, sid)
+					SET[pid].update = true;
+					FAV[sid] = nil;
+					frame.F_Update();
+				end,
+				text = L["sub_fav"],
+				para = {  },
+			},
+			QueryWhoCanCraftIt = {
+				handler = function(_, frame, pid, sid)
+					__namespace__.F_cmmQuerySpell(sid);
+				end,
+				text = L["query_who_can_craft_it"],
+				para = {  },
+			},
 		};
 		local T_SkillListDropMeta = {
 			handler = _noop_,
@@ -1393,7 +1353,7 @@ end
 			},
 		};
 		if select(2, _G.BNGetInfo()) == 'alex#516722' or select(2, _G.BNGetInfo()) == '单酒窝#51637' then
-			T_SkillListDropMeta.elements[2] =T_SkillListDrop_QueryWhoCanCraftIt;
+			T_SkillListDropMeta.elements[2] = T_SkillListDropList.QueryWhoCanCraftIt;
 		end
 	--
 	local function LF_SkillListButton_OnEnter(self)
@@ -1557,28 +1517,26 @@ end
 			frame.SearchEditBox:ClearFocus();
 			local pid = __db__.get_pid_by_sid(sid);
 			if FAV[sid] then
-				T_SkillListDrop_SubFav.para[1] = frame;
-				T_SkillListDrop_SubFav.para[2] = pid;
-				T_SkillListDrop_SubFav.para[3] = sid;
-				T_SkillListDropMeta.elements[1] = T_SkillListDrop_SubFav;
+				T_SkillListDropList.SubFav.para[1] = frame;
+				T_SkillListDropList.SubFav.para[2] = pid;
+				T_SkillListDropList.SubFav.para[3] = sid;
+				T_SkillListDropMeta.elements[1] = T_SkillListDropList.SubFav;
 			else
-				T_SkillListDrop_AddFav.para[1] = frame;
-				T_SkillListDrop_AddFav.para[2] = pid;
-				T_SkillListDrop_AddFav.para[3] = sid;
-				T_SkillListDropMeta.elements[1] = T_SkillListDrop_AddFav;
+				T_SkillListDropList.AddFav.para[1] = frame;
+				T_SkillListDropList.AddFav.para[2] = pid;
+				T_SkillListDropList.AddFav.para[3] = sid;
+				T_SkillListDropMeta.elements[1] = T_SkillListDropList.AddFav;
 			end
-			T_SkillListDrop_QueryWhoCanCraftIt.para[1] = frame;
-			T_SkillListDrop_QueryWhoCanCraftIt.para[2] = pid;
-			T_SkillListDrop_QueryWhoCanCraftIt.para[3] = sid;
+			T_SkillListDropList.QueryWhoCanCraftIt.para[1] = frame;
+			T_SkillListDropList.QueryWhoCanCraftIt.para[2] = pid;
+			T_SkillListDropList.QueryWhoCanCraftIt.para[3] = sid;
 			ALADROP(self, "BOTTOMLEFT", T_SkillListDropMeta);
 		end
 	end
 	local function LF_ProfitCreateSkillListButton(parent, index, buttonHeight)
 		local Button = CreateFrame("BUTTON", nil, parent);
 		Button:SetHeight(buttonHeight);
-		Button:SetBackdrop(T_UIDefinition.listButtonBackdrop);
-		Button:SetBackdropColor(unpack(T_UIDefinition.listButtonBackdropColor_Enabled));
-		Button:SetBackdropBorderColor(unpack(T_UIDefinition.listButtonBackdropBorderColor));
+		__ala_meta__._SetBackdrop(Button, 1, 0.0, 0.0, 0.0, 0.0, 1, 0.0, 0.0, 0.0, 0.0);
 		Button:SetHighlightTexture(T_UIDefinition.texture_white);
 		Button:GetHighlightTexture():SetVertexColor(unpack(T_UIDefinition.listButtonHighlightColor));
 		Button:EnableMouse(true);
@@ -1672,7 +1630,7 @@ end
 						quality = nil;
 						icon = ICON_FOR_NO_CID;
 					end
-					Button:SetBackdropColor(unpack(T_UIDefinition.listButtonBackdropColor_Enabled));
+					__ala_meta__._SetBackdropColor(Button, 0, 0.0, 0.0, 0.0, 1.0, 1);
 					Button.Icon:SetTexture(icon);
 					Button.Icon:SetVertexColor(1.0, 1.0, 1.0, 1.0);
 					Button.Title:SetText(__db__.spell_name_s(sid));
@@ -1695,7 +1653,7 @@ end
 					local name, rank, num = frame.F_GetRecipeInfo(data);
 					if name ~= nil and rank ~= 'header' then
 						Button:Show();
-						Button:SetBackdropColor(unpack(T_UIDefinition.listButtonBackdropColor_Enabled));
+						__ala_meta__._SetBackdropColor(Button, 0, 0.0, 0.0, 0.0, 1.0, 1);
 						local _, quality, icon;
 						if cid ~= nil then
 							_, _, quality, _, icon = __db__.item_info(cid);
@@ -1739,9 +1697,9 @@ end
 			else
 				Button:Show();
 				if SET.colored_rank_for_unknown and frame.flag ~= 'explorer' then
-					Button:SetBackdropColor(unpack(T_UIDefinition.listButtonBackdropColor_Disabled));
+					__ala_meta__._SetBackdropColor(Button, 0, 0.5, 0.25, 0.25, 0.5, 1);
 				else
-					Button:SetBackdropColor(unpack(T_UIDefinition.listButtonBackdropColor_Enabled));
+					__ala_meta__._SetBackdropColor(Button, 0, 0.0, 0.0, 0.0, 1.0, 1);
 				end
 				local _, quality, icon;
 				if cid ~= nil then
@@ -1810,9 +1768,7 @@ end
 	local function LF_CreateSkillListButton(parent, index, buttonHeight)
 		local Button = CreateFrame("BUTTON", nil, parent);
 		Button:SetHeight(buttonHeight);
-		Button:SetBackdrop(T_UIDefinition.listButtonBackdrop);
-		Button:SetBackdropColor(unpack(T_UIDefinition.listButtonBackdropColor_Enabled));
-		Button:SetBackdropBorderColor(unpack(T_UIDefinition.listButtonBackdropBorderColor));
+		__ala_meta__._SetBackdrop(Button, 1, 0.0, 0.0, 0.0, 1.0, 1, 0.0, 0.0, 0.0, 0.0);
 		Button:SetHighlightTexture(T_UIDefinition.texture_white);
 		Button:GetHighlightTexture():SetVertexColor(unpack(T_UIDefinition.listButtonHighlightColor));
 		Button:EnableMouse(true);
@@ -1907,7 +1863,7 @@ end
 				local name, rank, num = frame.F_GetRecipeInfo(data);
 				if name ~= nil and rank ~= 'header' then
 					Button:Show();
-					Button:SetBackdropColor(unpack(T_UIDefinition.listButtonBackdropColor_Enabled));
+					__ala_meta__._SetBackdropColor(Button, 0, 0.0, 0.0, 0.0, 1.0, 1);
 					local quality = cid and __db__.item_rarity(cid);
 					Button.Icon:SetTexture(frame.F_GetRecipeIcon(data));
 					Button.Icon:SetVertexColor(1.0, 1.0, 1.0, 1.0);
@@ -1952,9 +1908,9 @@ end
 			else
 				Button:Show();
 				if SET.colored_rank_for_unknown then
-					Button:SetBackdropColor(unpack(T_UIDefinition.listButtonBackdropColor_Disabled));
+					__ala_meta__._SetBackdropColor(Button, 0, 0.5, 0.25, 0.25, 0.5, 1);
 				else
-					Button:SetBackdropColor(unpack(T_UIDefinition.listButtonBackdropColor_Enabled));
+					__ala_meta__._SetBackdropColor(Button, 0, 0.0, 0.0, 0.0, 1.0, 1);
 				end
 				local _, quality, icon;
 				if cid ~= nil then
@@ -2188,7 +2144,7 @@ end
 			LF_StyleBLZScrollFrame(frame.HookedDetailFrame);
 			local HookedRankFrame = frame.HookedRankFrame;
 			HookedRankFrame.Border:Show();
-			HookedRankFrame:SetBackdrop(nil);
+			__ala_meta__._SetBackdrop(HookedRankFrame, 0, 0.0, 0.0, 0.0, 0.0, 1, 0.0, 0.0, 0.0, 0.0);
 			frame.PortraitBorder:Show();
 			local T_HookedFrameWidgets = frame.T_HookedFrameWidgets;
 			local T_HookedFrameButtons = T_HookedFrameWidgets.T_HookedFrameButtons;
@@ -2304,8 +2260,7 @@ end
 			LF_StyleModernScrollFrame(frame.HookedDetailFrame);
 			local HookedRankFrame = frame.HookedRankFrame;
 			HookedRankFrame.Border:Hide();
-			HookedRankFrame:SetBackdrop(T_UIDefinition.scrollBackdrop);
-			HookedRankFrame:SetBackdropBorderColor(unpack(T_UIDefinition.modernScrollBackdropBorderColor));
+			__ala_meta__._SetBackdrop(HookedRankFrame, 0, 0.0, 0.0, 0.0, 0.0, 1, 0.25, 0.25, 0.25, 1.0);
 			frame.PortraitBorder:Hide();
 			local T_HookedFrameWidgets = frame.T_HookedFrameWidgets;
 			local T_HookedFrameButtons = T_HookedFrameWidgets.T_HookedFrameButtons;
@@ -2389,7 +2344,7 @@ end
 	end
 	local function LF_HookFrame(addon, meta)
 		local HookedFrame = meta.HookedFrame;
-		local frame = CreateFrame("FRAME", nil, HookedFrame);
+		local frame = CreateFrame("FRAME", nil, HookedFrame, "BackdropTemplate");
 		HookedFrame.frame = frame;
 
 		for index = 1, #meta.T_DisabledFuncName do
@@ -2487,7 +2442,7 @@ end
 				LF_ModifyALAScrollFrame(ScrollFrame);
 				frame.ScrollFrame = ScrollFrame;
 
-				local ToggleButton = CreateFrame("BUTTON", nil, HookedFrame, "UIPanelButtonTemplate");
+				local ToggleButton = CreateFrame("BUTTON", nil, HookedFrame, "UIPanelButtonTemplate,BackdropTemplate");
 				ToggleButton:SetSize(70, 18);
 				ToggleButton:SetPoint("RIGHT", meta.Widget_AnchorTop, "LEFT", -2, 0);
 				-- ToggleButton:SetPoint("TOPRIGHT", -2, -42);
@@ -2597,7 +2552,7 @@ end
 				end
 				HookedRankFrame.Border = HookedRankFrameBorder;
 			--	BACKGROUND and DEVIDER
-				local TextureBackground = CreateFrame("FRAME", nil, HookedFrame);
+				local TextureBackground = CreateFrame("FRAME", nil, HookedFrame, "BackdropTemplate");
 				TextureBackground:SetPoint("TOPLEFT", 11, -12);
 				TextureBackground:SetPoint("BOTTOMRIGHT", -32, 76);
 				TextureBackground:SetFrameLevel(0);
@@ -2726,7 +2681,7 @@ end
 				end,
 				elements = {  },
 			};
-			local PortraitButton = CreateFrame("BUTTON", nil, HookedFrame);
+			local PortraitButton = CreateFrame("BUTTON", nil, HookedFrame, "BackdropTemplate");
 			PortraitButton:SetSize(42, 42);
 			PortraitButton:SetPoint("CENTER", meta.HookedPortrait);
 			PortraitButton:RegisterForClicks("AnyUp");
@@ -2753,7 +2708,7 @@ end
 		end
 
 		do	--	TabFrame
-			local TabFrame = CreateFrame("FRAME", nil, HookedFrame);
+			local TabFrame = CreateFrame("FRAME", nil, HookedFrame, "BackdropTemplate");
 			TabFrame:SetBackdrop(T_UIDefinition.frameBackdrop);
 			TabFrame:SetBackdropColor(unpack(T_UIDefinition.frameBackdropColor));
 			TabFrame:SetBackdropBorderColor(unpack(T_UIDefinition.frameBackdropBorderColor));
@@ -2765,7 +2720,7 @@ end
 			TabFrame:Show();
 			local T_Tabs = {  };
 			function TabFrame:F_CreateTab(index)
-				local Tab = CreateFrame("BUTTON", nil, self);
+				local Tab = CreateFrame("BUTTON", nil, self, "BackdropTemplate");
 				Tab:SetSize(T_UIDefinition.tabSize, T_UIDefinition.tabSize);
 				Tab:SetNormalTexture(T_UIDefinition.texture_unk);
 				-- Tab:GetNormalTexture():SetTexCoord(0.0625, 1.0, 0.0625, 1.0);
@@ -2873,7 +2828,7 @@ end
 		end
 
 		do	--	ProfitFrame
-			local ProfitFrame = CreateFrame("FRAME", nil, frame);
+			local ProfitFrame = CreateFrame("FRAME", nil, frame, "BackdropTemplate");
 			ProfitFrame:SetFrameStrata("HIGH");
 			ProfitFrame:EnableMouse(true);
 			ProfitFrame:Hide();
@@ -2882,7 +2837,7 @@ end
 			ProfitFrame.list = {  };
 			frame.ProfitFrame = ProfitFrame;
 
-			local ToggleButton = CreateFrame("BUTTON", nil, frame);
+			local ToggleButton = CreateFrame("BUTTON", nil, frame, "BackdropTemplate");
 			ToggleButton:SetSize(20, 20);
 			ToggleButton:SetNormalTexture("interface\\buttons\\ui-grouploot-coin-up");
 			ToggleButton:SetPushedTexture("interface\\buttons\\ui-grouploot-coin-down");
@@ -2928,7 +2883,7 @@ end
 			ScrollFrame:SetPoint("TOPRIGHT", -8, -28);
 			ProfitFrame.ScrollFrame = ScrollFrame;
 
-			local CostOnlyCheck = CreateFrame("CHECKBUTTON", nil, ProfitFrame, "OptionsBaseCheckButtonTemplate");
+			local CostOnlyCheck = CreateFrame("CHECKBUTTON", nil, ProfitFrame, "OptionsBaseCheckButtonTemplate,BackdropTemplate");
 			CostOnlyCheck:SetSize(24, 24);
 			CostOnlyCheck:SetHitRectInsets(0, 0, 0, 0);
 			CostOnlyCheck:SetPoint("CENTER", ProfitFrame, "TOPLEFT", 18, -14);
@@ -2948,7 +2903,7 @@ end
 			end);
 			ProfitFrame.CostOnlyCheck = CostOnlyCheck;
 
-			local CloseButton = CreateFrame("BUTTON", nil, ProfitFrame, "UIPanelCloseButton");
+			local CloseButton = CreateFrame("BUTTON", nil, ProfitFrame, "UIPanelCloseButton,BackdropTemplate");
 			CloseButton:SetSize(32, 32);
 			CloseButton:SetPoint("CENTER", ProfitFrame, "TOPRIGHT", -18, -14);
 			CloseButton:SetScript("OnClick", function()
@@ -2964,7 +2919,7 @@ end
 		end
 
 		do	--	SetFrame
-			local SetFrame = CreateFrame("FRAME", nil, frame);
+			local SetFrame = CreateFrame("FRAME", nil, frame, "BackdropTemplate");
 			SetFrame:SetFrameStrata("HIGH");
 			SetFrame:SetSize(332, 66);
 			SetFrame:Hide();
@@ -2975,7 +2930,7 @@ end
 			TipInfo:SetPoint("RIGHT", SetFrame, "BOTTOMRIGHT", -2, 9);
 			SetFrame.TipInfo = TipInfo;
 
-			local ToggleButton = CreateFrame("BUTTON", nil, frame);
+			local ToggleButton = CreateFrame("BUTTON", nil, frame, "BackdropTemplate");
 			ToggleButton:SetSize(16, 16);
 			ToggleButton:SetNormalTexture(T_UIDefinition.texture_config);
 			ToggleButton:SetPushedTexture(T_UIDefinition.texture_config);
@@ -3010,7 +2965,7 @@ end
 			local T_KeyTables = { "showUnkown", "showKnown", "showHighRank", "filterClass", "filterSpec", "showItemInsteadOfSpell", "showRank", "haveMaterials", };
 			for index = 1, #T_KeyTables do
 				local key = T_KeyTables[index];
-				local CheckButton = CreateFrame("CHECKBUTTON", nil, SetFrame, "OptionsBaseCheckButtonTemplate");
+				local CheckButton = CreateFrame("CHECKBUTTON", nil, SetFrame, "OptionsBaseCheckButtonTemplate,BackdropTemplate");
 				CheckButton:SetSize(24, 24);
 				CheckButton:SetHitRectInsets(0, 0, 0, 0);
 				CheckButton:Show();
@@ -3060,7 +3015,7 @@ end
 			end
 			SetFrame.T_CheckButtons = T_CheckButtons;
 
-			local PhaseSlider = CreateFrame("SLIDER", nil, SetFrame, "OptionsSliderTemplate");
+			local PhaseSlider = CreateFrame("SLIDER", nil, SetFrame, "OptionsSliderTemplate,BackdropTemplate");
 			PhaseSlider:SetPoint("BOTTOM", SetFrame, "TOP", 0, 10);
 			PhaseSlider:SetPoint("LEFT", 4, 0);
 			PhaseSlider:SetPoint("RIGHT", -4, 0);
@@ -3121,7 +3076,7 @@ end
 		end
 
 		do	--	HaveMaterialsCheck
-			local HaveMaterialsCheck = CreateFrame("CHECKBUTTON", nil, frame, "OptionsBaseCheckButtonTemplate");
+			local HaveMaterialsCheck = CreateFrame("CHECKBUTTON", nil, frame, "OptionsBaseCheckButtonTemplate,BackdropTemplate");
 			HaveMaterialsCheck:SetSize(24, 24);
 			HaveMaterialsCheck:SetHitRectInsets(0, 0, 0, 0);
 			HaveMaterialsCheck:Show();
@@ -3189,7 +3144,7 @@ end
 		end
 
 		ALA_HOOK_ChatEdit_InsertLink(function(link, addon)
-			if frame:IsVisible() and addon ~= __addon_ and not (BrowseName ~= nil and BrowseName:IsVisible()) then
+			if frame:IsVisible() and addon ~= __addon__ and not (BrowseName ~= nil and BrowseName:IsVisible()) then
 				local name, _, _, _, _, _, _, _, loc = GetItemInfo(link);
 				if name ~= nil and name ~= "" then
 					local pid = frame.flag or __db__.get_pid_by_pname(frame.F_GetSkillName());
@@ -3213,7 +3168,7 @@ end
 			end
 		end);
 		ALA_HOOK_ChatEdit_InsertName(function(name, addon)
-			if frame:IsVisible() and addon ~= __addon_ and not (BrowseName ~= nil and BrowseName:IsVisible()) then
+			if frame:IsVisible() and addon ~= __addon__ and not (BrowseName ~= nil and BrowseName:IsVisible()) then
 				if name ~= nil and name ~= "" then
 					frame.SearchEditBox:SetText(name);
 					frame.SearchEditBox:ClearFocus();
@@ -3317,6 +3272,7 @@ local function LF_AddOnCallback_Blizzard_TradeSkillUI(addon)
 		local TradeSkillFrameCloseButton = _G.TradeSkillFrameCloseButton;
 		local TradeSkillRankFrame = _G.TradeSkillRankFrame;
 		local TradeSkillRankFrameBorder = _G.TradeSkillRankFrameBorder;
+		local TradeSkillFrameAvailableFilterCheckButton = _G.TradeSkillFrameAvailableFilterCheckButton;
 		local TradeSkillListScrollFrame = _G.TradeSkillListScrollFrame;
 		local TradeSkillListScrollFrameScrollBar = _G.TradeSkillListScrollFrameScrollBar;
 		local TradeSkillHighlightFrame = _G.TradeSkillHighlightFrame;
@@ -3394,7 +3350,7 @@ local function LF_AddOnCallback_Blizzard_TradeSkillUI(addon)
 		T_HookedFrameWidgets = {
 			backup = {  },
 			C_SkillListButtonNamePrefix = "TradeSkillSkill",
-			C_SkillListButtonTemplate = "TradeSkillSkillButtonTemplate",
+			C_SkillListButtonTemplate = "TradeSkillSkillButtonTemplate,BackdropTemplate",
 			ProductionIcon = TradeSkillSkillIcon,
 			C_ReagentButtonNamePrefix = "TradeSkillReagent",
 			T_HookedFrameButtons = {
@@ -3417,6 +3373,9 @@ local function LF_AddOnCallback_Blizzard_TradeSkillUI(addon)
 			T_HookedFrameEditboxes = {
 				InputBox = TradeSkillInputBox,
 			},
+			T_HookedFrameChecks = {
+				AvailableFilterCheckButton = TradeSkillFrameAvailableFilterCheckButton,
+			},
 			CollapseAllButton = TradeSkillCollapseAllButton,
 		},
 
@@ -3430,6 +3389,7 @@ local function LF_AddOnCallback_Blizzard_TradeSkillUI(addon)
 			SetTradeSkillInvSlotFilter(0, 1, 1);
 			UIDropDownMenu_SetSelectedID(TradeSkillInvSlotDropDown, 1);
 			ExpandTradeSkillSubClass(0);
+			TradeSkillFrameAvailableFilterCheckButton:SetChecked(false);
 			if TradeSkillCollapseAllButton ~= nil then
 				TradeSkillCollapseAllButton.collapsed = nil;
 			end
@@ -3468,6 +3428,9 @@ local function LF_AddOnCallback_Blizzard_TradeSkillUI(addon)
 		},
 
 		F_WithDisabledFrame = function(self, func)
+			if __namespace__.__is_bcc then
+				func(TradeSkillFrameAvailableFilterCheckButton);
+			end
 			func(TradeSkillCollapseAllButton);
 			func(TradeSkillInvSlotDropDown);
 			func(TradeSkillSubClassDropDown);
@@ -3597,7 +3560,7 @@ local function LF_AddOnCallback_Blizzard_CraftUI(addon)
 		T_HookedFrameWidgets = {
 			backup = {  },
 			C_SkillListButtonNamePrefix = "Craft",
-			C_SkillListButtonTemplate = "CraftButtonTemplate",
+			C_SkillListButtonTemplate = "CraftButtonTemplate,BackdropTemplate",
 			ProductionIcon = CraftIcon,
 			C_ReagentButtonNamePrefix = "CraftReagent",
 			T_HookedFrameButtons = {
@@ -3743,7 +3706,7 @@ local function LF_AddOnCallback_Blizzard_CraftUI(addon)
 				-- },
 			},
 		};
-		local FilterDropdown = CreateFrame("BUTTON", nil, frame);
+		local FilterDropdown = CreateFrame("BUTTON", nil, frame, "BackdropTemplate");
 		FilterDropdown:SetSize(16, 16);
 		FilterDropdown:EnableMouse(true);
 		FilterDropdown:SetNormalTexture("interface\\mainmenubar\\ui-mainmenu-scrolldownbutton-up");
@@ -3803,9 +3766,7 @@ end
 	local function LF_ExplorerCreateSkillListButton(parent, index, buttonHeight)
 		local Button = CreateFrame("BUTTON", nil, parent);
 		Button:SetHeight(buttonHeight);
-		Button:SetBackdrop(T_UIDefinition.listButtonBackdrop);
-		Button:SetBackdropColor(unpack(T_UIDefinition.listButtonBackdropColor_Enabled));
-		Button:SetBackdropBorderColor(unpack(T_UIDefinition.listButtonBackdropBorderColor));
+		__ala_meta__._SetBackdrop(Button, 1, 0.0, 0.0, 0.0, 1.0, 1, 0.0, 0.0, 0.0, 0.0);
 		Button:SetHighlightTexture(T_UIDefinition.texture_white);
 		Button:GetHighlightTexture():SetVertexColor(unpack(T_UIDefinition.listButtonHighlightColor));
 		Button:EnableMouse(true);
@@ -4121,7 +4082,7 @@ end
 	end
 --
 local function LF_CreateExplorerFrame()
-	local frame = CreateFrame("FRAME", "ALA_TRADESKILL_EXPLORER", UIParent);
+	local frame = CreateFrame("FRAME", "ALA_TRADESKILL_EXPLORER", UIParent, "BackdropTemplate");
 	tinsert(UISpecialFrames, "ALA_TRADESKILL_EXPLORER");
 
 	do	--	frame
@@ -4159,7 +4120,7 @@ local function LF_CreateExplorerFrame()
 		ScrollFrame:SetPoint("TOPRIGHT", -10, -56);
 		frame.ScrollFrame = ScrollFrame;
 
-		local CloseButton = CreateFrame("BUTTON", nil, frame, "UIPanelCloseButton");
+		local CloseButton = CreateFrame("BUTTON", nil, frame, "UIPanelCloseButton,BackdropTemplate");
 		CloseButton:SetSize(32, 32);
 		CloseButton:SetPoint("CENTER", frame, "TOPRIGHT", -18, -16);
 		CloseButton:SetScript("OnClick", function()
@@ -4181,7 +4142,7 @@ local function LF_CreateExplorerFrame()
 	end
 
 	do	--	ProfitFrame
-		local ProfitFrame = CreateFrame("FRAME", nil, frame);
+		local ProfitFrame = CreateFrame("FRAME", nil, frame, "BackdropTemplate");
 		ProfitFrame:SetFrameStrata("HIGH");
 		ProfitFrame:EnableMouse(true);
 		ProfitFrame:Hide();
@@ -4192,7 +4153,7 @@ local function LF_CreateExplorerFrame()
 		ProfitFrame.flag = 'explorer';
 		frame.ProfitFrame = ProfitFrame;
 
-		local ToggleButton = CreateFrame("BUTTON", nil, frame);
+		local ToggleButton = CreateFrame("BUTTON", nil, frame, "BackdropTemplate");
 		ToggleButton:SetSize(20, 20);
 		ToggleButton:SetNormalTexture("interface\\buttons\\ui-grouploot-coin-up");
 		ToggleButton:SetPushedTexture("interface\\buttons\\ui-grouploot-coin-down");
@@ -4233,7 +4194,7 @@ local function LF_CreateExplorerFrame()
 		ScrollFrame:SetPoint("TOPRIGHT", -8, -28);
 		ProfitFrame.ScrollFrame = ScrollFrame;
 
-		-- local CostOnlyCheck = CreateFrame("CHECKBUTTON", nil, ProfitFrame, "OptionsBaseCheckButtonTemplate");
+		-- local CostOnlyCheck = CreateFrame("CHECKBUTTON", nil, ProfitFrame, "OptionsBaseCheckButtonTemplate,BackdropTemplate");
 		-- CostOnlyCheck:SetSize(24, 24);
 		-- CostOnlyCheck:SetHitRectInsets(0, 0, 0, 0);
 		-- CostOnlyCheck:SetPoint("CENTER", ProfitFrame, "TOPLEFT", 17, -10);
@@ -4250,7 +4211,7 @@ local function LF_CreateExplorerFrame()
 		-- end);
 		-- ProfitFrame.CostOnlyCheck = CostOnlyCheck;
 
-		local CloseButton = CreateFrame("BUTTON", nil, ProfitFrame, "UIPanelCloseButton");
+		local CloseButton = CreateFrame("BUTTON", nil, ProfitFrame, "UIPanelCloseButton,BackdropTemplate");
 		CloseButton:SetSize(32, 32);
 		CloseButton:SetPoint("CENTER", ProfitFrame, "TOPRIGHT", -18, -14);
 		CloseButton:SetScript("OnClick", function()
@@ -4263,7 +4224,7 @@ local function LF_CreateExplorerFrame()
 	end
 
 	do	--	SetFrame
-		local SetFrame = CreateFrame("FRAME", nil, frame);
+		local SetFrame = CreateFrame("FRAME", nil, frame, "BackdropTemplate");
 		SetFrame:SetFrameStrata("HIGH");
 		SetFrame:SetHeight(82);
 		SetFrame:SetPoint("LEFT", frame);
@@ -4277,7 +4238,7 @@ local function LF_CreateExplorerFrame()
 		TipInfo:SetPoint("RIGHT", SetFrame, "BOTTOMRIGHT", -2, 9);
 		SetFrame.TipInfo = TipInfo;
 
-		local ToggleButton = CreateFrame("BUTTON", nil, frame);
+		local ToggleButton = CreateFrame("BUTTON", nil, frame, "BackdropTemplate");
 		ToggleButton:SetSize(16, 16);
 		ToggleButton:SetNormalTexture(T_UIDefinition.texture_config);
 		ToggleButton:SetPushedTexture(T_UIDefinition.texture_config);
@@ -4309,7 +4270,7 @@ local function LF_CreateExplorerFrame()
 		local T_KeyTables = { "showUnkown", "showKnown", "showItemInsteadOfSpell", "showRank", };
 		for index = 1, #T_KeyTables do
 			local key = T_KeyTables[index];
-			local CheckButton = CreateFrame("CHECKBUTTON", nil, SetFrame, "OptionsBaseCheckButtonTemplate");
+			local CheckButton = CreateFrame("CHECKBUTTON", nil, SetFrame, "OptionsBaseCheckButtonTemplate,BackdropTemplate");
 			CheckButton:SetSize(24, 24);
 			CheckButton:SetHitRectInsets(0, 0, 0, 0);
 			CheckButton:Show();
@@ -4359,7 +4320,7 @@ local function LF_CreateExplorerFrame()
 		local T_KeyTables = { "skill", "type", "subType", "eqLoc", };
 		for index = 1, #T_KeyTables do
 			local key = T_KeyTables[index];
-			local Dropdown = CreateFrame("BUTTON", nil, SetFrame);
+			local Dropdown = CreateFrame("BUTTON", nil, SetFrame, "BackdropTemplate");
 			Dropdown:SetSize(20, 20);
 			Dropdown:EnableMouse(true);
 			Dropdown:SetNormalTexture("interface\\mainmenubar\\ui-mainmenu-scrolldownbutton-up");
@@ -4377,7 +4338,7 @@ local function LF_CreateExplorerFrame()
 			Label:SetPoint("LEFT", Dropdown, "RIGHT", 0, 0);
 			Dropdown.Label = Label;
 
-			local Cancel = CreateFrame("BUTTON", nil, SetFrame);
+			local Cancel = CreateFrame("BUTTON", nil, SetFrame, "BackdropTemplate");
 			Cancel:SetSize(16, 16);
 			Cancel:SetNormalTexture("interface\\buttons\\ui-grouploot-pass-up");
 			Cancel:SetPushedTexture("interface\\buttons\\ui-grouploot-pass-up");
@@ -4421,7 +4382,7 @@ local function LF_CreateExplorerFrame()
 		end
 		SetFrame.T_Dropdowns = T_Dropdowns;
 
-		local PhaseSlider = CreateFrame("SLIDER", nil, SetFrame, "OptionsSliderTemplate");
+		local PhaseSlider = CreateFrame("SLIDER", nil, SetFrame, "OptionsSliderTemplate,BackdropTemplate");
 		PhaseSlider:SetPoint("BOTTOM", SetFrame, "TOP", 0, 12);
 		PhaseSlider:SetPoint("LEFT", 4, 0);
 		PhaseSlider:SetPoint("RIGHT", -4, 0);
@@ -4489,7 +4450,7 @@ local function LF_CreateExplorerFrame()
 	end
 
 	ALA_HOOK_ChatEdit_InsertLink(function(link, addon)
-		if frame:IsShown() and addon ~= __addon_ and not (BrowseName ~= nil and BrowseName:IsVisible()) then
+		if frame:IsShown() and addon ~= __addon__ and not (BrowseName ~= nil and BrowseName:IsVisible()) then
 			local name = GetItemInfo(link);
 			if name and name ~= "" then
 				frame.SearchEditBox:SetText(name);
@@ -4500,7 +4461,7 @@ local function LF_CreateExplorerFrame()
 		end
 	end);
 	ALA_HOOK_ChatEdit_InsertName(function(name, addon)
-		if frame:IsShown() and addon ~= __addon_ and not (BrowseName ~= nil and BrowseName:IsVisible()) then
+		if frame:IsShown() and addon ~= __addon__ and not (BrowseName ~= nil and BrowseName:IsVisible()) then
 			if name and name ~= "" then
 				frame.SearchEditBox:SetText(name);
 				frame.SearchEditBox:ClearFocus();
@@ -4706,8 +4667,9 @@ end
 	end
 --
 local function LF_CreateBoard()
-	local frame = CreateFrame("FRAME", nil, UIParent);
+	local frame = CreateFrame("FRAME", nil, UIParent, "BackdropTemplate");
 	frame:SetClampedToScreen(true);
+	local LOCALE = GetLocale();
 	if LOCALE == 'zhCN' or LOCALE == 'zhTW' or LOCALE == 'koKR' then
 		frame:SetWidth(260);
 	else
@@ -4905,9 +4867,7 @@ end
 	local function LF_ConfigCreateCharListButton(parent, index, buttonHeight)
 		local Button = CreateFrame("BUTTON", nil, parent);
 		Button:SetHeight(buttonHeight);
-		Button:SetBackdrop(T_UIDefinition.listButtonBackdrop);
-		Button:SetBackdropColor(unpack(T_UIDefinition.listButtonBackdropColor_Enabled));
-		Button:SetBackdropBorderColor(unpack(T_UIDefinition.listButtonBackdropBorderColor));
+		__ala_meta__._SetBackdrop(Button, 1, 0.0, 0.0, 0.0, 1.0, 1, 0.0, 0.0, 0.0, 0.0);
 		Button:SetHighlightTexture(T_UIDefinition.texture_white);
 		Button:GetHighlightTexture():SetVertexColor(unpack(T_UIDefinition.listButtonHighlightColor));
 		Button:EnableMouse(true);
@@ -4987,7 +4947,7 @@ end
 		end
 	end
 	local function LF_ConfigCreateCheckButton(parent, key, text, OnClick)
-		local CheckButton = CreateFrame("CHECKBUTTON", nil, parent, "OptionsBaseCheckButtonTemplate");
+		local CheckButton = CreateFrame("CHECKBUTTON", nil, parent, "OptionsBaseCheckButtonTemplate,BackdropTemplate");
 		CheckButton:SetSize(24, 24);
 		CheckButton:SetHitRectInsets(0, 0, 0, 0);
 		CheckButton:Show();
@@ -5014,7 +4974,7 @@ end
 		end
 	end 
 	local function LF_ConfigCreateDrop(parent, key, text, meta)
-		local Dropdown = CreateFrame("BUTTON", nil, parent);
+		local Dropdown = CreateFrame("BUTTON", nil, parent, "BackdropTemplate");
 		Dropdown:SetSize(20, 20);
 		Dropdown:EnableMouse(true);
 		Dropdown:SetNormalTexture("interface\\mainmenubar\\ui-mainmenu-scrolldownbutton-up");
@@ -5047,7 +5007,7 @@ end
 		return Dropdown;
 	end
 	local function LF_ConfigCreateSlider(parent, key, text, minVal, maxVal, step, OnValueChanged)
-		local Slider = CreateFrame("SLIDER", nil, parent, "OptionsSliderTemplate");
+		local Slider = CreateFrame("SLIDER", nil, parent, "OptionsSliderTemplate,BackdropTemplate");
 		local Label = Slider:CreateFontString(nil, "ARTWORK");
 		Label:SetFont(T_UIDefinition.frameFont, T_UIDefinition.frameFontSize, "NORMAL");
 		Label:SetText(gsub(text, "%%[a-z]", ""));
@@ -5084,7 +5044,7 @@ end
 	local function LF_ConfigCreateColor4(parent, key, text, OnColor)
 		local ColorPickerFrame = _G.ColorPickerFrame;
 		local OpacitySliderFrame = _G.OpacitySliderFrame;
-		local Button = CreateFrame("BUTTON", nil, parent);
+		local Button = CreateFrame("BUTTON", nil, parent, "BackdropTemplate");
 		Button:SetSize(20, 20);
 		Button:EnableMouse(true);
 		Button:SetNormalTexture(T_UIDefinition.texture_color_select);
@@ -5146,7 +5106,7 @@ end
 	end
 --
 local function LF_CreateConfigFrame()
-	local frame = CreateFrame("FRAME", "ALA_TRADESKILL_CONFIG", UIParent);
+	local frame = CreateFrame("FRAME", "ALA_TRADESKILL_CONFIG", UIParent, "BackdropTemplate");
 	tinsert(UISpecialFrames, "ALA_TRADESKILL_CONFIG");
 	frame:SetBackdrop(T_UIDefinition.frameBackdrop);
 	frame:SetBackdropColor(unpack(T_UIDefinition.frameBackdropColor));
@@ -5165,7 +5125,7 @@ local function LF_CreateConfigFrame()
 	end);
 	frame:Hide();
 	--
-	local CloseButton = CreateFrame("BUTTON", nil, frame);
+	local CloseButton = CreateFrame("BUTTON", nil, frame, "BackdropTemplate");
 	CloseButton:SetSize(20, 20);
 	LF_StyleModernButton(CloseButton, nil, T_UIDefinition.texture_modern_button_close);
 	CloseButton:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -2, -2);
@@ -5180,9 +5140,8 @@ local function LF_CreateConfigFrame()
 	--
 	local T_SetWidgets = {  };
 	local px, py, h = 0, 0, 1;
-	local T_SetCommandList = __namespace__.T_SetCommandList;
-	for index = 1, #T_SetCommandList do
-		local cmd = T_SetCommandList[index];
+	for index = 1, #__namespace__.T_SetCommandList do
+		local cmd = __namespace__.T_SetCommandList[index];
 		if px >= 1 then
 			px = 0;
 			py = py + h;
@@ -5248,7 +5207,7 @@ local function LF_CreateConfigFrame()
 		h = 1;
 	end
 	do	--	character list
-		local CharList = CreateFrame("FRAME", nil, frame);
+		local CharList = CreateFrame("FRAME", nil, frame, "BackdropTemplate");
 		CharList:SetBackdrop(T_UIDefinition.frameBackdrop);
 		CharList:SetBackdropColor(unpack(T_UIDefinition.frameBackdropColor));
 		CharList:SetBackdropBorderColor(unpack(T_UIDefinition.frameBackdropBorderColor));
@@ -5279,7 +5238,7 @@ local function LF_CreateConfigFrame()
 		end);
 		frame.CharList = CharList;
 
-		local ToggleButton = CreateFrame("BUTTON", nil, frame);
+		local ToggleButton = CreateFrame("BUTTON", nil, frame, "BackdropTemplate");
 		ToggleButton:SetSize(20, 20);
 		ToggleButton:SetNormalTexture(T_UIDefinition.texture_triangle);
 		ToggleButton:GetNormalTexture():SetVertexColor(0.5, 0.5, 0.5, 1.0);
@@ -5604,6 +5563,7 @@ end
 
 function __namespace__.init_ui()
 	AVAR, VAR, SET, FAV = __namespace__.AVAR, __namespace__.VAR, __namespace__.SET, __namespace__.FAV;
+	local PLAYER_REALM_ID = tonumber(GetRealmID());
 	for GUID, VAR in next, AVAR do
 		if VAR.realm_id == PLAYER_REALM_ID then
 			for pid = __db__.DBMINPID, __db__.DBMAXPID do
@@ -5617,6 +5577,7 @@ function __namespace__.init_ui()
 			end
 		end
 	end
+	local _;
 	_, T_uiFrames["EXPLORER"] = __namespace__.F_SafeCall(LF_CreateExplorerFrame);
 	_, T_uiFrames["CONFIG"] = __namespace__.F_SafeCall(LF_CreateConfigFrame);
 	_, T_uiFrames["BOARD"] = __namespace__.F_SafeCall(LF_CreateBoard);

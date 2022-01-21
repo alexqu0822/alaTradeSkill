@@ -2,7 +2,7 @@
 	by ALA @ 163UI
 --]]--
 
-local __addon_, __namespace__ = ...;
+local __addon__, __namespace__ = ...;
 local __db__ = __namespace__.__db__;
 local L = __namespace__.L;
 
@@ -16,14 +16,13 @@ local L = __namespace__.L;
 -->
 
 local SET = nil;
+local F = CreateFrame('FRAME');
 
 
 -->		****
 __namespace__:BuildEnv("AuctionBase");
 -->		****
 
-
-local F = CreateFrame('FRAME');
 
 local AuctionBase = {  };
 

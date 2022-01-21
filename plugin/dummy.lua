@@ -5,7 +5,7 @@
 
 --	Howto
 --[==[
-	local __addon_, __namespace__ = ...;
+	local __addon__, __namespace__ = ...;
 
 	local mod = {  };
 	--****	Define methods.

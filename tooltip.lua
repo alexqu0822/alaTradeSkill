@@ -2,7 +2,7 @@
 	by ALA @ 163UI
 --]]--
 ----------------------------------------------------------------------------------------------------
-local __addon_, __namespace__ = ...;
+local __addon__, __namespace__ = ...;
 local __db__ = __namespace__.__db__;
 local L = __namespace__.L;
 
@@ -20,14 +20,28 @@ local L = __namespace__.L;
 	local strupper = string.upper;
 	local strsplit = string.split;
 	local strmatch = string.match;
-	local strfind = string.find;
 	local format = string.format;
 	local tinsert = table.insert;
 
 	local IsShiftKeyDown = IsShiftKeyDown;
 	local GetItemQualityColor = GetItemQualityColor;
 	local GetPlayerInfoByGUID = GetPlayerInfoByGUID;
-	local UnitFactionGroup = UnitFactionGroup;
+	local GetMerchantItemID = GetMerchantItemID;
+	local GetBuybackItemLink = GetBuybackItemLink;
+	local GetContainerItemInfo = GetContainerItemInfo;
+	local GetAuctionItemInfo = GetAuctionItemInfo;
+	local GetAuctionSellItemInfo = GetAuctionSellItemInfo;
+	local LootSlotHasItem, GetLootSlotType, GetLootSlotLink = LootSlotHasItem, GetLootSlotType, GetLootSlotLink;
+	local LOOT_SLOT_ITEM = LOOT_SLOT_ITEM;
+	local GetLootRollItemLink = GetLootRollItemLink;
+	local GetInventoryItemID = GetInventoryItemID;
+	local GetTradePlayerItemLink = GetTradePlayerItemLink;
+	local GetTradeTargetItemLink = GetTradeTargetItemLink;
+	local GetQuestItemLink = GetQuestItemLink;
+	local GetQuestLogChoiceInfo, GetQuestLogRewardInfo = GetQuestLogChoiceInfo, GetQuestLogRewardInfo;
+	local GetInboxItem = GetInboxItem;
+	local GetSendMailItem = GetSendMailItem;
+	local GetTradeSkillReagentItemLink, GetTradeSkillItemLink = GetTradeSkillReagentItemLink, GetTradeSkillItemLink;
 	local GetCraftReagentItemLink = GetCraftReagentItemLink;
 	local GetGuildBankItemLink = GetGuildBankItemLink;
 	local RAID_CLASS_COLORS = RAID_CLASS_COLORS;
@@ -510,6 +524,159 @@ local function LF_TooltipSetHyperlink(Tooltip, link)
 		end
 	end
 end
+local function LF_TooltipSetCraftSpell(Tooltip)
+	local _, sid = Tooltip:GetSpell();
+	if sid ~= nil then
+		LF_TooltipSetSpellByID(Tooltip, sid);
+	else
+		local _, link = Tooltip:GetItem();
+		local iid = link and tonumber(strmatch(link, "item:(%d+)") or nil);
+		if iid ~= nil then
+			LF_TooltipSetItemByID(Tooltip, iid);
+		end
+	end
+end
+local function LF_TooltipSetMerchantItem(Tooltip, index)
+	local iid = GetMerchantItemID(index);
+	if iid ~= nil then
+		LF_TooltipSetItemByID(Tooltip, iid);
+	end
+end
+local function LF_TooltipSetBuybackItem(Tooltip, index)
+	local link = GetBuybackItemLink(index);
+	if link then
+		local iid = tonumber(strmatch(link, "item:(%d+)") or nil);
+		if iid ~= nil then
+			LF_TooltipSetItemByID(Tooltip, iid);
+		end
+	end
+end
+local function LF_TooltipSetBagItem(Tooltip, bag, slot)
+	local _, num, _, _, _, _, link, _, _, iid = GetContainerItemInfo(bag, slot);
+	if iid ~= nil then
+		LF_TooltipSetItemByID(Tooltip, iid);
+	end
+end
+local function LF_TooltipSetAuctionItem(Tooltip, type, index)
+	local name, _, num, _, _, _, _, _, _, _, _, _, _, _, _, _, iid = GetAuctionItemInfo(type, index);
+	if iid ~= nil then
+		LF_TooltipSetItemByID(Tooltip, iid);
+	end
+end
+local function LF_TooltipSetAuctionSellItem(Tooltip)
+	local name, _, num, _, _, _, _, _, _, iid = GetAuctionSellItemInfo();
+	if iid ~= nil then
+		LF_TooltipSetItemByID(Tooltip, iid);
+	end
+end
+local function LF_TooltipSetLootItem(Tooltip, slot)
+	if LootSlotHasItem(slot) and GetLootSlotType(slot) == LOOT_SLOT_ITEM then
+		local link = GetLootSlotLink(slot);
+		if link then
+			local iid = tonumber(strmatch(link, "item:(%d+)") or nil);
+			if iid ~= nil then
+				LF_TooltipSetItemByID(Tooltip, iid);
+			end
+		end
+	end
+end
+local function LF_TooltipSetLootRollItem(Tooltip, slot)
+	local link = GetLootRollItemLink(slot);
+	if link then
+		local iid = tonumber(strmatch(link, "item:(%d+)") or nil);
+		if iid ~= nil then
+			LF_TooltipSetItemByID(Tooltip, iid);
+		end
+	end
+end
+local function LF_TooltipSetInventoryItem(Tooltip, unit, slot)
+	local iid = GetInventoryItemID(unit, slot);
+	if iid ~= nil then
+		LF_TooltipSetItemByID(Tooltip, iid);
+	end
+end
+local function LF_TooltipSetTradePlayerItem(Tooltip, index)
+	local link = GetTradePlayerItemLink(index);
+	if link then
+		local iid = tonumber(strmatch(link, "item:(%d+)") or nil);
+		if iid ~= nil then
+			LF_TooltipSetItemByID(Tooltip, iid);
+		end
+	end
+end
+local function LF_TooltipSetTradeTargetItem(Tooltip, index)
+	local link = GetTradeTargetItemLink(index);
+	if link then
+		local iid = tonumber(strmatch(link, "item:(%d+)") or nil);
+		if iid ~= nil then
+			LF_TooltipSetItemByID(Tooltip, iid);
+		end
+	end
+end
+local function LF_TooltipSetQuestItem(Tooltip, type, index)
+	local link = GetQuestItemLink(type, index);
+	if link then
+		local iid = tonumber(strmatch(link, "item:(%d+)") or nil);
+		if iid ~= nil then
+			LF_TooltipSetItemByID(Tooltip, iid);
+		end
+	end
+end
+local function LF_TooltipSetQuestLogItem(Tooltip, type, index)
+	local iid, _;
+	if type == "choice" then
+		_, _, _, _, _, iid = GetQuestLogChoiceInfo(index);
+	else
+		_, _, _, _, _, iid = GetQuestLogRewardInfo(index)
+	end
+	if iid ~= nil then
+		LF_TooltipSetItemByID(Tooltip, iid);
+	end
+end
+local function LF_TooltipSetInboxItem(Tooltip, index, index2)
+	local name, iid, _, num = GetInboxItem(index, index2 or 1);
+	if iid ~= nil then
+		LF_TooltipSetItemByID(Tooltip, iid);
+	end
+end
+local function LF_TooltipSetSendMailItem(Tooltip, index)
+	local name, iid, _, num = GetSendMailItem(index);
+	if iid ~= nil then
+		LF_TooltipSetItemByID(Tooltip, iid);
+	end
+end
+local function LF_TooltipSetTradeSkillItem(Tooltip, index, reagent)
+	local link;
+	if reagent then
+		link = GetTradeSkillReagentItemLink(index, reagent);
+	else
+		link = GetTradeSkillItemLink(index);
+	end
+	if link then
+		local iid = tonumber(strmatch(link, "item:(%d+)") or nil);
+		if iid ~= nil then
+			LF_TooltipSetItemByID(Tooltip, iid);
+		end
+	end
+end
+local function LF_TooltipSetCraftItem(Tooltip, index, reagent)
+	local link = GetCraftReagentItemLink(index, reagent);
+	if link ~= nil then
+		local iid = tonumber(strmatch(link, "item:(%d+)") or nil);
+		if iid ~= nil then
+			LF_TooltipSetItemByID(Tooltip, iid);
+		end
+	end
+end
+local function LF_TooltipSetGuildBankItem(Tooltip, tab, index)
+	local link = GetGuildBankItemLink(tab, index);
+	if link ~= nil then
+		local iid = tonumber(strmatch(link, "item:(%d+)") or nil);
+		if iid ~= nil then
+			LF_TooltipSetItemByID(Tooltip, iid);
+		end
+	end
+end
 local function LF_TooltipGUISetSpell(Tooltip)
 	local _, sid = Tooltip:GetSpell();
 	if sid ~= nil then
@@ -520,18 +687,6 @@ local function LF_TooltipGUISetItem(Tooltip)
 	local _, link = Tooltip:GetItem();
 	if link ~= nil then
 		local iid = tonumber(strmatch(link, "item:(%d+)") or nil);
-		if iid ~= nil then
-			LF_TooltipSetItemByID(Tooltip, iid);
-		end
-	end
-end
-local function LF_TooltipSetCraftSpell(Tooltip)
-	local _, sid = Tooltip:GetSpell();
-	if sid ~= nil then
-		LF_TooltipSetSpellByID(Tooltip, sid);
-	else
-		local _, link = Tooltip:GetItem();
-		local iid = link and tonumber(strmatch(link, "item:(%d+)") or nil);
 		if iid ~= nil then
 			LF_TooltipSetItemByID(Tooltip, iid);
 		end
@@ -549,44 +704,34 @@ local function F_HookTooltip(Tooltip)
 	hooksecurefunc(Tooltip, "SetItemByID", LF_TooltipSetItemByID);
 	hooksecurefunc(Tooltip, "SetCraftSpell", LF_TooltipSetCraftSpell);
 	--
-	hooksecurefunc(Tooltip, "SetMerchantItem", LF_TooltipGUISetItem);
-	hooksecurefunc(Tooltip, "SetBuybackItem", LF_TooltipGUISetItem);
-	hooksecurefunc(Tooltip, "SetBagItem", LF_TooltipGUISetItem);
-	hooksecurefunc(Tooltip, "SetAuctionItem", LF_TooltipGUISetItem);
-	hooksecurefunc(Tooltip, "SetAuctionSellItem", LF_TooltipGUISetItem);
-	hooksecurefunc(Tooltip, "SetLootItem", LF_TooltipGUISetItem);
-	hooksecurefunc(Tooltip, "SetLootRollItem", LF_TooltipGUISetItem);
-	hooksecurefunc(Tooltip, "SetInventoryItem", LF_TooltipGUISetItem);
-	hooksecurefunc(Tooltip, "SetTradePlayerItem", LF_TooltipGUISetItem);
-	hooksecurefunc(Tooltip, "SetTradeTargetItem", LF_TooltipGUISetItem);
-	hooksecurefunc(Tooltip, "SetQuestItem", LF_TooltipGUISetItem);
-	hooksecurefunc(Tooltip, "SetQuestLogItem", LF_TooltipGUISetItem);
-	hooksecurefunc(Tooltip, "SetInboxItem", LF_TooltipGUISetItem);
-	hooksecurefunc(Tooltip, "SetSendMailItem", LF_TooltipGUISetItem);
-	hooksecurefunc(Tooltip, "SetTradeSkillItem", LF_TooltipGUISetItem);
-	hooksecurefunc(Tooltip, "SetCraftItem", function(Tooltip, recipe_index, reagent_index)
-		local link = GetCraftReagentItemLink(recipe_index, reagent_index);
-		if link ~= nil then
-			local iid = tonumber(strmatch(link, "item:(%d+)") or nil);
-			if iid ~= nil then
-				LF_TooltipSetItemByID(Tooltip, iid);
-			end
-		end
-	end);
+	hooksecurefunc(Tooltip, "SetMerchantItem", LF_TooltipSetMerchantItem);
+	hooksecurefunc(Tooltip, "SetBuybackItem", LF_TooltipSetBuybackItem);
+	hooksecurefunc(Tooltip, "SetBagItem", LF_TooltipSetBagItem);
+	hooksecurefunc(Tooltip, "SetAuctionItem", LF_TooltipSetAuctionItem);
+	hooksecurefunc(Tooltip, "SetAuctionSellItem", LF_TooltipSetAuctionSellItem);
+	hooksecurefunc(Tooltip, "SetLootItem", LF_TooltipSetLootItem);
+	hooksecurefunc(Tooltip, "SetLootRollItem", LF_TooltipSetLootRollItem);
+	hooksecurefunc(Tooltip, "SetInventoryItem", LF_TooltipSetInventoryItem);
+	hooksecurefunc(Tooltip, "SetTradePlayerItem", LF_TooltipSetTradePlayerItem);
+	hooksecurefunc(Tooltip, "SetTradeTargetItem", LF_TooltipSetTradeTargetItem);
+	hooksecurefunc(Tooltip, "SetQuestItem", LF_TooltipSetQuestItem);
+	hooksecurefunc(Tooltip, "SetQuestLogItem", LF_TooltipSetQuestLogItem);
+	hooksecurefunc(Tooltip, "SetInboxItem", LF_TooltipSetInboxItem);
+	hooksecurefunc(Tooltip, "SetSendMailItem", LF_TooltipSetSendMailItem);
+	hooksecurefunc(Tooltip, "SetTradeSkillItem", LF_TooltipSetTradeSkillItem);
+	hooksecurefunc(Tooltip, "SetCraftItem", LF_TooltipSetCraftItem);
 	if __namespace__.__is_classic then
 		hooksecurefunc(Tooltip, "SetTrainerService", LF_TooltipGUISetItem);
 	elseif __namespace__.__is_bcc then
 		hooksecurefunc(Tooltip, "SetTrainerService", LF_TooltipGUISetSpell);
-		hooksecurefunc(Tooltip, "SetGuildBankItem", function(Tooltip, tab, index)
-			local link = GetGuildBankItemLink(tab, index);
-			if link ~= nil then
-				local iid = tonumber(strmatch(link, "item:(%d+)") or nil);
-				if iid ~= nil then
-					LF_TooltipSetItemByID(Tooltip, iid);
-				end
-			end
-		end);
+		hooksecurefunc(Tooltip, "SetGuildBankItem", LF_TooltipSetGuildBankItem);
+		hooksecurefunc(Tooltip, "SetSocketGem", LF_TooltipGUISetItem);
+		hooksecurefunc(Tooltip, "SetExistingSocketGem", LF_TooltipGUISetItem);
 	end
+	hooksecurefunc(Tooltip, "SetCompareItem", function(Tooltip, Tooltip2, service)
+		LF_TooltipGUISetItem(Tooltip);
+		LF_TooltipGUISetItem(Tooltip2);
+	end);
 end
 
 __namespace__.F_HookTooltip = F_HookTooltip;
@@ -655,9 +800,12 @@ local function LF_SetRecipeSourceTip(Tooltip, sid)
 				Tooltip:AddDoubleLine(L["LABEL_GET_FROM"], line);
 			end
 		end
-		local qid = info[index_quest];
-		if qid ~= nil then			-- quests
-			Tooltip:AddDoubleLine(L["LABEL_GET_FROM"], "Quest: " .. qid);
+		local qids = info[index_quest];
+		if qids then			-- quests
+			for index = 1, #qids do
+				local qid = qids[index];
+				Tooltip:AddDoubleLine(L["LABEL_GET_FROM"], "Quest: " .. qid);
+			end
 		end
 		-- if info[index_object] ~= nil then			-- objects
 		-- 	if type(info[index_object]) == 'table' then
@@ -676,6 +824,8 @@ function __namespace__.init_tooltip()
 	AVAR, VAR, SET, FAV = __namespace__.AVAR, __namespace__.VAR, __namespace__.SET, __namespace__.FAV;
 	F_HookTooltip(_G.GameTooltip);
 	F_HookTooltip(_G.ItemRefTooltip);
+	F_HookTooltip(_G.ShoppingTooltip1);
+	F_HookTooltip(_G.ShoppingTooltip2);
 	__namespace__:AddCallback("AUCTION_MOD_LOADED", function(mod)
 		if mod ~= nil then
 			AuctionMod = mod;

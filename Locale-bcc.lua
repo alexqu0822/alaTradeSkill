@@ -86,7 +86,7 @@ local LE_ITEM_MISCELLANEOUS_OTHER = LE_ITEM_MISCELLANEOUS_OTHER or 4;
 local LE_ITEM_MISCELLANEOUS_MOUNT = LE_ITEM_MISCELLANEOUS_MOUNT or 5;
 
 
-local __addon_, __namespace__ = ...;
+local __addon__, __namespace__ = ...;
 
 local LOCALE = GetLocale();
 local L = {
@@ -414,8 +414,7 @@ if LOCALE == "zhCN" or LOCALE == "zhTW" then
 		[5] = "胸部",
 		[6] = "腰部",
 		[7] = "腿部",
-		[8] = "脚",
-		[8] = "腿部",
+		[8] = "脚部",
 		[9] = "手腕",
 		[10] = "手",
 		[11] = "手指",

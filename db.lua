@@ -2,7 +2,7 @@
 	by ALA @ 163UI
 --]]--
 
-local __addon_, __namespace__ = ...;
+local __addon__, __namespace__ = ...;
 local __db__ = __namespace__.__db__;
 local L = __namespace__.L;
 
@@ -119,33 +119,61 @@ local T_Recipe_Data = __db__.T_Recipe_Data;
 --]]
 --
 local T_TradeSkill_ID = __db__.T_TradeSkill_ID;
-local T_TradeSkill_Name = {  };						--	[pid] = prof_name
-local T_TradeSkill_Hash = {  };						--	[prof_name] = pid
+--[[auto]]local T_TradeSkill_Name = {  };								--	[pid] = prof_name
+--[[auto]]local T_TradeSkill_Hash = {  };								--	[prof_name] = pid
 local T_TradeSkill_Texture = __db__.T_TradeSkill_Texture;
 local T_TradeSkill_CheckID = __db__.T_TradeSkill_CheckID;	--	[pid] = p_check_sid
-local T_TradeSkill_CheckName = {  };					--	[pid] = p_check_sname
-local T_TradeSkill_HasUI = __db__.T_TradeSkill_HasUI;	--	[pid] = bool
+--[[auto]]local T_TradeSkill_CheckName = {  };						--	[pid] = p_check_sname
+local T_TradeSkill_HasUI = __db__.T_TradeSkill_HasUI;		--	[pid] = bool
 local T_TradeSkill_Spec2Pid = __db__.T_TradeSkill_Spec2Pid;
 local T_TradeSkill_RecipeList = __db__.T_TradeSkill_RecipeList;
 --	Hash
-local T_sname2sid = {  };	--	[pid][sname] = { sid }
-local T_cis2sid = {  };		--	[cid] = { sid }
-local T_cidpid2sid = {  };	--	[cid][pid] = { sid }
-local T_rid2sid = {  };		--	[rid] = sid
+--[[auto]]local T_sname2sid = {  };		--	[pid][sname] = { sid }
+local T_cis2sid = {  };			--	[cid] = { sid }
+local T_cidpid2sid = {  };		--	[cid][pid] = { sid }
+local T_rid2sid = {  };			--	[rid] = sid
 local T_IsSpecLearned = {  };
 local T_material2sid = {  };
-local T_TradeSkill_SameSkillName = {  };
+--[[auto]]local T_TradeSkill_SameSkillName = {  };
 --	no-use list
 local recipe_sid_list = {  };	--	{ sid }			--	actually unused
 local recipe_cid_list = {  };	--	{ cid }			--	actually unused
 --	cached
-local T_SpellData = {  };		--	[sid] = { 1_name, 2_name_lower, 3_link, 4_link_lower, 5_string }
-local T_ItemData = {  };			--	[iid] = info{ 1_name, 2_link, 3_rarity, 4_loc, 5_icon, 6_sellPrice, 7_typeID, 8_subTypeId, 9_bindType, 10_name_lower, 11_link_lower, 12_string }
+--[[dynamic]]local T_SpellData = {  };		--	[sid] = { 1_name, 2_name_lower, 3_link, 4_link_lower, 5_string }
+--[[dynamic]]local T_ItemData = {  };		--	[iid] = info{ 1_name, 2_link, 3_rarity, 4_loc, 5_icon, 6_sellPrice, 7_typeID, 8_subTypeId, 9_bindType, 10_name_lower, 11_link_lower, 12_string }
 --	Temp
 local T_Temp_SpellHash = {  };
 local T_Temp_ItemHash = {  };
 local T_Temp_pid = {  };
 --
+local function LF_HashTradeSkill(pid, pname, pname_lower)
+	T_TradeSkill_Name[pid] = pname;
+	if L.extra_skill_name[pid] == nil then
+		T_TradeSkill_Hash[pname] = pid;
+		T_TradeSkill_Hash[pname_lower] = pid;
+	else
+		T_TradeSkill_Hash[L.extra_skill_name[pid]] = pid;
+		T_TradeSkill_Hash[strlower(L.extra_skill_name[pid])] = pid;
+	end
+end
+local function LF_HashSpell(sid, sname, sname_lower)
+	local info = T_Recipe_Data[sid];
+	if info ~= nil then
+		local pid = info[index_pid];
+		local pt = T_sname2sid[pid];
+		if pt == nil then
+			pt = {  };
+			T_sname2sid[pid] = pt;
+		end
+		local ptn = pt[sname];
+		if ptn == nil then
+			ptn = {  };
+			pt[sname] = ptn;
+			pt[sname_lower] = ptn;
+		end
+		tinsert(ptn, sid);
+	end
+end
 local function LF_CacheSpell(sid)
 	local sname = GetSpellInfo(sid);
 	if sname ~= nil then
@@ -158,22 +186,7 @@ local function LF_CacheSpell(sid)
 			"|cff71d5ff[" .. sname .. "]|r",
 		};
 		T_SpellData[sid] = sinfo;
-		local info = T_Recipe_Data[sid];
-		if info ~= nil then
-			local pid = info[index_pid];
-			local pt = T_sname2sid[pid];
-			if pt == nil then
-				pt = {  };
-				T_sname2sid[pid] = pt;
-			end
-			local ptn = pt[sname];
-			if ptn == nil then
-				ptn = {  };
-				pt[sname] = ptn;
-			end
-			pt[sname_lower] = ptn;
-			tinsert(ptn, sid);
-		end
+		LF_HashSpell(sid, sname, sname_lower);
 		T_Temp_SpellHash[sid] = nil;
 		return sinfo;
 	-- else
@@ -211,6 +224,20 @@ local function LF_CacheItem(iid)
 	end
 end
 -->		preload
+local _SPre, _IPre = 0, 0;		--	dev
+if __namespace__.__is_dev then
+	local _RequestLoadSpellData = RequestLoadSpellData;
+	RequestLoadSpellData = function(...)
+		_SPre = _SPre + 1;
+		return _RequestLoadSpellData(...);
+	end
+	local _RequestLoadItemDataByID = RequestLoadItemDataByID;
+	RequestLoadItemDataByID = function(...)
+		_IPre = _IPre + 1;
+		return _RequestLoadItemDataByID(...);
+	end
+end
+
 local LB_PreloadSpellFinished = false;
 local LB_PreloadItemFinished = false;
 function F.SPELL_DATA_LOAD_RESULT(sid, success)
@@ -223,14 +250,7 @@ function F.SPELL_DATA_LOAD_RESULT(sid, success)
 				local pname_lower = strlower(pname);
 				T_Temp_pid[sid] = nil;
 				if T_TradeSkill_ID[pid] == sid then
-					if L.extra_skill_name[pid] == nil then
-						T_TradeSkill_Hash[pname] = pid;
-						T_TradeSkill_Hash[pname_lower] = pid;
-					else
-						T_TradeSkill_Hash[L.extra_skill_name[pid]] = pid;
-						T_TradeSkill_Hash[strlower(L.extra_skill_name[pid])] = pid;
-					end
-					T_TradeSkill_Name[pid] = pname;
+					LF_HashTradeSkill(pid, pname, pname_lower);
 				end
 				if T_TradeSkill_CheckID[pid] == sid then
 					T_TradeSkill_CheckName[pid] = pname;
@@ -263,6 +283,7 @@ function F.ITEM_DATA_LOAD_RESULT(iid, success)
 		-- _error_("SPELL_DATA_LOAD_RESULT#0", iid);
 	end
 end
+
 local function LF_RequestSpell()
 	local completed = true;
 	local maxonce = IsInRaid() and 500 or (IsInGroup() and 1000 or 10000);
@@ -323,20 +344,23 @@ local LN_Limited_RequestSpell = 0;
 local function LF_PreloadSpell()
 	if LF_RequestSpell() then
 		F:UnregisterEvent("SPELL_DATA_LOAD_RESULT");
-		__namespace__:FireEvent("USER_EVENT_SPELL_DATA_LOADED");
-		LB_PreloadSpellFinished = true;
-		if LB_PreloadItemFinished then
-			__namespace__:FireEvent("USER_EVENT_DATA_LOADED");
-		end
 	else
 		F:RegisterEvent("SPELL_DATA_LOAD_RESULT");	--	Events registered before loading screen went out may not work well. So reg here everytime.
 		C_Timer_After(2.0, LF_PreloadSpell);
 		LN_Limited_RequestSpell = LN_Limited_RequestSpell + 1;
 		if LN_Limited_RequestSpell >= 10 then
 			_error_("LF_PreloadSpell#0", LN_Limited_RequestSpell);
+		else
+			return;
 		end
 	end
+	__namespace__:FireEvent("USER_EVENT_SPELL_DATA_LOADED");
+	LB_PreloadSpellFinished = true;
+	if LB_PreloadItemFinished then
+		__namespace__:FireEvent("USER_EVENT_DATA_LOADED");
+	end
 end
+
 local function LF_RequestItem()
 	local completed = true;
 	local maxonce = IsInRaid() and 500 or (IsInGroup() and 1000 or 10000);
@@ -394,24 +418,39 @@ local LN_Limited_RequestItem = 0;
 local function LF_PreloadItem()
 	if LF_RequestItem() then
 		F:UnregisterEvent("ITEM_DATA_LOAD_RESULT");
-		__namespace__:FireEvent("USER_EVENT_ITEM_DATA_LOADED");
-		LB_PreloadItemFinished = true;
-		if LB_PreloadSpellFinished then
-			__namespace__:FireEvent("USER_EVENT_DATA_LOADED");
-		end
-		for pid = __db__.DBMINPID, __db__.DBMAXPID do
-			local n1, n2 = T_TradeSkill_Name[pid], T_TradeSkill_CheckName[pid];
-			if n1 ~= nil and n2 ~= nil then
-				T_TradeSkill_SameSkillName[n1] = n2;
-				T_TradeSkill_SameSkillName[n2] = n1;
-			end
-		end
 	else
 		F:RegisterEvent("ITEM_DATA_LOAD_RESULT");	--	Events registered before loading screen went out may not work well. So reg here everytime.
 		C_Timer_After(2.0, LF_PreloadItem);
 		LN_Limited_RequestItem = LN_Limited_RequestItem + 1;
 		if LN_Limited_RequestItem >= 10 then
 			_error_("LF_PreloadItem#0", LN_Limited_RequestItem);
+		else
+			return;
+		end
+	end
+	__namespace__:FireEvent("USER_EVENT_ITEM_DATA_LOADED");
+	LB_PreloadItemFinished = true;
+	if LB_PreloadSpellFinished then
+		__namespace__:FireEvent("USER_EVENT_DATA_LOADED");
+	end
+end
+--
+local function _LoadSavedVar()
+	for pid = __db__.DBMINPID, __db__.DBMAXPID do
+		local sid = T_TradeSkill_ID[pid];
+		local sinfo = T_SpellData[sid];
+		if sinfo ~= nil then
+			LF_HashTradeSkill(pid, sinfo[1], sinfo[2]);
+		end
+		--
+		local sid = T_TradeSkill_CheckID[pid];
+		local sinfo = T_SpellData[sid];
+		if sinfo ~= nil then
+			T_TradeSkill_CheckName[pid] = sinfo[1];
+		end
+		--
+		for sid, sinfo in next, T_SpellData do
+			LF_HashSpell(sid, sinfo[1], sinfo[2]);
 		end
 	end
 end
@@ -432,6 +471,20 @@ function F.SPELLS_CHANGED()
 		end
 	end
 end
+__namespace__:AddCallback("USER_EVENT_DATA_LOADED", function()
+	if LB_PreloadSpellFinished and LB_PreloadItemFinished then
+		for pid = __db__.DBMINPID, __db__.DBMAXPID do
+			local n1, n2 = T_TradeSkill_Name[pid], T_TradeSkill_CheckName[pid];
+			if n1 ~= nil and n2 ~= nil then
+				T_TradeSkill_SameSkillName[n1] = n2;
+				T_TradeSkill_SameSkillName[n2] = n1;
+			end
+		end
+		if __namespace__.__is_dev then
+			_error_("Preload", _SPre, _IPre);
+		end
+	end
+end);
 
 -->		Query
 --	GET TABLE
@@ -1304,6 +1357,19 @@ function __namespace__.init_db()
 			T_Recipe_Data[sid] = nil;
 		end
 	end
+	local CACHE = __namespace__.CACHE;
+	local LOCALE = GetLocale();
+	local cache = CACHE[LOCALE];
+	local _PatchVersion, _BuildNumber, _BuildDate, _TocVersion = GetBuildInfo();
+	if cache == nil or cache.__WoWVersion == nil or cache.__WoWVersion < _TocVersion or cache.__DataVersion == nil or cache.__DataVersion < __db__.__DataVersion then
+		cache = { S = T_SpellData, I = T_ItemData, };
+		CACHE[LOCALE] = cache;
+	else
+		T_SpellData, T_ItemData = cache.S, cache.I;
+	end
+	cache.__WoWVersion = _TocVersion;
+	cache.__DataVersion = __db__.__DataVersion;
+	_LoadSavedVar();
 	LF_PreloadSpell();
 	LF_PreloadItem();
 	for spec, pid in next, T_TradeSkill_Spec2Pid do

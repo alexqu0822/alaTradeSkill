@@ -2,7 +2,7 @@
 	by ALA @ 163UI
 --]]--
 
-local __addon_, __namespace__ = ...;
+local __addon__, __namespace__ = ...;
 local __db__ = __namespace__.__db__;
 local L = __namespace__.L;
 
@@ -30,7 +30,7 @@ local LOCALE = GetLocale();
 
 
 local AuctionMod = nil;
-
+local MTSL_DATA = nil;
 
 ---->	index
 	local index_validated = 1;
@@ -436,8 +436,10 @@ local function LF_MTSL_SetSpellTip(Tip, sid)
 				LF_MTSL_SetItem(Tip, pid, rid, L["LABEL_GET_FROM"], 1);
 			end
 		end
-		if info[index_quest] then			-- quests
-			for _, qid in next, info[index_quest] do
+		local qids = info[index_quest];
+		if qids then			-- quests
+			for index = 1, #qids do
+				local qid = qids[index];
 				LF_MTSL_SetQuest(Tip, pid, qid, L["LABEL_GET_FROM"], 1);
 			end
 		end
@@ -491,6 +493,7 @@ end
 
 local function callback()
 	__namespace__:FireEvent("RECIPESOURCE_MOD_LOADED", {
+		MTSL_DATA = _G.MTSL_DATA;
 		SetSpell = LF_MTSL_SetSpellTip,
 		SetItem = LF_MTSL_SetItem,
 		SetUnit = LF_MTSL_SetUnit,
@@ -532,6 +535,7 @@ __namespace__:AddAddOnCallback("MissingTradeSkillsList_TBC", callback);
 
 __namespace__:AddAddOnCallback("MissingTradeSkillsList_TBC_Data", function()
 	__namespace__:FireEvent("RECIPESOURCE_MOD_LOADED", {
+		MTSL_DATA = _G.MTSL_DATA;
 		SetSpell = LF_MTSL_SetSpellTip,
 		SetItem = LF_MTSL_SetItem,
 		SetUnit = LF_MTSL_SetUnit,
