@@ -3,6 +3,7 @@
 --]]--
 local __version = 4;
 
+local _G = _G;
 _G.__ala_meta__ = _G.__ala_meta__ or {  };
 local __ala_meta__ = _G.__ala_meta__;
 local uireimp = __ala_meta__.uireimp;
@@ -23,7 +24,6 @@ _G.alaPopup = Popup;
 
 local type = type;
 local ipairs, pairs, tinsert, tremove = ipairs, pairs, tinsert, tremove;
-local _G = _G;
 local _ = nil;
 
 

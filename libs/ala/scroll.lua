@@ -12,6 +12,7 @@
 ]]
 local __version = 3;
 
+local _G = _G;
 _G.__ala_meta__ = _G.__ala_meta__ or {  };
 local __ala_meta__ = _G.__ala_meta__;
 
@@ -26,7 +27,6 @@ _G.alaScrollList = ScrollList;
 local ADDON, NS = ...;
 
 local ceil, floor, max, min = ceil, floor, max, min;
-local _G = _G;
 local _ = nil;
 
 local function _error_(key, msg, ...)

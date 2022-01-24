@@ -3,6 +3,7 @@
 --]]--
 local __version = 5;
 
+local _G = _G;
 _G.__ala_meta__ = _G.__ala_meta__ or {  };
 local __ala_meta__ = _G.__ala_meta__;
 
