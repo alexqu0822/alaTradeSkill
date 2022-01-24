@@ -5,11 +5,10 @@
 		query skill & query specified sid
 		supreme craft
 --]]--
+local __ala_meta__ = _G.__ala_meta__;
 
 local __addon__, __namespace__ = ...;
-_G.__ala_meta__ = _G.__ala_meta__ or {  };
 __ala_meta__.prof = __namespace__;
-local __ala_meta__ = __ala_meta__;
 
 local __db__ = __namespace__.__db__;
 local L = __namespace__.L;

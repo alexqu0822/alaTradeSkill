@@ -910,6 +910,7 @@ function __db__.get_ordered_list(pid, list, check_hash, phase, rank, rankReverse
 			wipe(list);
 		end
 		phase = phase or CURPHASE;
+		local notlowerphase = phase >= CURPHASE;
 		if check_hash ~= nil and rank ~= nil then
 			local bonus = T_CharRaceBonus[pid] or 0;
 			if showKnown and showUnkown then
@@ -917,28 +918,28 @@ function __db__.get_ordered_list(pid, list, check_hash, phase, rank, rankReverse
 					for i = 1, #recipe do
 						local sid = recipe[i];
 						local info = T_Recipe_Data[sid];
-						if info[index_phase] <= phase and info[index_grey_rank] + bonus <= rank then
+						if (info[index_phase] <= phase or (notlowerphase and check_hash[sid] ~= nil)) and info[index_grey_rank] + bonus <= rank then
 							FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 						end
 					end
 					for i = 1, #recipe do
 						local sid = recipe[i];
 						local info = T_Recipe_Data[sid];
-						if info[index_phase] <= phase and info[index_green_rank] + bonus <= rank and info[index_grey_rank] + bonus > rank then
+						if (info[index_phase] <= phase or (notlowerphase and check_hash[sid] ~= nil)) and info[index_green_rank] + bonus <= rank and info[index_grey_rank] + bonus > rank then
 							FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 						end
 					end
 					for i = 1, #recipe do
 						local sid = recipe[i];
 						local info = T_Recipe_Data[sid];
-						if info[index_phase] <= phase and info[index_yellow_rank] + bonus <= rank and info[index_green_rank] + bonus > rank then
+						if (info[index_phase] <= phase or (notlowerphase and check_hash[sid] ~= nil)) and info[index_yellow_rank] + bonus <= rank and info[index_green_rank] + bonus > rank then
 							FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 						end
 					end
 					for i = 1, #recipe do
 						local sid = recipe[i];
 						local info = T_Recipe_Data[sid];
-						if info[index_phase] <= phase and info[index_learn_rank] <= rank and info[index_yellow_rank] + bonus > rank then
+						if (info[index_phase] <= phase or (notlowerphase and check_hash[sid] ~= nil)) and info[index_learn_rank] <= rank and info[index_yellow_rank] + bonus > rank then
 							FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 						end
 					end
@@ -946,7 +947,7 @@ function __db__.get_ordered_list(pid, list, check_hash, phase, rank, rankReverse
 						for i = 1, #recipe do
 							local sid = recipe[i];
 							local info = T_Recipe_Data[sid];
-							if info[index_phase] <= phase and info[index_learn_rank] > rank then
+							if (info[index_phase] <= phase or (notlowerphase and check_hash[sid] ~= nil)) and info[index_learn_rank] > rank then
 								FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 							end
 						end
@@ -956,7 +957,7 @@ function __db__.get_ordered_list(pid, list, check_hash, phase, rank, rankReverse
 						for i = #recipe, 1, -1 do
 							local sid = recipe[i];
 							local info = T_Recipe_Data[sid];
-							if info[index_phase] <= phase and info[index_learn_rank] > rank then
+							if (info[index_phase] <= phase or (notlowerphase and check_hash[sid] ~= nil)) and info[index_learn_rank] > rank then
 								FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 							end
 						end
@@ -964,28 +965,28 @@ function __db__.get_ordered_list(pid, list, check_hash, phase, rank, rankReverse
 					for i = #recipe, 1, -1 do
 						local sid = recipe[i];
 						local info = T_Recipe_Data[sid];
-						if info[index_phase] <= phase and info[index_learn_rank] <= rank and info[index_yellow_rank] + bonus > rank then
+						if (info[index_phase] <= phase or (notlowerphase and check_hash[sid] ~= nil)) and info[index_learn_rank] <= rank and info[index_yellow_rank] + bonus > rank then
 							FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 						end
 					end
 					for i = #recipe, 1, -1 do
 						local sid = recipe[i];
 						local info = T_Recipe_Data[sid];
-						if info[index_phase] <= phase and info[index_yellow_rank] + bonus <= rank and info[index_green_rank] + bonus > rank then
+						if (info[index_phase] <= phase or (notlowerphase and check_hash[sid] ~= nil)) and info[index_yellow_rank] + bonus <= rank and info[index_green_rank] + bonus > rank then
 							FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 						end
 					end
 					for i = #recipe, 1, -1 do
 						local sid = recipe[i];
 						local info = T_Recipe_Data[sid];
-						if info[index_phase] <= phase and info[index_green_rank] + bonus <= rank and info[index_grey_rank] + bonus > rank then
+						if (info[index_phase] <= phase or (notlowerphase and check_hash[sid] ~= nil)) and info[index_green_rank] + bonus <= rank and info[index_grey_rank] + bonus > rank then
 							FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 						end
 					end
 					for i = #recipe, 1, -1 do
 						local sid = recipe[i];
 						local info = T_Recipe_Data[sid];
-						if info[index_phase] <= phase and info[index_grey_rank] + bonus <= rank then
+						if (info[index_phase] <= phase or (notlowerphase and check_hash[sid] ~= nil)) and info[index_grey_rank] + bonus <= rank then
 							FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 						end
 					end
@@ -994,59 +995,75 @@ function __db__.get_ordered_list(pid, list, check_hash, phase, rank, rankReverse
 				if rankReversed then
 					for i = 1, #recipe do
 						local sid = recipe[i];
-						local info = T_Recipe_Data[sid];
-						if info[index_phase] <= phase and check_hash[sid] ~= nil and info[index_grey_rank] + bonus <= rank then
-							FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
+						if check_hash[sid] ~= nil then
+							local info = T_Recipe_Data[sid];
+							if (info[index_phase] <= phase or notlowerphase) and info[index_grey_rank] + bonus <= rank then
+								FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
+							end
 						end
 					end
 					for i = 1, #recipe do
 						local sid = recipe[i];
-						local info = T_Recipe_Data[sid];
-						if info[index_phase] <= phase and check_hash[sid] ~= nil and info[index_green_rank] + bonus <= rank and info[index_grey_rank] + bonus > rank then
-							FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
+						if check_hash[sid] ~= nil then
+							local info = T_Recipe_Data[sid];
+							if (info[index_phase] <= phase or notlowerphase) and info[index_green_rank] + bonus <= rank and info[index_grey_rank] + bonus > rank then
+								FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
+							end
 						end
 					end
 					for i = 1, #recipe do
 						local sid = recipe[i];
-						local info = T_Recipe_Data[sid];
-						if info[index_phase] <= phase and check_hash[sid] ~= nil and info[index_yellow_rank] + bonus <= rank and info[index_green_rank] + bonus > rank then
-							FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
+						if check_hash[sid] ~= nil then
+							local info = T_Recipe_Data[sid];
+							if (info[index_phase] <= phase or notlowerphase) and info[index_yellow_rank] + bonus <= rank and info[index_green_rank] + bonus > rank then
+								FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
+							end
 						end
 					end
 					for i = 1, #recipe do
 						local sid = recipe[i];
-						local info = T_Recipe_Data[sid];
-						if info[index_phase] <= phase and check_hash[sid] ~= nil and info[index_learn_rank] <= rank and info[index_yellow_rank] + bonus > rank then
-							FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
+						if check_hash[sid] ~= nil then
+							local info = T_Recipe_Data[sid];
+							if (info[index_phase] <= phase or notlowerphase) and info[index_learn_rank] <= rank and info[index_yellow_rank] + bonus > rank then
+								FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
+							end
 						end
 					end
 				else
 					for i = #recipe, 1, -1 do
 						local sid = recipe[i];
-						local info = T_Recipe_Data[sid];
-						if info[index_phase] <= phase and check_hash[sid] ~= nil and info[index_learn_rank] <= rank and info[index_yellow_rank] + bonus > rank then
-							FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
+						if check_hash[sid] ~= nil then
+							local info = T_Recipe_Data[sid];
+							if (info[index_phase] <= phase or notlowerphase) and info[index_learn_rank] <= rank and info[index_yellow_rank] + bonus > rank then
+								FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
+							end
 						end
 					end
 					for i = #recipe, 1, -1 do
 						local sid = recipe[i];
-						local info = T_Recipe_Data[sid];
-						if info[index_phase] <= phase and check_hash[sid] ~= nil and info[index_yellow_rank] + bonus <= rank and info[index_green_rank] + bonus > rank then
-							FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
+						if check_hash[sid] ~= nil then
+							local info = T_Recipe_Data[sid];
+							if (info[index_phase] <= phase or notlowerphase) and info[index_yellow_rank] + bonus <= rank and info[index_green_rank] + bonus > rank then
+								FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
+							end
 						end
 					end
 					for i = #recipe, 1, -1 do
 						local sid = recipe[i];
-						local info = T_Recipe_Data[sid];
-						if info[index_phase] <= phase and check_hash[sid] ~= nil and info[index_green_rank] + bonus <= rank and info[index_grey_rank] + bonus > rank then
-							FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
+						if check_hash[sid] ~= nil then
+							local info = T_Recipe_Data[sid];
+							if (info[index_phase] <= phase or notlowerphase) and info[index_green_rank] + bonus <= rank and info[index_grey_rank] + bonus > rank then
+								FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
+							end
 						end
 					end
 					for i = #recipe, 1, -1 do
 						local sid = recipe[i];
-						local info = T_Recipe_Data[sid];
-						if info[index_phase] <= phase and check_hash[sid] ~= nil and info[index_grey_rank] + bonus <= rank then
-							FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
+						if check_hash[sid] ~= nil then
+							local info = T_Recipe_Data[sid];
+							if (info[index_phase] <= phase or notlowerphase) and info[index_grey_rank] + bonus <= rank then
+								FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
+							end
 						end
 					end
 				end
@@ -1054,38 +1071,48 @@ function __db__.get_ordered_list(pid, list, check_hash, phase, rank, rankReverse
 				if rankReversed then
 					for i = 1, #recipe do
 						local sid = recipe[i];
-						local info = T_Recipe_Data[sid];
-						if info[index_phase] <= phase and check_hash[sid] == nil and info[index_grey_rank] + bonus <= rank then
-							FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
+						if check_hash[sid] == nil then
+							local info = T_Recipe_Data[sid];
+							if info[index_phase] <= phase and info[index_grey_rank] + bonus <= rank then
+								FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
+							end
 						end
 					end
 					for i = 1, #recipe do
 						local sid = recipe[i];
-						local info = T_Recipe_Data[sid];
-						if info[index_phase] <= phase and check_hash[sid] == nil and info[index_green_rank] + bonus <= rank and info[index_grey_rank] + bonus > rank then
-							FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
+						if check_hash[sid] == nil then
+							local info = T_Recipe_Data[sid];
+							if info[index_phase] <= phase and info[index_green_rank] + bonus <= rank and info[index_grey_rank] + bonus > rank then
+								FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
+							end
 						end
 					end
 					for i = 1, #recipe do
 						local sid = recipe[i];
-						local info = T_Recipe_Data[sid];
-						if info[index_phase] <= phase and check_hash[sid] == nil and info[index_yellow_rank] + bonus <= rank and info[index_green_rank] + bonus > rank then
-							FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
+						if check_hash[sid] == nil then
+							local info = T_Recipe_Data[sid];
+							if info[index_phase] <= phase and info[index_yellow_rank] + bonus <= rank and info[index_green_rank] + bonus > rank then
+								FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
+							end
 						end
 					end
 					for i = 1, #recipe do
 						local sid = recipe[i];
-						local info = T_Recipe_Data[sid];
-						if info[index_phase] <= phase and check_hash[sid] == nil and info[index_learn_rank] <= rank and info[index_yellow_rank] + bonus > rank then
-							FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
+						if check_hash[sid] == nil then
+							local info = T_Recipe_Data[sid];
+							if info[index_phase] <= phase and info[index_learn_rank] <= rank and info[index_yellow_rank] + bonus > rank then
+								FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
+							end
 						end
 					end
 					if showHighRank then
 						for i = 1, #recipe do
 							local sid = recipe[i];
-							local info = T_Recipe_Data[sid];
-							if info[index_phase] <= phase and check_hash[sid] == nil and info[index_learn_rank] > rank then
-								FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
+							if check_hash[sid] == nil then
+								local info = T_Recipe_Data[sid];
+								if info[index_phase] <= phase and info[index_learn_rank] > rank then
+									FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
+								end
 							end
 						end
 					end
@@ -1093,38 +1120,48 @@ function __db__.get_ordered_list(pid, list, check_hash, phase, rank, rankReverse
 					if showHighRank then
 						for i = #recipe, 1, -1 do
 							local sid = recipe[i];
+							if check_hash[sid] == nil then
+								local info = T_Recipe_Data[sid];
+								if info[index_phase] <= phase and info[index_learn_rank] > rank then
+									FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
+								end
+							end
+						end
+					end
+					for i = #recipe, 1, -1 do
+						local sid = recipe[i];
+						if check_hash[sid] == nil then
 							local info = T_Recipe_Data[sid];
-							if info[index_phase] <= phase and check_hash[sid] == nil and info[index_learn_rank] > rank then
+							if info[index_phase] <= phase and info[index_learn_rank] <= rank and info[index_yellow_rank] + bonus > rank then
 								FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 							end
 						end
 					end
 					for i = #recipe, 1, -1 do
 						local sid = recipe[i];
-						local info = T_Recipe_Data[sid];
-						if info[index_phase] <= phase and check_hash[sid] == nil and info[index_learn_rank] <= rank and info[index_yellow_rank] + bonus > rank then
-							FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
+						if check_hash[sid] == nil then
+							local info = T_Recipe_Data[sid];
+							if info[index_phase] <= phase and info[index_yellow_rank] + bonus <= rank and info[index_green_rank] + bonus > rank then
+								FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
+							end
 						end
 					end
 					for i = #recipe, 1, -1 do
 						local sid = recipe[i];
-						local info = T_Recipe_Data[sid];
-						if info[index_phase] <= phase and check_hash[sid] == nil and info[index_yellow_rank] + bonus <= rank and info[index_green_rank] + bonus > rank then
-							FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
+						if check_hash[sid] == nil then
+							local info = T_Recipe_Data[sid];
+							if info[index_phase] <= phase and info[index_green_rank] + bonus <= rank and info[index_grey_rank] + bonus > rank then
+								FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
+							end
 						end
 					end
 					for i = #recipe, 1, -1 do
 						local sid = recipe[i];
-						local info = T_Recipe_Data[sid];
-						if info[index_phase] <= phase and check_hash[sid] == nil and info[index_green_rank] + bonus <= rank and info[index_grey_rank] + bonus > rank then
-							FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
-						end
-					end
-					for i = #recipe, 1, -1 do
-						local sid = recipe[i];
-						local info = T_Recipe_Data[sid];
-						if info[index_phase] <= phase and check_hash[sid] == nil and info[index_grey_rank] + bonus <= rank then
-							FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
+						if check_hash[sid] == nil then
+							local info = T_Recipe_Data[sid];
+							if info[index_phase] <= phase and info[index_grey_rank] + bonus <= rank then
+								FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
+							end
 						end
 					end
 				end
@@ -1135,7 +1172,7 @@ function __db__.get_ordered_list(pid, list, check_hash, phase, rank, rankReverse
 					for i = 1, #recipe do
 						local sid = recipe[i];
 						local info = T_Recipe_Data[sid];
-						if info[index_phase] <= phase then
+						if info[index_phase] <= phase or (notlowerphase and check_hash[sid] ~= nil) then
 							FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 						end
 					end
@@ -1143,7 +1180,7 @@ function __db__.get_ordered_list(pid, list, check_hash, phase, rank, rankReverse
 					for i = #recipe, 1, -1 do
 						local sid = recipe[i];
 						local info = T_Recipe_Data[sid];
-						if info[index_phase] <= phase then
+						if info[index_phase] <= phase or (notlowerphase and check_hash[sid] ~= nil) then
 							FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 						end
 					end
@@ -1154,7 +1191,7 @@ function __db__.get_ordered_list(pid, list, check_hash, phase, rank, rankReverse
 						local sid = recipe[i];
 						if check_hash[sid] ~= nil then
 							local info = T_Recipe_Data[sid];
-							if info[index_phase] <= phase then
+							if info[index_phase] <= phase or notlowerphase then
 								FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 							end
 						end
@@ -1164,7 +1201,7 @@ function __db__.get_ordered_list(pid, list, check_hash, phase, rank, rankReverse
 						local sid = recipe[i];
 						if check_hash[sid] ~= nil then
 							local info = T_Recipe_Data[sid];
-							if info[index_phase] <= phase then
+							if info[index_phase] <= phase or notlowerphase then
 								FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 							end
 						end

@@ -30,7 +30,7 @@ local LOCALE = GetLocale();
 
 
 local AuctionMod = nil;
-local MTSL_DATA = nil;
+-- local MTSL_DATA = nil;
 
 ---->	index
 	local index_validated = 1;
@@ -104,6 +104,7 @@ local LT_MTSL_SkillName = {
 	[8] = "Tailoring",
 	[9] = "Engineering",
 	[10] = "Enchanting",
+	[15] = "Jewelcrafting",
 };
 local MTSL_LOCALE = LT_MTSL_LocaleKey[LOCALE] or LT_MTSL_LocaleKey.enUS;
 local LF_MTSL_SetQuest;
@@ -493,7 +494,7 @@ end
 
 local function callback()
 	__namespace__:FireEvent("RECIPESOURCE_MOD_LOADED", {
-		MTSL_DATA = _G.MTSL_DATA;
+		-- MTSL_DATA = _G.MTSL_DATA;
 		SetSpell = LF_MTSL_SetSpellTip,
 		SetItem = LF_MTSL_SetItem,
 		SetUnit = LF_MTSL_SetUnit,
@@ -535,7 +536,7 @@ __namespace__:AddAddOnCallback("MissingTradeSkillsList_TBC", callback);
 
 __namespace__:AddAddOnCallback("MissingTradeSkillsList_TBC_Data", function()
 	__namespace__:FireEvent("RECIPESOURCE_MOD_LOADED", {
-		MTSL_DATA = _G.MTSL_DATA;
+		-- MTSL_DATA = _G.MTSL_DATA;
 		SetSpell = LF_MTSL_SetSpellTip,
 		SetItem = LF_MTSL_SetItem,
 		SetUnit = LF_MTSL_SetUnit,
