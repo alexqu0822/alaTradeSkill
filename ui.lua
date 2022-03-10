@@ -3388,7 +3388,9 @@ local function LF_AddOnCallback_Blizzard_TradeSkillUI(addon)
 			SetTradeSkillInvSlotFilter(0, 1, 1);
 			UIDropDownMenu_SetSelectedID(TradeSkillInvSlotDropDown, 1);
 			ExpandTradeSkillSubClass(0);
-			TradeSkillFrameAvailableFilterCheckButton:SetChecked(false);
+			if __namespace__.__is_bcc then
+				TradeSkillFrameAvailableFilterCheckButton:SetChecked(false);
+			end
 			if TradeSkillCollapseAllButton ~= nil then
 				TradeSkillCollapseAllButton.collapsed = nil;
 			end
@@ -3458,8 +3460,10 @@ local function LF_AddOnCallback_Blizzard_TradeSkillUI(addon)
 	local frame = LF_HookFrame(addon, meta);
 	T_uiFrames[addon] = frame;
 	--
-	TradeSkillFrameAvailableFilterCheckButton:ClearAllPoints();
-	TradeSkillFrameAvailableFilterCheckButton:SetPoint("TOPLEFT", TradeSkillFrame, "TOPLEFT", 68, -56);
+	if __namespace__.__is_bcc then
+		TradeSkillFrameAvailableFilterCheckButton:ClearAllPoints();
+		TradeSkillFrameAvailableFilterCheckButton:SetPoint("TOPLEFT", TradeSkillFrame, "TOPLEFT", 68, -56);
+	end
 	TradeSkillExpandButtonFrame:Hide();
 	--
 	LF_FrameApplySetting(frame);

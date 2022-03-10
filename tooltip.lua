@@ -357,8 +357,10 @@ local function set_tip_by_sid(Tooltip, sid)
 		-- if rank ~= nil then
 		-- 	pname = pname .. "(" .. rank .. ")";
 		-- end
-		pname = pname .. " " .. __db__.get_difficulty_rank_list_text_by_sid(sid, true) .. "";
-		Tooltip:AddLine("|cff00afff" .. pname .. "|r");
+		local rankText = __db__.get_difficulty_rank_list_text_by_sid(sid, true);
+		if pname ~= "" and rankText ~= "" then
+			Tooltip:AddLine("|cff00afff" .. pname .. " " .. rankText .. "|r");
+		end
 		local detail_lines = {  };
 		F_GetPriceInfoBySID(Tooltip.__phase or CURPHASE, sid, (info[index_num_made_min] + info[index_num_made_max]) / 2, detail_lines, 0, cid == nil);
 		if #detail_lines > 0 then
@@ -387,8 +389,10 @@ local function set_tip_by_cid(Tooltip, cid)
 				-- if rank ~= nil then
 				-- 	pname = pname .. "(" .. rank .. ")";
 				-- end
-				pname = pname .. " " .. __db__.get_difficulty_rank_list_text_by_sid(sid, true) .. "";
-				Tooltip:AddLine("|cff00afff" .. pname .. "|r");
+				local rankText = __db__.get_difficulty_rank_list_text_by_sid(sid, true);
+				if pname ~= "" and rankText ~= "" then
+					Tooltip:AddLine("|cff00afff" .. pname .. " " .. rankText .. "|r");
+				end
 				local detail_lines = {  };
 				F_GetPriceInfoBySID(Tooltip.__phase or CURPHASE, sid, (info[index_num_made_min] + info[index_num_made_max]) / 2, detail_lines, 0, false);
 				if #detail_lines > 0 then
@@ -473,8 +477,12 @@ local function LF_AddMaterialCraftInfo(Tooltip, iid)
 					lineL = T_SpaceTable[1] .. __db__.spell_string_s(sid) .. "x" .. num;
 					-- lineR = "|cff00afff" .. pname .. info[index_learn_rank] .. "|r";
 				end
-					lineR = "|cff00afff" .. pname .. " " .. __db__.get_difficulty_rank_list_text_by_sid(sid, true) .. "|r";
-				Tooltip:AddDoubleLine(lineL, lineR);
+				local rankText = __db__.get_difficulty_rank_list_text_by_sid(sid, true);
+				if pname ~= "" and rankText ~= "" then
+					Tooltip:AddDoubleLine(lineL, "|cff00afff" .. pname .. " " .. rankText .. "|r");
+				else
+					Tooltip:AddLine(lineL);
+				end
 				nLines = nLines + 1;
 			end
 		end

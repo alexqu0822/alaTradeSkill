@@ -609,6 +609,9 @@ end);
 		if sid ~= nil then
 			local red, yellow, green, grey, bonus = __db__.get_difficulty_rank_list_by_sid(sid);
 			if red and yellow and green and grey then
+				if red <= 0 and yellow <= 0 and green <= 0 and grey <= 0 then
+					return "";
+				end
 				if bonus and tipbonus then
 					if red < yellow then
 						return "|cffff8f00" .. red .. "|r |cffffff00" .. yellow .. "|r |cff8fff00" .. green .. "|r |cff8f8f8f" .. grey .. "|r |cff00ff00*" .. PLAYER_RACE .. " " .. bonus .. "*|r";
@@ -1372,6 +1375,45 @@ function __namespace__.init_db()
 				tinsert(recipe_sid_list, sid);
 				if cid ~= nil then
 					tinsert(recipe_cid_list, cid);
+				end
+				--	material
+				local regeants_id = info[index_reagents_id];
+				local reagents_num = info[index_reagents_count];
+				for index = 1, #regeants_id do
+					local reagent_id = regeants_id[index];
+					local val = T_material2sid[reagent_id];
+					if val == nil then
+						val = { {  }, {  }, };
+						T_material2sid[reagent_id] = val;
+					end
+					tinsert(val[1], sid);
+					tinsert(val[2], reagents_num[index]);
+				end
+			end
+		end
+	end
+	do
+		local list = T_TradeSkill_RecipeList[-1];
+		if list ~= nil then
+			for index = 1, #list do
+				local sid = list[index];
+				local info = T_Recipe_Data[sid];
+				info[index_validated] = true;
+				local cid = info[index_cid];
+				if cid ~= nil then
+					local h1 = T_cis2sid[cid];
+					if h1 == nil then
+						h1 = {  };
+						T_cis2sid[cid] = h1;
+					end
+					tinsert(h1, sid);
+				end
+				local rids = info[index_recipe];
+				if rids ~= nil then
+					for index = 1, #rids do
+						local rid = rids[index];
+						T_rid2sid[rid] = sid;
+					end
 				end
 				--	material
 				local regeants_id = info[index_reagents_id];
