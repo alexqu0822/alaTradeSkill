@@ -1439,7 +1439,7 @@ end
 			elseif IsAltKeyDown() then
 				local text1 = nil;
 				local text2 = nil;
-				if data then
+				if data and __db__.T_TradeSkill_ID[frame.flag] ~= nil then
 					local n = frame.F_GetRecipeNumReagents(data);
 					if n and n > 0 then
 						local m1, m2 = frame.F_GetRecipeNumMade(data);
