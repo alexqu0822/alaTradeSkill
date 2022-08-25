@@ -347,12 +347,13 @@ local function LF_PreloadSpell()
 	if LF_RequestSpell() then
 		F:UnregisterEvent("SPELL_DATA_LOAD_RESULT");
 	else
-		F:RegisterEvent("SPELL_DATA_LOAD_RESULT");	--	Events registered before loading screen went out may not work well. So reg here everytime.
-		C_Timer_After(2.0, LF_PreloadSpell);
 		LN_Limited_RequestSpell = LN_Limited_RequestSpell + 1;
 		if LN_Limited_RequestSpell >= 10 then
 			_error_("LF_PreloadSpell#0", LN_Limited_RequestSpell);
+			F:UnregisterEvent("SPELL_DATA_LOAD_RESULT");
 		else
+			F:RegisterEvent("SPELL_DATA_LOAD_RESULT");	--	Events registered before loading screen went out may not work well. So reg here everytime.
+			C_Timer_After(2.0, LF_PreloadSpell);
 			return;
 		end
 	end

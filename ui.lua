@@ -3280,7 +3280,7 @@ local function LF_AddOnCallback_Blizzard_TradeSkillUI(addon)
 		local TradeSkillRankFrame = _G.TradeSkillRankFrame;
 		local TradeSkillRankFrameBorder = _G.TradeSkillRankFrameBorder;
 		local TradeSkillFrameAvailableFilterCheckButton = _G.TradeSkillFrameAvailableFilterCheckButton;
-		local TradeSearchInputBox = _G.TradeSearchInputBox;
+		local TradeSearchInputBox = _G.TradeSearchInputBox or _G.TradeSkillFrameEditBox;
 		local TradeSkillListScrollFrame = _G.TradeSkillListScrollFrame;
 		local TradeSkillListScrollFrameScrollBar = _G.TradeSkillListScrollFrameScrollBar;
 		local TradeSkillHighlightFrame = _G.TradeSkillHighlightFrame;
