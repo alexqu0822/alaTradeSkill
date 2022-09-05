@@ -2642,11 +2642,13 @@ end
 				end
 				T_SkillListButtons[1]:ClearAllPoints();
 				T_SkillListButtons[1]:SetPoint("TOPLEFT", meta.HookedScrollFrame);
+				local FrameLevel = meta.HookedScrollFrame:GetFrameLevel() + 2;
 				for index = 1, #T_SkillListButtons do
 					local Button = T_SkillListButtons[index];
 					Button:SetScript("OnEnter", LF_BLZSkillListButton_OnEnter);
 					Button:SetScript("OnLeave", LT_SharedMethod.SkillListButton_OnLeave);
 					Button:SetID(index);
+					Button:SetFrameLevel(FrameLevel);
 					Button.frame = frame;
 					Button.ScrollFrame = meta.HookedScrollFrame;
 				end
@@ -3491,7 +3493,7 @@ local function LF_AddOnCallback_Blizzard_TradeSkillUI(addon)
 			func(TradeSkillInvSlotDropDown);
 			func(TradeSkillSubClassDropDown);
 			func(TradeSkillListScrollFrame);
-			func(TradeSkillListScrollFrameScrollBar)
+			func(TradeSkillListScrollFrameScrollBar);
 			func(TradeSkillHighlightFrame);
 			local T_SkillListButtons = self.T_SkillListButtons;
 			if T_SkillListButtons ~= nil then

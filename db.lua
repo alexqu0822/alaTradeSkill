@@ -636,17 +636,17 @@ end);
 					return "";
 				end
 				if bonus and tipbonus then
-					if red < yellow then
+					-- if red < yellow then
 						return "|cffff8f00" .. red .. "|r |cffffff00" .. yellow .. "|r |cff8fff00" .. green .. "|r |cff8f8f8f" .. grey .. "|r |cff00ff00*" .. PLAYER_RACE .. " " .. bonus .. "*|r";
-					else
-						return "|cffffff00" .. yellow .. "|r |cff8fff00" .. green .. "|r |cff8f8f8f" .. grey .. "|r |cff00ff00*" .. PLAYER_RACE .. " " .. bonus .. "*|r";
-					end
+					-- else
+						-- return "|cffffff00" .. yellow .. "|r |cff8fff00" .. green .. "|r |cff8f8f8f" .. grey .. "|r |cff00ff00*" .. PLAYER_RACE .. " " .. bonus .. "*|r";
+					-- end
 				else
-					if red < yellow then
+					-- if red < yellow then
 						return "|cffff8f00" .. red .. "|r |cffffff00" .. yellow .. "|r |cff8fff00" .. green .. "|r |cff8f8f8f" .. grey .. "|r";
-					else
-						return "|cffffff00" .. yellow .. "|r |cff8fff00" .. green .. "|r |cff8f8f8f" .. grey .. "|r";
-					end
+					-- else
+						-- return "|cffffff00" .. yellow .. "|r |cff8fff00" .. green .. "|r |cff8f8f8f" .. grey .. "|r";
+					-- end
 				end
 			end
 		end

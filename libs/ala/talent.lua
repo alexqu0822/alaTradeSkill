@@ -31,6 +31,7 @@ end
 -->			upvalue
 	--
 	local GetTime = GetTime;
+	local print, date = print, date;
 	local type, tostring, tonumber = type, tostring, tonumber;
 	local select = select;
 	local wipe, concat = table.wipe, table.concat;
@@ -538,6 +539,10 @@ end
 				return nil;
 			end
 
+			local v1, v2 = __debase64[strsub(code, -2, -2)], __debase64[strsub(code, -1, -1)];
+			if v1 == nil or v2 == nil then
+				_log_("TalentError", code);
+			end
 			return class, __debase64[strsub(code, -2, -2)] + __debase64[strsub(code, -1, -1)] * 64, 1, 1, __emulib.DecodeTalentBlock(strsub(code, 2, -3));
 		end,
 		[2] = function(code, nodecoding)
