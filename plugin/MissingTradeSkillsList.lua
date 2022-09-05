@@ -290,7 +290,7 @@ LF_MTSL_SetItem = function(Tip, pid, iid, label, stack_size)
 			if AuctionMod ~= nil then
 				local price = AuctionMod.F_QueryPriceByID(iid);
 				if price and price > 0 then
-					line = line .. " |cff00ff00AH|r " .. AuctionMod.F_GetMoneyString(price);
+					line = line .. " |cff00ff00AH|r " .. __namespace__.F_GetMoneyString(price);
 				end
 			end
 		else

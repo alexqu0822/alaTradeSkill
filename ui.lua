@@ -48,6 +48,7 @@ local L = __namespace__.L;
 
 	local GetNumSkillLines = GetNumSkillLines;
 	local GetSkillLineInfo = GetSkillLineInfo;
+	local IsTradeSkillLinked = IsTradeSkillLinked or function() return false; end;
 	-- local IsSpellKnown = IsSpellKnown;
 	local GetSpellInfo = GetSpellInfo;
 	local GetItemInfo = GetItemInfo;
@@ -279,6 +280,8 @@ function LT_SharedMethod.CancelMarkKnown(sid, GUID)
 		T_LearnedRecipesHash[sid] = nil;
 	end
 end
+function LT_SharedMethod.DynamicCreateInfo(frame, index, sid)
+end
 
 
 --	Update
@@ -389,6 +392,7 @@ end
 		-- end
 		-- frame.mute_update = true;
 		if frame.HookedFrame:IsShown() then
+			local NotInspecting = not IsTradeSkillLinked();
 			frame:F_LayoutOnShow();
 			local skillName, cur_rank, max_rank = frame.F_GetSkillInfo();
 			local pid = __db__.get_pid_by_pname(skillName);
@@ -439,26 +443,41 @@ end
 							for index = 1, num do
 								local sname, srank = frame.F_GetRecipeInfo(index);
 								if sname ~= nil and srank ~= nil and srank ~= 'header' then
-									local cid = frame.F_GetRecipeItemID(index);
-									if cid ~= nil then
-										local sid = __db__.get_sid_by_pid_sname_cid(pid, sname, cid);
-										local info = __db__.get_info_by_sid(sid);
-										if info ~= nil then
-											if hash[sid] ~= nil then
-												_error_("UpdateFrame#0E3", pid .. "#" .. cid .. "#" .. sname .. "#" .. sid);
+									local sid = frame.F_GetRecipeSpellID ~= nil and frame.F_GetRecipeSpellID(index) or nil;
+									if sid == nil then
+										local cid = frame.F_GetRecipeItemID(index);
+										if cid ~= nil then
+											local sid = __db__.get_sid_by_pid_sname_cid(pid, sname, cid);
+											local info = __db__.get_info_by_sid(sid);
+											if info ~= nil then
+												if hash[sid] ~= nil then
+													_error_("UpdateFrame#0E3", pid .. "#" .. cid .. "#" .. sname .. "#" .. sid);
+												else
+													tinsert(sids, sid);
+													hash[sid] = index;
+													if NotInspecting then
+														LT_SharedMethod.MarkKnown(sid, PLAYER_GUID);
+													end
+												end
+												if index == frame.F_GetSelection() then
+													frame.selected_sid = sid;
+												end
 											else
-												tinsert(sids, sid);
-												hash[sid] = index;
-												LT_SharedMethod.MarkKnown(sid, PLAYER_GUID);
-											end
-											if index == frame.F_GetSelection() then
-												frame.selected_sid = sid;
+												_error_("UpdateFrame#0E2", pid .. "#" .. cid .. "#" .. sname, sid or "_NIL");
 											end
 										else
-											_error_("UpdateFrame#0E2", pid .. "#" .. cid .. "#" .. sname);
+											_error_("UpdateFrame#0E1", pid .. "#" .. sname);
 										end
 									else
-										_error_("UpdateFrame#0E1", pid .. "#" .. sname);
+										tinsert(sids, sid);
+										hash[sid] = index;
+										if NotInspecting then
+											LT_SharedMethod.MarkKnown(sid, PLAYER_GUID);
+										end
+										local info = __db__.get_info_by_sid(sid);
+										if info == nil then
+											LT_SharedMethod.DynamicCreateInfo(frame, index, sid);
+										end
 									end
 								end
 							end
@@ -551,21 +570,36 @@ end
 							for index = 1, num do
 								local sname, srank = frame.F_GetRecipeInfo(index);
 								if sname ~= nil and srank ~= nil and srank ~= 'header' then
-									local cid = frame.F_GetRecipeItemID(index);
-									if cid ~= nil then
-										local sid = __db__.get_sid_by_pid_sname_cid(pid, sname, cid);
-										local info = __db__.get_info_by_sid(sid);
-										if info ~= nil then
-											if hash[sid] == nil then
-												tinsert(sids, sid);
-												hash[sid] = index;
-												LT_SharedMethod.MarkKnown(sid, PLAYER_GUID);
+									local sid = frame.F_GetRecipeSpellID ~= nil and frame.F_GetRecipeSpellID(index) or nil;
+									if sid == nil then
+										local cid = frame.F_GetRecipeSpellID ~= nil and frame.F_GetRecipeSpellID(index) or frame.F_GetRecipeItemID(index);
+										if cid ~= nil then
+											local sid = __db__.get_sid_by_pid_sname_cid(pid, sname, cid);
+											local info = __db__.get_info_by_sid(sid);
+											if info ~= nil then
+												if hash[sid] == nil then
+													tinsert(sids, sid);
+													hash[sid] = index;
+													if NotInspecting then
+														LT_SharedMethod.MarkKnown(sid, PLAYER_GUID);
+													end
+												end
+											else
+												_error_("UpdateFrame#0E2", pid .. "#" .. cid .. "#" .. sname);
 											end
 										else
-											_error_("UpdateFrame#0E2", pid .. "#" .. cid .. "#" .. sname);
+											_error_("UpdateFrame#0E1", pid .. "#" .. sname);
 										end
 									else
-										_error_("UpdateFrame#0E1", pid .. "#" .. sname);
+										tinsert(sids, sid);
+										hash[sid] = index;
+										if NotInspecting then
+											LT_SharedMethod.MarkKnown(sid, PLAYER_GUID);
+										end
+										local info = __db__.get_info_by_sid(sid);
+										if info == nil then
+											LT_SharedMethod.DynamicCreateInfo(frame, index, sid);
+										end
 									end
 								end
 							end
@@ -1643,7 +1677,7 @@ end
 					Button.Icon:SetVertexColor(1.0, 1.0, 1.0, 1.0);
 					Button.Title:SetText(__db__.spell_name_s(sid));
 					Button.Title:SetTextColor(0.0, 1.0, 0.0, 1.0);
-					Button.Note:SetText(AuctionMod.F_GetMoneyString(val[2]));
+					Button.Note:SetText(__namespace__.F_GetMoneyString(val[2]));
 					if quality ~= nil then
 						local r, g, b, code = GetItemQualityColor(quality);
 						Button.QualityGlow:SetVertexColor(r, g, b);
@@ -1677,7 +1711,7 @@ end
 							Button.Title:SetText(name);
 						end
 						Button.Title:SetTextColor(unpack(T_RankColor[T_RankIndex[rank]] or T_UIDefinition.color_white));
-						Button.Note:SetText(AuctionMod.F_GetMoneyString(val[2]));
+						Button.Note:SetText(__namespace__.F_GetMoneyString(val[2]));
 						if quality ~= nil then
 							local r, g, b, code = GetItemQualityColor(quality);
 							Button.QualityGlow:SetVertexColor(r, g, b);
@@ -1727,7 +1761,7 @@ end
 				else
 					Button.Title:SetTextColor(1.0, 0.0, 0.0, 1.0);
 				end
-				Button.Note:SetText(AuctionMod.F_GetMoneyString(val[2]));
+				Button.Note:SetText(__namespace__.F_GetMoneyString(val[2]));
 				if quality ~= nil then
 					local r, g, b, code = GetItemQualityColor(quality);
 					Button.QualityGlow:SetVertexColor(r, g, b);
@@ -1981,12 +2015,12 @@ end
 			local info = __db__.get_info_by_sid(sid);
 			if info ~= nil then
 				local pid = info[index_pid];
-				local nMade = (info[index_num_made_min] + info[index_num_made_max]) / 2;
+				local nMade = __db__.get_num_made_by_sid(sid);
 				local price_a_product, _, price_a_material, unk_in, cid = __namespace__.F_GetPriceInfoBySID(SET[pid].phase, sid, nMade);
 				if price_a_material > 0 then
 					T_PriceInfoInFrame[2]:SetText(
 						L["COST_PRICE"] .. ": " ..
-						(unk_in > 0 and (AuctionMod.F_GetMoneyString(price_a_material) .. " (|cffff0000" .. unk_in .. L["ITEMS_UNK"] .. "|r)") or AuctionMod.F_GetMoneyString(price_a_material))
+						(unk_in > 0 and (__namespace__.F_GetMoneyString(price_a_material) .. " (|cffff0000" .. unk_in .. L["ITEMS_UNK"] .. "|r)") or __namespace__.F_GetMoneyString(price_a_material))
 					);
 				else
 					T_PriceInfoInFrame[2]:SetText(
@@ -2005,24 +2039,24 @@ end
 					if price_a_product and price_a_product > 0 then
 						T_PriceInfoInFrame[1]:SetText(
 							L["AH_PRICE"] .. ": " ..
-							AuctionMod.F_GetMoneyString(price_a_product) .. " (" .. L["VENDOR_RPICE"] .. (price_v_product and AuctionMod.F_GetMoneyString(price_v_product) or L["NEED_UPDATE"]) .. ")"
+							__namespace__.F_GetMoneyString(price_a_product) .. " (" .. L["VENDOR_RPICE"] .. (price_v_product and __namespace__.F_GetMoneyString(price_v_product) or L["NEED_UPDATE"]) .. ")"
 						);
 						if price_a_material > 0 then
 							local diff = price_a_product - price_a_material;
 							local diffAH = price_a_product * 0.95 - price_a_material;
 							if diff > 0 then
 								if diffAH > 0 then
-									T_PriceInfoInFrame[3]:SetText(L["PRICE_DIFF+"] .. ": " .. AuctionMod.F_GetMoneyString(diff) .. " (" .. L["PRICE_DIFF_AH+"] .. " " .. AuctionMod.F_GetMoneyString(diffAH) .. ")");
+									T_PriceInfoInFrame[3]:SetText(L["PRICE_DIFF+"] .. ": " .. __namespace__.F_GetMoneyString(diff) .. " (" .. L["PRICE_DIFF_AH+"] .. " " .. __namespace__.F_GetMoneyString(diffAH) .. ")");
 								elseif diffAH < 0 then
-									T_PriceInfoInFrame[3]:SetText(L["PRICE_DIFF+"] .. ": " .. AuctionMod.F_GetMoneyString(diff) .. " (" .. L["PRICE_DIFF_AH-"] .. " " .. AuctionMod.F_GetMoneyString(-diffAH) .. ")");
+									T_PriceInfoInFrame[3]:SetText(L["PRICE_DIFF+"] .. ": " .. __namespace__.F_GetMoneyString(diff) .. " (" .. L["PRICE_DIFF_AH-"] .. " " .. __namespace__.F_GetMoneyString(-diffAH) .. ")");
 								else
-									T_PriceInfoInFrame[3]:SetText(L["PRICE_DIFF+"] .. ": " .. AuctionMod.F_GetMoneyString(diff) .. " (" .. L["PRICE_DIFF_AH0"] .. " " .. L["PRICE_DIFF0"] .. ")");
+									T_PriceInfoInFrame[3]:SetText(L["PRICE_DIFF+"] .. ": " .. __namespace__.F_GetMoneyString(diff) .. " (" .. L["PRICE_DIFF_AH0"] .. " " .. L["PRICE_DIFF0"] .. ")");
 								end
 							elseif diff < 0 then
-								T_PriceInfoInFrame[3]:SetText(L["PRICE_DIFF-"] .. ": " .. AuctionMod.F_GetMoneyString(-diff) .. " (" .. L["PRICE_DIFF_AH-"] .. " " .. AuctionMod.F_GetMoneyString(-diffAH) .. ")");
+								T_PriceInfoInFrame[3]:SetText(L["PRICE_DIFF-"] .. ": " .. __namespace__.F_GetMoneyString(-diff) .. " (" .. L["PRICE_DIFF_AH-"] .. " " .. __namespace__.F_GetMoneyString(-diffAH) .. ")");
 							else
 								if diffAH < 0 then
-									T_PriceInfoInFrame[3]:SetText(L["PRICE_DIFF0"] .. " (" .. L["PRICE_DIFF_AH-"] .. " " .. AuctionMod.F_GetMoneyString(-diffAH) .. ")");
+									T_PriceInfoInFrame[3]:SetText(L["PRICE_DIFF0"] .. " (" .. L["PRICE_DIFF_AH-"] .. " " .. __namespace__.F_GetMoneyString(-diffAH) .. ")");
 								else
 								end
 							end
@@ -2034,12 +2068,12 @@ end
 						if bindType == 1 or bindType == 4 then
 							T_PriceInfoInFrame[1]:SetText(
 								L["AH_PRICE"] .. ": " ..
-								L["BOP"] .. " (" .. L["VENDOR_RPICE"] .. (price_v_product and AuctionMod.F_GetMoneyString(price_v_product) or L["NEED_UPDATE"]) .. ")"
+								L["BOP"] .. " (" .. L["VENDOR_RPICE"] .. (price_v_product and __namespace__.F_GetMoneyString(price_v_product) or L["NEED_UPDATE"]) .. ")"
 							);
 						else
 							T_PriceInfoInFrame[1]:SetText(
 								L["AH_PRICE"] .. ": " ..
-								"|cffff0000" .. L["PRICE_UNK"] .. "|r (" .. L["VENDOR_RPICE"] .. (price_v_product and AuctionMod.F_GetMoneyString(price_v_product) or L["NEED_UPDATE"]) .. ")"
+								"|cffff0000" .. L["PRICE_UNK"] .. "|r (" .. L["VENDOR_RPICE"] .. (price_v_product and __namespace__.F_GetMoneyString(price_v_product) or L["NEED_UPDATE"]) .. ")"
 							);
 						end
 						T_PriceInfoInFrame[3]:SetText(nil);
@@ -3130,7 +3164,9 @@ end
 				if not frame:IsShown() then
 					local index = frame.F_GetSelection();
 					if index ~= nil then
-						frame.selected_sid = __db__.get_sid_by_pid_sname_cid(__db__.get_pid_by_pname(frame.F_GetSkillName()), frame.F_GetRecipeInfo(index), frame.F_GetRecipeItemID(index));
+						frame.selected_sid = 
+							frame.F_GetRecipeSpellID ~= nil and frame.F_GetRecipeSpellID(index) or
+							__db__.get_sid_by_pid_sname_cid(__db__.get_pid_by_pname(frame.F_GetSkillName()), frame.F_GetRecipeInfo(index), frame.F_GetRecipeItemID(index));
 					end
 				end
 				if prev_sid ~= frame.selected_sid then
@@ -3262,6 +3298,7 @@ local function LF_AddOnCallback_Blizzard_TradeSkillUI(addon)
 		local GetTradeSkillLine = _G.GetTradeSkillLine;
 		local GetNumTradeSkills = _G.GetNumTradeSkills;
 		local GetTradeSkillInfo = _G.GetTradeSkillInfo;
+		local GetTradeSkillRecipeLink = _G.GetTradeSkillRecipeLink;
 		local GetTradeSkillItemLink = _G.GetTradeSkillItemLink;
 		local GetTradeSkillIcon = _G.GetTradeSkillIcon;
 		--
@@ -3301,6 +3338,7 @@ local function LF_AddOnCallback_Blizzard_TradeSkillUI(addon)
 		local TradeSkillExpandButtonFrame = _G.TradeSkillExpandButtonFrame;
 		local TradeSkillSubClassDropDown = _G.TradeSkillSubClassDropDown;
 		local TradeSkillInvSlotDropDown = _G.TradeSkillInvSlotDropDown;
+		local TradeSkillDescription = _G.TradeSkillDescription;
 		local TradeSkillReagentLabel = _G.TradeSkillReagentLabel;
 
 
@@ -3354,7 +3392,7 @@ local function LF_AddOnCallback_Blizzard_TradeSkillUI(addon)
 		},
 		Widget_AnchorTop = TradeSkillFrameCloseButton,
 		Widget_AnchorLeftOfTabFrame = TradeSkillRankFrameBorder,
-		Widget_PositionSkippedByInfoInFrame = TradeSkillReagentLabel,
+		Widget_PositionSkippedByInfoInFrame = TradeSkillDescription or TradeSkillReagentLabel,
 		T_HookedFrameWidgets = {
 			backup = {  },
 			C_SkillListButtonNamePrefix = "TradeSkillSkill",
@@ -3396,13 +3434,13 @@ local function LF_AddOnCallback_Blizzard_TradeSkillUI(addon)
 			SetTradeSkillSubClassFilter(0, 1, 1);
 			UIDropDownMenu_SetSelectedID(TradeSkillSubClassDropDown, 1);
 			SetTradeSkillInvSlotFilter(0, 1, 1);
-			if __namespace__.__is_bcc then
+			if __namespace__.__is_bcc or __namespace__.__is_wlk then
 				SetTradeSkillItemNameFilter(nil);
 				SetTradeSkillItemLevelFilter(0, 0);
 			end
 			UIDropDownMenu_SetSelectedID(TradeSkillInvSlotDropDown, 1);
 			ExpandTradeSkillSubClass(0);
-			if __namespace__.__is_bcc then
+			if __namespace__.__is_bcc or __namespace__.__is_wlk then
 				TradeSkillFrameAvailableFilterCheckButton:SetChecked(false);
 			end
 			if TradeSkillCollapseAllButton ~= nil then
@@ -3420,6 +3458,7 @@ local function LF_AddOnCallback_Blizzard_TradeSkillUI(addon)
 		F_GetRecipeNumAvailable = GetNumTradeSkills,
 		F_GetRecipeInfo = GetTradeSkillInfo,
 			--	skillName, difficult & header, numAvailable, isExpanded = GetTradeSkillInfo(skillIndex)
+		F_GetRecipeSpellID = __namespace__.__is_wlk and function(arg1) local link = GetTradeSkillRecipeLink(arg1); return link and tonumber(strmatch(link, "[a-zA-Z]:(%d+)")); end or nil,
 		F_GetRecipeItemID = function(arg1) local link = GetTradeSkillItemLink(arg1); return link and tonumber(strmatch(link, "[a-zA-Z]:(%d+)")) or 0; end,
 		F_GetRecipeItemLink = GetTradeSkillItemLink,
 		F_GetRecipeIcon = GetTradeSkillIcon,
@@ -3443,7 +3482,7 @@ local function LF_AddOnCallback_Blizzard_TradeSkillUI(addon)
 		},
 
 		F_WithDisabledFrame = function(self, func)
-			if __namespace__.__is_bcc then
+			if __namespace__.__is_bcc or __namespace__.__is_wlk then
 				func(TradeSkillFrameAvailableFilterCheckButton);
 				func(TradeSearchInputBox);
 				TradeSearchInputBox:ClearFocus();
@@ -3476,7 +3515,7 @@ local function LF_AddOnCallback_Blizzard_TradeSkillUI(addon)
 	local frame = LF_HookFrame(addon, meta);
 	T_uiFrames[addon] = frame;
 	--
-	if __namespace__.__is_bcc then
+	if __namespace__.__is_bcc or __namespace__.__is_wlk then
 		TradeSkillFrameAvailableFilterCheckButton:ClearAllPoints();
 		TradeSkillFrameAvailableFilterCheckButton:SetPoint("TOPLEFT", TradeSkillFrame, "TOPLEFT", 68, -56);
 	end
@@ -3497,6 +3536,7 @@ local function LF_AddOnCallback_Blizzard_CraftUI(addon)
 		local GetCraftDisplaySkillLine = _G.GetCraftDisplaySkillLine;
 		local GetNumCrafts = _G.GetNumCrafts;
 		local GetCraftInfo = _G.GetCraftInfo;
+		local GetCraftRecipeLink = _G.GetCraftRecipeLink;
 		local GetCraftItemLink = _G.GetCraftItemLink;
 		local GetCraftIcon = _G.GetCraftIcon;
 		local GetCraftDescription = _G.GetCraftDescription;
@@ -3610,7 +3650,7 @@ local function LF_AddOnCallback_Blizzard_CraftUI(addon)
 		F_GetSelection = GetCraftSelectionIndex,
 		-- expand = ExpandCraftSkillLine,
 		-- collapse = CollapseCraftSkillLine,
-		F_ClearFilter = __namespace__.__is_bcc and function()
+		F_ClearFilter = (__namespace__.__is_bcc or __namespace__.__is_wlk) and function()
 			CraftOnlyShowMakeable(false);
 			CraftFrameAvailableFilterCheckButton:SetChecked(false);
 			SetCraftFilter(1);
@@ -3627,6 +3667,7 @@ local function LF_AddOnCallback_Blizzard_CraftUI(addon)
 		F_GetRecipeNumAvailable = GetNumCrafts,
 		F_GetRecipeInfo = function(arg1) local _1, _2, _3, _4, _5, _6, _7 = GetCraftInfo(arg1); return _1, _3, _4, _5, _6, _7; end,
 			--	craftName, craftSubSpellName(""), difficult, numAvailable, isExpanded, trainingPointCost, requiredLevel = GetCraftInfo(index)
+		F_GetRecipeSpellID = __namespace__.__is_wlk and function(arg1) local link = GetCraftRecipeLink(arg1); return link and tonumber(strmatch(link, "[a-zA-Z]:(%d+)")); end or nil,
 		F_GetRecipeItemID = function(arg1) local link = GetCraftItemLink(arg1); return link and tonumber(strmatch(link, "[a-zA-Z]:(%d+)")) or 0; end,
 		F_GetRecipeItemLink = GetCraftItemLink,
 		F_GetRecipeIcon = GetCraftIcon,
@@ -3649,7 +3690,7 @@ local function LF_AddOnCallback_Blizzard_CraftUI(addon)
 		},
 
 		F_WithDisabledFrame = function(self, func)
-			if __namespace__.__is_bcc then
+			if __namespace__.__is_bcc or __namespace__.__is_wlk then
 				func(CraftFrameAvailableFilterCheckButton);
 				func(CraftFrameFilterDropDown);
 			end
@@ -3676,7 +3717,7 @@ local function LF_AddOnCallback_Blizzard_CraftUI(addon)
 	local frame = LF_HookFrame(addon, meta);
 	T_uiFrames[addon] = frame;
 	--
-	if __namespace__.__is_bcc then
+	if __namespace__.__is_bcc or __namespace__.__is_wlk then
 		CraftFrameAvailableFilterCheckButton:ClearAllPoints();
 		CraftFrameAvailableFilterCheckButton:SetPoint("TOPLEFT", CraftFrame, "TOPLEFT", 68, -56);
 		CraftFrameAvailableFilterCheckButton:SetSize(20, 20);

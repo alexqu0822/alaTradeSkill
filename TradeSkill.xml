@@ -7,11 +7,8 @@
 -->
     <include file = "libs\libs.xml" />
 
-    <script file = "Locale-classic.lua" />
-    <script file = "data-classic.lua" />
-
-    <script file = "Locale-bcc.lua" />
-    <script file = "data-bcc.lua" />
+    <include file = "Locale\Locale.xml" />
+    <include file = "Data\Data.xml" />
 
     <script file = "main.lua" />
     <script file = "db.lua" />

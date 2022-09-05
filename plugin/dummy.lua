@@ -50,9 +50,6 @@
 
 			function F_QueryQualityByID(id)					return quality;			--	nilable
 			alias	query_quality_by_id
-
-			function F_GetMoneyString(copper)				return string;			--	"%d%s %02d%s %02d%s"	"%d%s %02d%s"	"%d%s"
-			alias	MoneyString
 		}
 	);
 	__namespace__:FireEvent(

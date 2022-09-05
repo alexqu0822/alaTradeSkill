@@ -201,7 +201,7 @@ local function F_GetPriceInfoBySID(phase, sid, num, lines, stack_level, is_encha
 								p = p * num;
 								if detail_lines ~= nil then
 									tinsert(detail_lines, T_SpaceTable[stack_level + 1] .. name .. "x" .. num);
-									tinsert(detail_lines, AuctionMod.F_GetMoneyString(p));
+									tinsert(detail_lines, __namespace__.F_GetMoneyString(p));
 								end
 							else
 								if detail_lines ~= nil then
@@ -252,7 +252,7 @@ local function F_GetPriceInfoBySID(phase, sid, num, lines, stack_level, is_encha
 			end
 		end
 		price = price and price * num;
-		local nMade = (info[index_num_made_min] + info[index_num_made_max]) / 2;
+		local nMade = __db__.get_num_made_by_sid(sid);
 		cost = cost and cost * num / nMade;
 		cost_known = cost_known * num / nMade;
 		local name = cid and (AuctionMod.F_QueryNameByID(cid) or __db__.item_name_s(cid));
@@ -271,42 +271,42 @@ local function F_GetPriceInfoBySID(phase, sid, num, lines, stack_level, is_encha
 				if is_enchanting then
 					if cost ~= nil then
 						tinsert(lines, "|cffff7f00**|r" .. "|cffffffff" .. __db__.spell_name_s(sid) .. "|r" or L["COST_PRICE"]);
-						tinsert(lines, L["COST_PRICE"] .. AuctionMod.F_GetMoneyString(cost));
+						tinsert(lines, L["COST_PRICE"] .. __namespace__.F_GetMoneyString(cost));
 					else
 						tinsert(lines, "|cffff7f00**|r" .. "|cffffffff" .. __db__.spell_name_s(sid) .. "|r" or L["COST_PRICE"]);
-						tinsert(lines, L["COST_PRICE_KNOWN"] .. AuctionMod.F_GetMoneyString(cost_known));
+						tinsert(lines, L["COST_PRICE_KNOWN"] .. __namespace__.F_GetMoneyString(cost_known));
 					end
 				else
 					if cost ~= nil then
 						tinsert(lines, "|cffff7f00**|r" .. name .. "x" .. num);
-						tinsert(lines, L["COST_PRICE"] .. AuctionMod.F_GetMoneyString(cost));
+						tinsert(lines, L["COST_PRICE"] .. __namespace__.F_GetMoneyString(cost));
 					else
 						tinsert(lines, "|cffff7f00**|r" .. name .. "x" .. num);
-						tinsert(lines, L["COST_PRICE_KNOWN"] .. AuctionMod.F_GetMoneyString(cost_known));
+						tinsert(lines, L["COST_PRICE_KNOWN"] .. __namespace__.F_GetMoneyString(cost_known));
 					end
 					if price ~= nil then
 						tinsert(lines, "|cff00ff00**|r" .. name .. "x" .. num);
-						tinsert(lines, L["AH_PRICE"] .. AuctionMod.F_GetMoneyString(price));
+						tinsert(lines, L["AH_PRICE"] .. __namespace__.F_GetMoneyString(price));
 					end
 					if cost ~= nil and price ~= nil then
 						local diff = price - cost;
 						local diffAH = price * 0.95 - cost;
 						if diff > 0 then
 							tinsert(lines, "|cff00ff00**|r" .. L["PRICE_DIFF+"]);
-							tinsert(lines, L["PRICE_DIFF_INFO+"] .. AuctionMod.F_GetMoneyString(diff));
+							tinsert(lines, L["PRICE_DIFF_INFO+"] .. __namespace__.F_GetMoneyString(diff));
 							if diffAH > 0 then
 								tinsert(lines, "|cff00ff00**|r" .. L["PRICE_DIFF_AH+"]);
-								tinsert(lines, L["PRICE_DIFF_INFO+"] .. AuctionMod.F_GetMoneyString(diffAH));
+								tinsert(lines, L["PRICE_DIFF_INFO+"] .. __namespace__.F_GetMoneyString(diffAH));
 							elseif diffAH < 0 then
 								tinsert(lines, "|cffff0000**|r" .. L["PRICE_DIFF_AH-"]);
-								tinsert(lines, L["PRICE_DIFF_INFO-"] .. AuctionMod.F_GetMoneyString(-diffAH));
+								tinsert(lines, L["PRICE_DIFF_INFO-"] .. __namespace__.F_GetMoneyString(-diffAH));
 							else
 							end
 						elseif diff < 0 then
 							tinsert(lines, "|cffff0000**|r" .. L["PRICE_DIFF-"]);
-							tinsert(lines, L["PRICE_DIFF_INFO-"] .. AuctionMod.F_GetMoneyString(-diff));
+							tinsert(lines, L["PRICE_DIFF_INFO-"] .. __namespace__.F_GetMoneyString(-diff));
 							tinsert(lines, "|cffff0000**|r" .. L["PRICE_DIFF_AH-"]);
-							tinsert(lines, L["PRICE_DIFF_INFO-"] .. AuctionMod.F_GetMoneyString(-diffAH));
+							tinsert(lines, L["PRICE_DIFF_INFO-"] .. __namespace__.F_GetMoneyString(-diffAH));
 						end
 					end
 				end
@@ -315,12 +315,12 @@ local function F_GetPriceInfoBySID(phase, sid, num, lines, stack_level, is_encha
 			if price ~= nil and (cost == nil or cost >= price) then
 				if lines then
 					tinsert(lines, T_SpaceTable[stack_level] .. name .. "x" .. num);
-					tinsert(lines, AuctionMod.F_GetMoneyString(price));
+					tinsert(lines, __namespace__.F_GetMoneyString(price));
 				end
 			elseif cost ~= nil and (price == nil or cost < price) then
 				if lines then
 					tinsert(lines, T_SpaceTable[stack_level] .. name .. "x" .. num);
-					tinsert(lines, AuctionMod.F_GetMoneyString(cost));
+					tinsert(lines, __namespace__.F_GetMoneyString(cost));
 					for index = 1, #detail_lines do
 						tinsert(lines, detail_lines[index]);
 					end
@@ -362,7 +362,7 @@ local function set_tip_by_sid(Tooltip, sid)
 			Tooltip:AddLine("|cff00afff" .. pname .. " " .. rankText .. "|r");
 		end
 		local detail_lines = {  };
-		F_GetPriceInfoBySID(Tooltip.__phase or CURPHASE, sid, (info[index_num_made_min] + info[index_num_made_max]) / 2, detail_lines, 0, cid == nil);
+		F_GetPriceInfoBySID(Tooltip.__phase or CURPHASE, sid, __db__.get_num_made_by_sid(sid), detail_lines, 0, cid == nil);
 		if #detail_lines > 0 then
 			for i = 1, #detail_lines, 2 do
 				Tooltip:AddDoubleLine(detail_lines[i], detail_lines[i + 1]);
@@ -394,7 +394,7 @@ local function set_tip_by_cid(Tooltip, cid)
 					Tooltip:AddLine("|cff00afff" .. pname .. " " .. rankText .. "|r");
 				end
 				local detail_lines = {  };
-				F_GetPriceInfoBySID(Tooltip.__phase or CURPHASE, sid, (info[index_num_made_min] + info[index_num_made_max]) / 2, detail_lines, 0, false);
+				F_GetPriceInfoBySID(Tooltip.__phase or CURPHASE, sid, __db__.get_num_made_by_sid(sid), detail_lines, 0, false);
 				if #detail_lines > 0 then
 					for i = 1, #detail_lines, 2 do
 						Tooltip:AddDoubleLine(detail_lines[i], detail_lines[i + 1]);
@@ -805,7 +805,7 @@ local function LF_SetRecipeSourceTip(Tooltip, sid)
 		if info[index_trainer] ~= nil then			-- trainer
 			local price = info[index_train_price];
 			if price ~= nil and price > 0 then
-				Tooltip:AddDoubleLine(L["LABEL_GET_FROM"], "|cffff00ff" .. L["trainer"] .. "|r " ..  AuctionMod.F_GetMoneyString(price));
+				Tooltip:AddDoubleLine(L["LABEL_GET_FROM"], "|cffff00ff" .. L["trainer"] .. "|r " ..  __namespace__.F_GetMoneyString(price));
 			else
 				Tooltip:AddDoubleLine(L["LABEL_GET_FROM"], "|cffff00ff" .. L["trainer"] .. "|r");
 			end
@@ -823,7 +823,7 @@ local function LF_SetRecipeSourceTip(Tooltip, sid)
 					if AuctionMod ~= nil then
 						local price = AuctionMod.F_QueryPriceByID(rid);
 						if price ~= nil and price > 0 then
-							line = line .. " |cff00ff00AH|r " .. AuctionMod.F_GetMoneyString(price);
+							line = line .. " |cff00ff00AH|r " .. __namespace__.F_GetMoneyString(price);
 						end
 					end
 				else

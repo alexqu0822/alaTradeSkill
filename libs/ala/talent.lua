@@ -2,7 +2,7 @@
 	ALA@163UI
 --]]--
 
-local __version = 220824.0;
+local __version = 220901.0;
 
 local _G = _G;
 _G.__ala_meta__ = _G.__ala_meta__ or {  };
@@ -32,6 +32,7 @@ end
 	--
 	local GetTime = GetTime;
 	local type, tostring, tonumber = type, tostring, tonumber;
+	local select = select;
 	local wipe, concat = table.wipe, table.concat;
 	local strchar, strupper, strlower, strsplit, strsub, strmatch, strfind, strrep = string.char, string.upper, string.lower, string.split, string.sub, string.match, string.find, string.rep;
 	local floor, ceil = floor, ceil;
@@ -259,20 +260,29 @@ end
 		bool = GlyphMatchesSocket(id);
 		PlaceGlyphInSocket(id);
 	--]]
-	--	Pack
-	--		[4]		1~2		3~4		5~255
-	--		!P32	b64b64	b64b64	code
-	--		prefix	NumPart	Index	code
-	--	Talent
-	--		[4]		1		2~3		4			5			6			7~6+Len1	7+Len1		8+Len1~7+Len1+Len2
-	--		!T32	b64		b64b64	b64			b64			b64			code		b64			code
-	--		prefix	class	level	numGroup	activeGroup	lenTal1		Talent1		lenTal2		Talent2
-	--	Glyph
-	--		!G320	+glyph...	Encode(Enabled[0 / 1] * 8 + GlyphType[0 / 1]):Encode(GlyphSpell):Encode(Icon)
-	--		prefix	glyph
-	--	Equip
-	--		!E320	+item...	Encode(id):Encode(Number of Colon)Encode(Value)..
-	--		prefix	item...
+	--	V1
+		--	Talent
+		--		1		2~-3	-2~-1
+		--		b64		b64...	b64b64
+		--		class	code	level
+		--	Equip
+		--		+slot+link...
+	--	V2
+		--	Pack
+		--		[4]		1~2		3~4		5~255
+		--		!P32	b64b64	b64b64	code
+		--		prefix	NumPart	Index	code
+		--	Talent
+		--		[4]		1		2~3		4			5			6			7~6+Len1	7+Len1		8+Len1~7+Len1+Len2
+		--		!T32	b64		b64b64	b64			b64			b64			code		b64			code
+		--		prefix	class	level	numGroup	activeGroup	lenTal1		Talent1		lenTal2		Talent2
+		--	Glyph
+		--		!G320	+glyph...	Encode(Enabled[0 / 1] * 8 + GlyphType[0 / 1]):Encode(GlyphSpell):Encode(Icon)
+		--		prefix	glyph
+		--	Equip
+		--		!E320	+item...	Encode(id):Encode(Number of Colon)Encode(Value)..
+		--		prefix	item...
+	--
 -->		SharedMethod
 	--
 	local RepeatedZero = setmetatable(
@@ -464,7 +474,7 @@ end
 	function __emulib.GetClass(code)
 		local cc = strsub(code, 1, 1);
 		if cc == "!" then
-			cc = strsub(code, 7, 7);
+			cc = strsub(code, 5, 5);
 		end
 		local classIndex = __debase64[cc];
 		if classIndex == nil then
@@ -595,8 +605,8 @@ end
 		if strsub(code, 1, 2) ~= "!T" then
 			return nil;
 		end
-		local CLIENT_MAJOR = __debase64[strsub(code, 3, 3)];
-		if CLIENT_MAJOR ~= CLIENT_MAJOR then
+		local CM = __debase64[strsub(code, 3, 3)];
+		if CM ~= CLIENT_MAJOR then
 			return nil, "WOW VERSION";
 		end
 		local LIB_MAJOR = __debase64[strsub(code, 4, 4)];

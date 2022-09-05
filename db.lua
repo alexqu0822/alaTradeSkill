@@ -292,13 +292,15 @@ local function LF_RequestSpell()
 	for pid = __db__.DBMINPID, __db__.DBMAXPID do
 		if T_TradeSkill_Name[pid] == nil then
 			local sid = T_TradeSkill_ID[pid];
-			RequestLoadSpellData(sid);
-			T_Temp_SpellHash[sid] = true;
-			T_Temp_pid[sid] = pid;
-			completed = false;
-			maxonce = maxonce - 1;
-			if maxonce <= 0 then
-				return false;
+			if sid ~= nil then
+				RequestLoadSpellData(sid);
+				T_Temp_SpellHash[sid] = true;
+				T_Temp_pid[sid] = pid;
+				completed = false;
+				maxonce = maxonce - 1;
+				if maxonce <= 0 then
+					return false;
+				end
 			end
 		end
 	end
@@ -422,12 +424,13 @@ local function LF_PreloadItem()
 	if LF_RequestItem() then
 		F:UnregisterEvent("ITEM_DATA_LOAD_RESULT");
 	else
-		F:RegisterEvent("ITEM_DATA_LOAD_RESULT");	--	Events registered before loading screen went out may not work well. So reg here everytime.
-		C_Timer_After(2.0, LF_PreloadItem);
 		LN_Limited_RequestItem = LN_Limited_RequestItem + 1;
 		if LN_Limited_RequestItem >= 10 then
 			_error_("LF_PreloadItem#0", LN_Limited_RequestItem);
+			F:UnregisterEvent("ITEM_DATA_LOAD_RESULT");
 		else
+			F:RegisterEvent("ITEM_DATA_LOAD_RESULT");	--	Events registered before loading screen went out may not work well. So reg here everytime.
+			C_Timer_After(2.0, LF_PreloadItem);
 			return;
 		end
 	end
@@ -498,6 +501,23 @@ end);
 	--	| T_TradeSkill_CheckName{ [pid] = p_check_sname }
 	function __db__.table_tradeskill_check_name()
 		return T_TradeSkill_CheckName;
+	end
+--	INSERT RECIPE DB
+	function __db__.insert_info(sid, info)
+		if T_Recipe_Data[sid] == nil then
+			T_Recipe_Data[sid] = info;
+			local pid = info[index_pid];
+			local recipe = T_TradeSkill_RecipeList[pid];
+			if recipe ~= nil then
+				local num = #recipe;
+				for i = 1, num do
+					if sid == recipe[i] then
+						return;
+					end
+				end
+				recipe[num + 1] = sid;
+			end
+		end
 	end
 --	QUERY RECIPE DB
 	--	pid | is_tradeskill
@@ -658,7 +678,8 @@ end);
 		if sid ~= nil then
 			local info = T_Recipe_Data[sid];
 			if info ~= nil then
-				return (info[index_num_made_min] + info[index_num_made_max]) / 2, info[index_num_made_min], info[index_num_made_max];
+				local num = (info[index_num_made_min] + info[index_num_made_max]) / 2;
+				return num <= 0 and 1 or num, info[index_num_made_min], info[index_num_made_max];
 			end
 		end
 	end
@@ -694,7 +715,7 @@ end);
 				for index = 1, #sids do
 					local sid = sids[index];
 					local info = T_Recipe_Data[sid];
-					if info and cid == info[index_xid] then
+					if info and cid == info[index_xid] or cid == info[index_cid] then
 						return sid;
 					end
 				end

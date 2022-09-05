@@ -12,17 +12,20 @@ __ala_meta__.prof = __namespace__;
 
 local __db__ = __namespace__.__db__;
 local L = __namespace__.L;
+local _patch_version, _build_number, _build_date, _toc_version = GetBuildInfo();
 __namespace__.__is_dev = select(2, GetAddOnInfo("!!!!!DebugMe")) ~= nil;
-__namespace__.__is_classic = WOW_PROJECT_ID == WOW_PROJECT_CLASSIC;
-__namespace__.__is_bcc = WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC;
+__namespace__.__is_classic = _toc_version > 11300 and _toc_version < 20000;
+__namespace__.__is_bcc = _toc_version > 20400 and _toc_version < 30000;
+__namespace__.__is_wlk = _toc_version > 30300 and _toc_version < 90000;
 
 -->		upvalue
-	local geterrorhandler = geterrorhandler;
+	local setfenv = setfenv;
 	local xpcall = xpcall;
+	local geterrorhandler = geterrorhandler;
 	local hooksecurefunc = hooksecurefunc;
-	local select = select;
 	local type = type;
 	local tonumber = tonumber;
+	local select = select;
 	local setmetatable = setmetatable;
 	local rawget = rawget;
 	local rawset = rawset;
@@ -60,63 +63,63 @@ __namespace__.__is_bcc = WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC;
 		local CreateFrame = CreateFrame;
 		local GetAddOnInfo = GetAddOnInfo;
 	]]
+
+-->		Dev
+	local _GlobalRef = {  };
+	local _GlobalAssign = {  };
+	function __namespace__:BuildEnv(category)
+		local _G = _G;
+		local Ref = _GlobalRef[category] or {  };
+		local Assign = _GlobalAssign[category] or {  };
+		setfenv(2, setmetatable(
+			{  },
+			{
+				__index = function(tbl, key, val)
+					Ref[key] = (Ref[key] or 0) + 1;
+					_GlobalRef[category] = Ref;
+					return _G[key];
+				end,
+				__newindex = function(tbl, key, value)
+					rawset(tbl, key, value);
+					Assign[key] = (Assign[key] or 0) + 1;
+					_GlobalAssign[category] = Assign;
+					return value;
+				end,
+			}
+		));
+	end
+	function __namespace__:MergeGlobal(DB)
+		local _Ref = DB._GlobalRef;
+		if _Ref ~= nil then
+			for category, db in next, _Ref do
+				local to = _GlobalRef[category];
+				if to == nil then
+					_GlobalRef[category] = db;
+				else
+					for key, val in next, db do
+						to[key] = (to[key] or 0) + val;
+					end
+				end
+			end
+		end
+		DB._GlobalRef = _GlobalRef;
+		local _Assign = DB._GlobalAssign;
+		if _Assign ~= nil then
+			for category, db in next, _Assign do
+				local to = _GlobalAssign[category];
+				if to == nil then
+					_GlobalAssign[category] = db;
+				else
+					for key, val in next, db do
+						to[key] = (to[key] or 0) + val;
+					end
+				end
+			end
+		end
+		DB._GlobalAssign = _GlobalAssign;
+	end
+
 -->
-
-
-local setfenv = setfenv;
-local _GlobalRef = {  };
-local _GlobalAssign = {  };
-function __namespace__:BuildEnv(category)
-	local _G = _G;
-	_GlobalRef[category] = _GlobalRef[category] or {  };
-	_GlobalAssign[category] = _GlobalAssign[category] or {  };
-	local Ref = _GlobalRef[category];
-	local Assign = _GlobalAssign[category];
-	setfenv(2, setmetatable(
-		{  },
-		{
-			__index = function(tbl, key, val)
-				Ref[key] = (Ref[key] or 0) + 1;
-				return _G[key];
-			end,
-			__newindex = function(tbl, key, value)
-				rawset(tbl, key, value);
-				Assign[key] = (Assign[key] or 0) + 1;
-				return value;
-			end,
-		}
-	));
-end
-function __namespace__:MergeGlobal(DB)
-	local _Ref = DB._GlobalRef;
-	if _Ref ~= nil then
-		for category, db in next, _Ref do
-			local to = _GlobalRef[category];
-			if to == nil then
-				_GlobalRef[category] = db;
-			else
-				for key, val in next, db do
-					to[key] = (to[key] or 0) + val;
-				end
-			end
-		end
-	end
-	DB._GlobalRef = _GlobalRef;
-	local _Assign = DB._GlobalAssign;
-	if _Assign ~= nil then
-		for category, db in next, _Assign do
-			local to = _GlobalAssign[category];
-			if to == nil then
-				_GlobalAssign[category] = db;
-			else
-				for key, val in next, db do
-					to[key] = (to[key] or 0) + val;
-				end
-			end
-		end
-	end
-	DB._GlobalAssign = _GlobalAssign;
-end
 
 local CURPHASE = __db__.CURPHASE;
 
@@ -1228,6 +1231,26 @@ end
 
 
 -->		Definition
+
+local C_GoldIcon    = "|TInterface\\MoneyFrame\\UI-GoldIcon:12:12:0:0|t";
+local C_SilverIcon  = "|TInterface\\MoneyFrame\\UI-SilverIcon:12:12:0:0|t";
+local C_CopperIcon  = "|TInterface\\MoneyFrame\\UI-CopperIcon:12:12:0:0|t";
+function __namespace__.F_GetMoneyString(copper)
+	-- GetCoinTextureString
+	local G = floor(copper / 10000);
+	copper = copper % 10000;
+	local S = floor(copper / 100);
+	copper = copper % 100;
+	local C = floor(copper);
+	if G > 0 then
+		return format("%d%s %02d%s %02d%s", G, C_GoldIcon, S, C_SilverIcon, C, C_CopperIcon);
+	elseif S > 0 then
+		return format("%d%s %02d%s", S, C_SilverIcon, C, C_CopperIcon);
+	else
+		return format("%d%s", C, C_CopperIcon);
+	end
+end
+
 local GetSpellCooldown = _G.GetSpellCooldown;
 function __ala_meta__.GetSpellModifiedCooldown(sid, formatStr)
 	local start, duration, enabled, modRate = GetSpellCooldown(sid);
@@ -1282,7 +1305,7 @@ if __namespace__.__is_classic then
 			ChatEdit_InsertLink(F_GetSkillLink(sid), __addon__);
 		end
 	end
-elseif __namespace__.__is_bcc then
+elseif __namespace__.__is_bcc or __namespace__.__is_wlk then
 	local function F_GetSkillLink(sid)
 		local name = GetSpellInfo(sid);
 		if name then

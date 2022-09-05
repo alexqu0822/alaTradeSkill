@@ -8,9 +8,7 @@ local L = __namespace__.L;
 
 -->		upvalue
 	local next = next;
-	local floor = math.floor;
 	local strmatch = string.match;
-	local format = string.format;
 	local RequestLoadItemDataByID = RequestLoadItemDataByID or C_Item.RequestLoadItemDataByID;
 	local GetItemInfo = GetItemInfo;
 -->
@@ -95,24 +93,6 @@ end
 function AuctionBase.F_QueryQualityByID(id)
 	return nil;
 end
-local C_GoldIcon    = "|TInterface\\MoneyFrame\\UI-GoldIcon:12:12:0:0|t";
-local C_SilverIcon  = "|TInterface\\MoneyFrame\\UI-SilverIcon:12:12:0:0|t";
-local C_CopperIcon  = "|TInterface\\MoneyFrame\\UI-CopperIcon:12:12:0:0|t";
-function AuctionBase.F_GetMoneyString(copper)
-	-- GetCoinTextureString
-	local G = floor(copper / 10000);
-	copper = copper % 10000;
-	local S = floor(copper / 100);
-	copper = copper % 100;
-	local C = floor(copper);
-	if G > 0 then
-		return format("%d%s %02d%s %02d%s", G, C_GoldIcon, S, C_SilverIcon, C, C_CopperIcon);
-	elseif S > 0 then
-		return format("%d%s %02d%s", S, C_SilverIcon, C, C_CopperIcon);
-	else
-		return format("%d%s", C, C_CopperIcon);
-	end
-end
 
 local T_AuctionList = {  };
 local T_AuctionDrop = {
@@ -128,7 +108,6 @@ local T_AliasList = {
 	F_QueryVendorPriceByName = "get_material_vendor_price_by_name",
 	F_QueryNameByID = "query_name_by_id",
 	F_QueryQualityByID = "query_quality_by_id",
-	F_GetMoneyString = "MoneyString",
 	--
 	F_QueryPriceByName = "query_ah_price_by_name",
 	F_QueryPriceByID = "query_ah_price_by_id",
