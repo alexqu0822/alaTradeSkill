@@ -230,6 +230,7 @@ local T_RankColor = {
 	[BIG_NUMBER] = { 0.0, 0.0, 0.0, 1.0, },
 };
 local T_RankIndex = {
+	['difficult'] = 0,
 	['optimal'] = 1,
 	['medium'] = 2,
 	['easy'] = 3,
@@ -280,7 +281,93 @@ function LT_SharedMethod.CancelMarkKnown(sid, GUID)
 		T_LearnedRecipesHash[sid] = nil;
 	end
 end
-function LT_SharedMethod.DynamicCreateInfo(frame, index, sid)
+local T_DynamicCreatedSID = {  };
+function LT_SharedMethod.DynamicCreateInfo(frame, pid, index, cur_rank, sid, srank)
+	--------------.-PHA-PID-----SID-----CID-LEARN--Y--GREEN-GREY-MIN--MAX---------R-------N--TRAINER-PRICE-RECIPE-QUEST-OBJ-CLASS-SPEC
+	--------------1--2---3-------4-------5----6----7----8----9---10---11---------12------13---14-------15-----16---17---18---19----20
+	--[[
+	local difficulty_rank = T_RankIndex[srank];
+	if T_DynamicCreatedSID[sid] == nil then
+		local cid = frame.F_GetRecipeItemID(index);
+		local minMade, maxMade = frame.F_GetRecipeNumMade(index);
+		local info = { nil, 1, pid, sid, cid, cur_rank, cur_rank, cur_rank, cur_rank, minMade, maxMade, {  }, {  }, };
+		if difficulty_rank == 0 then
+			info[index_learn_rank] = cur_rank + 1;
+			info[index_yellow_rank] = cur_rank + 1;
+			info[index_green_rank] = cur_rank + 1;
+			info[index_grey_rank] = cur_rank + 1;
+		elseif difficulty_rank == 1 then
+			info[index_learn_rank] = cur_rank;
+			info[index_yellow_rank] = cur_rank + 1;
+			info[index_green_rank] = cur_rank + 1;
+			info[index_grey_rank] = cur_rank + 1;
+		elseif difficulty_rank == 2 then
+			info[index_learn_rank] = cur_rank;
+			info[index_yellow_rank] = cur_rank;
+			info[index_green_rank] = cur_rank + 1;
+			info[index_grey_rank] = cur_rank + 1;
+		elseif difficulty_rank == 3 then
+			info[index_learn_rank] = cur_rank;
+			info[index_yellow_rank] = cur_rank;
+			info[index_green_rank] = cur_rank;
+			info[index_grey_rank] = cur_rank + 1;
+		elseif difficulty_rank == 4 then
+			info[index_learn_rank] = cur_rank;
+			info[index_yellow_rank] = cur_rank;
+			info[index_green_rank] = cur_rank;
+			info[index_grey_rank] = cur_rank;
+		else
+			return;
+		end
+		local numReagents = frame.F_GetRecipeNumReagents(index);
+		if numReagents > 0 then
+			local ids = info[index_reagents_id];
+			local cts = info[index_reagents_count];
+			for i = 1, numReagents do
+				local id = frame.F_GetRecipeReagentID(index, i);
+				local name, texture, req, has = F.F_GetRecipeReagentInfo(index, i);
+				if id ~= nil and req ~= nil then
+					ids[i] = id;
+					cts[i] = req;
+				else
+					return;
+				end
+			end
+		end
+		T_DynamicCreatedSID[sid] = info;
+		return __db__.insert_info(sid, info);
+	else
+		local info = T_DynamicCreatedSID[sid];
+		if difficulty_rank == 0 then
+			info[index_learn_rank] = cur_rank + 1;
+			info[index_yellow_rank] = cur_rank + 1;
+			info[index_green_rank] = cur_rank + 1;
+			info[index_grey_rank] = cur_rank + 1;
+		elseif difficulty_rank == 1 then
+			info[index_learn_rank] = cur_rank;
+			info[index_yellow_rank] = cur_rank + 1;
+			info[index_green_rank] = cur_rank + 1;
+			info[index_grey_rank] = cur_rank + 1;
+		elseif difficulty_rank == 2 then
+			info[index_learn_rank] = cur_rank;
+			info[index_yellow_rank] = cur_rank;
+			info[index_green_rank] = cur_rank + 1;
+			info[index_grey_rank] = cur_rank + 1;
+		elseif difficulty_rank == 3 then
+			info[index_learn_rank] = cur_rank;
+			info[index_yellow_rank] = cur_rank;
+			info[index_green_rank] = cur_rank;
+			info[index_grey_rank] = cur_rank + 1;
+		elseif difficulty_rank == 4 then
+			info[index_learn_rank] = cur_rank;
+			info[index_yellow_rank] = cur_rank;
+			info[index_green_rank] = cur_rank;
+			info[index_grey_rank] = cur_rank;
+		else
+			return;
+		end
+	end
+	--]]
 end
 
 
@@ -476,7 +563,7 @@ end
 										end
 										local info = __db__.get_info_by_sid(sid);
 										if info == nil then
-											LT_SharedMethod.DynamicCreateInfo(frame, index, sid);
+											LT_SharedMethod.DynamicCreateInfo(frame, pid, cur_rank, index, sid, srank);
 										end
 									end
 								end
@@ -572,7 +659,7 @@ end
 								if sname ~= nil and srank ~= nil and srank ~= 'header' then
 									local sid = frame.F_GetRecipeSpellID ~= nil and frame.F_GetRecipeSpellID(index) or nil;
 									if sid == nil then
-										local cid = frame.F_GetRecipeSpellID ~= nil and frame.F_GetRecipeSpellID(index) or frame.F_GetRecipeItemID(index);
+										local cid = frame.F_GetRecipeItemID(index);
 										if cid ~= nil then
 											local sid = __db__.get_sid_by_pid_sname_cid(pid, sname, cid);
 											local info = __db__.get_info_by_sid(sid);
@@ -598,7 +685,7 @@ end
 										end
 										local info = __db__.get_info_by_sid(sid);
 										if info == nil then
-											LT_SharedMethod.DynamicCreateInfo(frame, index, sid);
+											LT_SharedMethod.DynamicCreateInfo(frame, pid, cur_rank, index, sid, srank);
 										end
 									end
 								end
@@ -3460,8 +3547,8 @@ local function LF_AddOnCallback_Blizzard_TradeSkillUI(addon)
 		F_GetRecipeNumAvailable = GetNumTradeSkills,
 		F_GetRecipeInfo = GetTradeSkillInfo,
 			--	skillName, difficult & header, numAvailable, isExpanded = GetTradeSkillInfo(skillIndex)
-		F_GetRecipeSpellID = __namespace__.__is_wlk and function(arg1) local link = GetTradeSkillRecipeLink(arg1); return link and tonumber(strmatch(link, "[a-zA-Z]:(%d+)")); end or nil,
-		F_GetRecipeItemID = function(arg1) local link = GetTradeSkillItemLink(arg1); return link and tonumber(strmatch(link, "[a-zA-Z]:(%d+)")) or 0; end,
+		F_GetRecipeSpellID = __namespace__.__is_wlk and function(arg1) local link = GetTradeSkillRecipeLink(arg1); return link and tonumber(strmatch(link, "[a-zA-Z]:(%d+)")) or nil; end or nil,
+		F_GetRecipeItemID = function(arg1) local link = GetTradeSkillItemLink(arg1); return link and tonumber(strmatch(link, "[a-zA-Z]:(%d+)")) or nil; end,
 		F_GetRecipeItemLink = GetTradeSkillItemLink,
 		F_GetRecipeIcon = GetTradeSkillIcon,
 		F_GetRecipeDesc = function() return ""; end,
@@ -3669,8 +3756,8 @@ local function LF_AddOnCallback_Blizzard_CraftUI(addon)
 		F_GetRecipeNumAvailable = GetNumCrafts,
 		F_GetRecipeInfo = function(arg1) local _1, _2, _3, _4, _5, _6, _7 = GetCraftInfo(arg1); return _1, _3, _4, _5, _6, _7; end,
 			--	craftName, craftSubSpellName(""), difficult, numAvailable, isExpanded, trainingPointCost, requiredLevel = GetCraftInfo(index)
-		F_GetRecipeSpellID = __namespace__.__is_wlk and function(arg1) local link = GetCraftRecipeLink(arg1); return link and tonumber(strmatch(link, "[a-zA-Z]:(%d+)")); end or nil,
-		F_GetRecipeItemID = function(arg1) local link = GetCraftItemLink(arg1); return link and tonumber(strmatch(link, "[a-zA-Z]:(%d+)")) or 0; end,
+		F_GetRecipeSpellID = __namespace__.__is_wlk and function(arg1) local link = GetCraftRecipeLink(arg1); return link and tonumber(strmatch(link, "[a-zA-Z]:(%d+)")) or nil; end or nil,
+		F_GetRecipeItemID = function(arg1) local link = GetCraftItemLink(arg1); return link and tonumber(strmatch(link, "[a-zA-Z]:(%d+)")) or nil; end,
 		F_GetRecipeItemLink = GetCraftItemLink,
 		F_GetRecipeIcon = GetCraftIcon,
 		F_GetRecipeDesc = GetCraftDescription,

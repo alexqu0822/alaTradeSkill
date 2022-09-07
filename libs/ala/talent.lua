@@ -2,7 +2,7 @@
 	ALA@163UI
 --]]--
 
-local __version = 220901.0;
+local __version = 220905.0;
 
 local _G = _G;
 _G.__ala_meta__ = _G.__ala_meta__ or {  };
@@ -539,10 +539,6 @@ end
 				return nil;
 			end
 
-			local v1, v2 = __debase64[strsub(code, -2, -2)], __debase64[strsub(code, -1, -1)];
-			if v1 == nil or v2 == nil then
-				_log_("TalentError", code);
-			end
 			return class, __debase64[strsub(code, -2, -2)] + __debase64[strsub(code, -1, -1)] * 64, 1, 1, __emulib.DecodeTalentBlock(strsub(code, 2, -3));
 		end,
 		[2] = function(code, nodecoding)
@@ -1509,9 +1505,8 @@ function __emulib.CHAT_MSG_ADDON(prefix, msg, channel, sender, target, zoneChann
 					if code ~= nil and code ~= "" then
 						local overheard = false;
 						local _1, _2 = strsplit("#", code);
-						if _2 == nil or _2 == SELFFULLNAME then	-- OLDVERSION
-							code = _1;
-						else
+						code = _1;
+						if _2 ~= nil and _2 ~= SELFFULLNAME then
 							overheard = true;
 						end
 						for index = 1, __emulib._NumDistributors do

@@ -349,14 +349,10 @@ local function set_tip_by_sid(Tooltip, sid)
 		local cid = info[index_cid];
 		local pid = info[index_pid];
 		local texture = __db__.get_texture_by_pid(pid);
-		-- local rank = info[index_learn_rank];
 		local pname = __db__.get_pname_by_pid(pid) or "";
 		if texture ~= nil then
 			pname = "|T" .. texture .. ":12:12:0:0|t " .. pname;
 		end
-		-- if rank ~= nil then
-		-- 	pname = pname .. "(" .. rank .. ")";
-		-- end
 		local rankText = __db__.get_difficulty_rank_list_text_by_sid(sid, true);
 		if pname ~= "" and rankText ~= "" then
 			Tooltip:AddLine("|cff00afff" .. pname .. " " .. rankText .. "|r");
@@ -381,14 +377,10 @@ local function set_tip_by_cid(Tooltip, cid)
 			if info ~= nil then
 				local pid = info[index_pid];
 				local texture = __db__.get_texture_by_pid(pid);
-				-- local rank = info[index_learn_rank];
 				local pname = __db__.get_pname_by_pid(pid) or "";
 				if texture ~= nil then
 					pname = "|T" .. texture .. ":12:12:0:0|t " .. pname;
 				end
-				-- if rank ~= nil then
-				-- 	pname = pname .. "(" .. rank .. ")";
-				-- end
 				local rankText = __db__.get_difficulty_rank_list_text_by_sid(sid, true);
 				if pname ~= "" and rankText ~= "" then
 					Tooltip:AddLine("|cff00afff" .. pname .. " " .. rankText .. "|r");
@@ -436,11 +428,6 @@ local function LF_AddAccountLearnedInfo(Tooltip, rid, sid)
 							name = T_SpaceTable[1] .. L["RECIPE_NOT_LEARNED"] .. "  " .. name
 										.. ((var.cur_rank >= learn_rank) and "  |cff00ff00" or "  |cffff0000") .. var.cur_rank
 										.. ((var.max_rank >= learn_rank) and "|r|cffffffff/|r|cff00ff00" or "|r|cffffffff/|r|cffff0000") .. var.max_rank .. "|r";
-							-- if var.cur_rank >= learn_rank then
-							-- 	name = T_SpaceTable[1] .. L["RECIPE_NOT_LEARNED"] .. "  " .. name .. "  |cff00ff00" .. var.cur_rank .. "|r|cffffffff/" .. var.max_rank .. "|r";
-							-- else
-							-- 	name = T_SpaceTable[1] .. L["RECIPE_NOT_LEARNED"] .. "  " .. name .. "  |cffff0000" .. var.cur_rank .. "|r|cffffffff/" .. var.max_rank .. "|r";
-							-- end
 						end
 						Tooltip:AddLine(name);
 					end
@@ -472,10 +459,8 @@ local function LF_AddMaterialCraftInfo(Tooltip, iid)
 				local pname = __db__.get_pname_by_pid(info[index_pid]) or "";
 				if cid ~= nil then
 					lineL = T_SpaceTable[1] .. __db__.item_string_s(cid) .. "x" .. num;
-					-- lineR = "|cff00afff" .. pname .. info[index_learn_rank] .. "|r";
 				else
 					lineL = T_SpaceTable[1] .. __db__.spell_string_s(sid) .. "x" .. num;
-					-- lineR = "|cff00afff" .. pname .. info[index_learn_rank] .. "|r";
 				end
 				local rankText = __db__.get_difficulty_rank_list_text_by_sid(sid, true);
 				if pname ~= "" and rankText ~= "" then
