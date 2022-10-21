@@ -3,11 +3,11 @@
 --]]--
 do return end	--	no need to do this
 
-local __addon__, __namespace__ = ...;
+local __addon, __private = ...;
 
 
 -->		****
-__namespace__:BuildEnv("ElvUI");
+__private:BuildEnv("ElvUI");
 -->		****
 
 
@@ -26,6 +26,6 @@ local function LF_Skin_ElvUI(addon, frame)
 end
 
 
-__namespace__:AddAddOnCallback("ElvUI", function()
-	__namespace__:FireEvent("UI_MOD_LOADED", { Skin = LF_Skin_ElvUI, });
+__private:AddAddOnCallback("ElvUI", function()
+	__private:FireEvent("UI_MOD_LOADED", { Skin = LF_Skin_ElvUI, });
 end);

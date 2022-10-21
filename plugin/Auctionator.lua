@@ -2,7 +2,7 @@
 	by ALA @ 163UI
 --]]--
 
-local __addon__, __namespace__ = ...;
+local __addon, __private = ...;
 
 -->		upvalue
 	local GetItemInfo = GetItemInfo;
@@ -10,7 +10,7 @@ local __addon__, __namespace__ = ...;
 
 
 -->		****
-__namespace__:BuildEnv("Auctionator");
+__private:BuildEnv("Auctionator");
 -->		****
 
 
@@ -63,7 +63,7 @@ function mod.F_QueryPriceByID(id, num)
 end
 
 
-__namespace__.F_AuctionModCallback("Auctionator", function()
+__private.F_AuctionModCallback("Auctionator", function()
 	if Auctionator ~= nil and Auctionator.API ~= nil and Auctionator.API.v1 ~= nil then
 		local Get = Auctionator.API.v1.GetAuctionPriceByItemID;
 		if Get ~= nil then
@@ -93,5 +93,5 @@ __namespace__.F_AuctionModCallback("Auctionator", function()
 			mod.F_OnDBUpdate = Atr_RegisterFor_DBupdated;
 		end
 	end
-	__namespace__.F_AddAuctionMod("Auctionator", mod);
+	__private.F_AddAuctionMod("Auctionator", mod);
 end);

@@ -6,9 +6,9 @@ local _G = _G;
 local __ala_meta__ = _G.__ala_meta__;
 local uireimp = __ala_meta__.uireimp;
 
-local __addon__, __namespace__ = ...;
-local __db__ = __namespace__.__db__;
-local L = __namespace__.L;
+local __addon, __private = ...;
+local __db__ = __private.__db__;
+local L = __private.L;
 
 -->		upvalue
 	local pcall = pcall;
@@ -89,7 +89,7 @@ local PLAYER_GUID = UnitGUID('player');
 local PLAYER_REALM_ID = tonumber(GetRealmID());
 local LOCALE = GetLocale();
 
-local _noop_, _log_, _error_ = __namespace__._noop_, __namespace__._log_, __namespace__._error_;
+local _noop_, _log_, _error_ = __private._noop_, __private._log_, __private._error_;
 local T_uiFrames = {  };
 
 
@@ -240,7 +240,7 @@ local T_RankIndex = {
 
 
 -->		****************
-__namespace__:BuildEnv("ui");
+__private:BuildEnv("ui");
 -->		****************
 
 
@@ -386,7 +386,7 @@ end
 				local cur_rank = var and var.cur_rank or 0;
 				for index = 1, #sid_list do
 					local sid = sid_list[index];
-					local price_a_product, price_a_material, price_a_material_known, missing = __namespace__.F_GetPriceInfoBySID(SET[pid].phase, sid, __db__.get_num_made_by_sid(sid), nil);
+					local price_a_product, price_a_material, price_a_material_known, missing = __private.F_GetPriceInfoBySID(SET[pid].phase, sid, __db__.get_num_made_by_sid(sid), nil);
 					if price_a_material then
 						list[#list + 1] = { sid, price_a_material, __db__.get_difficulty_rank_by_sid(sid, cur_rank), };
 					end
@@ -403,7 +403,7 @@ end
 			else
 				for index = 1, #sid_list do
 					local sid = sid_list[index];
-					local price_a_product, price_a_material, price_a_material_known, missing = __namespace__.F_GetPriceInfoBySID(SET[pid].phase, sid, __db__.get_num_made_by_sid(sid), nil);
+					local price_a_product, price_a_material, price_a_material_known, missing = __private.F_GetPriceInfoBySID(SET[pid].phase, sid, __db__.get_num_made_by_sid(sid), nil);
 					if price_a_product and price_a_material then
 						if price_a_product > price_a_material then
 							list[#list + 1] = { sid, price_a_product - price_a_material, };
@@ -517,7 +517,7 @@ end
 				if SET.show_call then
 					Frame.ToggleButton:Show();
 				end
-				if __namespace__.__is_wlk then
+				if __private.__is_wlk then
 					if pid == 10 then
 						Frame.FilterDropdown:Show();
 					else
@@ -637,7 +637,7 @@ end
 							Frame:F_RefreshRankOffset();
 							LT_SharedMethod.UpdateProfitFrame(Frame);
 							set.update = nil;
-							__namespace__:FireEvent("USER_EVENT_RECIPE_LIST_UPDATE");
+							__private:FireEvent("USER_EVENT_RECIPE_LIST_UPDATE");
 						else
 							var.update = true;
 							-- Frame.mute_update = false;
@@ -706,7 +706,7 @@ end
 						end
 					end
 				end
-				__namespace__.F_CheckCooldown(pid, var);
+				__private.F_CheckCooldown(pid, var);
 			else
 				Frame:Hide();
 				Frame.ToggleButton:Hide();
@@ -1398,7 +1398,7 @@ end
 		SearchEditBoxNameOnly:SetScript("OnClick", function(self)
 			local pid = Frame.flag or __db__.get_pid_by_pname(Frame.F_GetSkillName());
 			if pid ~= nil then
-				__namespace__.F_ChangeSetWithUpdate(SET[pid], "searchNameOnly", self:GetChecked());
+				__private.F_ChangeSetWithUpdate(SET[pid], "searchNameOnly", self:GetChecked());
 			end
 			Frame.F_Update();
 		end);
@@ -1408,13 +1408,13 @@ end
 			local pid = Frame.flag or __db__.get_pid_by_pname(Frame.F_GetSkillName());
 			if pid ~= nil then
 				if text == "" then
-					__namespace__.F_ChangeSetWithUpdate(SET[pid], "searchText", nil);
+					__private.F_ChangeSetWithUpdate(SET[pid], "searchText", nil);
 					if not SearchEditBox:HasFocus() then
 						SearchEditBoxNote:Show();
 					end
 					SearchEditBoxCancel:Hide();
 				else
-					__namespace__.F_ChangeSetWithUpdate(SET[pid], "searchText", text);
+					__private.F_ChangeSetWithUpdate(SET[pid], "searchText", text);
 					SearchEditBoxCancel:Show();
 					SearchEditBoxNote:Hide();
 				end
@@ -1485,7 +1485,7 @@ end
 			},
 			QueryWhoCanCraftIt = {
 				handler = function(_, Frame, pid, sid)
-					__namespace__.F_cmmQuerySpell(sid);
+					__private.F_cmmQuerySpell(sid);
 				end,
 				text = L["QUERY_WHO_CAN_CRAFT_IT"],
 				para = {  },
@@ -1558,7 +1558,7 @@ end
 				data = data and data[PLAYER_GUID];
 			end
 			if data == nil then
-				__namespace__.F_TooltipAddSource(SkillTip, sid);
+				__private.F_TooltipAddSource(SkillTip, sid);
 			end
 		end
 	end
@@ -1574,7 +1574,7 @@ end
 		local data = Frame.hash[sid];
 		if button == "LeftButton" then
 			if IsShiftKeyDown() then
-				__namespace__.F_HandleShiftClick(self.flag or __db__.get_pid_by_sid(sid), sid);
+				__private.F_HandleShiftClick(self.flag or __db__.get_pid_by_sid(sid), sid);
 			elseif IsAltKeyDown() then
 				local text1 = nil;
 				local text2 = nil;
@@ -1779,7 +1779,7 @@ end
 					Button.Icon:SetVertexColor(1.0, 1.0, 1.0, 1.0);
 					Button.Title:SetText(__db__.spell_name_s(sid));
 					Button.Title:SetTextColor(0.0, 1.0, 0.0, 1.0);
-					Button.Note:SetText(__namespace__.F_GetMoneyString(val[2]));
+					Button.Note:SetText(__private.F_GetMoneyString(val[2]));
 					if quality ~= nil then
 						local r, g, b, code = GetItemQualityColor(quality);
 						Button.QualityGlow:SetVertexColor(r, g, b);
@@ -1813,7 +1813,7 @@ end
 							Button.Title:SetText(name);
 						end
 						Button.Title:SetTextColor(unpack(T_RankColor[T_RankIndex[rank]] or T_UIDefinition.color_white));
-						Button.Note:SetText(__namespace__.F_GetMoneyString(val[2]));
+						Button.Note:SetText(__private.F_GetMoneyString(val[2]));
 						if quality ~= nil then
 							local r, g, b, code = GetItemQualityColor(quality);
 							Button.QualityGlow:SetVertexColor(r, g, b);
@@ -1863,7 +1863,7 @@ end
 				else
 					Button.Title:SetTextColor(1.0, 0.0, 0.0, 1.0);
 				end
-				Button.Note:SetText(__namespace__.F_GetMoneyString(val[2]));
+				Button.Note:SetText(__private.F_GetMoneyString(val[2]));
 				if quality ~= nil then
 					local r, g, b, code = GetItemQualityColor(quality);
 					Button.QualityGlow:SetVertexColor(r, g, b);
@@ -2118,11 +2118,11 @@ end
 			if info ~= nil then
 				local pid = info[index_pid];
 				local nMade = __db__.get_num_made_by_sid(sid);
-				local price_a_product, _, price_a_material, unk_in, cid = __namespace__.F_GetPriceInfoBySID(SET[pid].phase, sid, nMade);
+				local price_a_product, _, price_a_material, unk_in, cid = __private.F_GetPriceInfoBySID(SET[pid].phase, sid, nMade);
 				if price_a_material > 0 then
 					T_PriceInfoInFrame[2]:SetText(
 						L["COST_PRICE"] .. ": " ..
-						(unk_in > 0 and (__namespace__.F_GetMoneyString(price_a_material) .. " (|cffff0000" .. unk_in .. L["ITEMS_UNK"] .. "|r)") or __namespace__.F_GetMoneyString(price_a_material))
+						(unk_in > 0 and (__private.F_GetMoneyString(price_a_material) .. " (|cffff0000" .. unk_in .. L["ITEMS_UNK"] .. "|r)") or __private.F_GetMoneyString(price_a_material))
 					);
 				else
 					T_PriceInfoInFrame[2]:SetText(
@@ -2141,24 +2141,24 @@ end
 					if price_a_product and price_a_product > 0 then
 						T_PriceInfoInFrame[1]:SetText(
 							L["AH_PRICE"] .. ": " ..
-							__namespace__.F_GetMoneyString(price_a_product) .. " (" .. L["VENDOR_RPICE"] .. (price_v_product and __namespace__.F_GetMoneyString(price_v_product) or L["NEED_UPDATE"]) .. ")"
+							__private.F_GetMoneyString(price_a_product) .. " (" .. L["VENDOR_RPICE"] .. (price_v_product and __private.F_GetMoneyString(price_v_product) or L["NEED_UPDATE"]) .. ")"
 						);
 						if price_a_material > 0 then
 							local diff = price_a_product - price_a_material;
 							local diffAH = price_a_product * 0.95 - price_a_material;
 							if diff > 0 then
 								if diffAH > 0 then
-									T_PriceInfoInFrame[3]:SetText(L["PRICE_DIFF+"] .. ": " .. __namespace__.F_GetMoneyString(diff) .. " (" .. L["PRICE_DIFF_AH+"] .. " " .. __namespace__.F_GetMoneyString(diffAH) .. ")");
+									T_PriceInfoInFrame[3]:SetText(L["PRICE_DIFF+"] .. ": " .. __private.F_GetMoneyString(diff) .. " (" .. L["PRICE_DIFF_AH+"] .. " " .. __private.F_GetMoneyString(diffAH) .. ")");
 								elseif diffAH < 0 then
-									T_PriceInfoInFrame[3]:SetText(L["PRICE_DIFF+"] .. ": " .. __namespace__.F_GetMoneyString(diff) .. " (" .. L["PRICE_DIFF_AH-"] .. " " .. __namespace__.F_GetMoneyString(-diffAH) .. ")");
+									T_PriceInfoInFrame[3]:SetText(L["PRICE_DIFF+"] .. ": " .. __private.F_GetMoneyString(diff) .. " (" .. L["PRICE_DIFF_AH-"] .. " " .. __private.F_GetMoneyString(-diffAH) .. ")");
 								else
-									T_PriceInfoInFrame[3]:SetText(L["PRICE_DIFF+"] .. ": " .. __namespace__.F_GetMoneyString(diff) .. " (" .. L["PRICE_DIFF_AH0"] .. " " .. L["PRICE_DIFF0"] .. ")");
+									T_PriceInfoInFrame[3]:SetText(L["PRICE_DIFF+"] .. ": " .. __private.F_GetMoneyString(diff) .. " (" .. L["PRICE_DIFF_AH0"] .. " " .. L["PRICE_DIFF0"] .. ")");
 								end
 							elseif diff < 0 then
-								T_PriceInfoInFrame[3]:SetText(L["PRICE_DIFF-"] .. ": " .. __namespace__.F_GetMoneyString(-diff) .. " (" .. L["PRICE_DIFF_AH-"] .. " " .. __namespace__.F_GetMoneyString(-diffAH) .. ")");
+								T_PriceInfoInFrame[3]:SetText(L["PRICE_DIFF-"] .. ": " .. __private.F_GetMoneyString(-diff) .. " (" .. L["PRICE_DIFF_AH-"] .. " " .. __private.F_GetMoneyString(-diffAH) .. ")");
 							else
 								if diffAH < 0 then
-									T_PriceInfoInFrame[3]:SetText(L["PRICE_DIFF0"] .. " (" .. L["PRICE_DIFF_AH-"] .. " " .. __namespace__.F_GetMoneyString(-diffAH) .. ")");
+									T_PriceInfoInFrame[3]:SetText(L["PRICE_DIFF0"] .. " (" .. L["PRICE_DIFF_AH-"] .. " " .. __private.F_GetMoneyString(-diffAH) .. ")");
 								else
 								end
 							end
@@ -2170,12 +2170,12 @@ end
 						if bindType == 1 or bindType == 4 then
 							T_PriceInfoInFrame[1]:SetText(
 								L["AH_PRICE"] .. ": " ..
-								L["BOP"] .. " (" .. L["VENDOR_RPICE"] .. (price_v_product and __namespace__.F_GetMoneyString(price_v_product) or L["NEED_UPDATE"]) .. ")"
+								L["BOP"] .. " (" .. L["VENDOR_RPICE"] .. (price_v_product and __private.F_GetMoneyString(price_v_product) or L["NEED_UPDATE"]) .. ")"
 							);
 						else
 							T_PriceInfoInFrame[1]:SetText(
 								L["AH_PRICE"] .. ": " ..
-								"|cffff0000" .. L["PRICE_UNK"] .. "|r (" .. L["VENDOR_RPICE"] .. (price_v_product and __namespace__.F_GetMoneyString(price_v_product) or L["NEED_UPDATE"]) .. ")"
+								"|cffff0000" .. L["PRICE_UNK"] .. "|r (" .. L["VENDOR_RPICE"] .. (price_v_product and __private.F_GetMoneyString(price_v_product) or L["NEED_UPDATE"]) .. ")"
 							);
 						end
 						T_PriceInfoInFrame[3]:SetText(nil);
@@ -2575,7 +2575,7 @@ end
 					end
 					Frame:SetScript("OnEvent", function(Frame, event, _1, ...)
 						Frame.update = true;
-						__namespace__.F_ScheduleDelayCall(Frame.F_Update);
+						__private.F_ScheduleDelayCall(Frame.F_Update);
 					end);
 				end
 				C_Timer_NewTicker(PERIODIC_UPDATE_PERIOD, Frame.F_Update);
@@ -2660,7 +2660,7 @@ end
 							value = value + 0.1; value = value - value % 5.0 + 5;
 							set.rankoffset = value;
 							Frame.update = true;
-							__namespace__.F_ScheduleDelayCall(Frame.F_Update);
+							__private.F_ScheduleDelayCall(Frame.F_Update);
 						end
 					end
 				end);
@@ -2872,9 +2872,9 @@ end
 			local T_PortraitDropMeta = {
 				handler = function(_, Frame, name)
 					if name == '@explorer' then
-						__namespace__.F_uiToggleFrame("EXPLORER");
+						__private.F_uiToggleFrame("EXPLORER");
 					elseif name == '@config' then
-						__namespace__.F_uiToggleFrame("CONFIG");
+						__private.F_uiToggleFrame("CONFIG");
 					else
 						CastSpellByName(name);
 					end
@@ -2933,9 +2933,9 @@ end
 					local pname = TabFrame.pname;
 					if pname ~= nil and not __db__.is_name_same_skill(pname, Frame.F_GetSkillName()) then
 						if pname == '@explorer' then
-							__namespace__.F_uiToggleFrame("EXPLORER");
+							__private.F_uiToggleFrame("EXPLORER");
 						elseif pname == '@config' then
-							__namespace__.F_uiToggleFrame("CONFIG");
+							__private.F_uiToggleFrame("CONFIG");
 						elseif pname == '@toggle' then
 							LF_ToggleFrame();
 						else
@@ -3185,7 +3185,7 @@ end
 					CheckButton:SetScript("OnClick", function(self)
 						local pid = Frame.flag or __db__.get_pid_by_pname(Frame.F_GetSkillName());
 						if pid ~= nil then
-							__namespace__.F_ChangeSetWithUpdate(SET[pid], key, self:GetChecked());
+							__private.F_ChangeSetWithUpdate(SET[pid], key, self:GetChecked());
 						end
 						Frame.F_Update();
 					end);
@@ -3193,7 +3193,7 @@ end
 					CheckButton:SetScript("OnClick", function(self)
 						local pid = Frame.flag or __db__.get_pid_by_pname(Frame.F_GetSkillName());
 						if pid ~= nil then
-							__namespace__.F_ChangeSetWithUpdate(SET[pid], key, self:GetChecked());
+							__private.F_ChangeSetWithUpdate(SET[pid], key, self:GetChecked());
 						end
 						Frame.ScrollFrame:Update();
 					end);
@@ -3232,7 +3232,7 @@ end
 				if userInput then
 					local pid = Frame.flag or __db__.get_pid_by_pname(Frame.F_GetSkillName());
 					if pid ~= nil then
-						__namespace__.F_ChangeSetWithUpdate(SET[pid], "phase", value);
+						__private.F_ChangeSetWithUpdate(SET[pid], "phase", value);
 						Frame.F_Update();
 					end
 				end
@@ -3284,7 +3284,7 @@ end
 			HaveMaterialsCheck:SetScript("OnClick", function(self)
 				local pid = Frame.flag or __db__.get_pid_by_pname(Frame.F_GetSkillName());
 				if pid ~= nil then
-					__namespace__.F_ChangeSetWithUpdate(SET[pid], "haveMaterials", self:GetChecked());
+					__private.F_ChangeSetWithUpdate(SET[pid], "haveMaterials", self:GetChecked());
 				end
 				Frame.F_Update();
 			end);
@@ -3345,7 +3345,7 @@ end
 		end
 
 		ALA_HOOK_ChatEdit_InsertLink(function(link, addon)
-			if Frame:IsVisible() and addon ~= __addon__ and not (BrowseName ~= nil and BrowseName:IsVisible()) then
+			if Frame:IsVisible() and addon ~= __addon and not (BrowseName ~= nil and BrowseName:IsVisible()) then
 				local name, _, _, _, _, _, _, _, loc = GetItemInfo(link);
 				if name ~= nil and name ~= "" then
 					local pid = Frame.flag or __db__.get_pid_by_pname(Frame.F_GetSkillName());
@@ -3369,7 +3369,7 @@ end
 			end
 		end);
 		ALA_HOOK_ChatEdit_InsertName(function(name, addon)
-			if Frame:IsVisible() and addon ~= __addon__ and not (BrowseName ~= nil and BrowseName:IsVisible()) then
+			if Frame:IsVisible() and addon ~= __addon and not (BrowseName ~= nil and BrowseName:IsVisible()) then
 				if name ~= nil and name ~= "" then
 					Frame.SearchEditBox:SetText(name);
 					Frame.SearchEditBox:ClearFocus();
@@ -3387,7 +3387,7 @@ end
 		-- if AuctionMod ~= nil and AuctionMod.F_OnDBUpdate ~= nil then
 		-- 	AuctionMod.F_OnDBUpdate(callback);
 		-- end
-		__namespace__:AddCallback("AUCTION_MOD_LOADED", function(mod)
+		__private:AddCallback("AUCTION_MOD_LOADED", function(mod)
 			if mod ~= nil then
 				AuctionMod = mod;
 				if mod.F_OnDBUpdate then
@@ -3396,7 +3396,7 @@ end
 				-- callback();
 			end
 		end);
-		__namespace__:AddCallback("UI_MOD_LOADED", function(mod)
+		__private:AddCallback("UI_MOD_LOADED", function(mod)
 			if mod ~= nil and mod.Skin ~= nil then
 				mod.Skin(addon, Frame);
 			end
@@ -3594,13 +3594,13 @@ local function LF_AddOnCallback_Blizzard_TradeSkillUI(addon)
 			SetTradeSkillSubClassFilter(0, 1, 1);
 			UIDropDownMenu_SetSelectedID(TradeSkillSubClassDropDown, 1);
 			SetTradeSkillInvSlotFilter(0, 1, 1);
-			if __namespace__.__is_bcc or __namespace__.__is_wlk then
+			if __private.__is_bcc or __private.__is_wlk then
 				SetTradeSkillItemNameFilter(nil);
 				SetTradeSkillItemLevelFilter(0, 0);
 			end
 			UIDropDownMenu_SetSelectedID(TradeSkillInvSlotDropDown, 1);
 			ExpandTradeSkillSubClass(0);
-			if __namespace__.__is_bcc or __namespace__.__is_wlk then
+			if __private.__is_bcc or __private.__is_wlk then
 				TradeSkillFrameAvailableFilterCheckButton:SetChecked(false);
 			end
 			if TradeSkillCollapseAllButton ~= nil then
@@ -3618,8 +3618,8 @@ local function LF_AddOnCallback_Blizzard_TradeSkillUI(addon)
 		F_GetRecipeNumAvailable = GetNumTradeSkills,
 		F_GetRecipeInfo = GetTradeSkillInfo,
 			--	skillName, difficult & header, numAvailable, isExpanded = GetTradeSkillInfo(skillIndex)
-		F_GetRecipeSpellID = __namespace__.__is_wlk and function(arg1) local link = GetTradeSkillRecipeLink(arg1); return link and tonumber(strmatch(link, "[a-zA-Z]:(%d+)")) or nil; end or nil,
-		F_GetRecipeSpellLink = __namespace__.__is_wlk and GetTradeSkillRecipeLink or nil;
+		F_GetRecipeSpellID = __private.__is_wlk and function(arg1) local link = GetTradeSkillRecipeLink(arg1); return link and tonumber(strmatch(link, "[a-zA-Z]:(%d+)")) or nil; end or nil,
+		F_GetRecipeSpellLink = __private.__is_wlk and GetTradeSkillRecipeLink or nil;
 		F_GetRecipeItemID = function(arg1) local link = GetTradeSkillItemLink(arg1); return link and tonumber(strmatch(link, "[a-zA-Z]:(%d+)")) or nil; end,
 		F_GetRecipeItemLink = GetTradeSkillItemLink,
 		F_GetRecipeIcon = GetTradeSkillIcon,
@@ -3643,7 +3643,7 @@ local function LF_AddOnCallback_Blizzard_TradeSkillUI(addon)
 		},
 
 		F_WithDisabledFrame = function(self, func)
-			if __namespace__.__is_bcc or __namespace__.__is_wlk then
+			if __private.__is_bcc or __private.__is_wlk then
 				func(TradeSkillFrameAvailableFilterCheckButton);
 				func(TradeSearchInputBox);
 				TradeSearchInputBox:ClearFocus();
@@ -3676,13 +3676,13 @@ local function LF_AddOnCallback_Blizzard_TradeSkillUI(addon)
 	local Frame = LF_HookFrame(addon, meta);
 	T_uiFrames[addon] = Frame;
 	--
-	if __namespace__.__is_bcc or __namespace__.__is_wlk then
+	if __private.__is_bcc or __private.__is_wlk then
 		TradeSkillFrameAvailableFilterCheckButton:ClearAllPoints();
 		TradeSkillFrameAvailableFilterCheckButton:SetPoint("TOPLEFT", TradeSkillFrame, "TOPLEFT", 68, -56);
 	end
 	TradeSkillExpandButtonFrame:Hide();
 	--
-	if __namespace__.__is_wlk then
+	if __private.__is_wlk then
 	local ENCHANT_FILTER = L.ENCHANT_FILTER;
 	--	Dropdown Filter
 		local T_CraftFrameFilterMeta = {
@@ -3784,7 +3784,7 @@ local function LF_AddOnCallback_Blizzard_TradeSkillUI(addon)
 		Frame.EventDriver = EventDriver;
 		Frame:HookScript("OnShow", function()
 			if TradeSkillFrame:IsShown() then
-				__namespace__.F_ScheduleDelayCall(LF_ProcessTradeTargetItemLink);
+				__private.F_ScheduleDelayCall(LF_ProcessTradeTargetItemLink);
 			end
 		end);
 	end
@@ -3918,7 +3918,7 @@ local function LF_AddOnCallback_Blizzard_CraftUI(addon)
 		F_GetSelection = GetCraftSelectionIndex,
 		-- expand = ExpandCraftSkillLine,
 		-- collapse = CollapseCraftSkillLine,
-		F_ClearFilter = (__namespace__.__is_bcc or __namespace__.__is_wlk) and function()
+		F_ClearFilter = (__private.__is_bcc or __private.__is_wlk) and function()
 			CraftOnlyShowMakeable(false);
 			CraftFrameAvailableFilterCheckButton:SetChecked(false);
 			SetCraftFilter(1);
@@ -3935,7 +3935,7 @@ local function LF_AddOnCallback_Blizzard_CraftUI(addon)
 		F_GetRecipeNumAvailable = GetNumCrafts,
 		F_GetRecipeInfo = function(arg1) local _1, _2, _3, _4, _5, _6, _7 = GetCraftInfo(arg1); return _1, _3, _4, _5, _6, _7; end,
 			--	craftName, craftSubSpellName(""), difficult, numAvailable, isExpanded, trainingPointCost, requiredLevel = GetCraftInfo(index)
-		F_GetRecipeSpellID = __namespace__.__is_wlk and function(arg1) local link = GetCraftRecipeLink(arg1); return link and tonumber(strmatch(link, "[a-zA-Z]:(%d+)")) or nil; end or nil,
+		F_GetRecipeSpellID = __private.__is_wlk and function(arg1) local link = GetCraftRecipeLink(arg1); return link and tonumber(strmatch(link, "[a-zA-Z]:(%d+)")) or nil; end or nil,
 		F_GetRecipeItemID = function(arg1) local link = GetCraftItemLink(arg1); return link and tonumber(strmatch(link, "[a-zA-Z]:(%d+)")) or nil; end,
 		F_GetRecipeItemLink = GetCraftItemLink,
 		F_GetRecipeIcon = GetCraftIcon,
@@ -3958,7 +3958,7 @@ local function LF_AddOnCallback_Blizzard_CraftUI(addon)
 		},
 
 		F_WithDisabledFrame = function(self, func)
-			if __namespace__.__is_bcc or __namespace__.__is_wlk then
+			if __private.__is_bcc or __private.__is_wlk then
 				func(CraftFrameAvailableFilterCheckButton);
 				func(CraftFrameFilterDropDown);
 			end
@@ -3985,7 +3985,7 @@ local function LF_AddOnCallback_Blizzard_CraftUI(addon)
 	local Frame = LF_HookFrame(addon, meta);
 	T_uiFrames[addon] = Frame;
 	--
-	if __namespace__.__is_bcc or __namespace__.__is_wlk then
+	if __private.__is_bcc or __private.__is_wlk then
 		CraftFrameAvailableFilterCheckButton:ClearAllPoints();
 		CraftFrameAvailableFilterCheckButton:SetPoint("TOPLEFT", CraftFrame, "TOPLEFT", 68, -56);
 		CraftFrameAvailableFilterCheckButton:SetSize(20, 20);
@@ -4092,7 +4092,7 @@ local function LF_AddOnCallback_Blizzard_CraftUI(addon)
 		Frame.EventDriver = EventDriver;
 		Frame:HookScript("OnShow", function()
 			if CraftFrame:IsShown() then
-				__namespace__.F_ScheduleDelayCall(LF_ProcessTradeTargetItemLink);
+				__private.F_ScheduleDelayCall(LF_ProcessTradeTargetItemLink);
 			end
 		end);
 	--
@@ -4783,7 +4783,7 @@ local function LF_CreateExplorerFrame()
 	end
 
 	ALA_HOOK_ChatEdit_InsertLink(function(link, addon)
-		if Frame:IsShown() and addon ~= __addon__ and not (BrowseName ~= nil and BrowseName:IsVisible()) then
+		if Frame:IsShown() and addon ~= __addon and not (BrowseName ~= nil and BrowseName:IsVisible()) then
 			local name = GetItemInfo(link);
 			if name and name ~= "" then
 				Frame.SearchEditBox:SetText(name);
@@ -4794,7 +4794,7 @@ local function LF_CreateExplorerFrame()
 		end
 	end);
 	ALA_HOOK_ChatEdit_InsertName(function(name, addon)
-		if Frame:IsShown() and addon ~= __addon__ and not (BrowseName ~= nil and BrowseName:IsVisible()) then
+		if Frame:IsShown() and addon ~= __addon and not (BrowseName ~= nil and BrowseName:IsVisible()) then
 			if name and name ~= "" then
 				Frame.SearchEditBox:SetText(name);
 				Frame.SearchEditBox:ClearFocus();
@@ -4811,7 +4811,7 @@ local function LF_CreateExplorerFrame()
 	-- if AuctionMod ~= nil and AuctionMod.F_OnDBUpdate ~= nil then
 	-- 	AuctionMod.F_OnDBUpdate(callback);
 	-- end
-	__namespace__:AddCallback("AUCTION_MOD_LOADED", function(mod)
+	__private:AddCallback("AUCTION_MOD_LOADED", function(mod)
 		if mod ~= nil then
 			AuctionMod = mod;
 			if AuctionMod.F_OnDBUpdate then
@@ -5116,7 +5116,7 @@ end
 	};
 	local T_CharListDropMeta = {
 		handler = function(_, index, Frame)
-			__namespace__.F_DelChar(index);
+			__private.F_DelChar(index);
 			Frame.ScrollFrame:Update();
 		end,
 		elements = {
@@ -5482,7 +5482,7 @@ local function LF_CreateConfigFrame()
 	SettingUIInterfaceOptionsFrameContainer = CreateFrame('FRAME');
 	SettingUIInterfaceOptionsFrameContainer:Hide();
 	SettingUIInterfaceOptionsFrameContainer:SetSize(1, 1);
-	SettingUIInterfaceOptionsFrameContainer.name = __addon__;
+	SettingUIInterfaceOptionsFrameContainer.name = __addon;
 	SettingUIInterfaceOptionsFrameContainer:SetScript("OnShow", function(self)
 		SettingUIFreeContainer:Hide();
 		Frame:_Show();
@@ -5503,7 +5503,7 @@ local function LF_CreateConfigFrame()
 	Frame._IsShown = Frame.IsShown;
 	function Frame:Show()
 		if InterfaceOptionsFrame:IsShown() then
-			InterfaceOptionsFrame_OpenToCategory(__addon__);
+			InterfaceOptionsFrame_OpenToCategory(__addon);
 		else
 			SettingUIFreeContainer:Show();
 		end
@@ -5521,8 +5521,8 @@ local function LF_CreateConfigFrame()
 	--
 	local T_SetWidgets = {  };
 	local px, py, h = 0, 0, 1;
-	for index = 1, #__namespace__.T_SetCommandList do
-		local cmd = __namespace__.T_SetCommandList[index];
+	for index = 1, #__private.T_SetCommandList do
+		local cmd = __private.T_SetCommandList[index];
 		if px >= 1 then
 			px = 0;
 			py = py + h;
@@ -5690,12 +5690,12 @@ local function LF_CreateConfigFrame()
 end
 
 
-function __namespace__.F_uiMarkToUpdate(pid)
+function __private.F_uiMarkToUpdate(pid)
 	SET[pid].update = true;
 end
 
 -->		external
-	function __namespace__.F_uiToggleFrame(key, val)
+	function __private.F_uiToggleFrame(key, val)
 		local Frame = T_uiFrames[key];
 		if Frame ~= nil then
 			if Frame:IsShown() or val == false then
@@ -5707,7 +5707,7 @@ end
 			end
 		end
 	end
-	function __namespace__.F_uiToggleFrameCall(val)
+	function __private.F_uiToggleFrameCall(val)
 		local TFrame = T_uiFrames["BLIZZARD_TRADESKILLUI"];
 		if TFrame ~= nil then
 			if val then
@@ -5725,7 +5725,7 @@ end
 			end
 		end
 	end
-	function __namespace__.F_uiToggleFrameTab(val)
+	function __private.F_uiToggleFrameTab(val)
 		local TFrame = T_uiFrames["BLIZZARD_TRADESKILLUI"];
 		if TFrame ~= nil then
 			if val then
@@ -5745,7 +5745,7 @@ end
 			CFrame:F_ShowSetFrame(false);
 		end
 	end
-	function __namespace__.F_uiToggleFramePortraitButton(val)
+	function __private.F_uiToggleFramePortraitButton(val)
 		local TFrame = T_uiFrames["BLIZZARD_TRADESKILLUI"];
 		if TFrame ~= nil then
 			if val then
@@ -5763,14 +5763,14 @@ end
 			end
 		end
 	end
-	function __namespace__.F_uiLockBoard(val)
+	function __private.F_uiLockBoard(val)
 		if val then
 			T_uiFrames["BOARD"]:F_Lock();
 		else
 			T_uiFrames["BOARD"]:F_Unlock();
 		end
 	end
-	function __namespace__.F_uiUpdateAllFrames()
+	function __private.F_uiUpdateAllFrames()
 		local TFrame = T_uiFrames["BLIZZARD_TRADESKILLUI"];
 		if TFrame ~= nil then
 			TFrame:F_Update();
@@ -5784,7 +5784,7 @@ end
 			EFrame:F_Update();
 		end
 	end
-	function __namespace__.F_uiRefreshAllFrames()
+	function __private.F_uiRefreshAllFrames()
 		local TFrame = T_uiFrames["BLIZZARD_TRADESKILLUI"];
 		if TFrame ~= nil then
 			TFrame.ScrollFrame:Update();
@@ -5810,7 +5810,7 @@ end
 			end
 		end
 	end
-	function __namespace__.F_uiRefreshFramesStyle(loading)
+	function __private.F_uiRefreshFramesStyle(loading)
 		local TFrame = T_uiFrames["BLIZZARD_TRADESKILLUI"];
 		if TFrame ~= nil then
 			TFrame:F_BlzStyle(SET.blz_style, loading);
@@ -5824,10 +5824,10 @@ end
 			EFrame:F_BlzStyle(SET.blz_style, loading);
 		end
 	end
-	function __namespace__.F_uiRefreshConfigFrame()
+	function __private.F_uiRefreshConfigFrame()
 		T_uiFrames["CONFIG"]:F_Refresh();
 	end
-	function __namespace__.F_uiToggleFrameExpand(val)
+	function __private.F_uiToggleFrameExpand(val)
 		local TFrame = T_uiFrames["BLIZZARD_TRADESKILLUI"];
 		if TFrame ~= nil then
 			TFrame:F_Expand(val);
@@ -5837,7 +5837,7 @@ end
 			CFrame:F_Expand(val);
 		end
 	end
-	function __namespace__.F_uiFrameFixSkillList()
+	function __private.F_uiFrameFixSkillList()
 		local TFrame = T_uiFrames["BLIZZARD_TRADESKILLUI"];
 		if TFrame ~= nil then
 			TFrame:F_FixSkillList(SET.expand);
@@ -5847,7 +5847,7 @@ end
 			CFrame:F_FixSkillList(SET.expand);
 		end
 	end
-	function __namespace__.F_uiToggleFrameRankInfo(val)
+	function __private.F_uiToggleFrameRankInfo(val)
 		local TFrame = T_uiFrames["BLIZZARD_TRADESKILLUI"];
 		if TFrame ~= nil then
 			TFrame:F_FrameUpdateRankInfo();
@@ -5857,7 +5857,7 @@ end
 			CFrame:F_FrameUpdateRankInfo();
 		end
 	end
-	function __namespace__.F_uiToggleFramePriceInfo(val)
+	function __private.F_uiToggleFramePriceInfo(val)
 		local TFrame = T_uiFrames["BLIZZARD_TRADESKILLUI"];
 		if TFrame ~= nil then
 			TFrame:F_FrameUpdatePriceInfo();
@@ -5904,7 +5904,7 @@ function F.SKILL_LINES_CHANGED()	--	Donot process at the first trigger. Do it af
 						local var = VAR[pid];
 						var.update = true;
 						var.cur_rank, var.max_rank = cur_rank, max_rank;
-						__namespace__.F_CheckCooldown(pid, var);
+						__private.F_CheckCooldown(pid, var);
 					end
 				end
 			end
@@ -5930,13 +5930,13 @@ function F.NEW_RECIPE_LEARNED(sid)
 		var[1][#var[1] + 1] = sid;
 		var[2][sid] = -1;
 		LT_SharedMethod.MarkKnown(sid, PLAYER_GUID);
-		__namespace__:FireEvent("USER_EVENT_RECIPE_LIST_UPDATE");
+		__private:FireEvent("USER_EVENT_RECIPE_LIST_UPDATE");
 	end
 end
 
 
-function __namespace__.init_ui()
-	AVAR, VAR, SET, FAV = __namespace__.AVAR, __namespace__.VAR, __namespace__.SET, __namespace__.FAV;
+function __private.init_ui()
+	AVAR, VAR, SET, FAV = __private.AVAR, __private.VAR, __private.SET, __private.FAV;
 	for GUID, VAR in next, AVAR do
 		if VAR.realm_id == PLAYER_REALM_ID then
 			for pid = __db__.DBMINPID, __db__.DBMAXPID do
@@ -5951,13 +5951,13 @@ function __namespace__.init_ui()
 		end
 	end
 	local _;
-	_, T_uiFrames["EXPLORER"] = __namespace__.F_SafeCall(LF_CreateExplorerFrame);
-	_, T_uiFrames["CONFIG"] = __namespace__.F_SafeCall(LF_CreateConfigFrame);
-	_, T_uiFrames["BOARD"] = __namespace__.F_SafeCall(LF_CreateBoard);
+	_, T_uiFrames["EXPLORER"] = __private.F_SafeCall(LF_CreateExplorerFrame);
+	_, T_uiFrames["CONFIG"] = __private.F_SafeCall(LF_CreateConfigFrame);
+	_, T_uiFrames["BOARD"] = __private.F_SafeCall(LF_CreateBoard);
 	F:RegisterEvent("SKILL_LINES_CHANGED");
 	F:RegisterEvent("NEW_RECIPE_LEARNED");
-	__namespace__.F_HookTooltip(SkillTip);
-	__namespace__:AddCallback("USER_EVENT_DATA_LOADED", function()
+	__private.F_HookTooltip(SkillTip);
+	__private:AddCallback("USER_EVENT_DATA_LOADED", function()
 		F.SKILL_LINES_CHANGED();
 		local TFrame = T_uiFrames["BLIZZARD_TRADESKILLUI"];
 		if TFrame ~= nil then
@@ -5974,14 +5974,14 @@ function __namespace__.init_ui()
 			CFrame.TabFrame:F_Update();
 		end
 	end);
-	__namespace__:AddCallback("USER_EVENT_RECIPE_LIST_UPDATE", __namespace__.F_uiUpdateAllFrames);
-	__namespace__:AddCallback("AUCTION_MOD_LOADED", function(mod)
+	__private:AddCallback("USER_EVENT_RECIPE_LIST_UPDATE", __private.F_uiUpdateAllFrames);
+	__private:AddCallback("AUCTION_MOD_LOADED", function(mod)
 		if mod ~= nil then
 			AuctionMod = mod;
 		end
 	end);
-	__namespace__:AddAddOnCallback("BLIZZARD_TRADESKILLUI", LF_AddOnCallback_Blizzard_TradeSkillUI);
-	if not __namespace__.__is_wlk then
-		__namespace__:AddAddOnCallback("BLIZZARD_CRAFTUI", LF_AddOnCallback_Blizzard_CraftUI);
+	__private:AddAddOnCallback("BLIZZARD_TRADESKILLUI", LF_AddOnCallback_Blizzard_TradeSkillUI);
+	if not __private.__is_wlk then
+		__private:AddAddOnCallback("BLIZZARD_CRAFTUI", LF_AddOnCallback_Blizzard_CraftUI);
 	end
 end

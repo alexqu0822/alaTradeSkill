@@ -2,11 +2,11 @@
 	by ALA @ 163UI
 --]]--
 
-local __addon__, __namespace__ = ...;
+local __addon, __private = ...;
 
 
 -->		****
-__namespace__:BuildEnv("CloudyTradeSkill");
+__private:BuildEnv("CloudyTradeSkill");
 -->		****
 
 
@@ -25,6 +25,6 @@ local function LF_Skin_CloudyTradeSkill(addon, frame)
 end
 
 
-__namespace__:AddAddOnCallback("CloudyTradeSkill", function()
-	__namespace__:FireEvent("UI_MOD_LOADED", { Skin = LF_Skin_CloudyTradeSkill, });
+__private:AddAddOnCallback("CloudyTradeSkill", function()
+	__private:FireEvent("UI_MOD_LOADED", { Skin = LF_Skin_CloudyTradeSkill, });
 end);

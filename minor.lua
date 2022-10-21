@@ -2,7 +2,7 @@
 	by ALA @ 163UI
 --]]--
 
-local __addon__, __namespace__ = ...;
+local __addon, __private = ...;
 
 
 StackSplitFrame:SetFrameStrata("TOOLTIP");

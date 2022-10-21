@@ -7,9 +7,9 @@ if WOW_PROJECT_ID ~= WOW_PROJECT_WRATH_CLASSIC then
 end
 
 
-local __addon__, __namespace__ = ...;
-__namespace__.__db__ = {  };
-local __db__ = __namespace__.__db__;
+local __addon, __private = ...;
+__private.__db__ = {  };
+local __db__ = __private.__db__;
 
 __db__.__DataVersion = 220904;
 

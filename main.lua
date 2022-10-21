@@ -7,16 +7,16 @@
 --]]--
 local __ala_meta__ = _G.__ala_meta__;
 
-local __addon__, __namespace__ = ...;
-__ala_meta__.prof = __namespace__;
+local __addon, __private = ...;
+__ala_meta__.prof = __private;
 
-local __db__ = __namespace__.__db__;
-local L = __namespace__.L;
+local __db__ = __private.__db__;
+local L = __private.L;
 local _patch_version, _build_number, _build_date, _toc_version = GetBuildInfo();
-__namespace__.__is_dev = select(2, GetAddOnInfo("!!!!!DebugMe")) ~= nil;
-__namespace__.__is_classic = _toc_version > 11300 and _toc_version < 20000;
-__namespace__.__is_bcc = _toc_version > 20400 and _toc_version < 30000;
-__namespace__.__is_wlk = _toc_version > 30300 and _toc_version < 90000;
+__private.__is_dev = select(2, GetAddOnInfo("!!!!!DebugMe")) ~= nil;
+__private.__is_classic = _toc_version > 11300 and _toc_version < 20000;
+__private.__is_bcc = _toc_version > 20400 and _toc_version < 30000;
+__private.__is_wlk = _toc_version > 30300 and _toc_version < 90000;
 
 -->		upvalue
 	local setfenv = setfenv;
@@ -67,7 +67,7 @@ __namespace__.__is_wlk = _toc_version > 30300 and _toc_version < 90000;
 -->		Dev
 	local _GlobalRef = {  };
 	local _GlobalAssign = {  };
-	function __namespace__:BuildEnv(category)
+	function __private:BuildEnv(category)
 		local _G = _G;
 		local Ref = _GlobalRef[category] or {  };
 		local Assign = _GlobalAssign[category] or {  };
@@ -88,7 +88,7 @@ __namespace__.__is_wlk = _toc_version > 30300 and _toc_version < 90000;
 			}
 		));
 	end
-	function __namespace__:MergeGlobal(DB)
+	function __private:MergeGlobal(DB)
 		local _Ref = DB._GlobalRef;
 		if _Ref ~= nil then
 			for category, db in next, _Ref do
@@ -132,7 +132,7 @@ local AVAR, VAR, SET, FAV, CMM = nil, nil, nil, nil, nil;
 
 
 -->		****************
-__namespace__:BuildEnv("main");
+__private:BuildEnv("main");
 -->		****************
 
 
@@ -142,7 +142,7 @@ __namespace__:BuildEnv("main");
 	hooksecurefunc("seterrorhandler", function(ErrorHandler)
 		_ErrorHandler = ErrorHandler;
 	end);
-	function __namespace__.F_SafeCall(func, ...)
+	function __private.F_SafeCall(func, ...)
 		local success, result = xpcall(func,
 			function(msg)
 				_ErrorHandler(msg);
@@ -155,10 +155,10 @@ __namespace__:BuildEnv("main");
 			return false;
 		end
 	end
-	local F_SafeCall = __namespace__.F_SafeCall;
+	local F_SafeCall = __private.F_SafeCall;
 	-->		Scheduler
 	local T_Scheduler = setmetatable({  }, { __mode = 'k', })
-	function __namespace__.F_ScheduleDelayCall(func, delay)
+	function __private.F_ScheduleDelayCall(func, delay)
 		local sch = T_Scheduler[func];
 		if sch == nil then
 			sch = {  };
@@ -172,33 +172,33 @@ __namespace__:BuildEnv("main");
 		sch[2] = true;
 		C_Timer_After(delay or 0.2, sch[1]);
 	end
-	if __namespace__.__is_dev then
-		__namespace__._noop_ = function() end;
-		__namespace__._log_ = function(...)
+	if __private.__is_dev then
+		__private._noop_ = function() end;
+		__private._log_ = function(...)
 			-- print(date('|cff00ff00%H:%M:%S|r'), ...);
 		end
-		__namespace__._error_ = function(header, child, ...)
+		__private._error_ = function(header, child, ...)
 			print(date('|cffff0000%H:%M:%S|r'), header, child, ...);
 		end
 	else
-		__namespace__._noop_ = function() end;
-		__namespace__._log_ = __namespace__._noop_;
-		__namespace__._error_ = __namespace__._noop_;
+		__private._noop_ = function() end;
+		__private._log_ = __private._noop_;
+		__private._error_ = __private._noop_;
 	end
 	-->		Dispatcher
 	local F = _G.CreateFrame('FRAME');
 	F:SetScript("OnEvent", function(self, event, ...)
 		return self[event](...);
 	end);
-	function __namespace__:RegisterEvent(event, callback)
+	function __private:RegisterEvent(event, callback)
 		F:RegisterEvent(event);
 		F[event] = callback or F[event];
 	end
-	function __namespace__:UnregisterEvent(event)
+	function __private:UnregisterEvent(event)
 		F:UnregisterEvent(event);
 	end
 	local T_FireStack = {  };
-	function __namespace__:FireEvent(event, ...)
+	function __private:FireEvent(event, ...)
 		local Stack = T_FireStack[event];
 		if Stack == nil then
 			T_FireStack[event] = { __num = 1, [1] = { ... }, };
@@ -213,7 +213,7 @@ __namespace__:BuildEnv("main");
 	end
 	local T_EventCallback = {  };
 	--	event, callback(..), method: 'prepend'[, 'append']
-	function __namespace__:AddCallback(event, callback, method)
+	function __private:AddCallback(event, callback, method)
 		local new = false;
 		local mem = T_EventCallback[event];
 		if mem == nil then
@@ -266,7 +266,7 @@ __namespace__:BuildEnv("main");
 			end
 		end
 	end
-	function __namespace__:DelCallback(event, callback)
+	function __private:DelCallback(event, callback)
 		local mem = T_EventCallback[event];
 		if mem ~= nil and mem[callback] ~= nil then
 			for index = mem.__num, 1, -1 do
@@ -288,7 +288,7 @@ __namespace__:BuildEnv("main");
 			callback(addon);
 		end
 	end
-	function __namespace__:AddAddOnCallback(addon, callback)
+	function __private:AddAddOnCallback(addon, callback)
 		addon = strupper(addon);
 		T_AddOnCallback[addon] = callback;
 		if B_MonitoringAddOnLoad and IsAddOnLoaded(addon) then
@@ -306,15 +306,15 @@ __namespace__:BuildEnv("main");
 		end
 	end
 -->
-local F_SafeCall = __namespace__.F_SafeCall;
+local F_SafeCall = __private.F_SafeCall;
 
 
 --		Saved Variables
-	function __namespace__.F_ChangeSetWithUpdate(set, key, val)
+	function __private.F_ChangeSetWithUpdate(set, key, val)
 		set[key] = val;
 		set.update = true;
 	end
-	function __namespace__.F_AddChar(key, VAR, before_initialized)
+	function __private.F_AddChar(key, VAR, before_initialized)
 		if key ~= nil and VAR ~= nil and AVAR[key] == nil then
 			local list = SET.char_list;
 			for index = #list, 1, -1 do
@@ -325,27 +325,27 @@ local F_SafeCall = __namespace__.F_SafeCall;
 			AVAR[key] = VAR;
 			list[#list + 1] = key;
 			if not before_initialized then
-				__namespace__.F_uiUpdateAllFrames();
+				__private.F_uiUpdateAllFrames();
 			end
 		end
 	end
-	function __namespace__.F_DelChar(index)
+	function __private.F_DelChar(index)
 		local list = SET.char_list;
 		if index ~= nil and index <= #list then
 			local key = list[index];
 			if key ~= PLAYER_GUID then
 				tremove(list, index);
 				AVAR[key] = nil;
-				__namespace__.F_uiUpdateAllFrames();
+				__private.F_uiUpdateAllFrames();
 			end
 		end
 	end
-	function __namespace__.F_DelCharByKey(key)
+	function __private.F_DelCharByKey(key)
 		if key ~= nil then
 			local list = SET.char_list;
 			for index = 1, #list do
 				if list[index] == key then
-					__namespace__.F_DelChar(index);
+					__private.F_DelChar(index);
 					break;
 				end
 			end
@@ -441,7 +441,7 @@ local F_SafeCall = __namespace__.F_SafeCall;
 			alaTradeSkillSV.cache = {  };
 		end
 		alaTradeSkillSV._version = 211227.0;
-		__namespace__:MergeGlobal(alaTradeSkillSV);
+		__private:MergeGlobal(alaTradeSkillSV);
 		SET = alaTradeSkillSV.set;
 		for pid = __db__.DBMINPID, __db__.DBMAXPID do
 			local set = rawget(SET, pid);
@@ -506,7 +506,7 @@ local F_SafeCall = __namespace__.F_SafeCall;
 			end
 		end
 		if AVAR[PLAYER_GUID] == nil then
-			__namespace__.F_AddChar(PLAYER_GUID, { realm_id = PLAYER_REALM_ID, realm_name = _G.GetRealmName(), supreme_list = {  }, }, true);
+			__private.F_AddChar(PLAYER_GUID, { realm_id = PLAYER_REALM_ID, realm_name = _G.GetRealmName(), supreme_list = {  }, }, true);
 		end
 		VAR = setmetatable(AVAR[PLAYER_GUID], {
 			__index = function(t, pid)
@@ -531,9 +531,9 @@ local F_SafeCall = __namespace__.F_SafeCall;
 			CMM = {  };
 			alaTradeSkillSV.cmm[PLAYER_REALM_ID] = CMM;
 		end
-		__namespace__.SavedVar = alaTradeSkillSV;
-		__namespace__.AVAR, __namespace__.VAR, __namespace__.SET, __namespace__.FAV, __namespace__.CMM = AVAR, VAR, SET, FAV, CMM;
-		__namespace__.CACHE = alaTradeSkillSV.cache;
+		__private.SavedVar = alaTradeSkillSV;
+		__private.AVAR, __private.VAR, __private.SET, __private.FAV, __private.CMM = AVAR, VAR, SET, FAV, CMM;
+		__private.CACHE = alaTradeSkillSV.cache;
 	end
 -->		Initialize
 	local isInitialized = false;
@@ -542,21 +542,21 @@ local F_SafeCall = __namespace__.F_SafeCall;
 		if not isInitialized then
 			isInitialized = true;
 			--
-			F_SafeCall(__namespace__.init_db);		--	!!!must be earlier than any others!!!
-			F_SafeCall(__namespace__.init_ui);
-			F_SafeCall(__namespace__.init_tooltip);
-			F_SafeCall(__namespace__.init_cooldown);
-			F_SafeCall(__namespace__.init_communication);
-			F_SafeCall(__namespace__.init_auctionmod);
+			F_SafeCall(__private.init_db);		--	!!!must be earlier than any others!!!
+			F_SafeCall(__private.init_ui);
+			F_SafeCall(__private.init_tooltip);
+			F_SafeCall(__private.init_cooldown);
+			F_SafeCall(__private.init_communication);
+			F_SafeCall(__private.init_auctionmod);
 			F_SafeCall(LF_StartMonitoringAddOnLoad);
-			F_SafeCall(__namespace__.init_libentry);
+			F_SafeCall(__private.init_libentry);
 			for GUID, _ in next, AVAR do
 				GetPlayerInfoByGUID(GUID);
 			end
-			-- F_SafeCall(__namespace__.cmm_InitAddOnMessage);
+			-- F_SafeCall(__private.cmm_InitAddOnMessage);
 			for key, val in next, SET do
 				if type(val) ~= 'table' then
-					__namespace__.ON_SET_CHANGED(key, val, true);
+					__private.ON_SET_CHANGED(key, val, true);
 				end
 			end
 			EnableAddOn("MissingTradeSkillsList_TBC_Data");
@@ -564,16 +564,16 @@ local F_SafeCall = __namespace__.F_SafeCall;
 		end
 	end
 	local function LOADING_SCREEN_DISABLED()
-		__namespace__:UnregisterEvent("LOADING_SCREEN_DISABLED");
+		__private:UnregisterEvent("LOADING_SCREEN_DISABLED");
 		if not isDBInitialized then
-			__namespace__:FireEvent(__addon__);
+			__private:FireEvent(__addon);
 		end
 		C_Timer_After(1.0, LF_Init);
 	end
-	__namespace__:RegisterEvent("LOADING_SCREEN_DISABLED", LOADING_SCREEN_DISABLED);
+	__private:RegisterEvent("LOADING_SCREEN_DISABLED", LOADING_SCREEN_DISABLED);
 	local function ADDON_LOADED(addon)
-		if addon == __addon__ then
-			__namespace__:UnregisterEvent("ADDON_LOADED");
+		if addon == __addon then
+			__private:UnregisterEvent("ADDON_LOADED");
 			if not isDBInitialized then
 				if not F_SafeCall(LF_ModifySavedVariable) then
 					local fav = alaTradeSkillSV.fav;
@@ -584,43 +584,43 @@ local F_SafeCall = __namespace__.F_SafeCall;
 							alaTradeSkillSV.fav = fav;
 						end
 					else
-						__namespace__._error_("|cffff0000alaTradeSkill fetal error");
+						__private._error_("|cffff0000alaTradeSkill fetal error");
 					end
 				end
 			end
 		end
 	end
-	__namespace__:RegisterEvent("ADDON_LOADED", ADDON_LOADED);
+	__private:RegisterEvent("ADDON_LOADED", ADDON_LOADED);
 -->
 
 
 
-function __namespace__.ON_SET_CHANGED(key, val, loading)
+function __private.ON_SET_CHANGED(key, val, loading)
 	if key == 'expand' then
-		__namespace__.F_uiToggleFrameExpand(val);
+		__private.F_uiToggleFrameExpand(val);
 	elseif key == 'blz_style' then
-		__namespace__.F_uiRefreshFramesStyle(loading);
+		__private.F_uiRefreshFramesStyle(loading);
 	elseif key == 'bg_color' then
-		__namespace__.F_uiRefreshFramesStyle(loading);
+		__private.F_uiRefreshFramesStyle(loading);
 	elseif key == 'show_tradeskill_frame_rank_info' then
-		__namespace__.F_uiToggleFrameRankInfo(val);
+		__private.F_uiToggleFrameRankInfo(val);
 	elseif key == 'show_tradeskill_frame_price_info' then
-		__namespace__.F_uiToggleFramePriceInfo(val);
+		__private.F_uiToggleFramePriceInfo(val);
 	elseif key == 'colored_rank_for_unknown' then
-		__namespace__.F_uiRefreshAllFrames();
+		__private.F_uiRefreshAllFrames();
 	elseif key == 'regular_exp' then
 		for pid, set in next, SET do
 			if __db__.is_pid(pid) or pid == 'explorer' then
 				set.update = true;
 			end
 		end
-		__namespace__.F_uiUpdateAllFrames();
+		__private.F_uiUpdateAllFrames();
 	elseif key == 'hide_mtsl' then
-		__namespace__.hide_mtsl(val);
+		__private.hide_mtsl(val);
 	else
 	end
 	if not loading then
-		__namespace__.F_uiRefreshConfigFrame();
+		__private.F_uiRefreshConfigFrame();
 	end
 end
 
@@ -646,7 +646,7 @@ do	--	SLASH
 				if cmd[5] then
 					cmd[5](cmd[3], val);
 				end
-				__namespace__.ON_SET_CHANGED(cmd[3], val);
+				__private.ON_SET_CHANGED(cmd[3], val);
 			end
 		else
 			print(L["INVALID_COMMANDS"]);
@@ -655,7 +655,7 @@ do	--	SLASH
 	--	pattern, key, note, func(key, val)
 	local SEPARATOR = "[ %`%~%!%@%#%$%%%^%&%*%(%)%-%_%=%+%[%{%]%}%\\%|%;%:%\'%\"%,%<%.%>%/%?]*";
 	--	1type, 2pattern, 3key, 4note(string or func), 5proc_func(key, val), 6func_to_mod_val, 7config_type(nil for check), 8cmd_for_config / drop_meta, 9para[slider:{min, max, step}], 10sub_config_on_val
-	__namespace__.T_SetCommandList = {
+	__private.T_SetCommandList = {
 		{	--	expand
 			'bool',
 			"^expand" .. SEPARATOR .. "(.*)" .. SEPARATOR .. "$",
@@ -692,7 +692,7 @@ do	--	SLASH
 					[7] = 'color4',
 					[8] = function(r, g, b, a)
 						SET.bg_color = { r or 1.0, g or 1.0, b or 1.0, a or 1.0, };
-						__namespace__.ON_SET_CHANGED('bg_color', SET.bg_color);
+						__private.ON_SET_CHANGED('bg_color', SET.bg_color);
 					end,
 				},
 			},
@@ -843,7 +843,7 @@ do	--	SLASH
 			"show_call",
 			L.SLASH_NOTE["show_call"],
 			function(key, val)
-				__namespace__.F_uiToggleFrameCall(val);
+				__private.F_uiToggleFrameCall(val);
 			end,
 			[8] = function(self)
 				if self:GetChecked() then
@@ -859,7 +859,7 @@ do	--	SLASH
 			"show_tab",
 			L.SLASH_NOTE["show_tab"],
 			function(key, val)
-				__namespace__.F_uiToggleFrameTab(val);
+				__private.F_uiToggleFrameTab(val);
 			end,
 			[8] = function(self)
 				if self:GetChecked() then
@@ -875,7 +875,7 @@ do	--	SLASH
 			"portrait_button",
 			L.SLASH_NOTE["portrait_button"],
 			function(key, val)
-				__namespace__.F_uiToggleFramePortraitButton(val);
+				__private.F_uiToggleFramePortraitButton(val);
 			end,
 			[8] = function(self)
 				if self:GetChecked() then
@@ -891,7 +891,7 @@ do	--	SLASH
 			"show_board",
 			L.SLASH_NOTE["show_board"],
 			function(key, val)
-				__namespace__.F_uiToggleFrame("BOARD", val);
+				__private.F_uiToggleFrame("BOARD", val);
 			end,
 			[8] = function(self)
 				if self:GetChecked() then
@@ -907,7 +907,7 @@ do	--	SLASH
 			"lock_board",
 			L.SLASH_NOTE["lock_board"],
 			function(key, val)
-				__namespace__.F_uiLockBoard(val);
+				__private.F_uiLockBoard(val);
 			end,
 			[8] = function(self)
 				if self:GetChecked() then
@@ -963,7 +963,7 @@ do	--	SLASH
 			nil,
 			'drop',
 			[8] = function(self)
-				return __namespace__.F_GetAuctionListDropMeta();
+				return __private.F_GetAuctionListDropMeta();
 			end,
 		},
 	};
@@ -979,7 +979,7 @@ do	--	SLASH
 		local _, pattern;
 		_, _, pattern = strfind(msg, SET_PATTERN);
 		if pattern then
-			local T_SetCommandList = __namespace__.T_SetCommandList;
+			local T_SetCommandList = __private.T_SetCommandList;
 			for index = 1, #T_SetCommandList do
 				local cmd = T_SetCommandList[index];
 				local _, _, pattern2 = strfind(pattern, cmd[2]);
@@ -1011,7 +1011,7 @@ do	--	SLASH
 								if cmd[5] then
 									cmd[5](cmd[3], val);
 								end
-								__namespace__.ON_SET_CHANGED(cmd[3], val);
+								__private.ON_SET_CHANGED(cmd[3], val);
 							end
 						else
 							print(L["INVALID_COMMANDS"]);
@@ -1039,7 +1039,7 @@ do	--	SLASH
 									if cmd[5] then
 										cmd[5](cmd[3], val);
 									end
-									__namespace__.ON_SET_CHANGED(cmd[3], val);
+									__private.ON_SET_CHANGED(cmd[3], val);
 								end
 							else
 								print("|cffff0000Invalid parameter: ", pattern2);
@@ -1054,15 +1054,15 @@ do	--	SLASH
 		_, _, pattern = strfind(msg, UI_PATTERN);
 		if pattern then
 			if strfind(pattern, 'exp') then
-				__namespace__.F_uiToggleFrame("EXPLORER");
+				__private.F_uiToggleFrame("EXPLORER");
 			elseif strfind(pattern, 'conf') then
-				__namespace__.F_uiToggleFrame("CONFIG");
+				__private.F_uiToggleFrame("CONFIG");
 			end
 			return;
 		end
 		_, _, pattern = strfind(msg, DUMP_PATTERN);
 		if pattern then
-			print("AuctionMod Status: ", __namespace__.F_GetAuctionMod() ~= nil);
+			print("AuctionMod Status: ", __private.F_GetAuctionMod() ~= nil);
 			return;
 		end
 		--	default
@@ -1087,20 +1087,20 @@ do	--	SLASH
 			print("  /atf setlockboard on/off");
 			print("  /atf sethidemtsl on/off");
 		else
-			-- __namespace__.F_uiToggleFrame("CONFIG");
-			__namespace__.F_uiToggleFrame("CONFIG");
+			-- __private.F_uiToggleFrame("CONFIG");
+			__private.F_uiToggleFrame("CONFIG");
 		end
 	end
 end
 
 local function DBIcon_OnClick(self, button)
 	if button == "RightButton" then
-		__namespace__.F_uiToggleFrame("CONFIG");
+		__private.F_uiToggleFrame("CONFIG");
 	else
-		__namespace__.F_uiToggleFrame("EXPLORER");
+		__private.F_uiToggleFrame("EXPLORER");
 	end
 end
-function __namespace__.init_libentry()
+function __private.init_libentry()
 	if LibStub ~= nil then
 		local LDI = LibStub("LibDBIcon-1.0", true);
 		if LDI ~= nil then
@@ -1143,11 +1143,11 @@ __ala_meta__.prof.extern_setting = extern_setting;
 do	--	EXTERN SETTING
 	function extern_setting.toggle_tradeskill_frame_rank(on)
 		SET.show_tradeskill_frame_rank_info = on;
-		__namespace__.ON_SET_CHANGED('show_tradeskill_frame_rank_info', on);
+		__private.ON_SET_CHANGED('show_tradeskill_frame_rank_info', on);
 	end
 	function extern_setting.toggle_tradeskill_frame_price_info(on)
 		SET.show_tradeskill_frame_price_info = on;
-		__namespace__.ON_SET_CHANGED('show_tradeskill_frame_price_info', on);
+		__private.ON_SET_CHANGED('show_tradeskill_frame_price_info', on);
 	end
 	function extern_setting.toggle_tradeskill_tip_craft_spell_price(on)
 		SET.show_tradeskill_tip_craft_spell_price = on;
@@ -1163,15 +1163,15 @@ do	--	EXTERN SETTING
 	end
 	function extern_setting.toggle_tradeskill_board_shown(on)
 		SET.show_board = on;
-		__namespace__.F_uiToggleFrame("BOARD", on);
+		__private.F_uiToggleFrame("BOARD", on);
 	end
 	function extern_setting.toggle_tradeskill_board_lock(on)
 		SET.lock_board = on;
-		__namespace__.F_uiLockBoard(on);
+		__private.F_uiLockBoard(on);
 	end
 	function extern_setting.toggle_tradeskill_blz_style(on)
 		SET.blz_style = on;
-		__namespace__.F_uiRefreshFramesStyle();
+		__private.F_uiRefreshFramesStyle();
 	end
 
 	function extern_setting.set_tradeskill_bg_color(r, g, b, a)
@@ -1179,7 +1179,7 @@ do	--	EXTERN SETTING
 		SET.bg_color[2] = g or SET.bg_color[2];
 		SET.bg_color[3] = b or SET.bg_color[3];
 		SET.bg_color[4] = a or SET.bg_color[4];
-		__namespace__.ON_SET_CHANGED('bg_color', SET.bg_color);
+		__private.ON_SET_CHANGED('bg_color', SET.bg_color);
 	end
 
 	function extern_setting.get_tradeskill_frame_price_info()
@@ -1236,7 +1236,7 @@ end
 local C_GoldIcon    = "|TInterface\\MoneyFrame\\UI-GoldIcon:12:12:0:0|t";
 local C_SilverIcon  = "|TInterface\\MoneyFrame\\UI-SilverIcon:12:12:0:0|t";
 local C_CopperIcon  = "|TInterface\\MoneyFrame\\UI-CopperIcon:12:12:0:0|t";
-function __namespace__.F_GetMoneyString(copper)
+function __private.F_GetMoneyString(copper)
 	-- GetCoinTextureString
 	local G = floor(copper / 10000);
 	copper = copper % 10000;
@@ -1287,7 +1287,7 @@ function __ala_meta__.GetSpellModifiedCooldown(sid, formatStr)
 end
 
 
-if __namespace__.__is_classic then
+if __private.__is_classic then
 	local function F_GetSkillLink(sid)
 		local name = GetSpellInfo(sid);
 		if name then
@@ -1296,17 +1296,17 @@ if __namespace__.__is_classic then
 			return nil;
 		end
 	end
-	__namespace__.F_GetSkillLink = F_GetSkillLink;
-	function __namespace__.F_HandleShiftClick(pid, sid)
+	__private.F_GetSkillLink = F_GetSkillLink;
+	function __private.F_HandleShiftClick(pid, sid)
 		local set = SET[pid];
 		local cid = __db__.get_cid_by_sid(sid);
 		if cid then
-			ChatEdit_InsertLink(__db__.item_link(cid), __addon__);
+			ChatEdit_InsertLink(__db__.item_link(cid), __addon);
 		else
-			ChatEdit_InsertLink(F_GetSkillLink(sid), __addon__);
+			ChatEdit_InsertLink(F_GetSkillLink(sid), __addon);
 		end
 	end
-elseif __namespace__.__is_bcc or __namespace__.__is_wlk then
+elseif __private.__is_bcc or __private.__is_wlk then
 	local function F_GetSkillLink(sid)
 		local name = GetSpellInfo(sid);
 		if name then
@@ -1315,26 +1315,26 @@ elseif __namespace__.__is_bcc or __namespace__.__is_wlk then
 			return nil;
 		end
 	end
-	__namespace__.F_GetSkillLink = F_GetSkillLink;
-	function __namespace__.F_HandleShiftClick(pid, sid)
+	__private.F_GetSkillLink = F_GetSkillLink;
+	function __private.F_HandleShiftClick(pid, sid)
 		local set = SET[pid];
 		if set.showItemInsteadOfSpell then
 			local cid = __db__.get_cid_by_sid(sid);
 			if cid then
-				ChatEdit_InsertLink(__db__.item_link(cid), __addon__);
+				ChatEdit_InsertLink(__db__.item_link(cid), __addon);
 			else
-				ChatEdit_InsertLink(F_GetSkillLink(sid), __addon__);
+				ChatEdit_InsertLink(F_GetSkillLink(sid), __addon);
 			end
 		else
-			ChatEdit_InsertLink(F_GetSkillLink(sid), __addon__);
+			ChatEdit_InsertLink(F_GetSkillLink(sid), __addon);
 		end
 	end
 else
 	local function F_GetSkillLink(sid)
 		return nil;
 	end
-	__namespace__.F_GetSkillLink = F_GetSkillLink;
-	function __namespace__.F_HandleShiftClick(pid, sid)
+	__private.F_GetSkillLink = F_GetSkillLink;
+	function __private.F_HandleShiftClick(pid, sid)
 	end
 end
 

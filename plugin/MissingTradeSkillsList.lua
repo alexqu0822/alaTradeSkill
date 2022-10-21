@@ -2,9 +2,9 @@
 	by ALA @ 163UI
 --]]--
 
-local __addon__, __namespace__ = ...;
-local __db__ = __namespace__.__db__;
-local L = __namespace__.L;
+local __addon, __private = ...;
+local __db__ = __private.__db__;
+local L = __private.L;
 
 -->		upvalue
 	local next = next;
@@ -78,7 +78,7 @@ local AuctionMod = nil;
 
 
 -->		****
-__namespace__:BuildEnv("MissingTradeSkillsList");
+__private:BuildEnv("MissingTradeSkillsList");
 -->		****
 
 
@@ -290,7 +290,7 @@ LF_MTSL_SetItem = function(Tip, pid, iid, label, stack_size)
 			if AuctionMod ~= nil then
 				local price = AuctionMod.F_QueryPriceByID(iid);
 				if price and price > 0 then
-					line = line .. " |cff00ff00AH|r " .. __namespace__.F_GetMoneyString(price);
+					line = line .. " |cff00ff00AH|r " .. __private.F_GetMoneyString(price);
 				end
 			end
 		else
@@ -486,14 +486,14 @@ local function LF_MTSL_SetSpellTip(Tip, sid)
 end
 
 
-function __namespace__.toggle_mtsl(hide)
+function __private.toggle_mtsl(hide)
 end
-function __namespace__.hide_mtsl(val)
+function __private.hide_mtsl(val)
 end
 
 
 local function callback()
-	__namespace__:FireEvent("RECIPESOURCE_MOD_LOADED", {
+	__private:FireEvent("RECIPESOURCE_MOD_LOADED", {
 		-- MTSL_DATA = _G.MTSL_DATA;
 		SetSpell = LF_MTSL_SetSpellTip,
 		SetItem = LF_MTSL_SetItem,
@@ -501,16 +501,16 @@ local function callback()
 		SetObject = LF_MTSL_SetObject,
 		SetQuest = LF_MTSL_SetQuest,
 	});
-	__namespace__:AddCallback("AUCTION_MOD_LOADED", function(mod)
+	__private:AddCallback("AUCTION_MOD_LOADED", function(mod)
 		if mod ~= nil then
 			AuctionMod = mod;
 		end
 	end);
-	local SET = __namespace__.SET;
+	local SET = __private.SET;
 	if SET ~= nil then
-		C_Timer_After(1.0, function() __namespace__.hide_mtsl(SET.hide_mtsl); end);
+		C_Timer_After(1.0, function() __private.hide_mtsl(SET.hide_mtsl); end);
 	end
-	function __namespace__.toggle_mtsl(hide)
+	function __private.toggle_mtsl(hide)
 		if hide then
 			MTSLUI_TOGGLE_BUTTON.ui_frame:SetAlpha(0);
 			MTSLUI_TOGGLE_BUTTON.ui_frame:EnableMouse(false);
@@ -527,15 +527,15 @@ local function callback()
 			-- MTSLUI_MISSING_TRADESKILLS_FRAME.ui_frame:Show();
 		end
 	end
-	function __namespace__.hide_mtsl(val)
-		__namespace__.toggle_mtsl(val);
+	function __private.hide_mtsl(val)
+		__private.toggle_mtsl(val);
 	end
 end
-__namespace__:AddAddOnCallback("MissingTradeSkillsList", callback);
-__namespace__:AddAddOnCallback("MissingTradeSkillsList_TBC", callback);
+__private:AddAddOnCallback("MissingTradeSkillsList", callback);
+__private:AddAddOnCallback("MissingTradeSkillsList_TBC", callback);
 
-__namespace__:AddAddOnCallback("MissingTradeSkillsList_TBC_Data", function()
-	__namespace__:FireEvent("RECIPESOURCE_MOD_LOADED", {
+__private:AddAddOnCallback("MissingTradeSkillsList_TBC_Data", function()
+	__private:FireEvent("RECIPESOURCE_MOD_LOADED", {
 		-- MTSL_DATA = _G.MTSL_DATA;
 		SetSpell = LF_MTSL_SetSpellTip,
 		SetItem = LF_MTSL_SetItem,
@@ -543,7 +543,7 @@ __namespace__:AddAddOnCallback("MissingTradeSkillsList_TBC_Data", function()
 		SetObject = LF_MTSL_SetObject,
 		SetQuest = LF_MTSL_SetQuest,
 	});
-	__namespace__:AddCallback("AUCTION_MOD_LOADED", function(mod)
+	__private:AddCallback("AUCTION_MOD_LOADED", function(mod)
 		if mod ~= nil then
 			AuctionMod = mod;
 		end

@@ -2,9 +2,9 @@
 	by ALA @ 163UI
 --]]--
 ----------------------------------------------------------------------------------------------------
-local __addon__, __namespace__ = ...;
-local __db__ = __namespace__.__db__;
-local L = __namespace__.L;
+local __addon, __private = ...;
+local __db__ = __private.__db__;
+local L = __private.L;
 
 -->		upvalue
 	local hooksecurefunc = hooksecurefunc;
@@ -111,7 +111,7 @@ local AuctionMod = nil;
 
 
 -->		****************
-__namespace__:BuildEnv("tooltip");
+__private:BuildEnv("tooltip");
 -->		****************
 
 
@@ -203,7 +203,7 @@ local function F_GetPriceInfoBySID(phase, sid, num, lines, stack_level, is_encha
 								p = p * num;
 								if detail_lines ~= nil then
 									detail_lines[#detail_lines + 1] = T_SpaceTable[stack_level + 1] .. name .. "x" .. num;
-									detail_lines[#detail_lines + 1] = __namespace__.F_GetMoneyString(p);
+									detail_lines[#detail_lines + 1] = __private.F_GetMoneyString(p);
 								end
 							else
 								if detail_lines ~= nil then
@@ -273,42 +273,42 @@ local function F_GetPriceInfoBySID(phase, sid, num, lines, stack_level, is_encha
 				if is_enchanting then
 					if cost ~= nil then
 						lines[#lines+ 1] = "|cffff7f00**|r" .. "|cffffffff" .. __db__.spell_name_s(sid) .. "|r" or L["COST_PRICE"];
-						lines[#lines+ 1] = L["COST_PRICE"] .. __namespace__.F_GetMoneyString(cost);
+						lines[#lines+ 1] = L["COST_PRICE"] .. __private.F_GetMoneyString(cost);
 					else
 						lines[#lines+ 1] = "|cffff7f00**|r" .. "|cffffffff" .. __db__.spell_name_s(sid) .. "|r" or L["COST_PRICE"];
-						lines[#lines+ 1] = L["COST_PRICE_KNOWN"] .. __namespace__.F_GetMoneyString(cost_known);
+						lines[#lines+ 1] = L["COST_PRICE_KNOWN"] .. __private.F_GetMoneyString(cost_known);
 					end
 				else
 					if cost ~= nil then
 						lines[#lines+ 1] = "|cffff7f00**|r" .. name .. "x" .. num;
-						lines[#lines+ 1] = L["COST_PRICE"] .. __namespace__.F_GetMoneyString(cost);
+						lines[#lines+ 1] = L["COST_PRICE"] .. __private.F_GetMoneyString(cost);
 					else
 						lines[#lines+ 1] = "|cffff7f00**|r" .. name .. "x" .. num;
-						lines[#lines+ 1] = L["COST_PRICE_KNOWN"] .. __namespace__.F_GetMoneyString(cost_known);
+						lines[#lines+ 1] = L["COST_PRICE_KNOWN"] .. __private.F_GetMoneyString(cost_known);
 					end
 					if price ~= nil then
 						lines[#lines+ 1] = "|cff00ff00**|r" .. name .. "x" .. num;
-						lines[#lines+ 1] = L["AH_PRICE"] .. __namespace__.F_GetMoneyString(price);
+						lines[#lines+ 1] = L["AH_PRICE"] .. __private.F_GetMoneyString(price);
 					end
 					if cost ~= nil and price ~= nil then
 						local diff = price - cost;
 						local diffAH = price * 0.95 - cost;
 						if diff > 0 then
 							lines[#lines+ 1] = "|cff00ff00**|r" .. L["PRICE_DIFF+"];
-							lines[#lines+ 1] = L["PRICE_DIFF_INFO+"] .. __namespace__.F_GetMoneyString(diff);
+							lines[#lines+ 1] = L["PRICE_DIFF_INFO+"] .. __private.F_GetMoneyString(diff);
 							if diffAH > 0 then
 								lines[#lines+ 1] = "|cff00ff00**|r" .. L["PRICE_DIFF_AH+"];
-								lines[#lines+ 1] = L["PRICE_DIFF_INFO+"] .. __namespace__.F_GetMoneyString(diffAH);
+								lines[#lines+ 1] = L["PRICE_DIFF_INFO+"] .. __private.F_GetMoneyString(diffAH);
 							elseif diffAH < 0 then
 								lines[#lines+ 1] = "|cffff0000**|r" .. L["PRICE_DIFF_AH-"];
-								lines[#lines+ 1] = L["PRICE_DIFF_INFO-"] .. __namespace__.F_GetMoneyString(-diffAH);
+								lines[#lines+ 1] = L["PRICE_DIFF_INFO-"] .. __private.F_GetMoneyString(-diffAH);
 							else
 							end
 						elseif diff < 0 then
 							lines[#lines+ 1] = "|cffff0000**|r" .. L["PRICE_DIFF-"];
-							lines[#lines+ 1] = L["PRICE_DIFF_INFO-"] .. __namespace__.F_GetMoneyString(-diff);
+							lines[#lines+ 1] = L["PRICE_DIFF_INFO-"] .. __private.F_GetMoneyString(-diff);
 							lines[#lines+ 1] = "|cffff0000**|r" .. L["PRICE_DIFF_AH-"];
-							lines[#lines+ 1] = L["PRICE_DIFF_INFO-"] .. __namespace__.F_GetMoneyString(-diffAH);
+							lines[#lines+ 1] = L["PRICE_DIFF_INFO-"] .. __private.F_GetMoneyString(-diffAH);
 						end
 					end
 				end
@@ -317,12 +317,12 @@ local function F_GetPriceInfoBySID(phase, sid, num, lines, stack_level, is_encha
 			if price ~= nil and (cost == nil or cost >= price) then
 				if lines then
 					lines[#lines+ 1] = T_SpaceTable[stack_level] .. name .. "x" .. num;
-					lines[#lines+ 1] = __namespace__.F_GetMoneyString(price);
+					lines[#lines+ 1] = __private.F_GetMoneyString(price);
 				end
 			elseif cost ~= nil and (price == nil or cost < price) then
 				if lines then
 					lines[#lines+ 1] = T_SpaceTable[stack_level] .. name .. "x" .. num;
-					lines[#lines+ 1] = __namespace__.F_GetMoneyString(cost);
+					lines[#lines+ 1] = __private.F_GetMoneyString(cost);
 					for index = 1, #detail_lines do
 						lines[#lines+ 1] = detail_lines[index];
 					end
@@ -373,7 +373,7 @@ local function set_tip_by_cid(Tooltip, cid)
 	local nsids, sids = __db__.get_sid_by_cid(cid);
 	if nsids > 0 then
 		Tooltip:AddLine(L["CRAFT_INFO"]);
-		for index = 1, #sids do
+		for index = 1, nsids do
 			local sid = sids[index];
 			local info = __db__.get_info_by_sid(sid);
 			if info ~= nil then
@@ -733,9 +733,9 @@ local function F_HookTooltip(Tooltip)
 	hooksecurefunc(Tooltip, "SetSendMailItem", LF_TooltipSetSendMailItem);
 	hooksecurefunc(Tooltip, "SetTradeSkillItem", LF_TooltipSetTradeSkillItem);
 	hooksecurefunc(Tooltip, "SetCraftItem", LF_TooltipSetCraftItem);
-	if __namespace__.__is_classic then
+	if __private.__is_classic then
 		hooksecurefunc(Tooltip, "SetTrainerService", LF_TooltipGUISetItem);
-	elseif __namespace__.__is_bcc or __namespace__.__is_wlk then
+	elseif __private.__is_bcc or __private.__is_wlk then
 		hooksecurefunc(Tooltip, "SetTrainerService", LF_TooltipGUISetSpell);
 		hooksecurefunc(Tooltip, "SetGuildBankItem", LF_TooltipSetGuildBankItem);
 		hooksecurefunc(Tooltip, "SetSocketGem", LF_TooltipGUISetItem);
@@ -751,18 +751,18 @@ local function F_HookTooltip(Tooltip)
 	end);
 end
 
-__namespace__.F_HookTooltip = F_HookTooltip;
-__namespace__.F_GetPriceInfoBySID = F_GetPriceInfoBySID;
+__private.F_HookTooltip = F_HookTooltip;
+__private.F_GetPriceInfoBySID = F_GetPriceInfoBySID;
 
 local N_RecipeSourceMOD = 0;
 local T_RecipeSourceMOD = {  };
-__namespace__:AddCallback("RECIPESOURCE_MOD_LOADED", function(mod)
+__private:AddCallback("RECIPESOURCE_MOD_LOADED", function(mod)
 	if mod ~= nil then
 		N_RecipeSourceMOD = N_RecipeSourceMOD + 1;
 		T_RecipeSourceMOD[N_RecipeSourceMOD] = mod;
 	end
 end);
-function __namespace__.F_TooltipAddSource(Tooltip, sid)
+function __private.F_TooltipAddSource(Tooltip, sid)
 	if N_RecipeSourceMOD > 0 then
 		for index = N_RecipeSourceMOD, 1, -1 do
 			local mod = T_RecipeSourceMOD[index];
@@ -790,7 +790,7 @@ local function LF_SetRecipeSourceTip(Tooltip, sid)
 		if info[index_trainer] ~= nil then			-- trainer
 			local price = info[index_train_price];
 			if price ~= nil and price > 0 then
-				Tooltip:AddDoubleLine(L["LABEL_GET_FROM"], "|cffff00ff" .. L["trainer"] .. "|r " ..  __namespace__.F_GetMoneyString(price));
+				Tooltip:AddDoubleLine(L["LABEL_GET_FROM"], "|cffff00ff" .. L["trainer"] .. "|r " ..  __private.F_GetMoneyString(price));
 			else
 				Tooltip:AddDoubleLine(L["LABEL_GET_FROM"], "|cffff00ff" .. L["trainer"] .. "|r");
 			end
@@ -808,7 +808,7 @@ local function LF_SetRecipeSourceTip(Tooltip, sid)
 					if AuctionMod ~= nil then
 						local price = AuctionMod.F_QueryPriceByID(rid);
 						if price ~= nil and price > 0 then
-							line = line .. " |cff00ff00AH|r " .. __namespace__.F_GetMoneyString(price);
+							line = line .. " |cff00ff00AH|r " .. __private.F_GetMoneyString(price);
 						end
 					end
 				else
@@ -837,22 +837,22 @@ local function LF_SetRecipeSourceTip(Tooltip, sid)
 	end
 end
 
-function __namespace__.init_tooltip()
-	AVAR, VAR, SET, FAV = __namespace__.AVAR, __namespace__.VAR, __namespace__.SET, __namespace__.FAV;
+function __private.init_tooltip()
+	AVAR, VAR, SET, FAV = __private.AVAR, __private.VAR, __private.SET, __private.FAV;
 	F_HookTooltip(_G.GameTooltip);
 	F_HookTooltip(_G.ItemRefTooltip);
 	F_HookTooltip(_G.ShoppingTooltip1);
 	F_HookTooltip(_G.ShoppingTooltip2);
-	__namespace__:AddCallback("AUCTION_MOD_LOADED", function(mod)
+	__private:AddCallback("AUCTION_MOD_LOADED", function(mod)
 		if mod ~= nil then
 			AuctionMod = mod;
 		end
 	end);
-	__namespace__:FireEvent("RECIPESOURCE_MOD_LOADED", {
+	__private:FireEvent("RECIPESOURCE_MOD_LOADED", {
 		SetSpell = LF_SetRecipeSourceTip,
-		SetItem = __namespace__._noop_,
-		SetUnit = __namespace__._noop_,
-		SetObject = __namespace__._noop_,
-		SetQuest = __namespace__._noop_,
+		SetItem = __private._noop_,
+		SetUnit = __private._noop_,
+		SetObject = __private._noop_,
+		SetQuest = __private._noop_,
 	});
 end

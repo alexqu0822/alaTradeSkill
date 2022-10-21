@@ -2,9 +2,9 @@
 	by ALA @ 163UI
 --]]--
 
-local __addon__, __namespace__ = ...;
-local __db__ = __namespace__.__db__;
-local L = __namespace__.L;
+local __addon, __private = ...;
+local __db__ = __private.__db__;
+local L = __private.L;
 
 -->		upvalue
 	local next = next;
@@ -18,7 +18,7 @@ local F = CreateFrame('FRAME');
 
 
 -->		****
-__namespace__:BuildEnv("AuctionBase");
+__private:BuildEnv("AuctionBase");
 -->		****
 
 
@@ -117,14 +117,14 @@ local function handler(_, addon)
 	if addon ~= SET.first_auction_mod then
 		SET.first_auction_mod = addon;
 		if T_AuctionModList[addon] ~= nil then
-			__namespace__:FireEvent("AUCTION_MOD_LOADED", T_AuctionModList[addon]);
+			__private:FireEvent("AUCTION_MOD_LOADED", T_AuctionModList[addon]);
 		end
 	end
 end
 local function __onshow(Button)
 	Button.Text:SetText(">> |cff00ff00" .. (Button.Text:GetText() or "") .. "|r <<");
 end
-function __namespace__.F_GetAuctionListDropMeta()
+function __private.F_GetAuctionListDropMeta()
 	local meta = {
 		handler = handler,
 		elements = {  },
@@ -157,7 +157,7 @@ function __namespace__.F_GetAuctionListDropMeta()
 	end
 	return meta;
 end
-function __namespace__.F_AddAuctionMod(id, mod)
+function __private.F_AddAuctionMod(id, mod)
 	for key, val in next, AuctionBase do
 		local alias = T_AliasList[key];
 		mod[key] = mod[key] or mod[alias] or val;
@@ -167,13 +167,13 @@ function __namespace__.F_AddAuctionMod(id, mod)
 	end
 	T_AuctionModList[id] = mod;
 	if id == SET.first_auction_mod or T_AuctionModList[SET.first_auction_mod] == nil then
-		__namespace__:FireEvent("AUCTION_MOD_LOADED", mod);
+		__private:FireEvent("AUCTION_MOD_LOADED", mod);
 	end
 end
-function __namespace__.F_GetAuctionMod()
+function __private.F_GetAuctionMod()
 	return T_AuctionModList[T_AuctionModList[1]];
 end
-function __namespace__.F_AuctionModCallback(addon, callback)
+function __private.F_AuctionModCallback(addon, callback)
 	if T_AuctionList[addon] == nil then
 		local index = #T_AuctionList + 1;
 		T_AuctionList[index] = addon;
@@ -183,8 +183,8 @@ function __namespace__.F_AuctionModCallback(addon, callback)
 			para = { addon, },
 		};
 	end
-	__namespace__:AddAddOnCallback(addon, callback);
+	__private:AddAddOnCallback(addon, callback);
 end
-function __namespace__.init_auctionmod()
-	SET = __namespace__.SET;
+function __private.init_auctionmod()
+	SET = __private.SET;
 end

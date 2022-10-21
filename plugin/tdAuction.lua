@@ -2,7 +2,7 @@
 	by ALA @ 163UI
 --]]--
 
-local __addon__, __namespace__ = ...;
+local __addon, __private = ...;
 
 -->		upvalue
 	local GetItemInfo = GetItemInfo;
@@ -13,7 +13,7 @@ local PLAYER_REALM_NAME = GetRealmName();
 
 
 -->		****
-__namespace__:BuildEnv("Auctioneer");
+__private:BuildEnv("Auctioneer");
 -->		****
 
 
@@ -44,6 +44,6 @@ function mod.F_QueryPriceByID(id, num)
 end
 
 
-__namespace__.F_AuctionModCallback("tdAuction", function()
-	__namespace__.F_AddAuctionMod("tdAuction", mod);
+__private.F_AuctionModCallback("tdAuction", function()
+	__private.F_AddAuctionMod("tdAuction", mod);
 end);

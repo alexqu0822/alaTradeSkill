@@ -2,8 +2,8 @@
 	by ALA @ 163UI
 --]]--
 
-local __addon__, __namespace__ = ...;
-local __db__ = __namespace__.__db__;
+local __addon, __private = ...;
+local __db__ = __private.__db__;
 
 -->		upvalue
 	local tonumber = tonumber;
@@ -54,7 +54,7 @@ local PLAYER_REALM_NAME = GetRealmName();
 local PLAYER_GUID = UnitGUID('player');
 local PLAYER_NAME = UnitName('player');
 
-local _noop_, _log_, _error_ = __namespace__._noop_, __namespace__._log_, __namespace__._error_;
+local _noop_, _log_, _error_ = __private._noop_, __private._log_, __private._error_;
 
 
 local AVAR, VAR, CMM = nil, nil, nil, nil, nil;
@@ -67,7 +67,7 @@ end);
 
 
 -->		****************
-__namespace__:BuildEnv("communication");
+__private:BuildEnv("communication");
 -->		****************
 
 
@@ -239,7 +239,7 @@ function F.CHAT_MSG_ADDON(prefix, msg, channel, sender, target, zoneChannelID, l
 							end
 						end
 						if ok then
-							local link = cid and (__db__.item_link_s(cid)) or __namespace__.F_GetSkillLink(sid);
+							local link = cid and (__db__.item_link_s(cid)) or __private.F_GetSkillLink(sid);
 							if link then
 								print(link, output);
 							end
@@ -257,7 +257,7 @@ function F.CHAT_MSG_ADDON(prefix, msg, channel, sender, target, zoneChannelID, l
 end
 F.CHAT_MSG_ADDON_LOGGED = F.CHAT_MSG_ADDON;
 
-function __namespace__.F_cmmQuerySpell(sid)
+function __private.F_cmmQuerySpell(sid)
 	local t = GetServerTime();
 	if IsInGuild() then
 		SendAddonMessage(ADDON_PREFIX, ADDON_MSG_QUERY_RECIPE .. "#" .. sid, "GUILD");
@@ -277,8 +277,8 @@ local function LF_cmmBroadcast(pid, list, channel, target)
 	T_QueuedMessageGuild[#T_QueuedMessageGuild + 1] = ADDON_MSG_BROADCAST_END .. "#" .. pid;
 end
 
-function __namespace__.init_communication()
-	AVAR, VAR, CMM = __namespace__.AVAR, __namespace__.VAR, __namespace__.CMM;
+function __private.init_communication()
+	AVAR, VAR, CMM = __private.AVAR, __private.VAR, __private.CMM;
 	if RegisterAddonMessagePrefix(ADDON_PREFIX) then
 		F:RegisterEvent("CHAT_MSG_ADDON");
 		F:RegisterEvent("CHAT_MSG_ADDON_LOGGED");

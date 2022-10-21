@@ -2,8 +2,8 @@
 	by ALA @ 163UI
 --]]--
 
-local __addon__, __namespace__ = ...;
-local __db__ = __namespace__.__db__;
+local __addon, __private = ...;
+local __db__ = __private.__db__;
 
 -->		upvalue
 	local rawget = rawget;
@@ -28,7 +28,7 @@ end);
 
 
 -->		****************
-__namespace__:BuildEnv("cooldown");
+__private:BuildEnv("cooldown");
 -->		****
 
 
@@ -80,8 +80,8 @@ function F.BAG_UPDATE_COOLDOWN(...)
 	end
 end
 
-__namespace__.F_CheckCooldown = F_CheckCooldown;
-function __namespace__.init_cooldown()
-	VAR = __namespace__.VAR;
+__private.F_CheckCooldown = F_CheckCooldown;
+function __private.init_cooldown()
+	VAR = __private.VAR;
 	F:RegisterEvent("BAG_UPDATE_COOLDOWN");
 end

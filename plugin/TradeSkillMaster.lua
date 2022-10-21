@@ -2,7 +2,7 @@
 	by ALA @ 163UI
 --]]--
 
-local __addon__, __namespace__ = ...;
+local __addon, __private = ...;
 
 -->		upvalue
 	local GetItemInfo = GetItemInfo;
@@ -10,7 +10,7 @@ local __addon__, __namespace__ = ...;
 
 
 -->		****
-__namespace__:BuildEnv("TradeSkillMaster");
+__private:BuildEnv("TradeSkillMaster");
 -->		****
 
 
@@ -38,6 +38,6 @@ function mod.F_QueryPriceByID(id, num)
 end
 
 
-__namespace__.F_AuctionModCallback("TradeSkillMaster", function()
-	__namespace__.F_AddAuctionMod("TradeSkillMaster", mod);
+__private.F_AuctionModCallback("TradeSkillMaster", function()
+	__private.F_AddAuctionMod("TradeSkillMaster", mod);
 end);

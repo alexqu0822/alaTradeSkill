@@ -2,9 +2,9 @@
 	by ALA @ 163UI
 --]]--
 
-local __addon__, __namespace__ = ...;
-local __db__ = __namespace__.__db__;
-local L = __namespace__.L;
+local __addon, __private = ...;
+local __db__ = __private.__db__;
+local L = __private.L;
 
 -->		upvalue
 	local next = next;
@@ -42,7 +42,7 @@ local PLAYER_RACE, PLAYER_RACE_FILE, PLAYER_RACE_ID = UnitRace('player');
 local LOCALE = GetLocale();
 local PATCHVERSION, BUILDNUMBER, BUILDDATE, TOCVERSION = GetBuildInfo();
 
-local _noop_, _log_, _error_ = __namespace__._noop_, __namespace__._log_, __namespace__._error_;
+local _noop_, _log_, _error_ = __private._noop_, __private._log_, __private._error_;
 
 
 ---->	index
@@ -102,7 +102,7 @@ end
 
 
 -->		****************
-__namespace__:BuildEnv("db");
+__private:BuildEnv("db");
 -->		****************
 
 
@@ -226,7 +226,7 @@ local function LF_CacheItem(iid)
 end
 -->		preload
 local _SPre, _IPre = 0, 0;		--	dev
-if __namespace__.__is_dev then
+if __private.__is_dev then
 	local _RequestLoadSpellData = RequestLoadSpellData;
 	RequestLoadSpellData = function(...)
 		_SPre = _SPre + 1;
@@ -358,10 +358,10 @@ local function LF_PreloadSpell()
 			return;
 		end
 	end
-	__namespace__:FireEvent("USER_EVENT_SPELL_DATA_LOADED");
+	__private:FireEvent("USER_EVENT_SPELL_DATA_LOADED");
 	LB_PreloadSpellFinished = true;
 	if LB_PreloadItemFinished then
-		__namespace__:FireEvent("USER_EVENT_DATA_LOADED");
+		__private:FireEvent("USER_EVENT_DATA_LOADED");
 	end
 end
 
@@ -433,10 +433,10 @@ local function LF_PreloadItem()
 			return;
 		end
 	end
-	__namespace__:FireEvent("USER_EVENT_ITEM_DATA_LOADED");
+	__private:FireEvent("USER_EVENT_ITEM_DATA_LOADED");
 	LB_PreloadItemFinished = true;
 	if LB_PreloadSpellFinished then
-		__namespace__:FireEvent("USER_EVENT_DATA_LOADED");
+		__private:FireEvent("USER_EVENT_DATA_LOADED");
 	end
 end
 --
@@ -464,7 +464,7 @@ function F.LEARNED_SPELL_IN_TAB(id, tab, isGuild)
 	local pid = T_TradeSkill_Spec2Pid[id];
 	if pid ~= nil and T_IsSpecLearned[id] ~= true then
 		T_IsSpecLearned[id] = true;
-		__namespace__.F_uiMarkToUpdate(pid);
+		__private.F_uiMarkToUpdate(pid);
 	end
 end
 function F.SPELLS_CHANGED()
@@ -472,11 +472,11 @@ function F.SPELLS_CHANGED()
 		local val = IsSpellKnown(spec) and true or nil;
 		if T_IsSpecLearned[spec] ~= val then
 			T_IsSpecLearned[spec] = val;
-			__namespace__.F_uiMarkToUpdate(pid);
+			__private.F_uiMarkToUpdate(pid);
 		end
 	end
 end
-__namespace__:AddCallback("USER_EVENT_DATA_LOADED", function()
+__private:AddCallback("USER_EVENT_DATA_LOADED", function()
 	if LB_PreloadSpellFinished and LB_PreloadItemFinished then
 		for pid = __db__.DBMINPID, __db__.DBMAXPID do
 			local n1, n2 = T_TradeSkill_Name[pid], T_TradeSkill_CheckName[pid];
@@ -485,7 +485,7 @@ __namespace__:AddCallback("USER_EVENT_DATA_LOADED", function()
 				T_TradeSkill_SameSkillName[n2] = n1;
 			end
 		end
-		if __namespace__.__is_dev then
+		if __private.__is_dev then
 			_error_("Preload", _SPre, _IPre);
 		end
 	end
@@ -1449,7 +1449,7 @@ function __db__.get_ordered_list(pid, list, check_hash, phase, rank, rankOffset,
 end
 -->
 
-function __namespace__.init_db()
+function __private.init_db()
 	for pid = __db__.DBMINPID, __db__.DBMAXPID do
 		local list = T_TradeSkill_RecipeList[pid];
 		if list ~= nil then
@@ -1546,7 +1546,7 @@ function __namespace__.init_db()
 			T_Recipe_Data[sid] = nil;
 		end
 	end
-	local CACHE = __namespace__.CACHE;
+	local CACHE = __private.CACHE;
 	local cache = CACHE[LOCALE];
 	if cache == nil or cache.__WoWVersion == nil or cache.__WoWVersion < TOCVERSION or cache.__DataVersion == nil or cache.__DataVersion < __db__.__DataVersion then
 		cache = { S = T_SpellData, I = T_ItemData, };

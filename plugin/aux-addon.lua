@@ -2,7 +2,7 @@
 	by ALA @ 163UI
 --]]--
 
-local __addon__, __namespace__ = ...;
+local __addon, __private = ...;
 
 -->		upvalue
 	local strsplit = string.split;
@@ -13,7 +13,7 @@ local __addon__, __namespace__ = ...;
 
 
 -->		****
-__namespace__:BuildEnv("aux-addon");
+__private:BuildEnv("aux-addon");
 -->		****
 
 
@@ -61,6 +61,6 @@ function mod.F_QueryPriceByID(id, num)
 end
 
 
-__namespace__.F_AuctionModCallback("aux-addon", function()
-	__namespace__.F_AddAuctionMod("aux-addon", mod);
+__private.F_AuctionModCallback("aux-addon", function()
+	__private.F_AddAuctionMod("aux-addon", mod);
 end);

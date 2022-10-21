@@ -6,7 +6,7 @@ if GetLocale() ~= "koKR" then
 	return;
 end
 
-local __addon__, __namespace__ = ...;
+local __addon, __private = ...;
 
 -->	fix for ptr
 	local LE_ITEM_CLASS_CONSUMABLE = LE_ITEM_CLASS_CONSUMABLE or 0;
@@ -106,7 +106,7 @@ local __addon__, __namespace__ = ...;
 local L = {
 	extra_skill_name = {  },
 };
-__namespace__.L = L;
+__private.L = L;
 
 --
 L["OK"] = "OK";

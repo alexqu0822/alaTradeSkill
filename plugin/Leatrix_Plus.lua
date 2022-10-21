@@ -2,18 +2,18 @@
 	by ALA @ 163UI
 --]]--
 
-local __addon__, __namespace__ = ...;
+local __addon, __private = ...;
 
 
 -->		****
-__namespace__:BuildEnv("Leatrix_Plus");
+__private:BuildEnv("Leatrix_Plus");
 -->		****
 
 
-__namespace__:AddAddOnCallback("Leatrix_Plus", function()
+__private:AddAddOnCallback("Leatrix_Plus", function()
 	if LeaPlusDB ~= nil then
 		LeaPlusDB["EnhanceProfessions"] = "Off";
 	end
-	__namespace__.F_uiFrameFixSkillList();
+	__private.F_uiFrameFixSkillList();
 end);
 

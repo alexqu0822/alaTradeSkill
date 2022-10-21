@@ -2,7 +2,7 @@
 	by ALA @ 163UI
 --]]--
 
-local __addon__, __namespace__ = ...;
+local __addon, __private = ...;
 
 -->		upvalue
 	local GetItemInfo = GetItemInfo;
@@ -10,7 +10,7 @@ local __addon__, __namespace__ = ...;
 
 
 -->		****
-__namespace__:BuildEnv("Auctioneer");
+__private:BuildEnv("Auctioneer");
 -->		****
 
 
@@ -46,6 +46,6 @@ function mod.F_QueryPriceByID(id, num)
 end
 
 
-__namespace__.F_AuctionModCallback("Auc-Advanced", function()
-	__namespace__.F_AddAuctionMod("Auc-Advanced", mod);
+__private.F_AuctionModCallback("Auc-Advanced", function()
+	__private.F_AddAuctionMod("Auc-Advanced", mod);
 end);

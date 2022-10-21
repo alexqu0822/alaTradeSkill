@@ -2,18 +2,18 @@
 	by ALA @ 163UI
 --]]--
 
-local __addon__, __namespace__ = ...;
-local __db__ = __namespace__.__db__;
-local L = __namespace__.L;
+local __addon, __private = ...;
+local __db__ = __private.__db__;
+local L = __private.L;
 
 
 local CURPHASE = __db__.CURPHASE;
 local LOCALE = GetLocale();
-local T_uiFrames = __namespace__.T_uiFrames;
+local T_uiFrames = __private.T_uiFrames;
 
 
 -->		****
-__namespace__:BuildEnv("external");
+__private:BuildEnv("external");
 -->		****
 
 do	--	supreme craft
@@ -31,7 +31,7 @@ do	--	supreme craft
 		UNIT_SPELLCAST_INTERRUPTED: unitTarget, castGUID, spellID
 		UNIT_SPELLCAST_INTERRUPTED: unitTarget, castGUID, spellID
 	]==]
-		function __namespace__.ui_supremeListButton_OnEnter(self)
+		function __private.ui_supremeListButton_OnEnter(self)
 			local frame = self.frame;
 			local sid = self.list[self:GetDataIndex()];
 			if type(sid) == 'table' then
@@ -91,15 +91,15 @@ do	--	supreme craft
 					data = data and data[PLAYER_GUID];
 				end
 				if not data then
-					__namespace__.ui_set_tooltip_mtsl(sid);
+					__private.ui_set_tooltip_mtsl(sid);
 				end
 			end
 		end
-		function __namespace__.ui_supremeListButton_OnLeave(self)
+		function __private.ui_supremeListButton_OnLeave(self)
 			mouse_focus_sid = nil;
 			button_info_OnLeave(self);
 		end
-		function __namespace__.ui_supremeListButton_OnClick(self, button)
+		function __private.ui_supremeListButton_OnClick(self, button)
 			local frame = self.frame;
 			local sid = self.list[self:GetDataIndex()];
 			if type(sid) == 'table' then
@@ -108,7 +108,7 @@ do	--	supreme craft
 			local data = frame.hash[sid];
 			if button == "LeftButton" then
 				if IsShiftKeyDown() then
-					__namespace__.F_HandleShiftClick(self.flag or __db__.get_pid_by_sid(sid), sid);
+					__private.F_HandleShiftClick(self.flag or __db__.get_pid_by_sid(sid), sid);
 				elseif IsAltKeyDown() then
 					local text1 = nil;
 					local text2 = nil;
@@ -211,7 +211,7 @@ do	--	supreme craft
 				ALADROP(self, "BOTTOMLEFT", list_drop_meta);
 			end
 		end
-		function __namespace__.ui_CreateSupremeListButton(parent, index, buttonHeight)
+		function __private.ui_CreateSupremeListButton(parent, index, buttonHeight)
 			local frame = parent:GetParent():GetParent();
 
 			local button = CreateFrame("BUTTON", nil, parent);
@@ -227,7 +227,7 @@ do	--	supreme craft
 			local del = CreateFrame("BUTTON", nil, button);
 			del:SetSize(buttonHeight / 2, buttonHeight / 2);
 			del:SetPoint("LEFT", 4, 0);
-			__namespace__.ui_ModernButton(del, nil, ui_style.texture_modern_button_close);
+			__private.ui_ModernButton(del, nil, ui_style.texture_modern_button_close);
 			del:SetScript("OnClick", frame.del);
 			button.del = del;
 
@@ -273,14 +273,14 @@ do	--	supreme craft
 			local up = CreateFrame("BUTTON", nil, button);
 			up:SetSize(buttonHeight / 2 - 3, buttonHeight / 2 - 3);
 			up:SetPoint("TOPRIGHT", -4, -2);
-			__namespace__.ui_ModernButton(up, nil, ui_style.texture_modern_arrow_up);
+			__private.ui_ModernButton(up, nil, ui_style.texture_modern_arrow_up);
 			up:SetScript("OnClick", frame.change_order_up);
 			button.up = up;
 
 			local down = CreateFrame("BUTTON", nil, button);
 			down:SetSize(buttonHeight / 2 - 3, buttonHeight / 2 - 3);
 			down:SetPoint("BOTTOMRIGHT", -4, 2);
-			__namespace__.ui_ModernButton(down, nil, ui_style.texture_modern_arrow_down);
+			__private.ui_ModernButton(down, nil, ui_style.texture_modern_arrow_down);
 			down:SetScript("OnClick", frame.change_order_down);
 			button.down = down;
 
@@ -294,10 +294,10 @@ do	--	supreme craft
 			quality_glow:Show();
 			button.quality_glow = quality_glow;
 
-			button:SetScript("OnEnter", __namespace__.ui_supremeListButton_OnEnter);
-			button:SetScript("OnLeave", __namespace__.ui_supremeListButton_OnLeave);
+			button:SetScript("OnEnter", __private.ui_supremeListButton_OnEnter);
+			button:SetScript("OnLeave", __private.ui_supremeListButton_OnLeave);
 			button:RegisterForClicks("AnyUp");
-			button:SetScript("OnClick", __namespace__.ui_supremeListButton_OnClick);
+			button:SetScript("OnClick", __private.ui_supremeListButton_OnClick);
 			button:RegisterForDrag("LeftButton");
 			button:SetScript("OnHide", ALADROP);
 
@@ -305,7 +305,7 @@ do	--	supreme craft
 
 			return button;
 		end
-		function __namespace__.ui_SetSupremeListButton(button, data_index)
+		function __private.ui_SetSupremeListButton(button, data_index)
 			local frame = button.frame;
 			local list = frame.list;
 			local hash = frame.hash;
@@ -398,7 +398,7 @@ do	--	supreme craft
 						button:Deselect();
 					end
 					if GetMouseFocus() == button then
-						__namespace__.ui_skillListButton_OnEnter(button);
+						__private.ui_skillListButton_OnEnter(button);
 					end
 					if button.prev_sid ~= sid then
 						ALADROP(button);
@@ -444,10 +444,10 @@ do	--	supreme craft
 			supreme.frame = hooked_frame.frame;
 			hooked_frame.supreme = supreme;
 
-			local scroll = ALASCR(supreme, nil, nil, ui_style.supremeListButtonHeight, __namespace__.ui_CreateSupremeListButton, __namespace__.ui_SetSupremeListButton);
+			local scroll = ALASCR(supreme, nil, nil, ui_style.supremeListButtonHeight, __private.ui_CreateSupremeListButton, __private.ui_SetSupremeListButton);
 			scroll:SetPoint("BOTTOMLEFT", 4, 0);
 			scroll:SetPoint("TOPRIGHT", - 4, - 28);
-			__namespace__.ui_ModifyALAScrollFrame(scroll);
+			__private.ui_ModifyALAScrollFrame(scroll);
 			supreme.scroll = scroll;
 
 			local call = CreateFrame("BUTTON", nil, hooked_frame, "UIPanelButtonTemplate");
