@@ -1,19 +1,20 @@
 --[[--
 	by ALA @ 163UI
 --]]--
-
+----------------------------------------------------------------------------------------------------
 local __addon, __private = ...;
+local MT = __private.MT;
+local CT = __private.CT;
+local VT = __private.VT;
+local DT = __private.DT;
+
 
 -->		upvalue
 	local GetItemInfo = GetItemInfo;
 -->
 
-
-local PLAYER_REALM_NAME = GetRealmName();
-
-
 -->		****
-__private:BuildEnv("Auctioneer");
+MT.BuildEnv("Auctioneer");
 -->		****
 
 
@@ -31,8 +32,8 @@ function mod.F_QueryPriceByID(id, num)
 		if TDDB_AUCTION ~= nil
 			and TDDB_AUCTION.global ~= nil
 			and TDDB_AUCTION.global.prices ~= nil
-			and TDDB_AUCTION.global.prices[PLAYER_REALM_NAME] ~= nil then
-			prices = TDDB_AUCTION.global.prices[PLAYER_REALM_NAME];
+			and TDDB_AUCTION.global.prices[CT.SELFREALM] ~= nil then
+			prices = TDDB_AUCTION.global.prices[CT.SELFREALM];
 		else
 			return;
 		end
@@ -44,6 +45,6 @@ function mod.F_QueryPriceByID(id, num)
 end
 
 
-__private.F_AuctionModCallback("tdAuction", function()
-	__private.F_AddAuctionMod("tdAuction", mod);
+MT.RegsiterAuctionModOnLoad("tdAuction", function()
+	MT.AddAuctionMod("tdAuction", mod);
 end);

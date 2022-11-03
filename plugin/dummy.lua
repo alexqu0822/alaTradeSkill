@@ -6,22 +6,27 @@
 --	Howto
 --[==[
 	local __addon, __private = ...;
+	local MT = __private.MT;
+	local CT = __private.CT;
+	local VT = __private.VT;
+	local DT = __private.DT;
+
 
 	local mod = {  };
 	--****	Define methods.
 
-	__private:AddAddOnCallback(ADDON_NAME, function()
+	MT.RegisterOnAddOnLoaded(ADDON_NAME, function()
 		--****	Define other methods of mod. Those to do after addon loaded. (hot-plug)
-		__private:FireEvent("AUCTION_MOD_LOADED", mod);
+		MT.FireCallback("AUCTION_MOD_LOADED", mod);
 	end);
 --]==]
 
 --[==[
-	__private:FireEvent("USER_EVENT_SPELL_DATA_LOADED");	--	Fire when data of all spells is cached.
-	__private:FireEvent("USER_EVENT_ITEM_DATA_LOADED");		--	Fire when data of all items is cached.
-	__private:FireEvent("USER_EVENT_RECIPE_LIST_UPDATE");	--	Fire when skill list updated or changed.
+	MT.FireCallback("USER_EVENT_SPELL_DATA_LOADED");	--	Fire when data of all spells is cached.
+	MT.FireCallback("USER_EVENT_ITEM_DATA_LOADED");		--	Fire when data of all items is cached.
+	MT.FireCallback("USER_EVENT_RECIPE_LIST_UPDATE");	--	Fire when skill list updated or changed.
 
-	__private:FireEvent(
+	MT.FireCallback(
 		"AUCTION_MOD_LOADED",
 		{
 		--	must
@@ -52,13 +57,13 @@
 			alias	query_quality_by_id
 		}
 	);
-	__private:FireEvent(
+	MT.FireCallback(
 		"UI_MOD_LOADED",
 		{
 			function Skin(addon, frame),
 		}
 	);
-	__private:FireEvent(
+	MT.FireCallback(
 		"RECIPESOURCE_MOD_LOADED",
 		{
 			function Tip(Tip, SpellID),

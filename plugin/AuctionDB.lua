@@ -1,8 +1,13 @@
 --[[--
 	by ALA @ 163UI
 --]]--
-
+----------------------------------------------------------------------------------------------------
 local __addon, __private = ...;
+local MT = __private.MT;
+local CT = __private.CT;
+local VT = __private.VT;
+local DT = __private.DT;
+
 
 -->		upvalue
 	local GetItemInfo = GetItemInfo;
@@ -10,7 +15,7 @@ local __addon, __private = ...;
 
 
 -->		****
-__private:BuildEnv("AuctionDB");
+MT.BuildEnv("AuctionDB");
 -->		****
 
 
@@ -41,6 +46,6 @@ function mod.F_QueryPriceByID(id, num)
 end
 
 
-__private.F_AuctionModCallback("AuctionDB", function()
-	__private.F_AddAuctionMod("AuctionDB", mod);
+MT.RegsiterAuctionModOnLoad("AuctionDB", function()
+	MT.AddAuctionMod("AuctionDB", mod);
 end);
