@@ -361,7 +361,7 @@ end
 				if VT.SET.show_call then
 					Frame.ToggleButton:Show();
 				end
-				if CT.ISWLK then
+				if CT.VGT3X then
 					if pid == 10 then
 						Frame.FilterDropdown:Show();
 					else
@@ -813,7 +813,7 @@ end
 			ptex = ptex or Button:SetPushedTexture(T_UIDefinition.texture_unk) or Button:GetPushedTexture();
 			htex = htex or Button:SetHighlightTexture(T_UIDefinition.texture_unk) or Button:GetHighlightTexture();
 			dtex = dtex or Button:SetDisabledTexture(T_UIDefinition.texture_unk) or Button:GetDisabledTexture();
-			if texture then
+			if texture ~= nil then
 				VT.__uireimp._SetSimpleBackdrop(Button, 0, 1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
 				Button:SetNormalTexture(texture);
 				Button:SetPushedTexture(texture);
@@ -846,18 +846,34 @@ end
 			if Button.Right then
 				Button.Right:SetAlpha(1.0);
 			end
-			if bak then
-				Button:SetNormalTexture(bak[1]);
-				Button:SetPushedTexture(bak[2]);
-				Button:SetHighlightTexture(bak[3]);
-				Button:SetDisabledTexture(bak[4]);
+			if bak ~= nil then
+				if bak[1] ~= nil then
+					Button:SetNormalTexture(bak[1]);
+				else
+					Button:ClearNormalTexture();
+				end
+				if bak[2] ~= nil then
+					Button:SetPushedTexture(bak[2]);
+				else
+					Button:ClearPushedTexture();
+				end
+				if bak[3] ~= nil then
+					Button:SetHighlightTexture(bak[3]);
+				else
+					Button:ClearHighlightTexture();
+				end
+				if bak[4] ~= nil then
+					Button:SetDisabledTexture(bak[4]);
+				else
+					Button:ClearDisabledTexture();
+				end
 			end
-			VT.__uireimp._SetSimpleBackdrop(Button, 0, 1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
-			Button:SetPushedTextOffset(1.55, -1.55);
 			local ntex = Button:GetNormalTexture();
 			local ptex = Button:GetPushedTexture();
 			local htex = Button:GetHighlightTexture();
 			local dtex = Button:GetDisabledTexture();
+			VT.__uireimp._SetSimpleBackdrop(Button, 0, 1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+			Button:SetPushedTextOffset(1.55, -1.55);
 			if ntex then ntex:SetVertexColor(1.0, 1.0, 1.0, 1.0); end
 			if ptex then ptex:SetVertexColor(1.0, 1.0, 1.0, 1.0); end
 			if htex then htex:SetVertexColor(1.0, 1.0, 1.0, 1.0); end
@@ -1069,6 +1085,10 @@ end
 					self:_SetNormalTexture(tex);
 					self:_SetHighlightTexture(tex);
 				end,
+				_ClearNormalTexture = function(self)
+					self:_ClearNormalTexture();
+					self:ClearHighlightTexture();
+				end,
 				_SetPushedTexture = function(self, tex)
 					self:_SetPushedTexture(SkillButton_TextureHash[tex] or tex);
 				end,
@@ -1087,6 +1107,8 @@ end
 				NormalTexture._SetTexture = NormalTexture._SetTexture or NormalTexture.SetTexture;
 				NormalTexture.SetTexture = SetTextureReplaced._SetTexture;
 			end
+			Button._ClearNormalTexture = Button._ClearNormalTexture or Button.ClearNormalTexture;
+			Button.ClearNormalTexture = SetTextureReplaced._ClearNormalTexture;
 			--
 			Button._SetPushedTexture = Button._SetPushedTexture or Button.SetPushedTexture;
 			Button.SetPushedTexture = SetTextureReplaced._SetPushedTexture;
@@ -3470,13 +3492,13 @@ local function LF_AddOnCallback_Blizzard_TradeSkillUI(addon)
 			SetTradeSkillSubClassFilter(0, 1, 1);
 			UIDropDownMenu_SetSelectedID(TradeSkillSubClassDropDown, 1);
 			SetTradeSkillInvSlotFilter(0, 1, 1);
-			if CT.ISBCC or CT.ISWLK then
+			if CT.VGT2X then
 				SetTradeSkillItemNameFilter(nil);
 				SetTradeSkillItemLevelFilter(0, 0);
 			end
 			UIDropDownMenu_SetSelectedID(TradeSkillInvSlotDropDown, 1);
 			ExpandTradeSkillSubClass(0);
-			if CT.ISBCC or CT.ISWLK then
+			if CT.VGT2X then
 				TradeSkillFrameAvailableFilterCheckButton:SetChecked(false);
 			end
 			if TradeSkillCollapseAllButton ~= nil then
@@ -3494,8 +3516,8 @@ local function LF_AddOnCallback_Blizzard_TradeSkillUI(addon)
 		F_GetRecipeNumAvailable = GetNumTradeSkills,
 		F_GetRecipeInfo = GetTradeSkillInfo,
 			--	skillName, difficult & header, numAvailable, isExpanded = GetTradeSkillInfo(skillIndex)
-		F_GetRecipeSpellID = CT.ISWLK and function(arg1) local link = GetTradeSkillRecipeLink(arg1); return link and tonumber(strmatch(link, "[a-zA-Z]:(%d+)")) or nil; end or nil,
-		F_GetRecipeSpellLink = CT.ISWLK and GetTradeSkillRecipeLink or nil;
+		F_GetRecipeSpellID = CT.VGT3X and function(arg1) local link = GetTradeSkillRecipeLink(arg1); return link and tonumber(strmatch(link, "[a-zA-Z]:(%d+)")) or nil; end or nil,
+		F_GetRecipeSpellLink = CT.VGT3X and GetTradeSkillRecipeLink or nil;
 		F_GetRecipeItemID = function(arg1) local link = GetTradeSkillItemLink(arg1); return link and tonumber(strmatch(link, "[a-zA-Z]:(%d+)")) or nil; end,
 		F_GetRecipeItemLink = GetTradeSkillItemLink,
 		F_GetRecipeIcon = GetTradeSkillIcon,
@@ -3519,7 +3541,7 @@ local function LF_AddOnCallback_Blizzard_TradeSkillUI(addon)
 		},
 
 		F_WithDisabledFrame = function(self, func)
-			if CT.ISBCC or CT.ISWLK then
+			if CT.VGT2X then
 				func(TradeSkillFrameAvailableFilterCheckButton);
 				func(TradeSearchInputBox);
 				TradeSearchInputBox:ClearFocus();
@@ -3552,14 +3574,14 @@ local function LF_AddOnCallback_Blizzard_TradeSkillUI(addon)
 	local Frame = LF_HookFrame(addon, meta);
 	VT.UIFrames[addon] = Frame;
 	--
-	if CT.ISBCC or CT.ISWLK then
+	if CT.VGT2X then
 		TradeSkillFrameAvailableFilterCheckButton:ClearAllPoints();
 		TradeSkillFrameAvailableFilterCheckButton:SetPoint("TOPLEFT", TradeSkillFrame, "TOPLEFT", 68, -56);
 	end
 	TradeSkillExpandButtonFrame:Hide();
 	--
-	if CT.ISWLK then
-	local ENCHANT_FILTER = l10n.ENCHANT_FILTER;
+	if CT.VGT3X then
+		local ENCHANT_FILTER = l10n.ENCHANT_FILTER;
 	--	Dropdown Filter
 		local T_TradeSkillFrameFilterMeta = {
 			handler = function(_, _, key)
@@ -3793,7 +3815,7 @@ local function LF_AddOnCallback_Blizzard_CraftUI(addon)
 		F_GetSelection = GetCraftSelectionIndex,
 		-- expand = ExpandCraftSkillLine,
 		-- collapse = CollapseCraftSkillLine,
-		F_ClearFilter = (CT.ISBCC or CT.ISWLK) and function()
+		F_ClearFilter = CT.VGT2X and function()
 			CraftOnlyShowMakeable(false);
 			CraftFrameAvailableFilterCheckButton:SetChecked(false);
 			SetCraftFilter(1);
@@ -3810,7 +3832,7 @@ local function LF_AddOnCallback_Blizzard_CraftUI(addon)
 		F_GetRecipeNumAvailable = GetNumCrafts,
 		F_GetRecipeInfo = function(arg1) local _1, _2, _3, _4, _5, _6, _7 = GetCraftInfo(arg1); return _1, _3, _4, _5, _6, _7; end,
 			--	craftName, craftSubSpellName(""), difficult, numAvailable, isExpanded, trainingPointCost, requiredLevel = GetCraftInfo(index)
-		F_GetRecipeSpellID = CT.ISWLK and function(arg1) local link = GetCraftRecipeLink(arg1); return link and tonumber(strmatch(link, "[a-zA-Z]:(%d+)")) or nil; end or nil,
+		F_GetRecipeSpellID = CT.VGT3X and function(arg1) local link = GetCraftRecipeLink(arg1); return link and tonumber(strmatch(link, "[a-zA-Z]:(%d+)")) or nil; end or nil,
 		F_GetRecipeItemID = function(arg1) local link = GetCraftItemLink(arg1); return link and tonumber(strmatch(link, "[a-zA-Z]:(%d+)")) or nil; end,
 		F_GetRecipeItemLink = GetCraftItemLink,
 		F_GetRecipeIcon = GetCraftIcon,
@@ -3833,7 +3855,7 @@ local function LF_AddOnCallback_Blizzard_CraftUI(addon)
 		},
 
 		F_WithDisabledFrame = function(self, func)
-			if CT.ISBCC or CT.ISWLK then
+			if CT.VGT2X then
 				func(CraftFrameAvailableFilterCheckButton);
 				func(CraftFrameFilterDropDown);
 			end
@@ -3860,7 +3882,7 @@ local function LF_AddOnCallback_Blizzard_CraftUI(addon)
 	local Frame = LF_HookFrame(addon, meta);
 	VT.UIFrames[addon] = Frame;
 	--
-	if CT.ISBCC or CT.ISWLK then
+	if CT.VGT2X then
 		CraftFrameAvailableFilterCheckButton:ClearAllPoints();
 		CraftFrameAvailableFilterCheckButton:SetPoint("TOPLEFT", CraftFrame, "TOPLEFT", 68, -56);
 		CraftFrameAvailableFilterCheckButton:SetSize(20, 20);
@@ -5862,7 +5884,7 @@ MT.RegisterOnInit('ui', function(LoggedIn)
 	end);
 	MT.AddCallback("USER_EVENT_RECIPE_LIST_UPDATE", MT.UpdateAllFrames);
 	MT.RegisterOnAddOnLoaded("BLIZZARD_TRADESKILLUI", LF_AddOnCallback_Blizzard_TradeSkillUI);
-	if not CT.ISWLK then
+	if not CT.VG3X then
 		MT.RegisterOnAddOnLoaded("BLIZZARD_CRAFTUI", LF_AddOnCallback_Blizzard_CraftUI);
 	end
 end);
