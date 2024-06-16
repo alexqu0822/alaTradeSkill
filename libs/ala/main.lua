@@ -319,9 +319,9 @@ local function dev()
 			Cur = 0;
 			for index = 1, Cur do
 				local Line = Lines[index];
-				Line[1]:SetText(nil);
-				Line[2]:SetText(nil);
-				Line[3]:SetText(nil);
+				Line[1]:SetText("");
+				Line[2]:SetText("");
+				Line[3]:SetText("");
 			end
 		end
 		function DisplayPanel:Render()
