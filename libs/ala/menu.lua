@@ -5,30 +5,35 @@
 	ALAMENU = __menulib.ShowMenu
 	ALAMENU(parent, anchor, data, param, useMousePosition)
 	data
-			handler		(function)
-			param		(any)
+			handler		(function(Button, param1, param2))
+			param		(any)																	@param1
 			num			(number)
-			__onshowprepend	[optional]
-			__onshowappend	[optional]
-			__onhide		[optional]
-			__buttononshow	[optional]
-			__buttononhide	[optional]
-			__buttononenter	[optional]
-			__buttononleave	[optional]
+			__onshowprepend	(Menu, param1)[optional]
+			__onshowappend	(Menu, param1)[optional]
+			__onhide		(Menu, param1)[optional]
+			__buttononshow	(Button, param1, param2)[optional]
+			__buttononhide	(Button, param1, param2)[optional]
+			__buttononenter	(Button, param1, param2)[optional]
+			__buttononleave	(Button, param1, param2)[optional]
 			[]{
-										handler		(function)[optional]
-										param		(any)parameter
+										handler		(function(self, param1, param2))[optional]
+										param		(any)parameter								@param2
 										text		(string)
 										--info		(string)
 										show/hide
-										__onshow	[optional]
-										__onhide	[optional]
-										__onenter	[optional]
-										__onleave	[optional]
+										__onshow	(Button, param1, param2)[optional]
+										__onhide	(Button, param1, param2)[optional]
+										__onenter	(Button, param1, param2)[optional]
+										__onleave	(Button, param1, param2)[optional]
 			}
+	--
+	Button.__onshow(Button, param1, param2) = ele.__onshow or data.__buttononshow
+	Button.__onhide(Button, param1, param2) = ele.__onhide or data.__buttononhide
+	Button.__onenter(Button, param1, param2) = ele.__onenter or data. __buttononenter
+	Button.__onleave(Button, param1, param2) = ele.__onleave or data.__buttononleave
 ]=]
 
-local __version = 240501.0;
+local __version = 240601.0;
 
 local _G = _G;
 _G.__ala_meta__ = _G.__ala_meta__ or {  };
@@ -330,6 +335,7 @@ local uireimp = __ala_meta__.uireimp;
 		if type(data) ~= "table" or data[1] == nil then
 			return;
 		end
+		param = param or data.param;
 		Menu = GetMenu(parent, anchor, useMousePosition, sideJustified);
 		Menu.meta = data;
 		Menu.handler = data.handler;
