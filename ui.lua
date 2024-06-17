@@ -190,9 +190,9 @@ local T_UIDefinition = {
 	listButtonHighlightColor = { 0.5, 0.5, 0.75, 0.25, },
 	listButtonSelectedColor = { 0.5, 0.5, 0.5, 0.25, },
 
-	frameFont = SystemFont_Shadow_Med1:GetFont(),	--	"Fonts\ARKai_T.ttf"
-	frameFontSize = min(select(2, SystemFont_Shadow_Med1:GetFont()) + 1, 15),
-	frameFontOutline = "",
+	frameNormalFont = SystemFont_Shadow_Med1:GetFont(),	--	"Fonts\ARKai_T.ttf"
+	frameNormalFontSize = min(select(2, SystemFont_Shadow_Med1:GetFont()) + 1, 15),
+	frameNormalFontFlag = "",
 
 	tabSize = 24,
 	tabInterval = 2,
@@ -1231,7 +1231,7 @@ end
 	function LT_SharedMethod.UICreateSearchBox(Frame)
 		local SearchEditBox = CreateFrame('EDITBOX', nil, Frame);
 		SearchEditBox:SetHeight(16);
-		SearchEditBox:SetFont(T_UIDefinition.frameFont, T_UIDefinition.frameFontSize, T_UIDefinition.frameFontOutline);
+		SearchEditBox:SetFont(T_UIDefinition.frameNormalFont, T_UIDefinition.frameNormalFontSize, T_UIDefinition.frameNormalFontFlag);
 		SearchEditBox:SetAutoFocus(false);
 		SearchEditBox:SetJustifyH("LEFT");
 		SearchEditBox:Show();
@@ -1251,7 +1251,7 @@ end
 		SearchEditBoxTexture:SetVertexColor(0.25, 0.25, 0.25);
 
 		local SearchEditBoxNote = SearchEditBox:CreateFontString(nil, "OVERLAY");
-		SearchEditBoxNote:SetFont(T_UIDefinition.frameFont, T_UIDefinition.frameFontSize);
+		SearchEditBoxNote:SetFont(T_UIDefinition.frameNormalFont, T_UIDefinition.frameNormalFontSize, T_UIDefinition.frameNormalFontFlag);
 		SearchEditBoxNote:SetTextColor(1.0, 1.0, 1.0, 0.5);
 		SearchEditBoxNote:SetPoint("LEFT", 4, 0);
 		SearchEditBoxNote:SetText(l10n["Search"]);
@@ -1270,7 +1270,7 @@ end
 		SearchEditBoxOK:SetNormalTexture(T_UIDefinition.texture_unk);
 		SearchEditBoxOK:GetNormalTexture():SetColorTexture(0.25, 0.25, 0.25, 0.5);
 		local SearchEditBoxOKText = SearchEditBoxOK:CreateFontString(nil, "OVERLAY");
-		SearchEditBoxOKText:SetFont(T_UIDefinition.frameFont, T_UIDefinition.frameFontSize);
+		SearchEditBoxOKText:SetFont(T_UIDefinition.frameNormalFont, T_UIDefinition.frameNormalFontSize, T_UIDefinition.frameNormalFontFlag);
 		SearchEditBoxOKText:SetTextColor(1.0, 1.0, 1.0, 0.5);
 		SearchEditBoxOKText:SetPoint("CENTER");
 		SearchEditBoxOKText:SetText(l10n["OK"]);
@@ -1591,7 +1591,7 @@ end
 		Button.Icon = Icon;
 
 		local Title = Button:CreateFontString(nil, "OVERLAY");
-		Title:SetFont(T_UIDefinition.frameFont, T_UIDefinition.frameFontSize, T_UIDefinition.frameFontOutline);
+		Title:SetFont(T_UIDefinition.frameNormalFont, T_UIDefinition.frameNormalFontSize, T_UIDefinition.frameNormalFontFlag);
 		Title:SetPoint("LEFT", Icon, "RIGHT", 4, 0);
 		-- Title:SetWidth(160);
 		Title:SetMaxLines(1);
@@ -1599,7 +1599,7 @@ end
 		Button.Title = Title;
 
 		local Num = Button:CreateFontString(nil, "OVERLAY");
-		Num:SetFont(T_UIDefinition.frameFont, T_UIDefinition.frameFontSize, T_UIDefinition.frameFontOutline);
+		Num:SetFont(T_UIDefinition.frameNormalFont, T_UIDefinition.frameNormalFontSize, T_UIDefinition.frameNormalFontFlag);
 		Num:SetPoint("LEFT", Title, "RIGHT", 2, 0);
 		-- Num:SetWidth(160);
 		Num:SetMaxLines(1);
@@ -1607,7 +1607,7 @@ end
 		Button.Num = Num;
 
 		local Note = Button:CreateFontString(nil, "ARTWORK");
-		Note:SetFont(T_UIDefinition.frameFont, T_UIDefinition.frameFontSize, T_UIDefinition.frameFontOutline);
+		Note:SetFont(T_UIDefinition.frameNormalFont, T_UIDefinition.frameNormalFontSize, T_UIDefinition.frameNormalFontFlag);
 		Note:SetPoint("RIGHT", -4, 0);
 		Button.Note = Note;
 
@@ -2912,7 +2912,7 @@ end
 		Button.Icon = Icon;
 
 		local Title = Button:CreateFontString(nil, "OVERLAY");
-		Title:SetFont(T_UIDefinition.frameFont, T_UIDefinition.frameFontSize, T_UIDefinition.frameFontOutline);
+		Title:SetFont(T_UIDefinition.frameNormalFont, T_UIDefinition.frameNormalFontSize, T_UIDefinition.frameNormalFontFlag);
 		Title:SetPoint("LEFT", Icon, "RIGHT", 2, 0);
 		-- Title:SetWidth(160);
 		Title:SetMaxLines(1);
@@ -2920,7 +2920,7 @@ end
 		Button.Title = Title;
 
 		local Num = Button:CreateFontString(nil, "OVERLAY");
-		Num:SetFont(T_UIDefinition.frameFont, T_UIDefinition.frameFontSize, T_UIDefinition.frameFontOutline);
+		Num:SetFont(T_UIDefinition.frameNormalFont, T_UIDefinition.frameNormalFontSize, T_UIDefinition.frameNormalFontFlag);
 		Num:SetPoint("LEFT", Title, "RIGHT", 2, 0);
 		-- Num:SetWidth(160);
 		Num:SetMaxLines(1);
@@ -2928,7 +2928,7 @@ end
 		Button.Num = Num;
 
 		local Note = Button:CreateFontString(nil, "ARTWORK");
-		Note:SetFont(T_UIDefinition.frameFont, T_UIDefinition.frameFontSize - 1, T_UIDefinition.frameFontOutline);
+		Note:SetFont(T_UIDefinition.frameNormalFont, T_UIDefinition.frameNormalFontSize - 1, T_UIDefinition.frameNormalFontFlag);
 		Note:SetPoint("RIGHT", -4, 0);
 		Button.Note = Note;
 
@@ -3483,7 +3483,7 @@ local function LF_HookFrame(addon, meta)
 		CostOnlyCheck:SetPoint("CENTER", ProfitFrame, "TOPLEFT", 18, -14);
 		CostOnlyCheck:Show();
 		local Text = ProfitFrame:CreateFontString(nil, "ARTWORK");
-		Text:SetFont(T_UIDefinition.frameFont, T_UIDefinition.frameFontSize, "OUTLINE");
+		Text:SetFont(T_UIDefinition.frameNormalFont, T_UIDefinition.frameNormalFontSize, T_UIDefinition.frameNormalFontFlag);
 		Text:SetPoint("LEFT", CostOnlyCheck, "CENTER", 10, 0);
 		Text:SetText(l10n["PROFIT_SHOW_COST_ONLY"]);
 		CostOnlyCheck.Text = Text;
@@ -3515,7 +3515,7 @@ local function LF_HookFrame(addon, meta)
 		SetFrame.Frame = Frame;
 
 		local TipInfo = SetFrame:CreateFontString(nil, "ARTWORK");
-		TipInfo:SetFont(T_UIDefinition.frameFont, T_UIDefinition.frameFontSize - 1);
+		TipInfo:SetFont(T_UIDefinition.frameNormalFont, T_UIDefinition.frameNormalFontSize - 1, T_UIDefinition.frameNormalFontFlag);
 		TipInfo:SetPoint("RIGHT", SetFrame, "BOTTOMRIGHT", -2, 9);
 		SetFrame.TipInfo = TipInfo;
 
@@ -3545,7 +3545,7 @@ local function LF_HookFrame(addon, meta)
 			CheckButton:Show();
 			CheckButton:SetChecked(false);
 			local Text = SetFrame:CreateFontString(nil, "ARTWORK");
-			Text:SetFont(T_UIDefinition.frameFont, T_UIDefinition.frameFontSize, "OUTLINE");
+			Text:SetFont(T_UIDefinition.frameNormalFont, T_UIDefinition.frameNormalFontSize, T_UIDefinition.frameNormalFontFlag);
 			Text:SetText(l10n[key]);
 			CheckButton.Text = Text;
 			Text:SetPoint("LEFT", CheckButton, "RIGHT", 0, 0);
@@ -3619,19 +3619,19 @@ local function LF_HookFrame(addon, meta)
 
 	do	--	InfoInFrame
 		local RankInfoInFrame = Frame.HookedDetailChild:CreateFontString(nil, "OVERLAY");
-		RankInfoInFrame:SetFont(T_UIDefinition.frameFont, T_UIDefinition.frameFontSize);
+		RankInfoInFrame:SetFont(T_UIDefinition.frameNormalFont, T_UIDefinition.frameNormalFontSize, T_UIDefinition.frameNormalFontFlag);
 		RankInfoInFrame:SetPoint("TOPLEFT", Frame.HookedDetailChild, "TOPLEFT", 5, -50);
 		Frame.RankInfoInFrame = RankInfoInFrame;
 
 		local T_PriceInfoInFrame = {  };
 		T_PriceInfoInFrame[1] = Frame.HookedDetailChild:CreateFontString(nil, "OVERLAY");
-		T_PriceInfoInFrame[1]:SetFont(T_UIDefinition.frameFont, T_UIDefinition.frameFontSize);
+		T_PriceInfoInFrame[1]:SetFont(T_UIDefinition.frameNormalFont, T_UIDefinition.frameNormalFontSize, T_UIDefinition.frameNormalFontFlag);
 		T_PriceInfoInFrame[1]:SetPoint("TOPLEFT", RankInfoInFrame, "BOTTOMLEFT", 0, -3);
 		T_PriceInfoInFrame[2] = Frame.HookedDetailChild:CreateFontString(nil, "OVERLAY");
-		T_PriceInfoInFrame[2]:SetFont(T_UIDefinition.frameFont, T_UIDefinition.frameFontSize);
+		T_PriceInfoInFrame[2]:SetFont(T_UIDefinition.frameNormalFont, T_UIDefinition.frameNormalFontSize, T_UIDefinition.frameNormalFontFlag);
 		T_PriceInfoInFrame[2]:SetPoint("TOPLEFT", T_PriceInfoInFrame[1], "BOTTOMLEFT", 0, 0);
 		T_PriceInfoInFrame[3] = Frame.HookedDetailChild:CreateFontString(nil, "OVERLAY");
-		T_PriceInfoInFrame[3]:SetFont(T_UIDefinition.frameFont, T_UIDefinition.frameFontSize);
+		T_PriceInfoInFrame[3]:SetFont(T_UIDefinition.frameNormalFont, T_UIDefinition.frameNormalFontSize, T_UIDefinition.frameNormalFontFlag);
 		T_PriceInfoInFrame[3]:SetPoint("TOPLEFT", T_PriceInfoInFrame[2], "BOTTOMLEFT", 0, 0);
 		Frame.T_PriceInfoInFrame = T_PriceInfoInFrame;
 
@@ -4434,7 +4434,7 @@ end
 		Button.Icon = Icon;
 
 		local Title = Button:CreateFontString(nil, "OVERLAY");
-		Title:SetFont(T_UIDefinition.frameFont, T_UIDefinition.frameFontSize, T_UIDefinition.frameFontOutline);
+		Title:SetFont(T_UIDefinition.frameNormalFont, T_UIDefinition.frameNormalFontSize, T_UIDefinition.frameNormalFontFlag);
 		Title:SetPoint("LEFT", Icon, "RIGHT", 4, 0);
 		-- Title:SetWidth(160);
 		Title:SetMaxLines(1);
@@ -4442,7 +4442,7 @@ end
 		Button.Title = Title;
 
 		local Note = Button:CreateFontString(nil, "ARTWORK");
-		Note:SetFont(T_UIDefinition.frameFont, T_UIDefinition.frameFontSize, T_UIDefinition.frameFontOutline);
+		Note:SetFont(T_UIDefinition.frameNormalFont, T_UIDefinition.frameNormalFontSize, T_UIDefinition.frameNormalFontFlag);
 		Note:SetPoint("RIGHT", -4, 0);
 		Button.Note = Note;
 
@@ -4582,7 +4582,7 @@ local function LF_CreateExplorerFrame()
 		Frame.flag = 'explorer';
 
 		local Title = Frame:CreateFontString(nil, "ARTWORK");
-		Title:SetFont(T_UIDefinition.frameFont, T_UIDefinition.frameFontSize);
+		Title:SetFont(T_UIDefinition.frameNormalFont, T_UIDefinition.frameNormalFontSize, T_UIDefinition.frameNormalFontFlag);
 		Title:SetPoint("CENTER", Frame, "TOP", 0, -16);
 		Title:SetText(l10n["EXPLORER_TITLE"]);
 
@@ -4649,22 +4649,24 @@ local function LF_CreateExplorerFrame()
 		ScrollFrame:SetPoint("TOPRIGHT", -8, -28);
 		ProfitFrame.ScrollFrame = ScrollFrame;
 
-		-- local CostOnlyCheck = CreateFrame('CHECKBUTTON', nil, ProfitFrame, "OptionsBaseCheckButtonTemplate");
-		-- CostOnlyCheck:SetSize(24, 24);
-		-- CostOnlyCheck:SetHitRectInsets(0, 0, 0, 0);
-		-- CostOnlyCheck:SetPoint("CENTER", ProfitFrame, "TOPLEFT", 17, -10);
-		-- CostOnlyCheck:Show();
-		-- local Text = ProfitFrame:CreateFontString(nil, "ARTWORK");
-		-- Text:SetFont(T_UIDefinition.frameFont, T_UIDefinition.frameFontSize, "OUTLINE");
-		-- Text:SetPoint("LEFT", CostOnlyCheck, "RIGHT", 2, 0);
-		-- Text:SetText(l10n["PROFIT_SHOW_COST_ONLY"]);
-		-- CostOnlyCheck.Text = Text;
-		-- CostOnlyCheck:SetScript("OnClick", function(self)
-		-- 	local checked = self:GetChecked();
-		-- 	VT.SET.explorer.PROFIT_SHOW_COST_ONLY = checked;
-		-- 	LT_SharedMethod.UpdateProfitFrame(Frame);
-		-- end);
-		-- ProfitFrame.CostOnlyCheck = CostOnlyCheck;
+		--[[
+		local CostOnlyCheck = CreateFrame('CHECKBUTTON', nil, ProfitFrame, "OptionsBaseCheckButtonTemplate");
+		CostOnlyCheck:SetSize(24, 24);
+		CostOnlyCheck:SetHitRectInsets(0, 0, 0, 0);
+		CostOnlyCheck:SetPoint("CENTER", ProfitFrame, "TOPLEFT", 17, -10);
+		CostOnlyCheck:Show();
+		local Text = ProfitFrame:CreateFontString(nil, "ARTWORK");
+		Text:SetFont(T_UIDefinition.frameNormalFont, T_UIDefinition.frameNormalFontSize, T_UIDefinition.frameNormalFontFlag);
+		Text:SetPoint("LEFT", CostOnlyCheck, "RIGHT", 2, 0);
+		Text:SetText(l10n["PROFIT_SHOW_COST_ONLY"]);
+		CostOnlyCheck.Text = Text;
+		CostOnlyCheck:SetScript("OnClick", function(self)
+			local checked = self:GetChecked();
+			VT.SET.explorer.PROFIT_SHOW_COST_ONLY = checked;
+			LT_SharedMethod.UpdateProfitFrame(Frame);
+		end);
+		ProfitFrame.CostOnlyCheck = CostOnlyCheck;
+		--]]
 
 		local CloseButton = CreateFrame('BUTTON', nil, ProfitFrame, "UIPanelCloseButton");
 		CloseButton:SetSize(32, 32);
@@ -4691,7 +4693,7 @@ local function LF_CreateExplorerFrame()
 		SetFrame.Frame = Frame;
 
 		local TipInfo = SetFrame:CreateFontString(nil, "ARTWORK");
-		TipInfo:SetFont(T_UIDefinition.frameFont, T_UIDefinition.frameFontSize - 1);
+		TipInfo:SetFont(T_UIDefinition.frameNormalFont, T_UIDefinition.frameNormalFontSize - 1, T_UIDefinition.frameNormalFontFlag);
 		TipInfo:SetPoint("RIGHT", SetFrame, "BOTTOMRIGHT", -2, 9);
 		SetFrame.TipInfo = TipInfo;
 
@@ -4722,7 +4724,7 @@ local function LF_CreateExplorerFrame()
 			CheckButton:SetChecked(false);
 
 			local Text = SetFrame:CreateFontString(nil, "ARTWORK");
-			Text:SetFont(T_UIDefinition.frameFont, T_UIDefinition.frameFontSize, "OUTLINE");
+			Text:SetFont(T_UIDefinition.frameNormalFont, T_UIDefinition.frameNormalFontSize, T_UIDefinition.frameNormalFontFlag);
 			Text:SetText(l10n[key]);
 			Text:SetPoint("LEFT", CheckButton, "RIGHT", 0, 0);
 			CheckButton.Text = Text;
@@ -4778,7 +4780,7 @@ local function LF_CreateExplorerFrame()
 			Dropdown:GetHighlightTexture():SetVertexColor(unpack(T_UIDefinition.textureButtonColorHighlight));
 
 			local Label = SetFrame:CreateFontString(nil, "ARTWORK");
-			Label:SetFont(T_UIDefinition.frameFont, T_UIDefinition.frameFontSize, "OUTLINE");
+			Label:SetFont(T_UIDefinition.frameNormalFont, T_UIDefinition.frameNormalFontSize, T_UIDefinition.frameNormalFontFlag);
 			Label:SetText(l10n.EXPLORER_SET[key]);
 			Label:SetPoint("LEFT", Dropdown, "RIGHT", 0, 0);
 			Dropdown.Label = Label;
@@ -4805,7 +4807,7 @@ local function LF_CreateExplorerFrame()
 			Dropdown.Cancel = Cancel;
 
 			local Text = SetFrame:CreateFontString(nil, "ARTWORK");
-			Text:SetFont(T_UIDefinition.frameFont, T_UIDefinition.frameFontSize, "OUTLINE");
+			Text:SetFont(T_UIDefinition.frameNormalFont, T_UIDefinition.frameNormalFontSize, T_UIDefinition.frameNormalFontFlag);
 			Text:SetText(l10n[key]);
 			Text:SetPoint("LEFT", Cancel, "RIGHT", 2, 0);
 			Text:SetVertexColor(0.0, 1.0, 0.0, 1.0);
@@ -5118,13 +5120,13 @@ local function LF_CreateBoard()
 		local Line = T_Lines[index];
 		if not Line then
 			local LineL = self:CreateFontString(nil, "OVERLAY");
-			LineL:SetFont(T_UIDefinition.frameFont, T_UIDefinition.frameFontSize);
+			LineL:SetFont(T_UIDefinition.frameNormalFont, T_UIDefinition.frameNormalFontSize, T_UIDefinition.frameNormalFontFlag);
 			LineL:SetPoint("TOPLEFT", self, "TOPLEFT", 0, -16 * (index - 1));
 			local LineM = self:CreateFontString(nil, "OVERLAY");
-			LineM:SetFont(T_UIDefinition.frameFont, T_UIDefinition.frameFontSize);
+			LineM:SetFont(T_UIDefinition.frameNormalFont, T_UIDefinition.frameNormalFontSize, T_UIDefinition.frameNormalFontFlag);
 			LineM:SetPoint("TOP", self, "TOP", 0, -16 * (index - 1));
 			local LineR = self:CreateFontString(nil, "OVERLAY");
-			LineR:SetFont(T_UIDefinition.frameFont, T_UIDefinition.frameFontSize);
+			LineR:SetFont(T_UIDefinition.frameNormalFont, T_UIDefinition.frameNormalFontSize, T_UIDefinition.frameNormalFontFlag);
 			LineR:SetPoint("TOPRIGHT", self, "TOPRIGHT", 0, -16 * (index - 1));
 			Line = { LineL, LineM, LineR, };
 			T_Lines[index] = Line;
@@ -5275,7 +5277,7 @@ end
 		Button.Icon = Icon;
 
 		local Title = Button:CreateFontString(nil, "OVERLAY");
-		Title:SetFont(T_UIDefinition.frameFont, T_UIDefinition.frameFontSize, T_UIDefinition.frameFontOutline);
+		Title:SetFont(T_UIDefinition.frameNormalFont, T_UIDefinition.frameNormalFontSize, T_UIDefinition.frameNormalFontFlag);
 		Title:SetPoint("LEFT", Icon, "RIGHT", 4, 0);
 		-- Title:SetWidth(160);
 		Title:SetMaxLines(1);
@@ -5283,7 +5285,7 @@ end
 		Button.Title = Title;
 
 		local Note = Button:CreateFontString(nil, "OVERLAY");
-		Note:SetFont(T_UIDefinition.frameFont, T_UIDefinition.frameFontSize, T_UIDefinition.frameFontOutline);
+		Note:SetFont(T_UIDefinition.frameNormalFont, T_UIDefinition.frameNormalFontSize, T_UIDefinition.frameNormalFontFlag);
 		Note:SetPoint("RIGHT", Button, "RIGHT", -4, 0);
 		-- Note:SetWidth(160);
 		Note:SetMaxLines(1);
@@ -5355,7 +5357,7 @@ end
 		CheckButton:Show();
 
 		local Text = CheckButton:CreateFontString(nil, "ARTWORK");
-		Text:SetFont(T_UIDefinition.frameFont, T_UIDefinition.frameFontSize, T_UIDefinition.frameFontOutline);
+		Text:SetFont(T_UIDefinition.frameNormalFont, T_UIDefinition.frameNormalFontSize, T_UIDefinition.frameNormalFontFlag);
 		Text:SetText(text);
 		Text:SetPoint("LEFT", CheckButton, "CENTER", 12, 0);
 		CheckButton.Text = Text;
@@ -5386,13 +5388,13 @@ end
 		Dropdown:GetHighlightTexture():SetVertexColor(0.0, 0.5, 1.0, 0.25);
 
 		local Label = Dropdown:CreateFontString(nil, "ARTWORK");
-		Label:SetFont(T_UIDefinition.frameFont, T_UIDefinition.frameFontSize, T_UIDefinition.frameFontOutline);
+		Label:SetFont(T_UIDefinition.frameNormalFont, T_UIDefinition.frameNormalFontSize, T_UIDefinition.frameNormalFontFlag);
 		Label:SetText(gsub(text, "%%[a-z]", ""));
 		Label:SetPoint("LEFT", Dropdown, "RIGHT", 0, 0);
 		Dropdown.Label = Label;
 
 		local Text = Dropdown:CreateFontString(nil, "ARTWORK");
-		Text:SetFont(T_UIDefinition.frameFont, T_UIDefinition.frameFontSize, T_UIDefinition.frameFontOutline);
+		Text:SetFont(T_UIDefinition.frameNormalFont, T_UIDefinition.frameNormalFontSize, T_UIDefinition.frameNormalFontFlag);
 		Text:SetPoint("TOPLEFT", Label, "BOTTOMLEFT", 0, -2);
 		Text:SetVertexColor(0.0, 1.0, 0.0, 1.0);
 		Dropdown.Text = Text;
@@ -5408,7 +5410,7 @@ end
 	local function LF_ConfigCreateSlider(parent, key, text, minVal, maxVal, step, OnValueChanged)
 		local Slider = CreateFrame('SLIDER', nil, parent, "OptionsSliderTemplate");
 		local Label = Slider:CreateFontString(nil, "ARTWORK");
-		Label:SetFont(T_UIDefinition.frameFont, T_UIDefinition.frameFontSize, T_UIDefinition.frameFontOutline);
+		Label:SetFont(T_UIDefinition.frameNormalFont, T_UIDefinition.frameNormalFontSize, T_UIDefinition.frameNormalFontFlag);
 		Label:SetText(gsub(text, "%%[a-z]", ""));
 		Slider:SetWidth(200);
 		Slider:SetHeight(20);
@@ -5455,11 +5457,11 @@ end
 		local valStr = Button:CreateTexture(nil, "OVERLAY");
 		valStr:SetAllPoints(true);
 		local left = Button:CreateFontString(nil, "ARTWORK");
-		left:SetFont(T_UIDefinition.frameFont, T_UIDefinition.frameFontSize, T_UIDefinition.frameFontOutline);
+		left:SetFont(T_UIDefinition.frameNormalFont, T_UIDefinition.frameNormalFontSize, T_UIDefinition.frameNormalFontFlag);
 		left:SetText(">>");
 		left:SetPoint("RIGHT", Button, "LEFT", -2, 0);
 		local Label = Button:CreateFontString(nil, "ARTWORK");
-		Label:SetFont(T_UIDefinition.frameFont, T_UIDefinition.frameFontSize, T_UIDefinition.frameFontOutline);
+		Label:SetFont(T_UIDefinition.frameNormalFont, T_UIDefinition.frameNormalFontSize, T_UIDefinition.frameNormalFontFlag);
 		Label:SetText("<<" .. gsub(text, "%%[a-z]", ""));
 		Label:SetPoint("LEFT", Button, "RIGHT", 2, 0);
 		Button.Label = Label;
@@ -5723,7 +5725,7 @@ local function LF_CreateConfigFrame()
 		Frame.CharListToggleButton = ToggleButton;
 
 		local Text = ToggleButton:CreateFontString(nil, "OVERLAY");
-		Text:SetFont(T_UIDefinition.frameFont, T_UIDefinition.frameFontSize, T_UIDefinition.frameFontOutline);
+		Text:SetFont(T_UIDefinition.frameNormalFont, T_UIDefinition.frameNormalFontSize, T_UIDefinition.frameNormalFontFlag);
 		Text:SetPoint("RIGHT", ToggleButton, "LEFT", -2, 0);
 		Text:SetVertexColor(1.0, 1.0, 1.0, 1.0);
 		Text:SetText(l10n.CHAR_LIST);
