@@ -102,7 +102,7 @@ end
 
 local GetAddOnInfo = GetAddOnInfo;
 local IsAddOnLoaded = IsAddOnLoaded;
-local GetAddOnEnableState = GetAddOnEnableState;
+local GetAddOnMetadata = GetAddOnMetadata;
 local _AddOnList = {
 	"ElvUI",
 	"Tukui",

@@ -1543,11 +1543,13 @@ end
 				end
 			else
 				local Frame = self.Frame;
-				local sid = self.list[self:GetDataIndex()];
-				if type(sid) == 'table' then
-					sid = sid[1];
+				if Frame.flag ~= 'explorer' then
+					local sid = self.list[self:GetDataIndex()];
+					if type(sid) == 'table' then
+						sid = sid[1];
+					end
+					LT_SharedMethod.SelectRecipe(Frame, sid);
 				end
-				LT_SharedMethod.SelectRecipe(Frame, sid);
 			end
 		elseif button == "RightButton" then
 			local Frame = self.Frame;
@@ -3380,6 +3382,7 @@ local function LF_HookFrame(addon, meta)
 				Button.Frame = Frame;
 				Button:HookScript("OnClick", LT_WidgetMethod.ReagentButton__OnClick);
 			end
+			T_HookedFrameWidgets.ProductionIcon.Frame = Frame;
 			T_HookedFrameWidgets.ProductionIcon:HookScript("OnClick", LT_WidgetMethod.ProductionIcon__OnClick);
 		--
 
