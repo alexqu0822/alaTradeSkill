@@ -1,5 +1,5 @@
 --[[--
-	by ALA @ 163UI
+	by ALA 
 --]]--
 
 local __addon, __private = ...;
@@ -196,7 +196,7 @@ l10n["COLORED_FORMATTED_TIME_LEN"] = {
 };
 l10n["COOLDOWN_EXPIRED"] = "\124cff00ff00Available\124r";
 --
-l10n["EXPLORER_TITLE"] = "ALA @ 163UI";
+l10n["EXPLORER_TITLE"] = "ALA ";
 l10n.EXPLORER_SET = {
 	Skill = "Skill",
 	Type = "Type",

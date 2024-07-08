@@ -1,8 +1,8 @@
 --[[--
-	alex/ALA @ 163UI
+	alex/ALA 
 --]]--
 
-local __version = 221101.0;
+local __version = 240705.0;
 
 local _G = _G;
 _G.__ala_meta__ = _G.__ala_meta__ or {  };
@@ -73,6 +73,7 @@ else
 		["Player-4497-04102FBE"] = "G",	--	"碧玉矿洞.ANDREA.WARLOCK"
 		["Player-4497-0516E2C2"] = "G",	--	"碧玉矿洞.ANDREA.WARRIOR"
 		["Player-4497-0410343D"] = "G",	--	"碧玉矿洞.ANDREA.ROGUE"
+		["Player-4497-0519E8E8"] = "G",	--	"碧玉矿洞.ANDREA.DRUID"
 		["Player-4497-03F6B362"] = "G",	--	"碧玉矿洞.ANDREA.DRUID"
 		["Player-4497-04102EFE"] = "G",	--	"碧玉矿洞.ANDREA.WARRIOR.MINOR"
 		["Player-4497-03B5A603"] = "G",	--	"碧玉矿洞.ANDREA.MAGE.MINOR"
@@ -140,6 +141,8 @@ else
 end
 local NUMFILE = #FILELIST;
 local random = random;
+local GetPlayerInfoByGUID = GetPlayerInfoByGUID;
+local REALM = GetRealmName();
 local GETFILE = function()
 	local rnd = random(1, NUMFILE);
 	return FILELIST[rnd] or FILELIST["*"];
@@ -187,6 +190,7 @@ local DATA = {
 	["Player-962-04FF445B"] = "\230\136\191\228\184\156\229\174\182\231\154\132\229\133\148\229\173\144\45\233\135\145\232\137\178\229\185\179\229\142\159",
 	["Player-4497-039DEE62"] = "\229\183\180\230\142\140\229\145\188\232\132\184\45\231\162\167\231\142\137\231\159\191\230\180\158",
 	["Player-962-0508A6CC"] = "\231\129\172\229\176\143\229\133\148\228\184\182\45\233\135\145\232\137\178\229\185\179\229\142\159",
+	["Player-4497-0519E8E8"] = "\230\181\133\230\181\133\232\135\179\230\158\129",
 	["Player-4497-03F6B362"] = "\229\143\152\229\175\140\229\143\152\230\188\130\228\186\174\45\231\162\167\231\142\137\231\159\191\230\180\158",
 	["Player-4497-0388473F"] = "\231\139\161\231\140\190\231\154\132\229\164\167\231\129\176\231\139\188\45\231\162\167\231\142\137\231\159\191\230\180\158",
 	["Player-4497-04102FBE"] = "\232\131\161\232\144\157\229\141\156\231\152\166\231\152\166\45\231\162\167\231\142\137\231\159\191\230\180\158",
@@ -209,6 +213,21 @@ local DATA = {
 	["Player-4791-010B0B3C"] = "\230\136\191\228\184\156\229\174\182\229\176\143\229\133\148\229\173\144\45\231\162\167\231\169\186\228\185\139\230\173\140",
 	["Player-4497-054BAC83"] = "\231\171\185\230\158\151\233\155\168\230\183\133\45\231\162\167\231\142\137\231\159\191\230\180\158",	
 };
+local function _InsertInfo(DevHash, GUID)
+	local locclass, class, locrace, race, sex, name, realm = GetPlayerInfoByGUID(GUID);
+	-- local name = DATA[GUID];
+	if name ~= nil then
+		if realm == "" then
+			name = name .. "-" .. REALM;
+		else
+			name = name .. "-" .. realm;
+		end
+		DevHash[name] = GUID;
+		DevHash[GUID] = name;
+		return true;
+	end
+	return false;
+end
 local function _HashMap()
 	local DevHash = {  };
 	for v1, v2 in next, DevHash do
@@ -216,11 +235,41 @@ local function _HashMap()
 			DevHash[v1] = nil;
 		end
 	end
+	local FullyInserted = true;
 	for GUID, _ in next, DEVELOPER do
-		local name = DATA[GUID];
-		if name ~= nil then
-			DevHash[name] = GUID;
-			DevHash[GUID] = name;
+		FullyInserted = _InsertInfo(DevHash, GUID) and FullyInserted;
+	end
+	if not FullyInserted then
+		local try = 0;
+		local After = C_Timer.After;
+		local proc;
+		function proc()
+			if try > 2 then
+				for GUID, _ in next, DEVELOPER do
+					if DevHash[GUID] == nil then
+						local name = DATA[GUID];
+						DevHash[name] = GUID;
+						DevHash[GUID] = name;
+					end
+				end
+				return;
+			end
+			After(2, proc);
+			try = try + 1;
+			local FullyInserted = true;
+			for GUID, _ in next, DEVELOPER do
+				FullyInserted = _InsertInfo(DevHash, GUID) and FullyInserted;
+			end
+			if FullyInserted then
+				try = 999;
+			end
+		end
+		if IsLoggedIn() then
+			proc();
+		else
+			local F = CreateFrame('FRAME');
+			F:RegisterEvent("PLAYER_LOGIN");
+			F:SetScript("OnEvent", proc);
 		end
 	end
 	__ala_meta__["__DEV" .. "GUID"] = DEVELOPER;
@@ -358,6 +407,7 @@ local function _LF_CheckTip(tip)
 	end
 end
 
+local hooked = {  };
 local _DelayAgent = CreateFrame('FRAME');
 local function _LF_OnUpdate_DelayAgent(self)
 	self:SetScript("OnUpdate", nil);
@@ -366,9 +416,10 @@ end
 local function _LF_Hook_OnTooltipSetUnit(tip)
 	_DelayAgent:SetScript("OnUpdate", _LF_OnUpdate_DelayAgent);
 end
-local function _LF_Hook_SetScript(tip, method)
-	if method == "OnTooltipSetUnit" then
+local function _LF_Hook_SetScript(tip, script, method)
+	if script == "OnTooltipSetUnit" and hooked[GameTooltip:GetScript("OnTooltipSetUnit")] == nil then
 		tip:HookScript("OnTooltipSetUnit", _LF_Hook_OnTooltipSetUnit);
+		hooked[GameTooltip:GetScript("OnTooltipSetUnit") or "none"] = true;
 	end
 end
 _DelayAgent:SetScript(
@@ -379,6 +430,7 @@ _DelayAgent:SetScript(
 			__ala_meta__["__initcoder"] = true;
 			hooksecurefunc(GameTooltip, "SetScript", _LF_Hook_SetScript);
 			GameTooltip:HookScript("OnTooltipSetUnit", _LF_Hook_OnTooltipSetUnit);
+			hooked[GameTooltip:GetScript("OnTooltipSetUnit") or "none"] = true;
 			if _showWrap then
 				_LF_Create_Wrap(GameTooltip);
 				if GameTooltip.SetBackdrop ~= nil then

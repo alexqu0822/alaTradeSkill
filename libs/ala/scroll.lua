@@ -1,5 +1,5 @@
 ﻿--[[--
-	ALA@163UI
+	by ALA
 --]]--
 --[[
 	ALASCR = ScrollList.CreateScrollFrame
