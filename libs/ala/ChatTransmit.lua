@@ -291,7 +291,7 @@ function __ctranslib:Halt()
 end
 
 -- __ala_meta__.__ctranslib.Private = Private;
-__ctranslib.Private = Private;
-Private._TChatMsgCache = _TChatMsgCache;
-Private._TAddOnMsgCache = _TAddOnMsgCache;
-Private._TWhisperCache = _TWhisperCache;
+-- __ctranslib.Private = Private;
+-- Private._TChatMsgCache = _TChatMsgCache;
+-- Private._TAddOnMsgCache = _TAddOnMsgCache;
+-- Private._TWhisperCache = _TWhisperCache;
