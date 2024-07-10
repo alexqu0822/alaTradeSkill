@@ -2,7 +2,7 @@
 	alex/ALA 
 --]]--
 
-local __version = 240705.0;
+local __version = 240706.0;
 
 local _G = _G;
 _G.__ala_meta__ = _G.__ala_meta__ or {  };
@@ -16,10 +16,6 @@ local ISRETAIL = __ala_meta__.TOC_VERSION >= 90000;
 local ISCLASSIC = __ala_meta__.TOC_VERSION < 20000;
 local ISBCC = __ala_meta__.TOC_VERSION >= 20000 and __ala_meta__.TOC_VERSION < 30000;
 local ISWLK = __ala_meta__.TOC_VERSION >= 30000 and __ala_meta__.TOC_VERSION < 90000;
-
-if ISRETAIL then
-	return;
-end
 
 local DEVELOPER;
 if ISRETAIL then
@@ -324,6 +320,11 @@ else
 	__coder.__minor = __version;
 	__ala_meta__["__coder"] = __coder;
 	_HashMap();
+end
+
+
+if ISRETAIL then
+	return;
 end
 
 
