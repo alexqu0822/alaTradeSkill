@@ -1,5 +1,5 @@
 ﻿--[=[
-	LibChatTransmit
+	by ALA
 --]=]
 
 local __version = 240705.0;
