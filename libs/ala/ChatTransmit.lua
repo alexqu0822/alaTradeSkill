@@ -2,7 +2,7 @@
 	by ALA
 --]=]
 
-local __version = 240714.0;
+local __version = 240715.0;
 
 local _G = _G;
 _G.__ala_meta__ = _G.__ala_meta__ or {  };
@@ -18,7 +18,7 @@ local Private = {  };
 		__ala_meta__.__ctranslib = __ctranslib;
 	else
 		if __ctranslib.Halt ~= nil then
-			Private = __ctranslib:Halt();
+			Private = __ctranslib:Halt() or Private;
 		end
 	end
 	__ctranslib.__minor = __version;

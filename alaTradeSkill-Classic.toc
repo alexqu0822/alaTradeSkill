@@ -1,4 +1,4 @@
-## Interface: 11502
+## Interface: 11503
 ## Title: ala's Trade Skill
 ## Title-zhCN: ala商业技能助手
 ## Title-zhTW: ala商業技能助手
