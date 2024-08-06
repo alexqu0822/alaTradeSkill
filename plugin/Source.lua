@@ -463,8 +463,8 @@ end
 
 MT.RegisterOnInit('source', function(LoggedIn)
 	SourceDataAgent = DT.DataAgent.T_SkillSource;
-	SourceLocale = DT.DataAgent.T_SkillSource.l10n;
-	if SourceDataAgent and SourceLocale then
+	if SourceDataAgent then
+		SourceLocale = DT.DataAgent.T_SkillSource.l10n;
 		MT.FireCallback("RECIPESOURCE_MOD_LOADED", {
 			SetSpell = LF_Source_SetSpellTip,
 			SetItem = LF_Source_SetItem,
