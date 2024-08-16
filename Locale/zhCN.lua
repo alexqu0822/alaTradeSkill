@@ -196,7 +196,7 @@ l10n["COLORED_FORMATTED_TIME_LEN"] = {
 };
 l10n["COOLDOWN_EXPIRED"] = "|cff00ff00冷却结束|r";
 --
-l10n["EXPLORER_TITLE"] = "ALA @ 网易有爱 |cff00ff00wowui.w.163.com|r";
+l10n["EXPLORER_TITLE"] = "配方浏览器";
 l10n.EXPLORER_SET = {
 	Skill = "技能",
 	Type = "物品类型",
@@ -485,8 +485,8 @@ l10n.CHAR_LIST = "角色列表";
 l10n.CHAR_DEL = "删除角色";
 l10n["INVALID_COMMANDS"] = "无效命令参数，使用|cff00ff00true、1、on、enable|r 或者 |cffff0000false、0、off、disable|r.";
 l10n.TooltipLines = {
-	"左键打开浏览器",
-	"右键打开设置",
+	"|cff00ff00左键|r|cffffffff打开浏览器|r",
+	"|cff00ff00右键|r|cffffffff打开设置|r",
 };
 
 --

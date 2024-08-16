@@ -196,7 +196,7 @@ l10n["COLORED_FORMATTED_TIME_LEN"] = {
 };
 l10n["COOLDOWN_EXPIRED"] = "|cff00ff00冷却结束|r";
 --
-l10n["EXPLORER_TITLE"] = "ALA @ 网易有爱 |cff00ff00wowui.w.163.com|r";
+l10n["EXPLORER_TITLE"] = "配方瀏覽器";
 l10n.EXPLORER_SET = {
 	Skill = "技能",
 	Type = "物品类型",
