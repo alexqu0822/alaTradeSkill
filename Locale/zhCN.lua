@@ -182,7 +182,7 @@ l10n["ITEMS_UNK"] = "项未知";
 l10n["NEED_UPDATE"] = "|cffff0000!!需要刷新!!|r";
 --
 l10n["TIP_SEARCH_NAME_ONLY_INFO"] = "|cffffffff只搜索名字，而不是物品链接|r";
-l10n["haveMaterialsTip"] = "只显示有足够材料的配方";
+l10n["TIP_HAVE_MATERIALS_INFO"] = "|cffffffff只显示有足够材料的配方|r";
 l10n["TIP_PROFIT_FRAME_CALL_INFO"] = "|cffffffff我想赚点零花钱! |r";
 --
 l10n["BOARD_LOCK"] = "锁定";
