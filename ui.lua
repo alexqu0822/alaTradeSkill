@@ -5187,8 +5187,20 @@ end
 	end
 --
 local function LF_CreateBoard()
+	local Pin = CreateFrame('BUTTON', nil, UIParent);
+	Pin:Show();
+	Pin:SetSize(16, 16);
+	Pin:SetNormalTexture(T_UIDefinition.texture_toggle);
+	Pin:SetHighlightTexture(T_UIDefinition.texture_toggle);
+	Pin:SetPushedTexture(T_UIDefinition.texture_toggle);
+	Pin:SetMovable(true);
+	Pin:RegisterForClicks("AnyUp");
+	Pin:RegisterForDrag("LeftButton");
+
 	local Frame = CreateFrame('FRAME', nil, UIParent);
+	Frame:Show();
 	Frame:SetClampedToScreen(true);
+	Frame:SetPoint("TOPRIGHT", Pin, "BOTTOMRIGHT", 0, 0);
 	if CT.LOCALE == 'zhCN' or CT.LOCALE == 'zhTW' or CT.LOCALE == 'koKR' then
 		Frame:SetWidth(260);
 	else
@@ -5197,6 +5209,36 @@ local function LF_CreateBoard()
 	Frame:SetMovable(true);
 	-- Frame:EnableMouse(true);
 	-- Frame:RegisterForDrag("LeftButton");
+
+	local ScaleSlider = CreateFrame('SLIDER', nil, Pin);
+	ScaleSlider:SetOrientation("HORIZONTAL");
+	ScaleSlider:SetPoint("RIGHT", Pin, "LEFT", -4, 0);
+	ScaleSlider:SetWidth(200);
+	ScaleSlider:SetHeight(4);
+	ScaleSlider:SetMinMaxValues(0.25, 4.0);
+	ScaleSlider:SetValueStep(0.05);
+	ScaleSlider:SetObeyStepOnDrag(true);
+	ScaleSlider.BG = ScaleSlider:CreateTexture(nil, "BACKGROUND");
+	ScaleSlider.BG:SetAllPoints();
+	ScaleSlider.BG:SetColorTexture(0.0, 0.0, 0.0, 0.75);
+	ScaleSlider:SetThumbTexture([[Interface\Buttons\UI-ScrollBar-Knob]]);
+	ScaleSlider.Thumb = ScaleSlider:GetThumbTexture();
+	ScaleSlider.Thumb:Show();
+	ScaleSlider.Thumb:SetColorTexture(1.0, 1.0, 1.0, 1.0);
+	ScaleSlider.Thumb:SetSize(4, 12);
+	ScaleSlider.Text = ScaleSlider:CreateFontString(nil, "ARTWORK");
+	ScaleSlider.Text:SetFont(T_UIDefinition.frameNormalFont, T_UIDefinition.frameNormalFontSize, T_UIDefinition.frameNormalFontFlag);
+	ScaleSlider.Text:SetPoint("TOP", ScaleSlider, "BOTTOM", 0, 3);
+	ScaleSlider.Low = ScaleSlider:CreateFontString(nil, "ARTWORK");
+	ScaleSlider.Low:SetFont(T_UIDefinition.frameNormalFont, T_UIDefinition.frameNormalFontSize, T_UIDefinition.frameNormalFontFlag);
+	ScaleSlider.Low:SetPoint("TOPLEFT", ScaleSlider, "BOTTOMLEFT", 4, 3);
+	ScaleSlider.High = ScaleSlider:CreateFontString(nil, "ARTWORK");
+	ScaleSlider.High:SetFont(T_UIDefinition.frameNormalFont, T_UIDefinition.frameNormalFontSize, T_UIDefinition.frameNormalFontFlag);
+	ScaleSlider.High:SetPoint("TOPRIGHT", ScaleSlider, "BOTTOMRIGHT", -4, 3);
+	ScaleSlider.Low:SetText("|cff00ff000.25|r");
+	ScaleSlider.High:SetText("|cffff00004.00|r");
+	Pin.ScaleSlider = ScaleSlider;
+
 	function Frame:F_Lock()
 		self:EnableMouse(false);
 		VT.__uireimp._SetSimpleBackdrop(self, 0, 1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
@@ -5205,17 +5247,14 @@ local function LF_CreateBoard()
 		self:EnableMouse(true);
 		VT.__uireimp._SetSimpleBackdrop(self, 0, 1, 0.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.5);
 	end
-	Frame.F_StartMoving = Frame.StartMoving;
 	function Frame:F_StopMoving()
-		self:StopMovingOrSizing();
-		local t = self:GetTop();
-		local r = self:GetRight();
-		local s = self:GetScale();
-		VT.SET.board.pos = { r * s, t * s, };
+		Pin:StopMovingOrSizing();
+		VT.SET.board.pos[1] = Pin:GetLeft();
+		VT.SET.board.pos[2] = Pin:GetBottom();
 	end
 	Frame:SetScript("OnMouseDown", function(self, button)
 		if button == "LeftButton" then
-			self:F_StartMoving();
+			Pin:StartMoving();
 		else
 			VT.__menulib.ShowMenu(self, "BOTTOMLEFT", T_BoardDropMeta);
 		end
@@ -5281,57 +5320,16 @@ local function LF_CreateBoard()
 	Frame.curLine = 0;
 	MT._TimerStart(LF_UpdateBoard, 1.0);
 
-	local Pin = CreateFrame('BUTTON', nil, UIParent);
-	Pin:SetSize(16, 16);
-	Pin:SetPoint("BOTTOMRIGHT", Frame, "TOPRIGHT", 0, 0);
-	Pin:RegisterForClicks("AnyUp");
-	Pin:RegisterForDrag("LeftButton");
-	Pin:SetNormalTexture(T_UIDefinition.texture_toggle);
-	Pin:SetHighlightTexture(T_UIDefinition.texture_toggle);
-	Pin:SetPushedTexture(T_UIDefinition.texture_toggle);
-	Pin:SetScript("OnDragStart", function(Pin)
-		Frame:F_StartMoving();
-	end);
+	Pin:SetScript("OnDragStart", Pin.StartMoving);
 	Pin:SetScript("OnDragStop", function(Pin)
 		Frame:F_StopMoving();
 	end);
-	Frame.Pin = Pin;
-	local ScaleSlider = CreateFrame('SLIDER', nil, Pin);
-	ScaleSlider:SetOrientation("HORIZONTAL");
-	ScaleSlider:SetPoint("RIGHT", Pin, "LEFT", -4, 0);
-	ScaleSlider:SetWidth(200);
-	ScaleSlider:SetHeight(4);
-	ScaleSlider:SetMinMaxValues(0.25, 4.0);
-	ScaleSlider:SetValueStep(0.05);
-	ScaleSlider:SetObeyStepOnDrag(true);
-	ScaleSlider.BG = ScaleSlider:CreateTexture(nil, "BACKGROUND");
-	ScaleSlider.BG:SetAllPoints();
-	ScaleSlider.BG:SetColorTexture(0.0, 0.0, 0.0, 0.75);
-	ScaleSlider:SetThumbTexture([[Interface\Buttons\UI-ScrollBar-Knob]]);
-	ScaleSlider.Thumb = ScaleSlider:GetThumbTexture();
-	ScaleSlider.Thumb:Show();
-	ScaleSlider.Thumb:SetColorTexture(1.0, 1.0, 1.0, 1.0);
-	ScaleSlider.Thumb:SetSize(4, 12);
-	ScaleSlider.Text = ScaleSlider:CreateFontString(nil, "ARTWORK");
-	ScaleSlider.Text:SetFont(T_UIDefinition.frameNormalFont, T_UIDefinition.frameNormalFontSize, T_UIDefinition.frameNormalFontFlag);
-	ScaleSlider.Text:SetPoint("TOP", ScaleSlider, "BOTTOM", 0, 3);
-	ScaleSlider.Low = ScaleSlider:CreateFontString(nil, "ARTWORK");
-	ScaleSlider.Low:SetFont(T_UIDefinition.frameNormalFont, T_UIDefinition.frameNormalFontSize, T_UIDefinition.frameNormalFontFlag);
-	ScaleSlider.Low:SetPoint("TOPLEFT", ScaleSlider, "BOTTOMLEFT", 4, 3);
-	ScaleSlider.High = ScaleSlider:CreateFontString(nil, "ARTWORK");
-	ScaleSlider.High:SetFont(T_UIDefinition.frameNormalFont, T_UIDefinition.frameNormalFontSize, T_UIDefinition.frameNormalFontFlag);
-	ScaleSlider.High:SetPoint("TOPRIGHT", ScaleSlider, "BOTTOMRIGHT", -4, 3);
-	ScaleSlider.Low:SetText("|cff00ff000.25|r");
-	ScaleSlider.High:SetText("|cffff00004.00|r");
-	Pin.ScaleSlider = ScaleSlider;
 	ScaleSlider:HookScript("OnValueChanged", function(self, value, userInput)
 		value = value + 0.005;
 		value = value - value % 0.01;
 		if userInput then
 			VT.SET.board.scale = value;
 			Frame:SetScale(value);
-			Frame:ClearAllPoints();
-			Frame:SetPoint("TOPRIGHT", nil, "BOTTOMLEFT", VT.SET.board.pos[1] / value, VT.SET.board.pos[2] / value);
 		end
 		self.Text:SetText(value);
 	end);
@@ -5385,11 +5383,8 @@ local function LF_CreateBoard()
 	else
 		Frame:F_Unlock();
 	end
-	if VT.SET.board.pos then
-		Frame:SetPoint("TOPRIGHT", nil, "BOTTOMLEFT", VT.SET.board.pos[1] / VT.SET.board.scale, VT.SET.board.pos[2] / VT.SET.board.scale);
-	else
-		Frame:SetPoint("TOP", 0, -20);
-	end
+	Pin:SetPoint("TOPRIGHT", nil, "BOTTOMLEFT", VT.SET.board.pos[1], VT.SET.board.pos[2]);
+	ScaleSlider:SetValue(VT.SET.board.scale);
 	Frame:SetScale(VT.SET.board.scale);
 	if VT.SET.board.showscale ~= false then
 		ScaleSlider:Show();
