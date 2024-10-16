@@ -210,7 +210,7 @@ local __ala_meta__ = _G.__ala_meta__;
 			end
 			nButtonsShown = num;
 			--scrollChild:SetHeight(buttonHeight * nButtonsShown);
-			scrollBar:SetStepsPerPage(nButtonsShown - 2);
+			-- scrollBar:SetStepsPerPage(nButtonsShown - 2);
 		end
 
 
