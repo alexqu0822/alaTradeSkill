@@ -773,6 +773,20 @@ end
 			obj:_SetAlpha(1.0);
 			obj:_EnableMouse(true);
 		end
+		local function LF_HookALAScrollBarOnValueChanged(self, val)
+			val = val or self:GetValue();
+			local minVal, maxVal = self:GetMinMaxValues();
+			if minVal >= val then
+				self.ScrollUpButton:Disable();
+			else
+				self.ScrollUpButton:Enable();
+			end
+			if maxVal <= val then
+				self.ScrollDownButton:Disable();
+			else
+				self.ScrollDownButton:Enable();
+			end
+		end
 		function LT_SharedMethod.ModifyALAScrollFrame(ScrollFrame)
 			local children = { ScrollFrame:GetChildren() };
 			for index = 1, #children do
@@ -787,44 +801,60 @@ end
 						end
 						obj:GetThumbTexture():Show();
 					end
-					obj:SetWidth(16);
+					obj:SetWidth(12);
 					obj:ClearAllPoints();
 					obj:SetPoint("TOPRIGHT", ScrollFrame, "TOPRIGHT", 0, -16);
 					obj:SetPoint("BOTTOMRIGHT", ScrollFrame, "BOTTOMRIGHT", 0, 16);
 					local up = CreateFrame('BUTTON', nil, obj);
-					up:SetSize(18, 16);
-					up:SetPoint("BOTTOM", obj, "TOP");
+					up:SetSize(12, 16);
+					up:SetPoint("BOTTOMLEFT", obj, "TOPLEFT", -1, 0);
+					up:SetPoint("BOTTOMRIGHT", obj, "TOPRIGHT", 1, 0);
 					up:SetScript("OnClick", function(self)
 						obj:SetValue(obj:GetValue() - obj:GetValueStep());
 					end);
 					obj.ScrollUpButton = up;
 					local down = CreateFrame('BUTTON', nil, obj);
-					down:SetSize(18, 16);
-					down:SetPoint("TOP", obj, "BOTTOM");
+					down:SetSize(12, 16);
+					down:SetPoint("TOPLEFT", obj, "BOTTOMLEFT", -1, 0);
+					down:SetPoint("TOPRIGHT", obj, "BOTTOMRIGHT", 1, 0);
 					down:SetScript("OnClick", function(self)
 						obj:SetValue(obj:GetValue() + obj:GetValueStep());
 					end);
 					obj.ScrollDownButton = down;
-					local function LF_HookALAScrollBarOnValueChanged(self, val)
-						val = val or self:GetValue();
-						local minVal, maxVal = self:GetMinMaxValues();
-						if minVal >= val then
-							up:Disable();
-						else
-							up:Enable();
-						end
-						if maxVal <= val then
-							down:Disable();
-						else
-							down:Enable();
-						end
-					end
 					obj:HookScript("OnValueChanged", LF_HookALAScrollBarOnValueChanged);
 					hooksecurefunc(ScrollFrame, "SetNumValue", function(self)
 						LF_HookALAScrollBarOnValueChanged(obj);
 					end);
 					break;
 				end
+			end
+		end
+		function LT_SharedMethod.ModifyBLZScrollBar(ScrollBar)
+			local frame = CreateFrame('FRAME', nil, ScrollBar:GetParent());
+			frame:EnableMouse(false);
+			frame:SetSize(ScrollBar:GetSize());
+			local i = 1;
+			while true do
+				local p, r, rp, x, y = ScrollBar:GetPoint(i);
+				if p == nil then
+					break;
+				end
+				frame:SetPoint(p, r, rp, x, y);
+				i = i + 1;
+			end
+			ScrollBar:ClearAllPoints();
+			ScrollBar:SetPoint("TOPRIGHT", frame, "TOPRIGHT");
+			ScrollBar:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT");
+			ScrollBar:SetWidth(12);
+			if ScrollBar.ScrollUpButton then
+				ScrollBar.ScrollUpButton:ClearAllPoints();
+				ScrollBar.ScrollUpButton:SetPoint("BOTTOMLEFT", ScrollBar, "TOPLEFT", -1, 0);
+				ScrollBar.ScrollUpButton:SetPoint("BOTTOMRIGHT", ScrollBar, "TOPRIGHT", 1, 0);
+			end
+			if ScrollBar.ScrollDownButton then
+				ScrollBar.ScrollDownButton:ClearAllPoints();
+				ScrollBar.ScrollDownButton:SetPoint("TOPLEFT", ScrollBar, "BOTTOMLEFT", -1, 0);
+				ScrollBar.ScrollDownButton:SetPoint("TOPRIGHT", ScrollBar, "BOTTOMRIGHT", 1, 0);
 			end
 		end
 		--	style
@@ -940,6 +970,7 @@ end
 			end
 			--
 			local bar = ScrollFrame.ScrollBar;
+			bar:SetWidth(12);
 			VT.__uireimp._SetSimpleBackdrop(bar, 0, 1, 0.0, 0.0, 0.0, 0.0, 0.25, 0.25, 0.25, 1.0);
 			local thumb = bar:GetThumbTexture();
 			if thumb == nil then
@@ -991,9 +1022,12 @@ end
 			end
 			--
 			local bar = ScrollFrame.ScrollBar;
+			bar:SetWidth(16);
 			VT.__uireimp._SetSimpleBackdrop(bar, 0, 1, 0.0, 0.0, 0.0, 0.0, 0.5, 0.5, 0.5, 0.5);
 			bar:SetThumbTexture([[Interface\Buttons\UI-ScrollBar-Knob]]);
-			bar:GetThumbTexture():SetWidth(bar:GetWidth());
+			local thumb = bar:GetThumbTexture();
+			thumb:SetTexCoord(8 / 32, 23 / 32, 7 / 32, 24 / 32);
+			thumb:SetWidth(bar:GetWidth());
 			local up = bar.ScrollUpButton;
 			up:SetNormalTexture([[Interface\Buttons\UI-ScrollBar-ScrollUpButton-Up]]);
 			up:GetNormalTexture():SetTexCoord(0.2, 0.8, 0.25, 0.75);
@@ -3281,7 +3315,7 @@ local function LF_HookFrame(addon, meta)
 			ToggleButton.Frame = Frame;
 
 			local ExpandButton = CreateFrame('BUTTON', nil, HookedFrame);
-			ExpandButton:SetSize(18, 18);
+			ExpandButton:SetSize(16, 14);
 			ExpandButton:SetNormalTexture(T_UIDefinition.texture_expand);
 			ExpandButton:SetPushedTexture(T_UIDefinition.texture_expand);
 			ExpandButton:SetHighlightTexture(T_UIDefinition.texture_expand);
@@ -3291,7 +3325,7 @@ local function LF_HookFrame(addon, meta)
 			Frame.ExpandButton = ExpandButton;
 			ExpandButton.Frame = Frame;
 			local ShrinkButton = CreateFrame('BUTTON', nil, HookedFrame);
-			ShrinkButton:SetSize(18, 18);
+			ShrinkButton:SetSize(16, 14);
 			ShrinkButton:SetNormalTexture(T_UIDefinition.texture_shrink);
 			ShrinkButton:SetPushedTexture(T_UIDefinition.texture_shrink);
 			ShrinkButton:SetHighlightTexture(T_UIDefinition.texture_shrink);
@@ -3300,6 +3334,10 @@ local function LF_HookFrame(addon, meta)
 			ShrinkButton:SetScript("OnClick", LT_WidgetMethod.ShrinkButton_OnClick);
 			Frame.ShrinkButton = ShrinkButton;
 			ShrinkButton.Frame = Frame;
+		--	DetailFrame
+			if Frame.HookedDetailBar then
+				LT_SharedMethod.ModifyBLZScrollBar(Frame.HookedDetailBar);
+			end
 		--
 
 		HookedFrame:HookScript("OnHide", function(HookedFrame)

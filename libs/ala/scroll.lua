@@ -11,7 +11,7 @@
 	scroll:CallButtonFuncByDataIndex(index, FuncName, ...)		button:func(...)
 	button:GetDataIndex()
 ]]
-local __version = 4;
+local __version = 5;
 
 local _G = _G;
 _G.__ala_meta__ = _G.__ala_meta__ or {  };
@@ -56,7 +56,7 @@ local __ala_meta__ = _G.__ala_meta__;
 		local ofsIndex = 0;
 		local numValue = -1;
 
-		local sbWidth = 20;
+		local sbWidth = 14;
 
 		scrollFrame:Show();
 		scrollFrame:EnableMouse(true);
