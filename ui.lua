@@ -473,7 +473,7 @@ end
 							Frame.prev_pid = pid;
 							Frame.hash = hash;
 							local list = Frame.list;
-							DataAgent.get_ordered_list(pid, list, hash, set.phase, cur_rank, set.rankoffset, set.rankReversed, set.showKnown, set.showUnkown, set.showHighRank, set.filterClass, set.filterSpec);
+							DataAgent.get_ordered_list(pid, list, hash, set.phase, cur_rank, set.overrideminrank, set.rankoffset, set.rankReversed, set.showKnown, set.showUnkown, set.showHighRank, set.filterClass, set.filterSpec);
 							if set.haveMaterials then
 								for i = #list, 1, -1 do
 									local sid = list[i];
@@ -483,14 +483,14 @@ end
 									end
 								end
 							end
-							do
-								local C_top = 1;
+							do	--	fav
+								local InsertFavAt = 1;
 								for index = 1, #list do
 									local sid = list[index];
 									if VT.FAV[sid] ~= nil then
 										tremove(list, index);
-										tinsert(list, C_top, sid);
-										C_top = C_top + 1;
+										tinsert(list, InsertFavAt, sid);
+										InsertFavAt = InsertFavAt + 1;
 									end
 								end
 							end
@@ -504,6 +504,7 @@ end
 							Frame.ScrollFrame:Update();
 							Frame:F_RefreshSetFrame();
 							Frame:F_RefreshSearchEdit();
+							Frame:F_RefreshOverrideMinRank();
 							Frame:F_RefreshRankOffset();
 							LT_SharedMethod.UpdateProfitFrame(Frame);
 							set.update = nil;
@@ -636,15 +637,15 @@ end
 			},
 		};
 	function LT_SharedMethod.ExplorerFilterList(Frame, stat, filter, searchText, searchNameOnly, list, check_hash, phase, rank, rankReversed, showKnown, showUnkown, showHighRank, filterClass, filterSpec, donot_wipe_list)
-		DataAgent.get_ordered_list(filter.Skill, list, check_hash, phase, rank, nil, rankReversed, showKnown, showUnkown, showHighRank, filterClass, filterSpec, donot_wipe_list);
-		do
-			local C_top = 1;
+		DataAgent.get_ordered_list(filter.Skill, list, check_hash, phase, rank, nil, nil, rankReversed, showKnown, showUnkown, showHighRank, filterClass, filterSpec, donot_wipe_list);
+		do	--	fav
+			local InsertFavAt = 1;
 			for index = 1, #list do
 				local sid = list[index];
 				if VT.FAV[sid] then
 					tremove(list, index);
-					tinsert(list, C_top, sid);
-					C_top = C_top + 1;
+					tinsert(list, InsertFavAt, sid);
+					InsertFavAt = InsertFavAt + 1;
 				end
 			end
 		end
@@ -2012,7 +2013,7 @@ end
 			Frame.ExpandButton:Show();
 			Frame.ShrinkButton:Hide();
 			Frame.TextureLineBottom:Show();
-			Frame.HookedRankFrame:SetWidth(240);
+			Frame.HookedRankFrame:SetWidth(210);
 			SetUIPanelAttribute(Frame.HookedFrame, 'width', 353);
 			_G[T_StyleLayout.C_VariableName_NumSkillListButton] = layout.scroll_button_num;
 			for index = layout.scroll_button_num + 1, T_StyleLayout.expand.scroll_button_num do
@@ -2083,6 +2084,7 @@ end
 				T_HookedFrameButtons.DecrementButton:SetSize(23, 22);
 			end
 			T_HookedFrameButtons.CloseButton:SetSize(32, 32);
+			T_HookedFrameButtons.OverrideMinRankButton:SetSize(40, 20);
 			T_HookedFrameButtons.RankOffsetButton:SetSize(40, 20);
 			local backup = T_HookedFrameWidgets.backup;
 			for _, Button in next, T_HookedFrameButtons do
@@ -2200,6 +2202,7 @@ end
 				T_HookedFrameButtons.DecrementButton:SetSize(14, 14);
 			end
 			T_HookedFrameButtons.CloseButton:SetSize(16, 16);
+			T_HookedFrameButtons.OverrideMinRankButton:SetSize(32, 14);
 			T_HookedFrameButtons.RankOffsetButton:SetSize(32, 14);
 			local backup = T_HookedFrameWidgets.backup;
 			local T_ButtonModernTexture = T_HookedFrameWidgets.T_ButtonModernTexture;
@@ -2361,12 +2364,27 @@ end
 			T_ToggleOnSkill[index]:SetShown(val);
 		end
 	end
+	function LT_FrameMethod.F_RefreshOverrideMinRank(Frame)
+		local pid = Frame.flag or DataAgent.get_pid_by_pname(Frame.F_GetSkillName());
+		if pid ~= nil then
+			local set = VT.SET[pid];
+			local var = Frame.notlinked and VT.VAR[pid] or LT_LinkedSkillVar;
+			Frame.OverrideMinRankSlider:SetMinMaxValues(1, var.cur_rank or 1);
+			if set.overrideminrank ~= nil and set.overrideminrank > 0 then
+				Frame.OverrideMinRankButton:SetText(set.overrideminrank);
+				Frame.OverrideMinRankSlider:SetValue(set.overrideminrank);
+			else
+				Frame.OverrideMinRankButton:SetText("0");
+				Frame.OverrideMinRankSlider:SetValue(0);
+			end
+		end
+	end
 	function LT_FrameMethod.F_RefreshRankOffset(Frame)
 		local pid = Frame.flag or DataAgent.get_pid_by_pname(Frame.F_GetSkillName());
 		if pid ~= nil then
 			local set = VT.SET[pid];
 			local var = Frame.notlinked and VT.VAR[pid] or LT_LinkedSkillVar;
-			Frame.RankOffsetSlider:SetMinMaxValues(1, var.max_rank ~= nil and var.max_rank > 1 and var.max_rank or 75);
+			Frame.RankOffsetSlider:SetMinMaxValues(var.cur_rank and (var.cur_rank - var.cur_rank % 5.0) or 1, var.max_rank ~= nil and var.max_rank > 1 and var.max_rank or 75);
 			if set.rankoffset ~= nil and set.rankoffset > 0 then
 				Frame.RankOffsetButton:SetText("+" .. set.rankoffset);
 				Frame.RankOffsetSlider:SetValue(var.cur_rank + set.rankoffset);
@@ -2547,6 +2565,27 @@ end
 	function LT_WidgetMethod.ShrinkButton_OnClick(self)
 		self.Frame:F_Expand(false);
 	end
+	function LT_WidgetMethod.OverrideMinRankSlider__OnValueChanged(self, value, userInput)
+		if userInput then
+			local Frame = self.Frame;
+			local pid = Frame.flag or DataAgent.get_pid_by_pname(Frame.F_GetSkillName());
+			if pid ~= nil then
+				local set = VT.SET[pid];
+				local var = Frame.notlinked and VT.VAR[pid] or LT_LinkedSkillVar;
+				value = value + 0.5; value = value - value % 1.0;
+				value = value + 0.1; value = value - value % 5.0;
+				local cur = var.cur_rank - var.cur_rank % 5.0;
+				if value > cur then
+					value = cur;
+				end
+				if set.overrideminrank ~= value then
+					set.overrideminrank = value;
+					Frame.update = true;
+					MT._TimerStart(Frame.F_Update, 0.2, 1);
+				end
+			end
+		end
+	end
 	function LT_WidgetMethod.RankOffsetSlider__OnValueChanged(self, value, userInput)
 		if userInput then
 			local Frame = self.Frame;
@@ -2557,9 +2596,11 @@ end
 				value = value + 0.5; value = value - value % 1.0;
 				value = value - var.cur_rank;
 				value = value + 0.1; value = value - value % 5.0 + 5;
-				set.rankoffset = value;
-				Frame.update = true;
-				MT._TimerStart(Frame.F_Update, 0.2, 1);
+				if set.rankoffset ~= value then
+					set.rankoffset = value;
+					Frame.update = true;
+					MT._TimerStart(Frame.F_Update, 0.2, 1);
+				end
 			end
 		end
 	end
@@ -3291,19 +3332,43 @@ local function LF_HookFrame(addon, meta)
 			Frame.PortraitBorder = PortraitBorder;
 		--	Rank Offset
 			local HookedRankFrame = meta.HookedRankFrame;
+			--
+			local OverrideMinRankButton = CreateFrame('BUTTON', nil, Frame, "UIPanelButtonTemplate");
+			OverrideMinRankButton:SetSize(40, 20);
+			OverrideMinRankButton:SetPoint("CENTER", HookedRankFrame, "LEFT", -20, 0);
+			OverrideMinRankButton:SetText("0");
+			Frame.OverrideMinRankButton = OverrideMinRankButton;
+			local OverrideMinRankSlider = CreateFrame('SLIDER', nil, Frame);
+			OverrideMinRankSlider:SetOrientation("HORIZONTAL");
+			OverrideMinRankSlider:SetThumbTexture([[Interface\Buttons\UI-SliderBar-Button-Horizontal]]);
+			local OverrideMinRankThumb = OverrideMinRankSlider:GetThumbTexture();
+			OverrideMinRankThumb:SetWidth(1);
+			OverrideMinRankThumb:SetHeight(16);
+			OverrideMinRankThumb:SetColorTexture(1.0, 0.8, 0.6, 1.0);
+			OverrideMinRankSlider:SetPoint("LEFT", HookedRankFrame, "LEFT", 0, 0);
+			OverrideMinRankSlider:SetPoint("RIGHT", HookedRankFrame:GetStatusBarTexture(), "RIGHT", 0, 0);
+			OverrideMinRankSlider:SetHeight(16);
+			OverrideMinRankSlider:SetMinMaxValues(1, 450);
+			OverrideMinRankSlider:SetValueStep(1);
+			OverrideMinRankSlider:SetObeyStepOnDrag(true);
+			OverrideMinRankSlider:HookScript("OnValueChanged", LT_WidgetMethod.OverrideMinRankSlider__OnValueChanged);
+			Frame.OverrideMinRankSlider = OverrideMinRankSlider;
+			OverrideMinRankSlider.Frame = Frame;
+			Frame.F_RefreshOverrideMinRank = LT_FrameMethod.F_RefreshOverrideMinRank;
+			--
 			local RankOffsetButton = CreateFrame('BUTTON', nil, Frame, "UIPanelButtonTemplate");
 			RankOffsetButton:SetSize(40, 20);
-			RankOffsetButton:SetPoint("CENTER", HookedRankFrame, "RIGHT", 18, 0);
+			RankOffsetButton:SetPoint("CENTER", HookedRankFrame, "RIGHT", 20, 0);
 			RankOffsetButton:SetText("+0");
 			Frame.RankOffsetButton = RankOffsetButton;
 			local RankOffsetSlider = CreateFrame('SLIDER', nil, Frame);
 			RankOffsetSlider:SetOrientation("HORIZONTAL");
 			RankOffsetSlider:SetThumbTexture([[Interface\Buttons\UI-SliderBar-Button-Horizontal]]);
-			local Thumb = RankOffsetSlider:GetThumbTexture();
-			Thumb:SetWidth(1);
-			Thumb:SetHeight(12);
-			Thumb:SetColorTexture(0.6, 1.0, 0.8, 1.0);
-			RankOffsetSlider:SetPoint("LEFT", HookedRankFrame, "LEFT", 0, 0);
+			local  RankOffsetThumb = RankOffsetSlider:GetThumbTexture();
+			RankOffsetThumb:SetWidth(1);
+			RankOffsetThumb:SetHeight(16);
+			RankOffsetThumb:SetColorTexture(0.6, 1.0, 0.8, 1.0);
+			RankOffsetSlider:SetPoint("LEFT", HookedRankFrame:GetStatusBarTexture(), "RIGHT", 0, 0);
 			RankOffsetSlider:SetPoint("RIGHT", HookedRankFrame, "RIGHT", 0, 0);
 			RankOffsetSlider:SetHeight(16);
 			RankOffsetSlider:SetMinMaxValues(1, 450);
@@ -3345,6 +3410,7 @@ local function LF_HookFrame(addon, meta)
 			T_HookedFrameButtons.CloseButton:ClearAllPoints();
 			T_HookedFrameButtons.CloseButton:SetPoint("CENTER", HookedFrame, "TOPRIGHT", -51, -24);
 			T_HookedFrameButtons.ToggleButton = ToggleButton;
+			T_HookedFrameButtons.OverrideMinRankButton = OverrideMinRankButton;
 			T_HookedFrameButtons.RankOffsetButton = RankOffsetButton;
 			if T_HookedFrameEditboxes ~= nil and T_HookedFrameEditboxes.InputBox then
 				local Left = _G[T_HookedFrameEditboxes.InputBox:GetName() .. "Left"];
@@ -3370,7 +3436,7 @@ local function LF_HookFrame(addon, meta)
 			end
 			local HookedRankFrame = meta.HookedRankFrame;
 			HookedRankFrame:ClearAllPoints();
-			HookedRankFrame:SetPoint("TOP", 0, -42);
+			HookedRankFrame:SetPoint("TOP", 16, -42);
 			local HookedRankFrameName = HookedRankFrame:GetName();
 			local HookedRankFrameSkillName = _G[HookedRankFrameName .. "SkillName"];
 			if HookedRankFrameSkillName ~= nil then HookedRankFrameSkillName:Hide(); end
@@ -3497,9 +3563,9 @@ local function LF_HookFrame(addon, meta)
 		local TabFrame = CreateFrame('FRAME', nil, HookedFrame);
 		TabFrame:SetFrameStrata("HIGH");
 		TabFrame:SetHeight(T_UIDefinition.tabSize + T_UIDefinition.tabInterval * 2);
-		TabFrame:SetPoint("LEFT", Frame);
-		TabFrame:SetPoint("BOTTOM", meta.Widget_AnchorTop, "TOP", 0, -4);
-		TabFrame:SetPoint("LEFT", meta.Widget_AnchorLeftOfTabFrame, "LEFT", 0, 0);
+		TabFrame:SetPoint("LEFT", Frame, "LEFT", 60, 0);
+		TabFrame:SetPoint("BOTTOM", meta.Widget_AnchorTop, "TOP", 0, 0);
+		-- TabFrame:SetPoint("LEFT", meta.Widget_AnchorLeftOfTabFrame, "LEFT", 0, 0);
 		TabFrame:Show();
 		TabFrame.T_Tabs = {  };
 		TabFrame.F_CreateTab = LT_WidgetMethod.TabFrame_CreateTab;
@@ -5203,8 +5269,10 @@ local function LF_CreateBoard()
 	Frame:SetPoint("TOPRIGHT", Pin, "BOTTOMRIGHT", 0, 0);
 	if CT.LOCALE == 'zhCN' or CT.LOCALE == 'zhTW' or CT.LOCALE == 'koKR' then
 		Frame:SetWidth(260);
+		Frame.Width = 260;
 	else
 		Frame:SetWidth(320);
+		Frame.Width = 320;
 	end
 	Frame:SetMovable(true);
 	-- Frame:EnableMouse(true);
@@ -5267,6 +5335,7 @@ local function LF_CreateBoard()
 		local index = self.curLine + 1;
 		self.curLine = index;
 		local Line = T_Lines[index];
+		local Width = 4;
 		if not Line then
 			local LineL = self:CreateFontString(nil, "OVERLAY");
 			LineL:SetFont(T_UIDefinition.frameNormalFont, T_UIDefinition.frameNormalFontSize, T_UIDefinition.frameNormalFontFlag);
@@ -5283,20 +5352,30 @@ local function LF_CreateBoard()
 		if textL then
 			Line[1]:Show();
 			Line[1]:SetText(textL);
+			Width = Width + Line[1]:GetWidth();
 		else
 			Line[1]:Hide();
 		end
 		if textM then
 			Line[2]:Show()
 			Line[2]:SetText(textM);
+			Width = Width + Line[2]:GetWidth();
 		else
 			Line[2]:Hide();
 		end
 		if textR then
 			Line[3]:Show()
 			Line[3]:SetText(textR);
+			Width = Width + Line[3]:GetWidth();
 		else
 			Line[3]:Hide();
+		end
+		if Width > 512 then
+			Width = 512;
+		end
+		if Frame.Width < Width then
+			self:SetWidth(Width);
+			Frame.Width = Width;
 		end
 	end
 	function Frame:F_Clear()

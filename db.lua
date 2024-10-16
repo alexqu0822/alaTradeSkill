@@ -898,13 +898,13 @@ end);
 	function DataAgent.is_name_same_skill(name1, name2)
 		return name1 == name2 or name1 == T_TradeSkill_SameSkillName[name2];
 	end
---	pid, list, check_hash, phase, rank, rankOffset, rankReversed, showKnown, showUnkown, showHighRank, filterClass, filterSpec, donot_wipe | list{ sid, }
+--	pid, list, check_hash, phase, rank, minRankOverride, maxRankOffset, rankReversed, showKnown, showUnkown, showHighRank, filterClass, filterSpec, donot_wipe | list{ sid, }
 local function FilterAdd(list, sid, class, spec, filterClass, filterSpec)
 	if (class == nil or not filterClass or bitband(class, USELFCLASSBIT) ~= 0) and (spec == nil or not filterSpec or T_IsSpecLearned[spec]) then
 		list[#list + 1] = sid;
 	end
 end
-function DataAgent.get_ordered_list(pid, list, check_hash, phase, rank, rankOffset, rankReversed, showKnown, showUnkown, showHighRank, filterClass, filterSpec, donot_wipe)
+function DataAgent.get_ordered_list(pid, list, check_hash, phase, rank, minRankOverride, maxRankOffset, rankReversed, showKnown, showUnkown, showHighRank, filterClass, filterSpec, donot_wipe)
 	if pid == nil then
 		MT.Debug("DataAgent.get_ordered_list|cff00ff00#1L1|r");
 		if not donot_wipe then
@@ -912,7 +912,7 @@ function DataAgent.get_ordered_list(pid, list, check_hash, phase, rank, rankOffs
 		end
 		for pid = DataAgent.DBMINPID, DataAgent.DBMAXPID do
 			if T_TradeSkill_RecipeList[pid] ~= nil then
-				DataAgent.get_ordered_list(pid, list, check_hash, phase, rank, rankOffset, rankReversed, showKnown, showUnkown, showHighRank, filterClass, filterSpec, true);
+				DataAgent.get_ordered_list(pid, list, check_hash, phase, rank, minRankOverride, maxRankOffset, rankReversed, showKnown, showUnkown, showHighRank, filterClass, filterSpec, true);
 			end
 		end
 	elseif T_TradeSkill_RecipeList[pid] ~= nil then
@@ -922,7 +922,8 @@ function DataAgent.get_ordered_list(pid, list, check_hash, phase, rank, rankOffs
 			wipe(list);
 		end
 		phase = phase or DataAgent.CURPHASE;
-		rankOffset = (rankOffset ~= nil and rankOffset > 0) and rankOffset or nil;
+		minRankOverride = (minRankOverride ~= nil and minRankOverride <= rank) and minRankOverride or 0;
+		maxRankOffset = (maxRankOffset ~= nil and maxRankOffset > 0) and maxRankOffset or nil;
 		local notlowerphase = phase >= DataAgent.CURPHASE;
 		if check_hash ~= nil and rank ~= nil then
 			local bonus = T_CharRaceBonus[pid] or 0;
@@ -931,28 +932,28 @@ function DataAgent.get_ordered_list(pid, list, check_hash, phase, rank, rankOffs
 					for i = 1, #recipe do
 						local sid = recipe[i];
 						local info = T_Recipe_Data[sid];
-						if (info[index_phase] <= phase or (notlowerphase and check_hash[sid] ~= nil)) and info[index_grey_rank] + bonus <= rank then
+						if (info[index_phase] <= phase or (notlowerphase and check_hash[sid] ~= nil)) and info[index_learn_rank] >= minRankOverride and info[index_grey_rank] + bonus <= rank then
 							FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 						end
 					end
 					for i = 1, #recipe do
 						local sid = recipe[i];
 						local info = T_Recipe_Data[sid];
-						if (info[index_phase] <= phase or (notlowerphase and check_hash[sid] ~= nil)) and info[index_green_rank] + bonus <= rank and info[index_grey_rank] + bonus > rank then
+						if (info[index_phase] <= phase or (notlowerphase and check_hash[sid] ~= nil)) and info[index_learn_rank] >= minRankOverride and info[index_green_rank] + bonus <= rank and info[index_grey_rank] + bonus > rank then
 							FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 						end
 					end
 					for i = 1, #recipe do
 						local sid = recipe[i];
 						local info = T_Recipe_Data[sid];
-						if (info[index_phase] <= phase or (notlowerphase and check_hash[sid] ~= nil)) and info[index_yellow_rank] + bonus <= rank and info[index_green_rank] + bonus > rank then
+						if (info[index_phase] <= phase or (notlowerphase and check_hash[sid] ~= nil)) and info[index_learn_rank] >= minRankOverride and info[index_yellow_rank] + bonus <= rank and info[index_green_rank] + bonus > rank then
 							FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 						end
 					end
 					for i = 1, #recipe do
 						local sid = recipe[i];
 						local info = T_Recipe_Data[sid];
-						if (info[index_phase] <= phase or (notlowerphase and check_hash[sid] ~= nil)) and info[index_learn_rank] <= rank and info[index_yellow_rank] + bonus > rank then
+						if (info[index_phase] <= phase or (notlowerphase and check_hash[sid] ~= nil)) and info[index_learn_rank] >= minRankOverride and info[index_learn_rank] <= rank and info[index_yellow_rank] + bonus > rank then
 							FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 						end
 					end
@@ -964,8 +965,8 @@ function DataAgent.get_ordered_list(pid, list, check_hash, phase, rank, rankOffs
 								FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 							end
 						end
-					elseif rankOffset ~= nil then
-						local Top = rank + rankOffset;
+					elseif maxRankOffset ~= nil then
+						local Top = rank + maxRankOffset;
 						for i = 1, #recipe do
 							local sid = recipe[i];
 							local info = T_Recipe_Data[sid];
@@ -983,8 +984,8 @@ function DataAgent.get_ordered_list(pid, list, check_hash, phase, rank, rankOffs
 								FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 							end
 						end
-					elseif rankOffset ~= nil then
-						local Top = rank + rankOffset;
+					elseif maxRankOffset ~= nil then
+						local Top = rank + maxRankOffset;
 						for i = 1, #recipe do
 							local sid = recipe[i];
 							local info = T_Recipe_Data[sid];
@@ -996,28 +997,28 @@ function DataAgent.get_ordered_list(pid, list, check_hash, phase, rank, rankOffs
 					for i = #recipe, 1, -1 do
 						local sid = recipe[i];
 						local info = T_Recipe_Data[sid];
-						if (info[index_phase] <= phase or (notlowerphase and check_hash[sid] ~= nil)) and info[index_learn_rank] <= rank and info[index_yellow_rank] + bonus > rank then
+						if (info[index_phase] <= phase or (notlowerphase and check_hash[sid] ~= nil)) and info[index_learn_rank] >= minRankOverride and info[index_learn_rank] <= rank and info[index_yellow_rank] + bonus > rank then
 							FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 						end
 					end
 					for i = #recipe, 1, -1 do
 						local sid = recipe[i];
 						local info = T_Recipe_Data[sid];
-						if (info[index_phase] <= phase or (notlowerphase and check_hash[sid] ~= nil)) and info[index_yellow_rank] + bonus <= rank and info[index_green_rank] + bonus > rank then
+						if (info[index_phase] <= phase or (notlowerphase and check_hash[sid] ~= nil)) and info[index_learn_rank] >= minRankOverride and info[index_yellow_rank] + bonus <= rank and info[index_green_rank] + bonus > rank then
 							FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 						end
 					end
 					for i = #recipe, 1, -1 do
 						local sid = recipe[i];
 						local info = T_Recipe_Data[sid];
-						if (info[index_phase] <= phase or (notlowerphase and check_hash[sid] ~= nil)) and info[index_green_rank] + bonus <= rank and info[index_grey_rank] + bonus > rank then
+						if (info[index_phase] <= phase or (notlowerphase and check_hash[sid] ~= nil)) and info[index_learn_rank] >= minRankOverride and info[index_green_rank] + bonus <= rank and info[index_grey_rank] + bonus > rank then
 							FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 						end
 					end
 					for i = #recipe, 1, -1 do
 						local sid = recipe[i];
 						local info = T_Recipe_Data[sid];
-						if (info[index_phase] <= phase or (notlowerphase and check_hash[sid] ~= nil)) and info[index_grey_rank] + bonus <= rank then
+						if (info[index_phase] <= phase or (notlowerphase and check_hash[sid] ~= nil)) and info[index_learn_rank] >= minRankOverride and info[index_grey_rank] + bonus <= rank then
 							FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 						end
 					end
@@ -1028,7 +1029,7 @@ function DataAgent.get_ordered_list(pid, list, check_hash, phase, rank, rankOffs
 						local sid = recipe[i];
 						if check_hash[sid] ~= nil then
 							local info = T_Recipe_Data[sid];
-							if (info[index_phase] <= phase or notlowerphase) and info[index_grey_rank] + bonus <= rank then
+							if (info[index_phase] <= phase or notlowerphase) and info[index_learn_rank] >= minRankOverride and info[index_grey_rank] + bonus <= rank then
 								FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 							end
 						end
@@ -1037,7 +1038,7 @@ function DataAgent.get_ordered_list(pid, list, check_hash, phase, rank, rankOffs
 						local sid = recipe[i];
 						if check_hash[sid] ~= nil then
 							local info = T_Recipe_Data[sid];
-							if (info[index_phase] <= phase or notlowerphase) and info[index_green_rank] + bonus <= rank and info[index_grey_rank] + bonus > rank then
+							if (info[index_phase] <= phase or notlowerphase) and info[index_learn_rank] >= minRankOverride and info[index_green_rank] + bonus <= rank and info[index_grey_rank] + bonus > rank then
 								FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 							end
 						end
@@ -1046,7 +1047,7 @@ function DataAgent.get_ordered_list(pid, list, check_hash, phase, rank, rankOffs
 						local sid = recipe[i];
 						if check_hash[sid] ~= nil then
 							local info = T_Recipe_Data[sid];
-							if (info[index_phase] <= phase or notlowerphase) and info[index_yellow_rank] + bonus <= rank and info[index_green_rank] + bonus > rank then
+							if (info[index_phase] <= phase or notlowerphase) and info[index_learn_rank] >= minRankOverride and info[index_yellow_rank] + bonus <= rank and info[index_green_rank] + bonus > rank then
 								FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 							end
 						end
@@ -1055,13 +1056,13 @@ function DataAgent.get_ordered_list(pid, list, check_hash, phase, rank, rankOffs
 						local sid = recipe[i];
 						if check_hash[sid] ~= nil then
 							local info = T_Recipe_Data[sid];
-							if (info[index_phase] <= phase or notlowerphase) and info[index_learn_rank] <= rank and info[index_yellow_rank] + bonus > rank then
+							if (info[index_phase] <= phase or notlowerphase) and info[index_learn_rank] >= minRankOverride and info[index_learn_rank] <= rank and info[index_yellow_rank] + bonus > rank then
 								FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 							end
 						end
 					end
-					if rankOffset ~= nil then
-						local Top = rank + rankOffset;
+					if maxRankOffset ~= nil then
+						local Top = rank + maxRankOffset;
 						for i = 1, #recipe do
 							local sid = recipe[i];
 							local info = T_Recipe_Data[sid];
@@ -1071,8 +1072,8 @@ function DataAgent.get_ordered_list(pid, list, check_hash, phase, rank, rankOffs
 						end
 					end
 				else
-					if rankOffset ~= nil then
-						local Top = rank + rankOffset;
+					if maxRankOffset ~= nil then
+						local Top = rank + maxRankOffset;
 						for i = 1, #recipe do
 							local sid = recipe[i];
 							local info = T_Recipe_Data[sid];
@@ -1085,7 +1086,7 @@ function DataAgent.get_ordered_list(pid, list, check_hash, phase, rank, rankOffs
 						local sid = recipe[i];
 						if check_hash[sid] ~= nil then
 							local info = T_Recipe_Data[sid];
-							if (info[index_phase] <= phase or notlowerphase) and info[index_learn_rank] <= rank and info[index_yellow_rank] + bonus > rank then
+							if (info[index_phase] <= phase or notlowerphase) and info[index_learn_rank] >= minRankOverride and info[index_learn_rank] <= rank and info[index_yellow_rank] + bonus > rank then
 								FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 							end
 						end
@@ -1094,7 +1095,7 @@ function DataAgent.get_ordered_list(pid, list, check_hash, phase, rank, rankOffs
 						local sid = recipe[i];
 						if check_hash[sid] ~= nil then
 							local info = T_Recipe_Data[sid];
-							if (info[index_phase] <= phase or notlowerphase) and info[index_yellow_rank] + bonus <= rank and info[index_green_rank] + bonus > rank then
+							if (info[index_phase] <= phase or notlowerphase) and info[index_learn_rank] >= minRankOverride and info[index_yellow_rank] + bonus <= rank and info[index_green_rank] + bonus > rank then
 								FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 							end
 						end
@@ -1103,7 +1104,7 @@ function DataAgent.get_ordered_list(pid, list, check_hash, phase, rank, rankOffs
 						local sid = recipe[i];
 						if check_hash[sid] ~= nil then
 							local info = T_Recipe_Data[sid];
-							if (info[index_phase] <= phase or notlowerphase) and info[index_green_rank] + bonus <= rank and info[index_grey_rank] + bonus > rank then
+							if (info[index_phase] <= phase or notlowerphase) and info[index_learn_rank] >= minRankOverride and info[index_green_rank] + bonus <= rank and info[index_grey_rank] + bonus > rank then
 								FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 							end
 						end
@@ -1112,7 +1113,7 @@ function DataAgent.get_ordered_list(pid, list, check_hash, phase, rank, rankOffs
 						local sid = recipe[i];
 						if check_hash[sid] ~= nil then
 							local info = T_Recipe_Data[sid];
-							if (info[index_phase] <= phase or notlowerphase) and info[index_grey_rank] + bonus <= rank then
+							if (info[index_phase] <= phase or notlowerphase) and info[index_learn_rank] >= minRankOverride and info[index_grey_rank] + bonus <= rank then
 								FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 							end
 						end
@@ -1124,7 +1125,7 @@ function DataAgent.get_ordered_list(pid, list, check_hash, phase, rank, rankOffs
 						local sid = recipe[i];
 						if check_hash[sid] == nil then
 							local info = T_Recipe_Data[sid];
-							if info[index_phase] <= phase and info[index_grey_rank] + bonus <= rank then
+							if info[index_phase] <= phase and info[index_learn_rank] >= minRankOverride and info[index_grey_rank] + bonus <= rank then
 								FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 							end
 						end
@@ -1133,7 +1134,7 @@ function DataAgent.get_ordered_list(pid, list, check_hash, phase, rank, rankOffs
 						local sid = recipe[i];
 						if check_hash[sid] == nil then
 							local info = T_Recipe_Data[sid];
-							if info[index_phase] <= phase and info[index_green_rank] + bonus <= rank and info[index_grey_rank] + bonus > rank then
+							if info[index_phase] <= phase and info[index_learn_rank] >= minRankOverride and info[index_green_rank] + bonus <= rank and info[index_grey_rank] + bonus > rank then
 								FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 							end
 						end
@@ -1142,7 +1143,7 @@ function DataAgent.get_ordered_list(pid, list, check_hash, phase, rank, rankOffs
 						local sid = recipe[i];
 						if check_hash[sid] == nil then
 							local info = T_Recipe_Data[sid];
-							if info[index_phase] <= phase and info[index_yellow_rank] + bonus <= rank and info[index_green_rank] + bonus > rank then
+							if info[index_phase] <= phase and info[index_learn_rank] >= minRankOverride and info[index_yellow_rank] + bonus <= rank and info[index_green_rank] + bonus > rank then
 								FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 							end
 						end
@@ -1151,7 +1152,7 @@ function DataAgent.get_ordered_list(pid, list, check_hash, phase, rank, rankOffs
 						local sid = recipe[i];
 						if check_hash[sid] == nil then
 							local info = T_Recipe_Data[sid];
-							if info[index_phase] <= phase and info[index_learn_rank] <= rank and info[index_yellow_rank] + bonus > rank then
+							if info[index_phase] <= phase and info[index_learn_rank] >= minRankOverride and info[index_learn_rank] <= rank and info[index_yellow_rank] + bonus > rank then
 								FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 							end
 						end
@@ -1166,8 +1167,8 @@ function DataAgent.get_ordered_list(pid, list, check_hash, phase, rank, rankOffs
 								end
 							end
 						end
-					elseif rankOffset ~= nil then
-						local Top = rank + rankOffset;
+					elseif maxRankOffset ~= nil then
+						local Top = rank + maxRankOffset;
 						for i = 1, #recipe do
 							local sid = recipe[i];
 							local info = T_Recipe_Data[sid];
@@ -1187,8 +1188,8 @@ function DataAgent.get_ordered_list(pid, list, check_hash, phase, rank, rankOffs
 								end
 							end
 						end
-					elseif rankOffset ~= nil then
-						local Top = rank + rankOffset;
+					elseif maxRankOffset ~= nil then
+						local Top = rank + maxRankOffset;
 						for i = 1, #recipe do
 							local sid = recipe[i];
 							local info = T_Recipe_Data[sid];
@@ -1201,7 +1202,7 @@ function DataAgent.get_ordered_list(pid, list, check_hash, phase, rank, rankOffs
 						local sid = recipe[i];
 						if check_hash[sid] == nil then
 							local info = T_Recipe_Data[sid];
-							if info[index_phase] <= phase and info[index_learn_rank] <= rank and info[index_yellow_rank] + bonus > rank then
+							if info[index_phase] <= phase and info[index_learn_rank] >= minRankOverride and info[index_learn_rank] <= rank and info[index_yellow_rank] + bonus > rank then
 								FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 							end
 						end
@@ -1210,7 +1211,7 @@ function DataAgent.get_ordered_list(pid, list, check_hash, phase, rank, rankOffs
 						local sid = recipe[i];
 						if check_hash[sid] == nil then
 							local info = T_Recipe_Data[sid];
-							if info[index_phase] <= phase and info[index_yellow_rank] + bonus <= rank and info[index_green_rank] + bonus > rank then
+							if info[index_phase] <= phase and info[index_learn_rank] >= minRankOverride and info[index_yellow_rank] + bonus <= rank and info[index_green_rank] + bonus > rank then
 								FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 							end
 						end
@@ -1219,7 +1220,7 @@ function DataAgent.get_ordered_list(pid, list, check_hash, phase, rank, rankOffs
 						local sid = recipe[i];
 						if check_hash[sid] == nil then
 							local info = T_Recipe_Data[sid];
-							if info[index_phase] <= phase and info[index_green_rank] + bonus <= rank and info[index_grey_rank] + bonus > rank then
+							if info[index_phase] <= phase and info[index_learn_rank] >= minRankOverride and info[index_green_rank] + bonus <= rank and info[index_grey_rank] + bonus > rank then
 								FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 							end
 						end
@@ -1228,7 +1229,7 @@ function DataAgent.get_ordered_list(pid, list, check_hash, phase, rank, rankOffs
 						local sid = recipe[i];
 						if check_hash[sid] == nil then
 							local info = T_Recipe_Data[sid];
-							if info[index_phase] <= phase and info[index_grey_rank] + bonus <= rank then
+							if info[index_phase] <= phase and info[index_learn_rank] >= minRankOverride and info[index_grey_rank] + bonus <= rank then
 								FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 							end
 						end
@@ -1241,7 +1242,7 @@ function DataAgent.get_ordered_list(pid, list, check_hash, phase, rank, rankOffs
 					for i = 1, #recipe do
 						local sid = recipe[i];
 						local info = T_Recipe_Data[sid];
-						if info[index_phase] <= phase or (notlowerphase and check_hash[sid] ~= nil) then
+						if info[index_phase] <= phase and info[index_learn_rank] >= minRankOverride or (notlowerphase and check_hash[sid] ~= nil) then
 							FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 						end
 					end
@@ -1249,7 +1250,7 @@ function DataAgent.get_ordered_list(pid, list, check_hash, phase, rank, rankOffs
 					for i = #recipe, 1, -1 do
 						local sid = recipe[i];
 						local info = T_Recipe_Data[sid];
-						if info[index_phase] <= phase or (notlowerphase and check_hash[sid] ~= nil) then
+						if info[index_phase] <= phase and info[index_learn_rank] >= minRankOverride or (notlowerphase and check_hash[sid] ~= nil) then
 							FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 						end
 					end
@@ -1260,7 +1261,7 @@ function DataAgent.get_ordered_list(pid, list, check_hash, phase, rank, rankOffs
 						local sid = recipe[i];
 						if check_hash[sid] ~= nil then
 							local info = T_Recipe_Data[sid];
-							if info[index_phase] <= phase or notlowerphase then
+							if info[index_phase] <= phase and info[index_learn_rank] >= minRankOverride or notlowerphase then
 								FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 							end
 						end
@@ -1270,7 +1271,7 @@ function DataAgent.get_ordered_list(pid, list, check_hash, phase, rank, rankOffs
 						local sid = recipe[i];
 						if check_hash[sid] ~= nil then
 							local info = T_Recipe_Data[sid];
-							if info[index_phase] <= phase or notlowerphase then
+							if info[index_phase] <= phase and info[index_learn_rank] >= minRankOverride or notlowerphase then
 								FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 							end
 						end
@@ -1282,7 +1283,7 @@ function DataAgent.get_ordered_list(pid, list, check_hash, phase, rank, rankOffs
 						local sid = recipe[i];
 						if check_hash[sid] == nil then
 							local info = T_Recipe_Data[sid];
-							if info[index_phase] <= phase then
+							if info[index_phase] <= phase and info[index_learn_rank] >= minRankOverride then
 								FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 							end
 						end
@@ -1292,7 +1293,7 @@ function DataAgent.get_ordered_list(pid, list, check_hash, phase, rank, rankOffs
 						local sid = recipe[i];
 						if check_hash[sid] == nil then
 							local info = T_Recipe_Data[sid];
-							if info[index_phase] <= phase then
+							if info[index_phase] <= phase and info[index_learn_rank] >= minRankOverride then
 								FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 							end
 						end
@@ -1306,28 +1307,28 @@ function DataAgent.get_ordered_list(pid, list, check_hash, phase, rank, rankOffs
 				for i = 1, #recipe do
 					local sid = recipe[i];
 					local info = T_Recipe_Data[sid];
-					if info[index_phase] <= phase and info[index_grey_rank] + bonus <= rank then
+					if info[index_phase] <= phase and info[index_learn_rank] >= minRankOverride and info[index_grey_rank] + bonus <= rank then
 						FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 					end
 				end
 				for i = 1, #recipe do
 					local sid = recipe[i];
 					local info = T_Recipe_Data[sid];
-					if info[index_phase] <= phase and info[index_green_rank] + bonus <= rank and info[index_grey_rank] + bonus > rank then
+					if info[index_phase] <= phase and info[index_learn_rank] >= minRankOverride and info[index_green_rank] + bonus <= rank and info[index_grey_rank] + bonus > rank then
 						FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 					end
 				end
 				for i = 1, #recipe do
 					local sid = recipe[i];
 					local info = T_Recipe_Data[sid];
-					if info[index_phase] <= phase and info[index_yellow_rank] + bonus <= rank and info[index_green_rank] + bonus > rank then
+					if info[index_phase] <= phase and info[index_learn_rank] >= minRankOverride and info[index_yellow_rank] + bonus <= rank and info[index_green_rank] + bonus > rank then
 						FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 					end
 				end
 				for i = 1, #recipe do
 					local sid = recipe[i];
 					local info = T_Recipe_Data[sid];
-					if info[index_phase] <= phase and info[index_learn_rank] <= rank and info[index_yellow_rank] + bonus > rank then
+					if info[index_phase] <= phase and info[index_learn_rank] >= minRankOverride and info[index_learn_rank] <= rank and info[index_yellow_rank] + bonus > rank then
 						FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 					end
 				end
@@ -1339,8 +1340,8 @@ function DataAgent.get_ordered_list(pid, list, check_hash, phase, rank, rankOffs
 							FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 						end
 					end
-				elseif rankOffset ~= nil then
-					local Top = rank + rankOffset;
+				elseif maxRankOffset ~= nil then
+					local Top = rank + maxRankOffset;
 					for i = 1, #recipe do
 						local sid = recipe[i];
 						local info = T_Recipe_Data[sid];
@@ -1358,8 +1359,8 @@ function DataAgent.get_ordered_list(pid, list, check_hash, phase, rank, rankOffs
 							FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 						end
 					end
-				elseif rankOffset ~= nil then
-					local Top = rank + rankOffset;
+				elseif maxRankOffset ~= nil then
+					local Top = rank + maxRankOffset;
 					for i = 1, #recipe do
 						local sid = recipe[i];
 						local info = T_Recipe_Data[sid];
@@ -1371,28 +1372,28 @@ function DataAgent.get_ordered_list(pid, list, check_hash, phase, rank, rankOffs
 				for i = #recipe, 1, -1 do
 					local sid = recipe[i];
 					local info = T_Recipe_Data[sid];
-					if info[index_phase] <= phase and info[index_learn_rank] <= rank and info[index_yellow_rank] + bonus > rank then
+					if info[index_phase] <= phase and info[index_learn_rank] >= minRankOverride and info[index_learn_rank] <= rank and info[index_yellow_rank] + bonus > rank then
 						FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 					end
 				end
 				for i = #recipe, 1, -1 do
 					local sid = recipe[i];
 					local info = T_Recipe_Data[sid];
-					if info[index_phase] <= phase and info[index_yellow_rank] + bonus <= rank and info[index_green_rank] + bonus > rank then
+					if info[index_phase] <= phase and info[index_learn_rank] >= minRankOverride and info[index_yellow_rank] + bonus <= rank and info[index_green_rank] + bonus > rank then
 						FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 					end
 				end
 				for i = #recipe, 1, -1 do
 					local sid = recipe[i];
 					local info = T_Recipe_Data[sid];
-					if info[index_phase] <= phase and info[index_green_rank] + bonus <= rank and info[index_grey_rank] + bonus > rank then
+					if info[index_phase] <= phase and info[index_learn_rank] >= minRankOverride and info[index_green_rank] + bonus <= rank and info[index_grey_rank] + bonus > rank then
 						FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 					end
 				end
 				for i = #recipe, 1, -1 do
 					local sid = recipe[i];
 					local info = T_Recipe_Data[sid];
-					if info[index_phase] <= phase and info[index_grey_rank] + bonus <= rank then
+					if info[index_phase] <= phase and info[index_learn_rank] >= minRankOverride and info[index_grey_rank] + bonus <= rank then
 						FilterAdd(list, sid, info[index_class], info[index_spec], filterClass, filterSpec);
 					end
 				end

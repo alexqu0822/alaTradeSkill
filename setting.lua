@@ -115,6 +115,7 @@ MT.BuildEnv("setting");
 		showSet = false,
 		showProfit = false,
 		--
+		overrideminrank = 0,
 		rankoffset = 0,
 		showKnown = true,
 		showUnkown = true,
