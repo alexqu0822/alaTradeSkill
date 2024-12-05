@@ -2,8 +2,7 @@
 	by ALA
 --]]--
 --[=[
-	ALAMENU = __menulib.ShowMenu
-	ALAMENU(parent, anchor, data, param, useMousePosition)
+	__menulib.ShowMenu(parent, anchor, data, param, useMousePosition)
 	data
 			handler		(function(Button, param1, param2))
 			param		(any)																	@param1
@@ -33,7 +32,7 @@
 	Button.__onleave(Button, param1, param2) = ele.__onleave or data.__buttononleave
 ]=]
 
-local __version = 240601.0;
+local __version = 241201.0;
 
 local _G = _G;
 _G.__ala_meta__ = _G.__ala_meta__ or {  };
@@ -153,7 +152,7 @@ local uireimp = __ala_meta__.uireimp;
 		uireimp._SetSimpleBackdrop(Menu, -1, 1, MenuBackdropColor[1], MenuBackdropColor[2], MenuBackdropColor[3], MenuBackdropColor[4], MenuBorderColor[1], MenuBorderColor[2], MenuBorderColor[3], MenuBorderColor[4]);
 	end
 	local function CreateMenu()
-		Menu = CreateFrame('BUTTON', nil, UIParent);
+		local Menu = CreateFrame('BUTTON', nil, UIParent);
 		Menu:SetFrameStrata("FULLSCREEN_DIALOG");
 		Menu:SetClampedToScreen(true);
 		Menu:Hide();
@@ -443,5 +442,3 @@ function __menulib:Halt()
 		wipe(frameToMenu);
 	end
 end
-
-_G["ALAMENU"] = ShowMenu;

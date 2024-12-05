@@ -29,7 +29,6 @@ function mod.F_QueryPriceByName(name, num)
 end
 function mod.F_QueryPriceByID(id, num)
 	if id == nil then return nil; end
-	num = num or 1;
 	--[[	--	changed since v3.0
 	if history == nil then
 		if require ~= nil then
@@ -43,6 +42,7 @@ function mod.F_QueryPriceByID(id, num)
 	end
 	local ap = history.market_value(id .. ":0");
 	if ap ~= nil and ap > 0 then
+		num = num or 1;
 		return ap * num;
 	end
 	--]]	--	so query it myself
@@ -58,6 +58,7 @@ function mod.F_QueryPriceByID(id, num)
 		local next_push, daily_min_buyout = strsplit("#", val);
 		if daily_min_buyout ~= nil then
 			daily_min_buyout = tonumber(daily_min_buyout);
+			num = num or 1;
 			return daily_min_buyout ~= nil and daily_min_buyout * num or nil;
 		end
 	end

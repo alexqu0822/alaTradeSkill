@@ -27,7 +27,6 @@ function mod.F_QueryPriceByName(name, num)
 end
 function mod.F_QueryPriceByID(id, num)
 	if id == nil then return nil; end
-	num = num or 1;
 	if GetAuctionBuyoutRange == nil then
 		local Auctipus = Auctipus;
 		if Auctipus ~= nil and Auctipus.API ~= nil and Auctipus.API.GetAuctionBuyoutRange ~= nil then
@@ -38,6 +37,7 @@ function mod.F_QueryPriceByID(id, num)
 	end
 	local minBuyout, maxBuyout, daysElapsed = GetAuctionBuyoutRange(id)
 	if minBuyout ~= nil then
+		num = num or 1;
 		return minBuyout * num;
 	end
 end

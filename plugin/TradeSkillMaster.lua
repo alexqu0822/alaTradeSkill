@@ -27,7 +27,6 @@ function mod.F_QueryPriceByName(name, num)
 end
 function mod.F_QueryPriceByID(id, num)
 	if not id then return nil; end
-	num = num or 1;
 	if GetCustomPriceValue == nil then
 		local TSM_API = TSM_API;
 		if TSM_API ~= nil and TSM_API.GetCustomPriceValue ~= nil then
@@ -38,6 +37,7 @@ function mod.F_QueryPriceByID(id, num)
 	end
 	local p = GetCustomPriceValue("dbminbuyout", "i:" .. id);
 	if p ~= nil then
+		num = num or 1;
 		return p * num;
 	end
 end

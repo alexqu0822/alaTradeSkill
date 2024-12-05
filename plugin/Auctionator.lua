@@ -24,7 +24,6 @@ local mod = {  };
 local GetPrice = nil;
 function mod.F_QueryPriceByName(name, num)
 	if name == nil then return nil; end
-	num = num or 1;
 	if GetPrice == nil then
 		if Atr_GetAuctionPrice ~= nil then
 			GetPrice = Atr_GetAuctionPrice;
@@ -34,13 +33,13 @@ function mod.F_QueryPriceByName(name, num)
 	end
 	local ap = GetPrice(name);
 	if ap ~= nil then
+		num = num or 1;
 		return ap * num;
 	end
 	return nil;
 end
 function mod.F_QueryPriceByID(id, num)
 	if id == nil then return nil; end
-	num = num or 1;
 	if GetPrice == nil then
 		if Auctionator ~= nil and Auctionator.API ~= nil and Auctionator.API.v1 ~= nil then
 			local Get = Auctionator.API.v1.GetAuctionPriceByItemID;
@@ -63,6 +62,7 @@ function mod.F_QueryPriceByID(id, num)
 	end
 	local ap = GetPrice(id);
 	if ap ~= nil and ap > 0 then
+		num = num or 1;
 		return ap * num;
 	end
 end

@@ -1,4 +1,4 @@
-## Interface: 11504
+## Interface: 11505
 ## Title: ala's Trade Skill
 ## Title-zhCN: ala商业技能助手
 ## Title-zhTW: ala商業技能助手
@@ -12,7 +12,7 @@
 ## Author: |cff00ff00ALA|r
 ## Author-zhCN: |cff00ff00ALA|r
 ## Author-zhTW: |cff00ff00ALA|r
-## Version: 114r.241011
+## Version: 114r.241205
 
 load.xml
 

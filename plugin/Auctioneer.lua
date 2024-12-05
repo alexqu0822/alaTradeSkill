@@ -27,7 +27,6 @@ function mod.F_QueryPriceByName(name, num)
 end
 function mod.F_QueryPriceByID(id, num)
 	if not id then return nil; end
-	num = num or 1;
 	if GetItems == nil then
 		local AucAdvanced = AucAdvanced;
 		if AucAdvanced ~= nil
@@ -45,6 +44,7 @@ function mod.F_QueryPriceByID(id, num)
 	if link ~= nil then
 		local imgseen, image, matchBid, matchBuy, lowBid, lowBuy, aSeen, aveBuy = GetItems(link);
 		if lowBuy ~= nil then
+			num = num or 1;
 			return lowBuy * num;
 		end
 	end

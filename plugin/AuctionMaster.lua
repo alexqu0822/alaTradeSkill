@@ -27,7 +27,6 @@ function mod.F_QueryPriceByName(name, num)
 end
 function mod.F_QueryPriceByID(id, num)
 	if id == nil then return nil; end
-	num = num or 1;
 	if GetInfo == nil then
 		if AucMasGetCurrentAuctionInfo ~= nil then
 			GetInfo = AucMasGetCurrentAuctionInfo;
@@ -39,6 +38,7 @@ function mod.F_QueryPriceByID(id, num)
 	if link ~= nil then
 		local _, _, bid, ap = GetInfo(link)
 		if ap ~= nil and ap > 0 then
+			num = num or 1;
 			return ap * num;
 		end
 	end

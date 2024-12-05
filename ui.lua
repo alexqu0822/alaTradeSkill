@@ -34,7 +34,7 @@ local DT = __private.DT;
 	local wipe = table.wipe;
 
 	local CreateFrame = CreateFrame;
-	local GetMouseFocus = GetMouseFocus or VT._comptb.GetMouseFocus;
+	local GetMouseFocus = VT._comptb.GetMouseFocus;
 	local IsShiftKeyDown = IsShiftKeyDown;
 	local IsAltKeyDown = IsAltKeyDown;
 	local IsControlKeyDown = IsControlKeyDown;
@@ -3859,6 +3859,12 @@ local function LF_HookFrame(addon, meta)
 		Frame.F_UpdateRankInfo = LT_FrameMethod.F_UpdateRankInfo;
 	end
 
+	do	--	Craft Queue
+		if Frame.IsQueueEnabled then
+			local AddQueue = CreateFrame('FRAME', nil, Frame);
+		end
+	end
+
 	ALA_HOOK_ChatEdit_InsertLink(function(link, addon)
 		if Frame:IsVisible() and addon ~= __addon and not (BrowseName ~= nil and BrowseName:IsVisible()) then
 			local name, _, _, _, _, _, _, _, loc = GetItemInfo(link);
@@ -4195,6 +4201,8 @@ local function LF_AddOnCallback_Blizzard_TradeSkillUI(addon)
 		T_FunctionName = {
 			F_SetSelection = "TradeSkillFrame_SetSelection",
 		},
+
+		IsQueueEnabled = true,
 	};
 	local Frame = LF_HookFrame(addon, meta);
 	VT.UIFrames[addon] = Frame;

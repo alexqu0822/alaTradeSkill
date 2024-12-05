@@ -11,6 +11,7 @@ local DT = __private.DT;
 
 -->		upvalue
 	local GetItemInfo = GetItemInfo;
+	local _G = _G;
 -->
 
 -->		****
@@ -26,9 +27,8 @@ function mod.F_QueryPriceByName(name, num)
 end
 function mod.F_QueryPriceByID(id, num)
 	if not id then return nil; end
-	num = num or 1;
 	if prices == nil then
-		local TDDB_AUCTION = TDDB_AUCTION;
+		local TDDB_AUCTION = _G.TDDB_AUCTION;
 		if TDDB_AUCTION ~= nil
 			and TDDB_AUCTION.global ~= nil
 			and TDDB_AUCTION.global.prices ~= nil
@@ -40,6 +40,7 @@ function mod.F_QueryPriceByID(id, num)
 	end
 	local price = prices[id .. ":0"];
 	if price ~= nil then
+		num = num or 1;
 		return price * num;
 	end
 end

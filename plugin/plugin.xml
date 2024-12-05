@@ -2,6 +2,7 @@
 ..\FrameXML\UI.xsd">
 
 	<script file = "AuctionBase.lua" />
+	<script file = "!Pig.lua" />
 	<script file = "alaTrade.lua" />
 	<script file = "Auctionator.lua" />
 	<script file = "AuctionDB.lua" />

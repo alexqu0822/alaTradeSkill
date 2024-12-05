@@ -27,7 +27,6 @@ function mod.F_QueryPriceByName(name, num)
 end
 function mod.F_QueryPriceByID(id, num)
 	if id == nil then return nil; end
-	num = num or 1;
 	if GetItemFromCache == nil then
 		if AuctionFaster ~= nil
 			and AuctionFaster.modules ~= nil
@@ -44,6 +43,7 @@ function mod.F_QueryPriceByID(id, num)
 		if cacheItem ~= nil then
 			local ap = cacheItem.buy;
 			if ap ~= nil and ap > 0 then
+				num = num or 1;
 				return ap * num;
 			end
 		end

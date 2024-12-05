@@ -27,7 +27,6 @@ function mod.F_QueryPriceByName(name, num)
 end
 function mod.F_QueryPriceByID(id, num)
 	if not id then return nil; end
-	num = num or 1;
 	if GetInfo == nil then
 		local AuctionDB = AuctionDB;
 		if AuctionDB ~= nil and AuctionDB.AHGetAuctionInfoByLink ~= nil then
@@ -40,6 +39,7 @@ function mod.F_QueryPriceByID(id, num)
 	if link ~= nil then
 		local info = GetInfo(link);
 		if info ~= nil and info.minBuyout ~= nil then
+			num = num or 1;
 			return info.minBuyout * num;
 		end
 	end
