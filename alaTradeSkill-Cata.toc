@@ -1,4 +1,4 @@
-## Interface: 40400
+## Interface: 40401
 ## Title: ala's Trade Skill
 ## Title-zhCN: ala商业技能助手
 ## Title-zhTW: ala商業技能助手
