@@ -39,6 +39,27 @@ local min, max = math.min, math.max, math;
 local CreateFrame = CreateFrame;
 local UIParent = UIParent;
 local _G = _G;
+local InterfaceOptions_AddCategory = InterfaceOptions_AddCategory;
+if InterfaceOptions_AddCategory == nil then
+	function InterfaceOptions_AddCategory(frame, addOn, position)
+		-- cancel is no longer a default option. May add menu extension for this.
+		frame.OnCommit = frame.okay;
+		frame.OnDefault = frame.default;
+		frame.OnRefresh = frame.refresh;
+
+		if frame.parent then
+			local category = Settings.GetCategory(frame.parent);
+			local subcategory, layout = Settings.RegisterCanvasLayoutSubcategory(category, frame, frame.name, frame.name);
+			subcategory.ID = frame.name;
+			return subcategory, category;
+		else
+			local category, layout = Settings.RegisterCanvasLayoutCategory(frame, frame.name, frame.name);
+			category.ID = frame.name;
+			Settings.RegisterAddOnCategory(category);
+			return category;
+		end
+	end
+end
 
 local TEXTURE_PATH = strmatch(debugstack(), [[(Interface[^:"|]+[/\])[^/\:"|]+%.lua]]) .. [[Media\Texture\]];
 local SettingUIColWidth = 180;
