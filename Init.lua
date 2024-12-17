@@ -114,6 +114,16 @@ local DT = {  }; __private.DT = DT;		--	data
 -->		constant
 	CT.CLIENTVERSION, CT.BUILDNUMBER, CT.BUILDDATE, CT.TOCVERSION = GetBuildInfo();
 	CT.ISCLASSIC = CT.TOCVERSION >= 11400 and CT.TOCVERSION < 20000;
+	CT.SEASON = C_Seasons and C_Seasons.HasActiveSeason() and C_Seasons.GetActiveSeason() or nil;
+	--[=[
+		--	Enum.SeasonID
+		0 = Enum.SeasonID.NoSeason
+		1 = Enum.SeasonID.SeasonOfMastery
+		2 = Enum.SeasonID.SeasonOfDiscovery
+		3 = Enum.SeasonID.Hardcore
+		11 = Enum.SeasonID.Fresh
+		12 = Enum.SeasonID.FreshHardcore
+	--]=]
 	CT.ISBCC = CT.TOCVERSION >= 20500 and CT.TOCVERSION < 30000;
 	CT.ISWLK = CT.TOCVERSION >= 30400 and CT.TOCVERSION < 40000;
 	CT.ISCATA = CT.TOCVERSION >= 40400 and CT.TOCVERSION < 90000;

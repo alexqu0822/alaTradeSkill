@@ -172,29 +172,59 @@ DataAgent.T_TradeSkill_HasUI = {		--	[pid] = bool
 	[15] = true,	--	Jewelcrafting
 };
 
-local index_validated = 1;
-local index_phase = 2;
-local index_pid = 3;
-local index_sid = 4;
-local index_cid = 5;
-local index_learn_rank = 6;
-local index_yellow_rank = 7;
-local index_green_rank = 8;
-local index_grey_rank = 9;
-local index_num_made_min = 10;
-local index_num_made_max = 11;
-local index_reagents_id = 12;
-local index_reagents_count = 13;
-local index_trainer = 14;
-local index_train_price = 15;
-local index_recipe = 16;
-local index_quest = 17;
-local index_object = 18;
-local index_class = 19;
-local index_spec = 20;
+-->		Index
+	local index_validated = 1;
+	local index_phase = 2;
+	local index_pid = 3;
+	local index_sid = 4;
+	local index_cid = 5;
+	local index_learn_rank = 6;
+	local index_yellow_rank = 7;
+	local index_green_rank = 8;
+	local index_grey_rank = 9;
+	local index_num_made_min = 10;
+	local index_num_made_max = 11;
+	local index_reagents_id = 12;
+	local index_reagents_count = 13;
+	local index_trainer = 14;
+	local index_train_price = 15;
+	local index_recipe = 16;
+	local index_quest = 17;
+	local index_object = 18;
+	local index_class = 19;
+	local index_spec = 20;
+-->
 
 local T_Recipe_Data = {
 --	TradeSkill
+	--[[
+		SpellEffect.db2
+			sid = 36SpellID
+			cid = 14EffectItemType
+			min = 9EffectBasePoints + 1
+			max = 9EffectBasePoints + 13EffectDieSides
+		SpellReagents.db2
+			sid = 2SpellID
+			reagent = 3Reagent...10
+			num = 11ReagentCount...19
+		SkillLineAbility.db2
+			通过3SkillLine查表SkillLine.db2得技能名筛选
+			sid = 4SpellID
+			pid = *(3SkillLine)
+			Grey = 10TrivialSkillLineRankLow
+			Yellow = 9TrivialSkillLineRankHigh
+		SkillLine.db2
+			6SkillLine
+			1DisplayName_lang
+		ItemEffect.db2
+			sid = 8SpellID
+			recipe = 10ParentItemID * SpellName
+			--	Skip Spell:843
+	--]]
+	--------------.-PHA-PID-----SID-----CID-LEARN--Y--GREEN-GREY-MIN--MAX---------R-------N--TRAINER-PRICE-RECIPE-QUEST-OBJ-CLASS-SPEC
+	--------------1--2---3-------4-------5----6----7----8----9---10---11---------12------13---14-------15-----16---17---18---19----20
+--
+	--
 	[3275]  = { nil, 1,  1,   3275,   1251,   1,  30,  45,  60,   1,   1, { 2589, }, { 1, }, },
 	[3276]  = { nil, 1,  1,   3276,   2581,  40,  50,  75, 100,   1,   1, { 2589, }, { 2, }, true, 100, },
 	[3277]  = { nil, 1,  1,   3277,   3530,  80,  80, 115, 150,   1,   1, { 2592, }, { 1, }, true, 250, },

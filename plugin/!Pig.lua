@@ -28,7 +28,7 @@ MT.RegsiterAuctionModOnLoad("!Pig", function()
 			local info = PIGA["AHPlus"]["CacheData"][CT.SELFREALM][name];
 			if info then
 				num = num or 1;
-				return info[2][1][1] * num;
+				return info[2][#info[2]][1] * num;
 			end
 		end
 	end
