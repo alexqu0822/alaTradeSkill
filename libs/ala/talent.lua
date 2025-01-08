@@ -2,7 +2,7 @@
 	by ALA
 --]]--
 
-local __version = 240627-2.1;
+local __version = 250101;
 
 local _G = _G;
 _G.__ala_meta__ = _G.__ala_meta__ or {  };
@@ -131,7 +131,12 @@ end
 	local SUPPORT_GLYPH = CLIENT_MAJOR >= 3 and CLIENT_MAJOR <= 6 or false;
 	local SUPPORT_ENGRAVING = C_Engraving ~= nil and C_Engraving.IsEngravingEnabled ~= nil and C_Engraving.IsEngravingEnabled() or false;
 	--
-	local COMM_PREFIX_LIST = { "ATEADD", "ATECOM", "EMUADD", "EMUCOM", };
+	local COMM_PREFIX_LIST = {
+		"EMUCOM",
+		"ATEADD",
+		"ATECOM",
+		"EMUADD",
+	};
 	local COMM_PREFIX_HASH = {  };
 	local COMM_HEART_BEAT = "**heart*beat**";
 	local COMM_LWRAVL_PREFIX = 1;

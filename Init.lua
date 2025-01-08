@@ -39,7 +39,7 @@ local DT = {  }; __private.DT = DT;		--	data
 	VT.__super = __ala_meta__;
 	VT.__uireimp = __ala_meta__.uireimp;
 	VT.__menulib = __ala_meta__.__menulib;
-	VT.__scrolllib = _G.alaScrollList;
+	VT.__scrolllib = __ala_meta__.__scrolllib;
 
 -->		Compatible
 	local _comptb = {  };

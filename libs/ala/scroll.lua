@@ -2,8 +2,7 @@
 	by ALA
 --]]--
 --[[
-	ALASCR = ScrollList.CreateScrollFrame
-	scroll = ALASCR(parent, width, height, buttonHeight, funcToCreateButton(parent: ScrollFrame.ScrollChild, index, buttonHeight), functToSetButton(button, data_index))
+	scroll = __ala_meta__.__scrolllib.CreateScrollFrame(parent, width, height, buttonHeight, funcToCreateButton(parent: ScrollFrame.ScrollChild, index, buttonHeight), functToSetButton(button, data_index))
 	scroll:SetNumValue(num)
 	scroll:HandleButtonByDataIndex(index, func, ...)			func(button, ...)
 	scroll:HandleButtonByRawIndex(index, func, ...)				func(button, ...)
@@ -11,25 +10,27 @@
 	scroll:CallButtonFuncByDataIndex(index, FuncName, ...)		button:func(...)
 	button:GetDataIndex()
 ]]
-local __version = 5;
+local __version = 250101;
 
 local _G = _G;
 _G.__ala_meta__ = _G.__ala_meta__ or {  };
 local __ala_meta__ = _G.__ala_meta__;
 
 -->			versioncheck
-	local ScrollList = _G.alaScrollList;
-	if ScrollList ~= nil and ScrollList.__minor ~= nil and ScrollList.__minor >= __version then
+	local __scrolllib = __ala_meta__.__scrolllib;
+	if __scrolllib ~= nil and __scrolllib.__minor ~= nil and __scrolllib.__minor >= __version then
 		return;
-	elseif ScrollList == nil or ScrollList.Halt == nil then
-		ScrollList = {  };
-		_G.alaScrollList = ScrollList;
+	elseif __scrolllib == nil then
+		__scrolllib = {  };
+		__ala_meta__.__scrolllib = __scrolllib;
 	else
-		ScrollList:Halt();
+		if __scrolllib.Halt ~= nil then
+			__scrolllib:Halt(__scrolllib.__minor);
+		end
 	end
-	ScrollList = ScrollList or {  };
-	ScrollList.__minor = __version;
-	ScrollList._Created = ScrollList._Created or {  };
+	__scrolllib.__minor = __version;
+	__scrolllib._Created = __scrolllib._Created or {  };
+
 -->
 
 -->			upvalue
@@ -44,7 +45,7 @@ local __ala_meta__ = _G.__ala_meta__;
 	local def_inner_size = 64;
 
 -->
-	function ScrollList.CreateScrollFrame(parent, width, height, buttonHeight, funcToCreateButton, functToSetButton)
+	function __scrolllib.CreateScrollFrame(parent, width, height, buttonHeight, funcToCreateButton, functToSetButton)
 		width = width and max(width, def_inner_size) or def_inner_size;
 		height = height and max(height, def_inner_size) or def_inner_size;
 
@@ -287,12 +288,11 @@ local __ala_meta__ = _G.__ala_meta__;
 
 		scrollFrame:SetNumValue(0);
 
-		ScrollList._Created[scrollFrame] = __version;
+		__scrolllib._Created[scrollFrame] = __version;
 
 		return scrollFrame;
 	end
 
 -->
 
-_G["ALASCR"] = ScrollList.CreateScrollFrame;
 

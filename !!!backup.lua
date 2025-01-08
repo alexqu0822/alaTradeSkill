@@ -441,7 +441,7 @@ do	--	supreme craft
 			supreme.frame = hooked_frame.frame;
 			hooked_frame.supreme = supreme;
 
-			local scroll = ALASCR(supreme, nil, nil, ui_style.supremeListButtonHeight, __private.ui_CreateSupremeListButton, __private.ui_SetSupremeListButton);
+			local scroll = __ala_meta__.__scrolllib.CreateScrollFrame(supreme, nil, nil, ui_style.supremeListButtonHeight, __private.ui_CreateSupremeListButton, __private.ui_SetSupremeListButton);
 			scroll:SetPoint("BOTTOMLEFT", 4, 0);
 			scroll:SetPoint("TOPRIGHT", - 4, - 28);
 			__private.ui_ModifyALAScrollFrame(scroll);
