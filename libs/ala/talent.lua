@@ -2,7 +2,7 @@
 	by ALA
 --]]--
 
-local __version = 250101;
+local __version = 250112;
 
 local _G = _G;
 _G.__ala_meta__ = _G.__ala_meta__ or {  };
@@ -133,10 +133,13 @@ end
 	--
 	local COMM_PREFIX_LIST = {
 		"EMUCOM",
-		"ATEADD",
+		"ATEADD",	--	Blocked since 20250108<Vanilla>
 		"ATECOM",
 		"EMUADD",
 	};
+	local COMM_PREFIX_RESERVED = {	};
+	for i = 0, 63 do COMM_PREFIX_RESERVED[i] = "EMUCO" .. __base64[i]; end
+	for i = 0, 63 do COMM_PREFIX_RESERVED[i] = "EMUAD" .. __base64[i]; end
 	local COMM_PREFIX_HASH = {  };
 	local COMM_HEART_BEAT = "**heart*beat**";
 	local COMM_LWRAVL_PREFIX = 1;
@@ -1543,6 +1546,9 @@ for i = 1, #COMM_PREFIX_LIST do
 	local prefix = COMM_PREFIX_LIST[i];
 	_RecvBuffer[prefix] = {  };
 	COMM_PREFIX_HASH[prefix] = i;
+end
+for i = 1, #COMM_PREFIX_RESERVED do
+	COMM_PREFIX_HASH[COMM_PREFIX_RESERVED[i]] = 65536 + i;
 end
 local function _SendLongMessage(prefix, msg, channel, target)
 	local len = #msg;
