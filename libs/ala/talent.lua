@@ -1548,7 +1548,10 @@ for i = 1, #COMM_PREFIX_LIST do
 	COMM_PREFIX_HASH[prefix] = i;
 end
 for i = 1, #COMM_PREFIX_RESERVED do
-	COMM_PREFIX_HASH[COMM_PREFIX_RESERVED[i]] = 65536 + i;
+	local prefix = COMM_PREFIX_RESERVED[i];
+	if COMM_PREFIX_HASH[prefix] == nil then
+		COMM_PREFIX_HASH[prefix] = 65536 + i;
+	end
 end
 local function _SendLongMessage(prefix, msg, channel, target)
 	local len = #msg;
