@@ -2,7 +2,7 @@
 	by ALA
 --]]--
 
-local __version = 250112;
+local __version = 250201;
 
 local _G = _G;
 _G.__ala_meta__ = _G.__ala_meta__ or {  };
@@ -133,15 +133,14 @@ end
 	--
 	local COMM_PREFIX_LIST = {
 		"EMUCOM",
-		"ATEADD",	--	Blocked since 20250108<Vanilla>
+		"ATEADD",	--	<Vanilla Master>Blocked since 20250108.
 		"ATECOM",
 		"EMUADD",
 	};
 	local COMM_PREFIX_RESERVED = {	};
-	for i = 0, 63 do COMM_PREFIX_RESERVED[i] = "EMUCO" .. __base64[i]; end
-	for i = 0, 63 do COMM_PREFIX_RESERVED[i] = "EMUAD" .. __base64[i]; end
+	for i = 0, 63 do COMM_PREFIX_RESERVED[#COMM_PREFIX_RESERVED + 1] = "EMUCO" .. __base64[i]; end
+	for i = 0, 63 do COMM_PREFIX_RESERVED[#COMM_PREFIX_RESERVED + 1] = "EMUAD" .. __base64[i]; end
 	local COMM_PREFIX_HASH = {  };
-	local COMM_HEART_BEAT = "**heart*beat**";
 	local COMM_LWRAVL_PREFIX = 1;
 	local COMM_PREFIX = COMM_PREFIX_LIST[1];
 	local COMM_PART_PREFIX = "!P" .. __base64[CLIENT_MAJOR] .. __base64[LIB_MAJOR];
@@ -1029,8 +1028,8 @@ end
 		if strsub(code, 1, 2) ~= "!G" then
 			return nil;
 		end
-		local CLIENT_MAJOR = __debase64[strsub(code, 3, 3)];
-		if CLIENT_MAJOR ~= CLIENT_MAJOR then
+		local CM = __debase64[strsub(code, 3, 3)];
+		if CM ~= CLIENT_MAJOR then
 			return nil, "WOW VERSION";
 		end
 		local LM = __debase64[strsub(code, 4, 4)];
@@ -1321,8 +1320,8 @@ end
 		if strsub(code, 1, 2) ~= "!E" then
 			return false;
 		end
-		local CLIENT_MAJOR = __debase64[strsub(code, 3, 3)];
-		if CLIENT_MAJOR ~= CLIENT_MAJOR then
+		local CM = __debase64[strsub(code, 3, 3)];
+		if CM ~= CLIENT_MAJOR then
 			return nil, "WOW VERSION";
 		end
 		local LM = __debase64[strsub(code, 4, 4)];
@@ -1419,8 +1418,8 @@ end
 		if strsub(code, 1, 2) ~= "!N" then
 			return false;
 		end
-		local CLIENT_MAJOR = __debase64[strsub(code, 3, 3)];
-		if CLIENT_MAJOR ~= CLIENT_MAJOR then
+		local CM = __debase64[strsub(code, 3, 3)];
+		if CM ~= CLIENT_MAJOR then
 			return nil, "WOW VERSION";
 		end
 		local val = { strsplit("+", strsub(code, 5)) };
@@ -1492,39 +1491,28 @@ local function _FlushMessageCounter()
 	end
 end
 _FlushMessageCounter();
-function __emulib.SendQueryRequest(shortname, realm, talent, glyph, equipment)
-	--[=[
-	if UnitInBattleground('player') and realm ~= SELFREALM then
-		if talent then
-			SendAddonMessage(COMM_PREFIX, COMM_QUERY_TALENTS_V1 .. "!" .. shortname .. "-" .. realm, "INSTANCE_CHAT");
-		end
-		if glyph and CLIENT_MAJOR >= 3 then
-			SendAddonMessage(COMM_PREFIX, COMM_QUERY_GLYPH_V1 .. "!" .. shortname .. "-" .. realm, "INSTANCE_CHAT");
-		end
-		if equipment then
-			SendAddonMessage(COMM_PREFIX, COMM_QUERY_EQUIPMENTS_V1 .. "!" .. shortname .. "-" .. realm, "INSTANCE_CHAT");
-		end
-	else
-		if talent then
-			SendAddonMessage(COMM_PREFIX, COMM_QUERY_TALENTS_V1 .. "!", "WHISPER", shortname .. "-" .. realm);
-		end
-		if glyph and CLIENT_MAJOR >= 3 then
-			SendAddonMessage(COMM_PREFIX, COMM_QUERY_GLYPH_V1 .. "!", "WHISPER", shortname .. "-" .. realm);
-		end
-		if equipment then
-			SendAddonMessage(COMM_PREFIX, COMM_QUERY_EQUIPMENTS_V1 .. "!", "WHISPER", shortname .. "-" .. realm);
-		end
-	end
-	--]=]
-	--[~=[
+function __emulib._SendQueryRequest(shortname, realm, talent, glyph, equipment)
 	if talent or glyph or equipment then
 		if UnitInBattleground('player') and realm ~= SELFREALM then
-			SendAddonMessage(COMM_PREFIX, COMM_QUERY_PREFIX .. (talent and "T" or "") .. ((glyph and CLIENT_MAJOR >= 3) and "G" or "") .. (equipment and "E" or "") .. "#" .. shortname .. "-" .. realm, "INSTANCE_CHAT");
+			SendAddonMessage(COMM_PREFIX, COMM_QUERY_PREFIX .. (talent and "T" or "") .. ((glyph and SUPPORT_GLYPH) and "G" or "") .. (equipment and "E" or "") .. "#" .. shortname .. "-" .. realm, "INSTANCE_CHAT");
 		else
-			SendAddonMessage(COMM_PREFIX, COMM_QUERY_PREFIX .. (talent and "T" or "") .. ((glyph and CLIENT_MAJOR >= 3) and "G" or "") .. (equipment and "E" or ""), "WHISPER", shortname .. "-" .. realm);
+			SendAddonMessage(COMM_PREFIX, COMM_QUERY_PREFIX .. (talent and "T" or "") .. ((glyph and SUPPORT_GLYPH) and "G" or "") .. (equipment and "E" or ""), "WHISPER", shortname .. "-" .. realm);
 		end
 	end
-	--]=]
+end
+
+
+local _Muted = false;
+local function _PeriodicUnmute()
+	After(10, _PeriodicUnmute);
+	_Muted = false;
+end
+_PeriodicUnmute();
+function __emulib.SendQueryRequest(shortname, realm, talent, glyph, equipment)
+	if not _Muted then
+		_Muted = true;
+		return __emulib._SendQueryRequest(shortname, realm, talent, glyph, equipment);
+	end
 end
 
 __emulib._NumDistributors = __emulib._NumDistributors or 0;
@@ -1625,7 +1613,7 @@ function __emulib.ProcV1Message(prefix, msg, channel, sender)
 		if MessageCounter[channel] ~= nil and MessageCounter[channel] > MSG_LIMIT_NUM then
 			return;
 		end
-		if CLIENT_MAJOR >= 3 then
+		if SUPPORT_GLYPH then
 			if channel == "INSTANCE_CHAT" then
 				local target = strsub(msg, COMM_CONTROL_CODE_LEN_V1 + 2, - 1);
 				if target ~= SELFFULLNAME then
@@ -1846,13 +1834,6 @@ end
 function __emulib.CHAT_MSG_ADDON(prefix, msg, channel, sender, target, zoneChannelID, localID, name, instanceID)
 	local PrefixSeq = COMM_PREFIX_HASH[prefix];
 	if PrefixSeq ~= nil then
-		if msg == COMM_HEART_BEAT then
-			if PrefixSeq < COMM_LWRAVL_PREFIX then
-				COMM_LWRAVL_PREFIX = PrefixSeq;
-				COMM_PREFIX = COMM_PREFIX_LIST[PrefixSeq];
-			end
-			return;
-		end
 		if channel ~= "WHISPER" then
 			MessageCounter[channel] = (MessageCounter[channel] or 0) + 1;
 		end
@@ -1870,15 +1851,6 @@ local function PeriodicGeneratePlayerTalentMap()
 		After(1.0, PeriodicGeneratePlayerTalentMap);
 	end
 end
-local function PeriodicCheckPrefix()
-	local num = #COMM_PREFIX_LIST;
-	COMM_LWRAVL_PREFIX = num;
-	for i = 1, #COMM_PREFIX_LIST do
-		local prefix = COMM_PREFIX_LIST[i];
-		SendAddonMessage(prefix, COMM_HEART_BEAT, "WHISPER", SELFFULLNAME);
-	end
-	After(600.0, PeriodicCheckPrefix);
-end
 function __emulib.PLAYER_LOGIN()
 	__emulib:UnregisterEvent("PLAYER_LOGIN");
 	for i = 1, #COMM_PREFIX_LIST do
@@ -1887,7 +1859,6 @@ function __emulib.PLAYER_LOGIN()
 		end
 	end
 	PeriodicGeneratePlayerTalentMap();
-	-- After(1.0, PeriodicCheckPrefix);
 end
 
 local function OnEvent(self, event, ...)
