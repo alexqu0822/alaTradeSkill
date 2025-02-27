@@ -160,6 +160,8 @@ l10n["LABEL_USED_AS_MATERIAL_IN"] = "|cffff7f00用于制造: |r";
 l10n["RECIPE_LEARNED"] = "|cff00ff00已学|r";
 l10n["RECIPE_NOT_LEARNED"] = "|cffff0000未学|r";
 
+l10n["PREV"] = "上一個";
+l10n["NEXT"] = "下一個";
 l10n["PRINT_MATERIALS: "] = "材料: ";
 l10n["PRICE_UNK"] = "未知";
 l10n["AH_PRICE"] = "|cff00ff00价格|r";

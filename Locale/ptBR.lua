@@ -160,6 +160,8 @@ l10n["LABEL_USED_AS_MATERIAL_IN"] = "|cffff7f00Used to craft: |r";
 l10n["RECIPE_LEARNED"] = "|cff00ff00Learned|r";
 l10n["RECIPE_NOT_LEARNED"] = "|cffff0000Not learned|r";
 
+l10n["PREV"] = "Prev";
+l10n["NEXT"] = "Next";
 l10n["PRINT_MATERIALS: "] = "Needs: ";
 l10n["PRICE_UNK"] = "Unknown";
 l10n["AH_PRICE"] = "|cff00ff00AH|r";

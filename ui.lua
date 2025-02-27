@@ -453,6 +453,10 @@ end
 							end
 							var.update = nil;
 							Frame.update = nil;
+							if Frame.prev_pid ~= pid then
+								Frame.prev_selected_sid = nil;
+								Frame.F_SetSelection(Frame.F_GetSelection());
+							end
 						else
 							MT.Debug("UpdateFrame|cff00ff00#1L2|r");
 						end
@@ -522,11 +526,13 @@ end
 							end
 						end
 					end
+					Frame.switching = nil;
 				else
 					Frame.prev_pid = pid;
 					set.update = nil;
 					var.update = nil;
 					Frame.update = nil;
+					Frame.switching = nil;
 					if update_list then
 						local sids = var[1];
 						local hash = var[2];
@@ -541,7 +547,7 @@ end
 							for index = 1, num do
 								local sname, srank = Frame.F_GetRecipeInfo(index);
 								if sname ~= nil and srank ~= nil and srank ~= 'header' then
-									local sid = Frame.F_GetRecipeSpellID ~= nil and Frame.F_GetRecipeSpellID(index) or nil;
+									local sid = Frame.F_GetRecipeSpellID(index);
 									if sid == nil then
 										local cid = Frame.F_GetRecipeItemID(index);
 										if cid ~= nil then
@@ -745,14 +751,14 @@ end
 			Frame.selected_sid = sid;
 			Frame.F_Update();
 			Frame.SearchEditBox:ClearFocus();
-			local HookedScrollBar = Frame.HookedScrollBar;
+			local HookedListBar = Frame.HookedListBar;
 			local num = Frame.F_GetRecipeNumAvailable();
-			local minVal, maxVal = HookedScrollBar:GetMinMaxValues();
-			local step = HookedScrollBar:GetValueStep();
-			local cur = HookedScrollBar:GetValue() + step;
+			local minVal, maxVal = HookedListBar:GetMinMaxValues();
+			local step = HookedListBar:GetValueStep();
+			local cur = HookedListBar:GetValue() + step;
 			local value = step * (recipeindex - 1);
 			if value < cur or value > (cur + num * step - maxVal) then
-				HookedScrollBar:SetValue(min(maxVal, value));
+				HookedListBar:SetValue(min(maxVal, value));
 			end
 			Frame.ScrollFrame:Update();
 			if Frame.ProfitFrame:IsShown() then
@@ -1924,9 +1930,9 @@ end
 		if VT.AuctionMod ~= nil and VT.SET.show_tradeskill_frame_price_info then
 			local sid = Frame.selected_sid;
 			if sid == nil or sid <= 0 then
-				T_PriceInfoInFrame[1]:SetText("");
-				T_PriceInfoInFrame[2]:SetText("");
-				T_PriceInfoInFrame[3]:SetText("");
+				T_PriceInfoInFrame[1]:SetText(nil);
+				T_PriceInfoInFrame[2]:SetText(nil);
+				T_PriceInfoInFrame[3]:SetText(nil);
 				return;
 			end
 			local info = DataAgent.get_info_by_sid(sid);
@@ -1978,7 +1984,7 @@ end
 								end
 							end
 						else
-							T_PriceInfoInFrame[3]:SetText("");
+							T_PriceInfoInFrame[3]:SetText(nil);
 						end
 					else
 						local bindType = DataAgent.item_bindType(cid);
@@ -1993,18 +1999,21 @@ end
 								"|cffff0000" .. l10n["PRICE_UNK"] .. "|r (" .. l10n["VENDOR_RPICE"] .. (price_v_product and MT.GetMoneyString(price_v_product) or l10n["NEED_UPDATE"]) .. ")"
 							);
 						end
-						T_PriceInfoInFrame[3]:SetText("");
+						T_PriceInfoInFrame[3]:SetText(nil);
 					end
+				else
+				T_PriceInfoInFrame[1]:SetText(nil);
+				T_PriceInfoInFrame[3]:SetText(nil);
 				end
 			else
-				T_PriceInfoInFrame[1]:SetText("");
-				T_PriceInfoInFrame[2]:SetText("");
-				T_PriceInfoInFrame[3]:SetText("");
+				T_PriceInfoInFrame[1]:SetText(nil);
+				T_PriceInfoInFrame[2]:SetText(nil);
+				T_PriceInfoInFrame[3]:SetText(nil);
 			end
 		else
-			T_PriceInfoInFrame[1]:SetText("");
-			T_PriceInfoInFrame[2]:SetText("");
-			T_PriceInfoInFrame[3]:SetText("");
+			T_PriceInfoInFrame[1]:SetText(nil);
+			T_PriceInfoInFrame[2]:SetText(nil);
+			T_PriceInfoInFrame[3]:SetText(nil);
 		end
 	end
 	function LT_FrameMethod.F_UpdateRankInfo(Frame)
@@ -2024,11 +2033,11 @@ end
 		end
 		Frame:SetSize(unpack(layout.size));
 		Frame.HookedFrame:SetSize(unpack(layout.frame_size));
-		Frame.HookedScrollFrame:ClearAllPoints();
-		for index = 1, #layout.scroll_anchor do
-			Frame.HookedScrollFrame:SetPoint(unpack(layout.scroll_anchor[index]));
+		Frame.HookedListFrame:ClearAllPoints();
+		for index = 1, #layout.list_anchor do
+			Frame.HookedListFrame:SetPoint(unpack(layout.list_anchor[index]));
 		end
-		Frame.HookedScrollFrame:SetSize(unpack(layout.scroll_size));
+		Frame.HookedListFrame:SetSize(unpack(layout.list_size));
 		Frame.HookedDetailFrame:ClearAllPoints();
 		for index = 1, #layout.detail_anchor do
 			Frame.HookedDetailFrame:SetPoint(unpack(layout.detail_anchor[index]));
@@ -2103,7 +2112,7 @@ end
 			TextureLineBottom:SetTexCoord(4 / 256, 188 / 256, 5 / 32, 13 / 32);
 			TextureLineBottom:SetHeight(2);
 
-			LT_SharedMethod.StyleBLZScrollFrame(Frame.HookedScrollFrame);
+			LT_SharedMethod.StyleBLZScrollFrame(Frame.HookedListFrame);
 			LT_SharedMethod.StyleBLZScrollFrame(Frame.HookedDetailFrame);
 			local HookedRankFrame = Frame.HookedRankFrame;
 			HookedRankFrame.Border:Show();
@@ -2221,7 +2230,7 @@ end
 			TextureLineBottom:SetColorTexture(unpack(T_UIDefinition.modernDividerColor));
 			TextureLineBottom:SetHeight(1);
 
-			LT_SharedMethod.StyleModernScrollFrame(Frame.HookedScrollFrame);
+			LT_SharedMethod.StyleModernScrollFrame(Frame.HookedListFrame);
 			LT_SharedMethod.StyleModernScrollFrame(Frame.HookedDetailFrame);
 			local HookedRankFrame = Frame.HookedRankFrame;
 			HookedRankFrame.Border:Hide();
@@ -2541,7 +2550,7 @@ end
 	end
 	function LT_FrameMethod._OnShow(Frame)
 		Frame:F_WithDisabledFrame(LT_SharedMethod.WidgetHidePermanently);
-		-- Frame.HookedScrollFrame:Hide();
+		-- Frame.HookedListFrame:Hide();
 		Frame.F_ClearFilter();
 		for name, func in next, Frame.T_DisabledFunc do
 			_G[name] = MT.noop;
@@ -2549,7 +2558,7 @@ end
 	end
 	function LT_FrameMethod._OnHide(Frame)
 		Frame:F_WithDisabledFrame(LT_SharedMethod.WidgetUnhidePermanently);
-		-- Frame.HookedScrollFrame:Show();
+		-- Frame.HookedListFrame:Show();
 		for name, func in next, Frame.T_DisabledFunc do
 			_G[name] = func;
 		end
@@ -2557,6 +2566,9 @@ end
 	end
 	function LT_FrameMethod._OnEvent(Frame, event, _1, ...)
 		Frame.update = true;
+		if event == Frame.C_SwitchEvent then
+			Frame.switching = true;
+		end
 		MT._TimerStart(Frame.F_Update, 0.2, 1);
 	end
 	function LT_WidgetMethod.BLZSkillListButton_OnEnter(self)
@@ -2595,9 +2607,11 @@ end
 	end
 	function LT_WidgetMethod.ExpandButton_OnClick(self)
 		self.Frame:F_Expand(true);
+		VT.SET.expand = true;
 	end
 	function LT_WidgetMethod.ShrinkButton_OnClick(self)
 		self.Frame:F_Expand(false);
+		VT.SET.expand = false;
 	end
 	function LT_WidgetMethod.OverrideMinRankSlider__OnValueChanged(self, value, userInput)
 		if userInput then
@@ -3039,6 +3053,104 @@ end
 		end
 		Frame.F_Update();
 	end
+	function LT_WidgetMethod.PrevButton_OnEnter(self)
+		local Frame = self.Frame;
+		if not Frame.switching then
+			local pid = Frame.flag;
+			local History = Frame.T_SelectionHistory[pid];
+			if History then
+				GameTooltip:SetOwner(self, "ANCHOR_RIGHT");
+				GameTooltip:SetText(l10n["PREV"]);
+				-- 7 1 8
+				local min = History.pos - 7;
+				local max = History.pos + 8;
+				if History.top <= 16 then
+					min = 1;
+					max = History.top
+				elseif History.pos <= 8 then
+					min = 1;
+					max = 16;
+				elseif History.top - History.pos < 8 then
+					min = History.top - 15;
+					max = History.top;
+				end
+				for i = min, max do
+					local sid = History[i];
+					local cid = DataAgent.get_cid_by_sid(sid);
+					if i == History.pos then
+						GameTooltip:AddDoubleLine("|cff00ff00>>|r", DataAgent.item_string(cid) or DataAgent.spell_string(sid) or cid);
+					else
+						GameTooltip:AddDoubleLine(i, DataAgent.item_string(cid) or DataAgent.spell_string(sid) or cid);
+					end
+				end
+				if History.top > max then
+					GameTooltip:AddDoubleLine("...", "x" .. (History.top - max));
+				end
+				GameTooltip:Show();
+			end
+		end
+	end
+	function LT_WidgetMethod.PrevButton_OnClick(self)
+		local Frame = self.Frame;
+		if not Frame.switching then
+			local pid = Frame.flag;
+			local History = Frame.T_SelectionHistory[pid];
+			if History.pos > 1 then
+				History.pos = History.pos - 1;
+				LT_SharedMethod.SelectRecipe(Frame, History[History.pos]);
+				LT_WidgetMethod.PrevButton_OnEnter(self);
+			end
+		end
+	end
+	function LT_WidgetMethod.NextButton_OnEnter(self)
+		local Frame = self.Frame;
+		if not Frame.switching then
+			local pid = Frame.flag;
+			local History = Frame.T_SelectionHistory[pid];
+			if History then
+				GameTooltip:SetOwner(self, "ANCHOR_RIGHT");
+				GameTooltip:SetText(l10n["NEXT"]);
+				-- 7 1 8
+				local min = History.pos - 7;
+				local max = History.pos + 8;
+				if History.top <= 16 then
+					min = 1;
+					max = History.top
+				elseif History.pos <= 8 then
+					min = 1;
+					max = 16;
+				elseif History.top - History.pos < 8 then
+					min = History.top - 15;
+					max = History.top;
+				end
+				for i = min, max do
+					local sid = History[i];
+					local cid = DataAgent.get_cid_by_sid(sid);
+					if i == History.pos then
+						GameTooltip:AddDoubleLine("|cff00ff00>>|r", DataAgent.item_string(cid) or DataAgent.spell_string(sid) or cid);
+					else
+						GameTooltip:AddDoubleLine(i, DataAgent.item_string(cid) or DataAgent.spell_string(sid) or cid);
+					end
+				end
+				if History.top > max then
+					GameTooltip:AddDoubleLine("...", "x" .. (History.top - max));
+				end
+				GameTooltip:Show();
+			end
+		end
+	end
+	function LT_WidgetMethod.NextButton_OnClick(self)
+		local Frame = self.Frame;
+		if not Frame.switching then
+			local pid = Frame.flag;
+			local History = Frame.T_SelectionHistory[pid];
+			if History.pos < History.top then
+				History.pos = History.pos + 1;
+				LT_SharedMethod.SelectRecipe(Frame, History[History.pos]);
+				LT_WidgetMethod.NextButton_OnEnter(self);
+			end
+		end
+	end
 --
 --	SkillFrame
 	local function LF_CreateSkillListButton(parent, index, buttonHeight)
@@ -3257,9 +3369,9 @@ local function LF_HookFrame(addon, meta)
 				end
 			end
 		end
-		if layout.scroll_anchor ~= nil then
-			for index = 1, #layout.scroll_anchor do
-				local point = layout.scroll_anchor[index];
+		if layout.list_anchor ~= nil then
+			for index = 1, #layout.list_anchor do
+				local point = layout.list_anchor[index];
 				if point[2] == nil then
 					point[2] = Frame;
 				end
@@ -3277,6 +3389,20 @@ local function LF_HookFrame(addon, meta)
 	for key, val in next, meta do
 		Frame[key] = val;
 	end
+
+	Frame.T_OnSelection = {  };
+	Frame.prev_selected_sid = nil;
+	function Frame.F_OnSelection()
+		Frame.selected_sid = Frame.F_GetRecipeSpellID(Frame.F_GetSelection());
+			MT.Debug("OnSelection", Frame.prev_selected_sid, Frame.selected_sid);
+		if Frame.prev_selected_sid ~= Frame.selected_sid then
+			Frame.prev_selected_sid = Frame.selected_sid;
+			for i = 1, #Frame.T_OnSelection do
+				Frame.T_OnSelection[i]();
+			end
+		end
+	end
+	hooksecurefunc(Frame.T_FunctionName.F_SetSelection, Frame.F_OnSelection);
 
 	do	--	Frame & HookedFrame
 		--	Frame
@@ -3315,21 +3441,21 @@ local function LF_HookFrame(addon, meta)
 			ToggleButton.Frame = Frame;
 
 			local ExpandButton = CreateFrame('BUTTON', nil, HookedFrame);
-			ExpandButton:SetSize(16, 14);
+			ExpandButton:SetSize(16, 12);
 			ExpandButton:SetNormalTexture(T_UIDefinition.texture_expand);
 			ExpandButton:SetPushedTexture(T_UIDefinition.texture_expand);
 			ExpandButton:SetHighlightTexture(T_UIDefinition.texture_expand);
-			ExpandButton:SetPoint("CENTER", Frame, "TOPRIGHT", 4, -356);
+			ExpandButton:SetPoint("CENTER", Frame, "TOPRIGHT", 4, -358);
 			ExpandButton:SetFrameLevel(127);
 			ExpandButton:SetScript("OnClick", LT_WidgetMethod.ExpandButton_OnClick);
 			Frame.ExpandButton = ExpandButton;
 			ExpandButton.Frame = Frame;
 			local ShrinkButton = CreateFrame('BUTTON', nil, HookedFrame);
-			ShrinkButton:SetSize(16, 14);
+			ShrinkButton:SetSize(16, 12);
 			ShrinkButton:SetNormalTexture(T_UIDefinition.texture_shrink);
 			ShrinkButton:SetPushedTexture(T_UIDefinition.texture_shrink);
 			ShrinkButton:SetHighlightTexture(T_UIDefinition.texture_shrink);
-			ShrinkButton:SetPoint("CENTER", Frame, "TOPRIGHT", 4, -356);
+			ShrinkButton:SetPoint("CENTER", Frame, "TOPRIGHT", 4, -358);
 			ShrinkButton:SetFrameLevel(127);
 			ShrinkButton:SetScript("OnClick", LT_WidgetMethod.ShrinkButton_OnClick);
 			Frame.ShrinkButton = ShrinkButton;
@@ -3370,7 +3496,7 @@ local function LF_HookFrame(addon, meta)
 			Frame.PortraitBorder = PortraitBorder;
 		--	Rank Offset
 			local HookedRankFrame = meta.HookedRankFrame;
-			--
+
 			local OverrideMinRankButton = CreateFrame('BUTTON', nil, Frame, "UIPanelButtonTemplate");
 			OverrideMinRankButton:SetSize(40, 20);
 			OverrideMinRankButton:SetPoint("CENTER", HookedRankFrame, "LEFT", -20, 0);
@@ -3393,7 +3519,7 @@ local function LF_HookFrame(addon, meta)
 			Frame.OverrideMinRankSlider = OverrideMinRankSlider;
 			OverrideMinRankSlider.Frame = Frame;
 			Frame.F_RefreshOverrideMinRank = LT_FrameMethod.F_RefreshOverrideMinRank;
-			--
+
 			local RankOffsetButton = CreateFrame('BUTTON', nil, Frame, "UIPanelButtonTemplate");
 			RankOffsetButton:SetSize(40, 20);
 			RankOffsetButton:SetPoint("CENTER", HookedRankFrame, "RIGHT", 20, 0);
@@ -3470,7 +3596,7 @@ local function LF_HookFrame(addon, meta)
 			if CollapseAllButton ~= nil then
 				CollapseAllButton:SetParent(HookedFrame);
 				CollapseAllButton:ClearAllPoints();
-				CollapseAllButton:SetPoint("BOTTOMLEFT", meta.HookedScrollFrame, "TOPLEFT", 0, 4);
+				CollapseAllButton:SetPoint("BOTTOMLEFT", meta.HookedListFrame, "TOPLEFT", 0, 4);
 			end
 			local HookedRankFrame = meta.HookedRankFrame;
 			HookedRankFrame:ClearAllPoints();
@@ -3539,8 +3665,8 @@ local function LF_HookFrame(addon, meta)
 				T_SkillListButtons[index] = Button;
 			end
 			T_SkillListButtons[1]:ClearAllPoints();
-			T_SkillListButtons[1]:SetPoint("TOPLEFT", meta.HookedScrollFrame);
-			local FrameLevel = meta.HookedScrollFrame:GetFrameLevel() + 2;
+			T_SkillListButtons[1]:SetPoint("TOPLEFT", meta.HookedListFrame);
+			local FrameLevel = meta.HookedListFrame:GetFrameLevel() + 2;
 			for index = 1, #T_SkillListButtons do
 				local Button = T_SkillListButtons[index];
 				Button:SetScript("OnEnter", LT_WidgetMethod.BLZSkillListButton_OnEnter);
@@ -3548,7 +3674,7 @@ local function LF_HookFrame(addon, meta)
 				Button:SetID(index);
 				Button:SetFrameLevel(FrameLevel);
 				Button.Frame = Frame;
-				Button.ScrollFrame = meta.HookedScrollFrame;
+				Button.ScrollFrame = meta.HookedListFrame;
 			end
 		--	reagentButton & ProductionIcon
 			local T_ReagentButtons = {  };
@@ -3819,12 +3945,15 @@ local function LF_HookFrame(addon, meta)
 		T_PriceInfoInFrame[1] = Frame.HookedDetailChild:CreateFontString(nil, "OVERLAY");
 		T_PriceInfoInFrame[1]:SetFont(T_UIDefinition.frameNormalFont, T_UIDefinition.frameNormalFontSize, T_UIDefinition.frameNormalFontFlag);
 		T_PriceInfoInFrame[1]:SetPoint("TOPLEFT", RankInfoInFrame, "BOTTOMLEFT", 0, -3);
+		T_PriceInfoInFrame[1]:SetText(nil);
 		T_PriceInfoInFrame[2] = Frame.HookedDetailChild:CreateFontString(nil, "OVERLAY");
 		T_PriceInfoInFrame[2]:SetFont(T_UIDefinition.frameNormalFont, T_UIDefinition.frameNormalFontSize, T_UIDefinition.frameNormalFontFlag);
 		T_PriceInfoInFrame[2]:SetPoint("TOPLEFT", T_PriceInfoInFrame[1], "BOTTOMLEFT", 0, 0);
+		T_PriceInfoInFrame[2]:SetText(nil);
 		T_PriceInfoInFrame[3] = Frame.HookedDetailChild:CreateFontString(nil, "OVERLAY");
 		T_PriceInfoInFrame[3]:SetFont(T_UIDefinition.frameNormalFont, T_UIDefinition.frameNormalFontSize, T_UIDefinition.frameNormalFontFlag);
 		T_PriceInfoInFrame[3]:SetPoint("TOPLEFT", T_PriceInfoInFrame[2], "BOTTOMLEFT", 0, 0);
+		T_PriceInfoInFrame[3]:SetText(nil);
 		Frame.T_PriceInfoInFrame = T_PriceInfoInFrame;
 
 		Frame.Widget_PositionSkippedByInfoInFrame:ClearAllPoints();
@@ -3834,29 +3963,78 @@ local function LF_HookFrame(addon, meta)
 			Frame:F_UpdatePriceInfo();
 			Frame:F_UpdateRankInfo();
 		end
-		local prev_sid = nil;
-		local function LF_OnSelection()
-			if not Frame:IsShown() then
-				local index = Frame.F_GetSelection();
-				if index ~= nil then
-					Frame.selected_sid = 
-						Frame.F_GetRecipeSpellID ~= nil and Frame.F_GetRecipeSpellID(index) or
-						DataAgent.get_sid_by_pid_sname_cid(DataAgent.get_pid_by_pname(Frame.F_GetSkillName()), Frame.F_GetRecipeInfo(index), Frame.F_GetRecipeItemID(index));
-				end
+		Frame.T_OnSelection[#Frame.T_OnSelection + 1] = function()
+			if T_PriceInfoInFrame[1]:GetText() ~= nil then
+				T_PriceInfoInFrame[1]:SetText(l10n["AH_PRICE"]);
 			end
-			if prev_sid ~= Frame.selected_sid then
-				prev_sid = Frame.selected_sid;
-				T_PriceInfoInFrame[1]:SetText("");
-				T_PriceInfoInFrame[2]:SetText("");
-				T_PriceInfoInFrame[3]:SetText("");
+			if T_PriceInfoInFrame[2]:GetText() ~= nil then
+				T_PriceInfoInFrame[2]:SetText(l10n["COST_PRICE"]);
 			end
-			MT.After(0.5, LF_DelayUpdateInfoInFrame);
+			if T_PriceInfoInFrame[3]:GetText() ~= nil then
+				T_PriceInfoInFrame[3]:SetText(l10n["PRICE_DIFF+"]);
+			end
+			MT._TimerStart(LF_DelayUpdateInfoInFrame, 0.5, 1);
 		end
-		hooksecurefunc(Frame.T_FunctionName.F_SetSelection, LF_OnSelection);
-		Frame.F_OnSelection = LF_OnSelection;
-		Frame.F_SetSelection = _G[Frame.T_FunctionName.F_SetSelection];
 		Frame.F_UpdatePriceInfo = LT_FrameMethod.F_UpdatePriceInfo;
 		Frame.F_UpdateRankInfo = LT_FrameMethod.F_UpdateRankInfo;
+	end
+
+	do	--	Select History
+		local HookedDetailFrame = meta.HookedDetailFrame;
+
+		local HistoryFrame = CreateFrame('FRAME', nil, HookedDetailFrame);
+		HistoryFrame:SetSize(32, 20);
+		HistoryFrame:SetPoint("TOPRIGHT", HookedDetailFrame, "TOPRIGHT", 4, -2);
+		Frame.HistoryFrame = HistoryFrame;
+		HistoryFrame.Frame = Frame;
+
+		local PrevButton = CreateFrame('BUTTON', nil, HistoryFrame);
+		PrevButton:SetSize(12, 8);
+		PrevButton:SetNormalTexture(T_UIDefinition.texture_shrink);
+		PrevButton:SetPushedTexture(T_UIDefinition.texture_shrink);
+		PrevButton:SetHighlightTexture(T_UIDefinition.texture_shrink);
+		PrevButton:SetPoint("LEFT", HistoryFrame, "LEFT", 2, 0);
+		PrevButton:SetFrameLevel(127);
+		PrevButton:SetScript("OnClick", LT_WidgetMethod.PrevButton_OnClick);
+		PrevButton:SetScript("OnEnter", LT_WidgetMethod.PrevButton_OnEnter);
+		PrevButton:SetScript("OnLeave", LT_SharedMethod.ButtonInfoOnLeave);
+		HistoryFrame.PrevButton = PrevButton;
+		PrevButton.HistoryFrame = HistoryFrame;
+		PrevButton.Frame = Frame;
+		local NextButton = CreateFrame('BUTTON', nil, HistoryFrame);
+		NextButton:SetSize(12, 8);
+		NextButton:SetNormalTexture(T_UIDefinition.texture_expand);
+		NextButton:SetPushedTexture(T_UIDefinition.texture_expand);
+		NextButton:SetHighlightTexture(T_UIDefinition.texture_expand);
+		NextButton:SetPoint("RIGHT", HistoryFrame, "RIGHT", -2, 0);
+		NextButton:SetFrameLevel(127);
+		NextButton:SetScript("OnClick", LT_WidgetMethod.NextButton_OnClick);
+		NextButton:SetScript("OnEnter", LT_WidgetMethod.NextButton_OnEnter);
+		NextButton:SetScript("OnLeave", LT_SharedMethod.ButtonInfoOnLeave);
+		HistoryFrame.NextButton = NextButton;
+		NextButton.HistoryFrame = HistoryFrame;
+		NextButton.Frame = Frame;
+
+		Frame.T_SelectionHistory = {  };
+		Frame.T_OnSelection[#Frame.T_OnSelection + 1] = function()
+			local sid = Frame.selected_sid;
+			if sid ~= nil then
+				local pid = DataAgent.get_pid_by_sid(sid);
+				local History = Frame.T_SelectionHistory[pid];
+				MT.Debug("Selection", pid, sid);
+				if History == nil then
+					Frame.T_SelectionHistory[pid] = {
+						pos = 1,
+						top = 1,
+						sid,
+					};
+				elseif History[History.pos] ~= sid then
+					History.pos = History.pos + 1;
+					History.top = History.pos;
+					History[History.pos] = sid;
+				end
+			end
+		end
 	end
 
 	do	--	Craft Queue
@@ -3864,6 +4042,9 @@ local function LF_HookFrame(addon, meta)
 			local AddQueue = CreateFrame('FRAME', nil, Frame);
 		end
 	end
+
+	--	Update after all hooks
+	Frame.F_SetSelection = _G[Frame.T_FunctionName.F_SetSelection];
 
 	ALA_HOOK_ChatEdit_InsertLink(function(link, addon)
 		if Frame:IsVisible() and addon ~= __addon and not (BrowseName ~= nil and BrowseName:IsVisible()) then
@@ -3910,6 +4091,7 @@ local function LF_HookFrame(addon, meta)
 	-- end
 	MT.AddCallback("AUCTION_MOD_LOADED", function(mod)
 		if mod ~= nil then
+			MT.Debug("AUCTION_MOD_LOADED");
 			if mod.F_OnDBUpdate then
 				mod.F_OnDBUpdate(callback);
 			end
@@ -3918,6 +4100,7 @@ local function LF_HookFrame(addon, meta)
 	end);
 	MT.AddCallback("UI_MOD_LOADED", function(mod)
 		if mod ~= nil and mod.Skin ~= nil then
+			MT.Debug("UI_MOD_LOADED");
 			mod.Skin(addon, Frame);
 		end
 	end);
@@ -4016,7 +4199,9 @@ local function LF_AddOnCallback_Blizzard_TradeSkillUI(addon)
 		local TradeSkillCollapseAllButton = _G.TradeSkillCollapseAllButton;
 		local TradeSkillExpandButtonFrame = _G.TradeSkillExpandButtonFrame;
 		local TradeSkillSubClassDropDown = _G.TradeSkillSubClassDropDown or _G.TradeSkillSubClassDropdown;
+		local TradeSkillSubClassDropDownButton = _G.TradeSkillSubClassDropDownButton or _G.TradeSkillSubClassDropdownButton;
 		local TradeSkillInvSlotDropDown = _G.TradeSkillInvSlotDropDown or _G.TradeSkillInvSlotDropdown;
+		local TradeSkillInvSlotDropDownButton = _G.TradeSkillInvSlotDropDownButton or _G.TradeSkillInvSlotDropdownButton;
 		local TradeSkillDescription = _G.TradeSkillDescription;
 		local TradeSkillReagentLabel = _G.TradeSkillReagentLabel;
 
@@ -4024,13 +4209,13 @@ local function LF_AddOnCallback_Blizzard_TradeSkillUI(addon)
 		local UIDropDownMenu_SetSelectedID = _G.UIDropDownMenu_SetSelectedID;
 	-->
 
-	local meta = {
+	local meta; meta = {
 		HookedFrame = TradeSkillFrame,
 		HookedDetailFrame = TradeSkillDetailScrollFrame,
 		HookedDetailBar = TradeSkillDetailScrollFrameScrollBar,
 		HookedDetailChild = TradeSkillDetailScrollChildFrame,
-		HookedScrollFrame = TradeSkillListScrollFrame,
-		HookedScrollBar = TradeSkillListScrollFrameScrollBar,
+		HookedListFrame = TradeSkillListScrollFrame,
+		HookedListBar = TradeSkillListScrollFrameScrollBar,
 		HookedRankFrame = TradeSkillRankFrame,
 		HookedPortrait = TradeSkillFramePortrait,
 		T_StyleLayout = {
@@ -4041,10 +4226,10 @@ local function LF_AddOnCallback_Blizzard_TradeSkillUI(addon)
 					-- { "BOTTOMRIGHT", TradeSkillFrame, "TOPRIGHT", -38, -230, },
 				},
 				size = { 328, 156, },
-				scroll_anchor = {
+				list_anchor = {
 					{ "TOPLEFT", TradeSkillFrame, "TOPLEFT", 22, -96, },
 				},
-				scroll_size = { 298, 128, },
+				list_size = { 298, 128, },
 				scroll_button_num = 8,
 				detail_anchor = {
 					{ "TOPLEFT", TradeSkillFrame, "TOPLEFT", 22, -234, },
@@ -4057,15 +4242,15 @@ local function LF_AddOnCallback_Blizzard_TradeSkillUI(addon)
 					{ "TOPLEFT", TradeSkillFrame, "TOPLEFT", 18, -68, },
 				},
 				size = { 328, 366, },
-				scroll_anchor = {
+				list_anchor = {
 					{ "TOPLEFT", TradeSkillFrame, "TOPLEFT", 22, -96, },
 				},
-				scroll_size = { 298, 21 * 16, },
+				list_size = { 298, 21 * 16, },
 				scroll_button_num = 21,
 				detail_anchor = {
 					{ "TOPLEFT", nil, "TOPRIGHT", 2, -4, },
 				},
-				detail_size = { 298, 318, },
+				detail_size = { 328, 318, },
 			},
 			C_VariableName_NumSkillListButton = "TRADE_SKILLS_DISPLAYED",
 		},
@@ -4147,7 +4332,15 @@ local function LF_AddOnCallback_Blizzard_TradeSkillUI(addon)
 
 		F_GetRecipeInfo = GetTradeSkillInfo,
 			--	skillName, difficult & header, numAvailable, isExpanded = GetTradeSkillInfo(skillIndex)
-		F_GetRecipeSpellID = CT.VGT3X and function(arg1) local link = GetTradeSkillRecipeLink(arg1); return link and tonumber(strmatch(link, "[a-zA-Z]:(%d+)")) or nil; end or nil,
+		F_GetRecipeSpellID = CT.VGT3X and
+								function(arg1)
+									local link = GetTradeSkillRecipeLink(arg1);
+									return link and tonumber(strmatch(link, "[a-zA-Z]:(%d+)")) or nil;
+								end
+							or
+								function(arg1)
+									return DataAgent.get_sid_by_pid_sname_cid(DataAgent.get_pid_by_pname(meta.F_GetSkillName()), meta.F_GetRecipeInfo(arg1), meta.F_GetRecipeItemID(arg1));
+								end,
 		F_GetRecipeSpellLink = CT.VGT3X and GetTradeSkillRecipeLink or nil;
 		F_GetRecipeItemID = function(arg1) local link = GetTradeSkillItemLink(arg1); return link and tonumber(strmatch(link, "[a-zA-Z]:(%d+)")) or nil; end,
 		F_GetRecipeItemLink = GetTradeSkillItemLink,
@@ -4170,6 +4363,7 @@ local function LF_AddOnCallback_Blizzard_TradeSkillUI(addon)
 			-- "TRADE_SKILL_SHOW",
 			"TRADE_SKILL_UPDATE",
 		},
+		C_SwitchEvent = "TRADE_SKILL_SHOW",
 
 		F_WithDisabledFrame = function(self, func)
 			if CT.VGT2X then
@@ -4178,8 +4372,14 @@ local function LF_AddOnCallback_Blizzard_TradeSkillUI(addon)
 				TradeSearchInputBox:ClearFocus();
 			end
 			func(TradeSkillCollapseAllButton);
-			func(TradeSkillInvSlotDropDown);
 			func(TradeSkillSubClassDropDown);
+			if CT.VGT2X then
+				func(TradeSkillSubClassDropDownButton);
+			end
+			func(TradeSkillInvSlotDropDown);
+			if CT.VGT2X then
+				func(TradeSkillInvSlotDropDownButton);
+			end
 			func(TradeSkillListScrollFrame);
 			func(TradeSkillListScrollFrameScrollBar);
 			func(TradeSkillHighlightFrame);
@@ -4368,13 +4568,13 @@ local function LF_AddOnCallback_Blizzard_CraftUI(addon)
 		local CraftCancelButton = _G.CraftCancelButton;
 	-->
 
-	local meta = {
+	local meta; meta = {
 		HookedFrame = CraftFrame,
 		HookedDetailFrame = CraftDetailScrollFrame,
 		HookedDetailBar = CraftDetailScrollFrameScrollBar,
 		HookedDetailChild = CraftDetailScrollChildFrame,
-		HookedScrollFrame = CraftListScrollFrame,
-		HookedScrollBar = CraftListScrollFrameScrollBar,
+		HookedListFrame = CraftListScrollFrame,
+		HookedListBar = CraftListScrollFrameScrollBar,
 		HookedRankFrame = CraftRankFrame,
 		HookedPortrait = CraftFramePortrait,
 		T_StyleLayout = {
@@ -4385,10 +4585,10 @@ local function LF_AddOnCallback_Blizzard_CraftUI(addon)
 					-- { "BOTTOMRIGHT", CraftFrame, "TOPRIGHT", -38, -230, },
 				},
 				size = { 328, 156, },
-				scroll_anchor = {
+				list_anchor = {
 					{ "TOPLEFT", CraftFrame, "TOPLEFT", 22, -96, },
 				},
-				scroll_size = { 298, 128, },
+				list_size = { 298, 128, },
 				scroll_button_num = 8,
 				detail_anchor = {
 					{ "TOPLEFT", CraftFrame, "TOPLEFT", 22, -234, },
@@ -4401,15 +4601,15 @@ local function LF_AddOnCallback_Blizzard_CraftUI(addon)
 					{ "TOPLEFT", CraftFrame, "TOPLEFT", 18, -68, },
 				},
 				size = { 328, 366, },
-				scroll_anchor = {
+				list_anchor = {
 					{ "TOPLEFT", CraftFrame, "TOPLEFT", 22, -96, },
 				},
-				scroll_size = { 298, 21 * 16, },
+				list_size = { 298, 21 * 16, },
 				scroll_button_num = 21,
 				detail_anchor = {
 					{ "TOPLEFT", nil, "TOPRIGHT", 2, -4, },
 				},
-				detail_size = { 298, 318, },
+				detail_size = { 328, 318, },
 			},
 			C_VariableName_NumSkillListButton = "CRAFTS_DISPLAYED",
 		},
@@ -4467,7 +4667,15 @@ local function LF_AddOnCallback_Blizzard_CraftUI(addon)
 
 		F_GetRecipeInfo = function(arg1) local _1, _2, _3, _4, _5, _6, _7 = GetCraftInfo(arg1); return _1, _3, _4, _5, _6, _7; end,
 			--	craftName, craftSubSpellName(""), difficult, numAvailable, isExpanded, trainingPointCost, requiredLevel = GetCraftInfo(index)
-		F_GetRecipeSpellID = CT.VGT3X and function(arg1) local link = GetCraftRecipeLink(arg1); return link and tonumber(strmatch(link, "[a-zA-Z]:(%d+)")) or nil; end or nil,
+		F_GetRecipeSpellID = CT.VGT3X and
+								function(arg1)
+									local link = GetCraftRecipeLink(arg1);
+									return link and tonumber(strmatch(link, "[a-zA-Z]:(%d+)")) or nil;
+								end
+							or
+								function(arg1)
+									return DataAgent.get_sid_by_pid_sname_cid(DataAgent.get_pid_by_pname(meta.F_GetSkillName()), meta.F_GetRecipeInfo(arg1), meta.F_GetRecipeItemID(arg1));
+								end,
 		F_GetRecipeItemID = function(arg1) local link = GetCraftItemLink(arg1); return link and tonumber(strmatch(link, "[a-zA-Z]:(%d+)")) or nil; end,
 		F_GetRecipeItemLink = GetCraftItemLink,
 		F_GetRecipeIcon = GetCraftIcon,
@@ -4488,6 +4696,7 @@ local function LF_AddOnCallback_Blizzard_CraftUI(addon)
 			-- "CRAFT_SHOW",
 			"CRAFT_UPDATE",
 		},
+		C_SwitchEvent = "CRAFT_SHOW",
 
 		F_WithDisabledFrame = function(self, func)
 			if CT.VGT2X then
