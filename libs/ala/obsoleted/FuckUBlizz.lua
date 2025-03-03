@@ -5,7 +5,7 @@ local _G = _G;
 local function noop()
 end
 
---	30400Compatible 
+--	30400Compatible
 if __ala_meta__.TOC_VERSION < 30401 then
 
 	local ToPack = {
