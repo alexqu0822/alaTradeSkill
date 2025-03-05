@@ -2,7 +2,7 @@
 	by ALA
 --]]--
 
-local __version = 250301;
+local __version = 250305;
 
 local _G = _G;
 _G.__ala_meta__ = _G.__ala_meta__ or {  };
@@ -871,6 +871,10 @@ end
 		local TypeClassIndex = type(classIndex);
 		if TypeClassIndex == 'string' then
 			classIndex = __classHash[classIndex];
+			if classIndex == nil then
+				_Print("EncodeFrameTalentDataV2", "hash(classIndex)", classIndex);
+				return nil;
+			end
 		elseif TypeClassIndex == 'number' and __classList[classIndex] then
 		else
 			_Print("EncodeFrameTalentDataV2", "type(classIndex)", TypeClassIndex, classIndex);

@@ -159,7 +159,7 @@ l10n["LABEL_ACCOUT_RECIPE_LEARNED"] = "|cffff7f00Status of characters:|r";
 l10n["LABEL_USED_AS_MATERIAL_IN"] = "|cffff7f00Used to craft: |r";
 l10n["RECIPE_LEARNED"] = "|cff00ff00Learned|r";
 l10n["RECIPE_NOT_LEARNED"] = "|cffff0000Not learned|r";
-
+--
 l10n["PREV"] = "Prev";
 l10n["NEXT"] = "Next";
 l10n["PRINT_MATERIALS: "] = "Needs: ";
@@ -182,6 +182,9 @@ l10n["CRAFT_INFO"] = "|cffff7f00Craft info: |r";
 l10n["CRAFTED_BY"] = "|cffff7f00Crafted by: |r";
 l10n["ITEMS_UNK"] = "items unk";
 l10n["NEED_UPDATE"] = "|cffff0000!!Need refresh!!|r";
+--
+l10n["QueueToggleButton"] = "Queue";
+l10n["AddQueue"] = "Add";
 --
 l10n["TIP_SEARCH_NAME_ONLY_INFO"] = "|cffffffSearch name instead of hyperlink|r";
 l10n["TIP_HAVE_MATERIALS_INFO"] = "|cffffffffShow recipes that u have enough materials|r";

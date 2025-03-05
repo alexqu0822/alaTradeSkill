@@ -159,7 +159,7 @@ l10n["LABEL_ACCOUT_RECIPE_LEARNED"] = "|cffff7f00帐号角色状态: |r";
 l10n["LABEL_USED_AS_MATERIAL_IN"] = "|cffff7f00用于制造: |r";
 l10n["RECIPE_LEARNED"] = "|cff00ff00已学|r";
 l10n["RECIPE_NOT_LEARNED"] = "|cffff0000未学|r";
-
+--
 l10n["PREV"] = "上一個";
 l10n["NEXT"] = "下一個";
 l10n["PRINT_MATERIALS: "] = "材料: ";
@@ -182,6 +182,9 @@ l10n["CRAFT_INFO"] = "|cffff7f00商业技能制造信息: |r";
 l10n["CRAFTED_BY"] = "|cffff7f00可由以下角色制作: |r";
 l10n["ITEMS_UNK"] = "项未知";
 l10n["NEED_UPDATE"] = "|cffff0000!!需要刷新!!|r";
+--
+l10n["QueueToggleButton"] = "隊列";
+l10n["AddQueue"] = "Add";
 --
 l10n["TIP_SEARCH_NAME_ONLY_INFO"] = "|cffffffff只搜索名字，而不是物品链接|r";
 l10n["TIP_HAVE_MATERIALS_INFO"] = "|cffffffff只显示有足够材料的配方|r";
