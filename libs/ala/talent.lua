@@ -2,7 +2,7 @@
 	by ALA
 --]]--
 
-local __version = 250305;
+local __version = 250306;
 
 local _G = _G;
 _G.__ala_meta__ = _G.__ala_meta__ or {  };
@@ -70,10 +70,6 @@ end
 	local function __table_sub(T, index, index2)
 		return T[index];
 	end;
-	local function _Print(...)
-		print(date('\124cff00ff00%H:%M:%S\124r'), ...);
-		--	tinsert(logfile, { date('\124cff00ff00%H:%M:%S\124r'), ... });
-	end
 -->			constant
 	--
 	local BIG_NUMBER = 4294967295;
@@ -317,6 +313,17 @@ end
 	--
 -->		SharedMethod
 	--
+	function __emulib.Print(...)
+		print(date('\124cff00ff00%H:%M:%S\124r'), ...);
+		--	tinsert(logfile, { date('\124cff00ff00%H:%M:%S\124r'), ... });
+	end
+	local _, BNTAG = BNGetInfo();
+	if BNTAG == "\97\108\101\120\35\53\49\54\55\50\50" or BNTAG == "ALEX#125620" then
+		__emulib.Debug = __emulib.Print;
+	else
+		__emulib.Debug = function()
+		end
+	end
 	local RepeatedZero = setmetatable(
 		{
 			[0] = "",
@@ -389,7 +396,7 @@ end
 	local _TalentMap = {  };
 	local function _GenerateTalentMap(class, inspect)
 		if not inspect and class ~= SELFCLASS then
-			_Print("_GenerateTalentMap", "not inspect and class ~= SELFCLASS", class, inspect, SELFCLASS);
+			__emulib.Debug("_GenerateTalentMap", "not inspect and class ~= SELFCLASS", class, inspect, SELFCLASS);
 			return nil;
 		end
 		local Map = _TalentMap[class];
@@ -403,7 +410,7 @@ end
 		for SpecIndex = 1, NumSpecs do
 			local NumTalents = GetNumTalents(SpecIndex, inspect);
 			if NumTalents == nil then
-				_Print("_GenerateTalentMap", "NumTalents == nil", class, inspect, SpecIndex);
+				__emulib.Debug("_GenerateTalentMap", "NumTalents == nil", class, inspect, SpecIndex);
 				return nil;
 			end
 			local PM = {  };
@@ -411,7 +418,7 @@ end
 			for TalentIndex = 1, NumTalents do
 				local name, iconTexture, tier, column, rank, maxRank, isExceptional, available = GetTalentInfo(SpecIndex, TalentIndex, inspect);
 				if maxRank == nil then
-					_Print("_GenerateTalentMap", "maxRank == nil", class, inspect, SpecIndex, TalentIndex, name, tier, column, rank, maxRank);
+					__emulib.Debug("_GenerateTalentMap", "maxRank == nil", class, inspect, SpecIndex, TalentIndex, name, tier, column, rank, maxRank);
 					return nil;
 				end
 				if tier == nil or maxRank == 0 then
@@ -464,7 +471,7 @@ end
 	end
 	function __emulib.INSPECT_READY(GUID)
 		local locClass, class, locRace, race, sex, name, realm = GetPlayerInfoByGUID(GUID);
-		-- _Print("INSPECT_READY", GUID, class);
+		-- __emulib.Debug("INSPECT_READY", GUID, class);
 		if class ~= nil then
 			_GenerateTalentMap(class, true);
 		end
@@ -480,7 +487,7 @@ end
 	function __emulib.GetTalentData(class, inspect, group)
 		local Map = __emulib.GetTalentMap(class);
 		if Map == nil then
-			_Print("GetTalentData", "Map == nil", class);
+			__emulib.Debug("GetTalentData", "Map == nil", class);
 			return nil, 0;
 		end
 		local VMap = Map.VMap;
@@ -488,7 +495,7 @@ end
 		local len = 0;
 		local NumSpecs = GetNumTalentTabs(inspect);
 		if NumSpecs == nil then
-			_Print("GetTalentData", "NumSpecs == nil", inspect);
+			__emulib.Debug("GetTalentData", "NumSpecs == nil", inspect, class);
 			return nil, 0;
 		end
 		for SpecIndex = 1, NumSpecs do
@@ -498,19 +505,19 @@ end
 			end
 			local NumTalents = GetNumTalents(SpecIndex, inspect);
 			if NumTalents == nil then
-				_Print("GetTalentData", "NumTalents == nil", inspect)
+				__emulib.Debug("GetTalentData", "NumTalents == nil", NumSpecs, inspect, class);
 				return nil, 0;
 			end
 			len = len + NumTalents;
 			for TalentSeq = 1, NumTalents do
 				local TalentIndex = VM[TalentSeq];
 				if TalentIndex == nil then
-					_Print("GetTalentData", "TalentIndex == nil", SpecIndex, TalentSeq, TalentIndex);
+					__emulib.Debug("GetTalentData", "TalentIndex == nil", SpecIndex, TalentSeq, TalentIndex, NumSpecs, inspect, class);
 					return nil, 0;
 				end
 				local name, iconTexture, tier, column, rank, maxRank, isExceptional, available = GetTalentInfo(SpecIndex, TalentIndex, inspect, false, group or 1);
 				if rank == nil then
-					_Print("GetTalentData", "rank == nil", SpecIndex, TalentSeq, TalentIndex);
+					__emulib.Debug("GetTalentData", "rank == nil", SpecIndex, TalentSeq, TalentIndex, NumSpecs, inspect, class);
 					return nil, 0;
 				end
 				data = data .. rank;
@@ -527,12 +534,12 @@ end
 		end
 		local classIndex = __debase64[cc];
 		if classIndex == nil then
-			_Print("GetClass", "classIndex == nil", code);
+			__emulib.Debug("GetClass", "classIndex == nil", code);
 			return nil;
 		end
 		local class = __classList[classIndex];
 		if class == nil then
-			_Print("GetClass", "class == nil", classIndex, code);
+			__emulib.Debug("GetClass", "class == nil", classIndex, code);
 			return nil;
 		end
 		return class;
@@ -555,7 +562,7 @@ end
 				magic = magic * 64;
 				nChar = nChar + 1;
 			else
-				_Print("DecodeTalentBlock", 1, c, index, code);
+				__emulib.Debug("DecodeTalentBlock", 1, c, index, code);
 			end
 			if c == ":" or nChar == 5 or index == len then
 				magic = 1;
@@ -578,12 +585,12 @@ end
 		[1] = function(code, nodecoding)
 			local classIndex = __debase64[strsub(code, 1, 1)];
 			if classIndex == nil then
-				_Print("DecodeTalent", "classIndex == nil", code);
+				__emulib.Debug("DecodeTalent", "classIndex == nil", code);
 				return nil;
 			end
 			local class = __classList[classIndex];
 			if class == nil then
-				_Print("DecodeTalent", "class == nil", classIndex, code);
+				__emulib.Debug("DecodeTalent", "class == nil", classIndex, code);
 				return nil;
 			end
 
@@ -593,29 +600,29 @@ end
 			local cc = strsub(code, 1, 1);
 			local classIndex = __debase64[cc];
 			if classIndex == nil then
-				_Print("_TalentDataSubDecoder V2", "classIndex == nil", cc, code);
+				__emulib.Debug("_TalentDataSubDecoder V2", "classIndex == nil", cc, code);
 				return nil;
 			end
 			local class = __classList[classIndex];
 			if class == nil then
-				_Print("_TalentDataSubDecoder V2", "class == nil", classIndex, code);
+				__emulib.Debug("_TalentDataSubDecoder V2", "class == nil", classIndex, code);
 				return nil;
 			end
 			local level = __debase64[strsub(code, 2, 2)] + __debase64[strsub(code, 3, 3)] * 64;
 			local numGroup = __debase64[strsub(code, 4, 4)];
 			if numGroup == nil then
-				_Print("_TalentDataSubDecoder V2", "numGroup == nil", __debase64[strsub(code, 4, 4)], code);
+				__emulib.Debug("_TalentDataSubDecoder V2", "numGroup == nil", __debase64[strsub(code, 4, 4)], code);
 				return nil;
 			end
 			local activeGroup = __debase64[strsub(code, 5, 5)];
 			if activeGroup == nil then
-				_Print("_TalentDataSubDecoder V2", "activeGroup == nil", __debase64[strsub(code, 5, 5)], code);
+				__emulib.Debug("_TalentDataSubDecoder V2", "activeGroup == nil", __debase64[strsub(code, 5, 5)], code);
 				return nil;
 			end
 			if numGroup < 2 then
 				local lenTal1 = __debase64[strsub(code, 6, 6)];
 				if lenTal1 == nil then
-					_Print("_TalentDataSubDecoder V2", "lenTal1 == nil", __debase64[strsub(code, 6, 6)], code);
+					__emulib.Debug("_TalentDataSubDecoder V2", "lenTal1 == nil", __debase64[strsub(code, 6, 6)], code);
 					return nil;
 				end
 				local code1 = strsub(code, 7, lenTal1 + 6);
@@ -627,13 +634,13 @@ end
 			else
 				local lenTal1 = __debase64[strsub(code, 6, 6)];
 				if lenTal1 == nil then
-					_Print("_TalentDataSubDecoder V2", "lenTal1 == nil", __debase64[strsub(code, 6, 6)], code);
+					__emulib.Debug("_TalentDataSubDecoder V2", "lenTal1 == nil", __debase64[strsub(code, 6, 6)], code);
 					return nil;
 				end
 				local code1 = strsub(code, 7, lenTal1 + 6);
 				local lenTal2 = __debase64[strsub(code, 7 + lenTal1, 7 + lenTal1)];
 				if lenTal2 == nil then
-					_Print("_TalentDataSubDecoder V2", "lenTal2 == nil", __debase64[strsub(code, 7 + lenTal1, 7 + lenTal1)], code);
+					__emulib.Debug("_TalentDataSubDecoder V2", "lenTal2 == nil", __debase64[strsub(code, 7 + lenTal1, 7 + lenTal1)], code);
 					return nil;
 				end
 				local code2 = strsub(code, lenTal1 + 8, lenTal1 + lenTal2 + 7);
@@ -694,7 +701,7 @@ end
 		for index = 1, len do
 			local d = tonumber(data:sub(index, index));			--	table or string
 			if d == nil or d == "" then
-				_Print("EncodeTalentBlock", "d == nil", data, len);
+				__emulib.Debug("EncodeTalentBlock", "d == nil", data, len);
 				return nil;
 			end
 			num = num + 1;
@@ -740,7 +747,7 @@ end
 			classIndex = __classHash[classIndex];
 		elseif TypeClassIndex == 'number' and __classList[classIndex] then
 		else
-			_Print("EncodeFrameTalentDataV1", "type(classIndex)", TypeClassIndex, classIndex);
+			__emulib.Debug("EncodeFrameTalentDataV1", "type(classIndex)", TypeClassIndex, classIndex);
 			return nil;
 		end
 		if type(D1) == 'string' then
@@ -752,7 +759,7 @@ end
 			for index = 1, N2 do len = len + 1; data[len] = D2 and D2[index] or 0; end
 			for index = 1, N3 do len = len + 1; data[len] = D3 and D3[index] or 0; end
 		else
-			_Print("EncodeFrameData", 1, classIndex);
+			__emulib.Debug("EncodeFrameData", 1, classIndex);
 			return nil;
 		end
 		local TypeD1 = type(D1);
@@ -765,7 +772,7 @@ end
 			for index = 1, N2 do len = len + 1; data[len] = D2 and D2[index] or 0; end
 			for index = 1, N3 do len = len + 1; data[len] = D3 and D3[index] or 0; end
 		else
-			_Print("EncodeFrameTalentDataV1", "type(D1)", TypeD1, classIndex);
+			__emulib.Debug("EncodeFrameTalentDataV1", "type(D1)", TypeD1, classIndex);
 			return nil;
 		end
 
@@ -778,7 +785,7 @@ end
 			classIndex = __classHash[classIndex];
 		elseif TypeClassIndex == 'number' and __classList[classIndex] then
 		else
-			_Print("EncodeFrameTalentDataV2", "type(classIndex)", TypeClassIndex, classIndex);
+			__emulib.Debug("EncodeFrameTalentDataV2", "type(classIndex)", TypeClassIndex, classIndex);
 			return nil;
 		end
 		local TypeD1 = type(D1);
@@ -791,7 +798,7 @@ end
 			for index = 1, N2 do len = len + 1; data[len] = D2 and D2[index] or 0; end
 			for index = 1, N3 do len = len + 1; data[len] = D3 and D3[index] or 0; end
 		else
-			_Print("EncodeFrameTalentDataV2", "type(D1)", TypeD1, classIndex);
+			__emulib.Debug("EncodeFrameTalentDataV2", "type(D1)", TypeD1, classIndex);
 			return nil;
 		end
 		level = level ~= nil and tonumber(level) or MAX_LEVEL;
@@ -859,7 +866,7 @@ end
 			classIndex = __classHash[classIndex];
 		elseif TypeClassIndex == 'number' and __classList[classIndex] then
 		else
-			_Print("EncodeFrameTalentDataV1", "type(classIndex)", TypeClassIndex, classIndex);
+			__emulib.Debug("EncodeFrameTalentDataV1", "type(classIndex)", TypeClassIndex, classIndex);
 			return nil;
 		end
 		local LvLow = level % 64;
@@ -872,12 +879,12 @@ end
 		if TypeClassIndex == 'string' then
 			classIndex = __classHash[classIndex];
 			if classIndex == nil then
-				_Print("EncodeFrameTalentDataV2", "hash(classIndex)", classIndex);
+				__emulib.Debug("EncodeFrameTalentDataV2", "hash(classIndex)", classIndex);
 				return nil;
 			end
 		elseif TypeClassIndex == 'number' and __classList[classIndex] then
 		else
-			_Print("EncodeFrameTalentDataV2", "type(classIndex)", TypeClassIndex, classIndex);
+			__emulib.Debug("EncodeFrameTalentDataV2", "type(classIndex)", TypeClassIndex, classIndex);
 			return nil;
 		end
 		level = level ~= nil and tonumber(level) or -1;
@@ -997,12 +1004,12 @@ end
 		[2] = function(code)
 			local numGroup = __debase64[strsub(code, 1, 1)];
 			if numGroup == nil then
-				_Print("_GlyphDataSubDecoder V2", "numGroup == nil", __debase64[strsub(code, 1, 1)], code);
+				__emulib.Debug("_GlyphDataSubDecoder V2", "numGroup == nil", __debase64[strsub(code, 1, 1)], code);
 				return nil;
 			end
 			local activeGroup = __debase64[strsub(code, 2, 2)];
 			if activeGroup == nil then
-				_Print("_GlyphDataSubDecoder V2", "activeGroup == nil", __debase64[strsub(code, 2, 2)], code);
+				__emulib.Debug("_GlyphDataSubDecoder V2", "activeGroup == nil", __debase64[strsub(code, 2, 2)], code);
 				return nil;
 			end
 			local ofs = 3;
