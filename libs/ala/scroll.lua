@@ -2,15 +2,15 @@
 	by ALA
 --]]--
 --[[
-	scroll = __ala_meta__.__scrolllib.CreateScrollFrame(parent, width, height, buttonHeight, funcToCreateButton(parent: ScrollFrame.ScrollChild, index, buttonHeight), functToSetButton(button, data_index))
-	scroll:SetNumValue(num)
-	scroll:HandleButtonByDataIndex(index, func, ...)			func(button, ...)
-	scroll:HandleButtonByRawIndex(index, func, ...)				func(button, ...)
-	scroll:CallButtonFuncByRawIndex(index, FuncName, ...)		button:func(...)
-	scroll:CallButtonFuncByDataIndex(index, FuncName, ...)		button:func(...)
-	button:GetDataIndex()
+	Scroll = __ala_meta__.__scrolllib.CreateScrollFrame(Parent, width, height, ButtonHeight, Creator(Parent: ScrollFrame.ScrollChild, index, ButtonHeight), Settor(Button, data_index))
+	Scroll:SetNumValue(num)
+	Scroll:HandleButtonByDataIndex(index, func, ...)			func(Button, ...)
+	Scroll:HandleButtonByRawIndex(index, func, ...)				func(Button, ...)
+	Scroll:CallButtonFuncByRawIndex(index, FuncName, ...)		Button:func(...)
+	Scroll:CallButtonFuncByDataIndex(index, FuncName, ...)		Button:func(...)
+	Button:GetDataIndex()
 ]]
-local __version = 250101;
+local __version = 250301;
 
 local _G = _G;
 _G.__ala_meta__ = _G.__ala_meta__ or {  };
@@ -35,6 +35,7 @@ local __ala_meta__ = _G.__ala_meta__;
 
 -->			upvalue
 	local ceil, floor, max, min = ceil, floor, max, min;
+	local After = C_Timer.After;
 	local _ = nil;
 
 	local function _error_(key, msg, ...)
@@ -45,120 +46,117 @@ local __ala_meta__ = _G.__ala_meta__;
 	local def_inner_size = 64;
 
 -->
-	function __scrolllib.CreateScrollFrame(parent, width, height, buttonHeight, funcToCreateButton, functToSetButton)
-		width = width and max(width, def_inner_size) or def_inner_size;
-		height = height and max(height, def_inner_size) or def_inner_size;
+	function __scrolllib.CreateScrollFrame(Parent, FrameWidth, FrameHeight, ButtonHeight, Creator, Settor)
+		local ScrollFrame = CreateFrame('SCROLLFRAME', nil, Parent);
+		local ScrollChild = CreateFrame('FRAME', nil, ScrollFrame);
+		local ScrollBar = CreateFrame('SLIDER', nil, ScrollFrame);
+		local TblButtons = {  };
+		local NumButtons = 0;
+		local NumShown = 0;
+		local IndexOffset = 0;
+		local NumValues = -1;
 
-		local scrollFrame = CreateFrame('SCROLLFRAME', nil, parent);
-		local scrollChild = CreateFrame('FRAME', nil, scrollFrame);
-		local scrollBar = CreateFrame('SLIDER', nil, scrollFrame);
-		local buttons = {  };
-		local nButtonsShown = 0;
-		local ofsIndex = 0;
-		local numValue = -1;
+		local BarWidth = 14;
 
-		local sbWidth = 14;
-
-		scrollFrame:Show();
-		scrollFrame:EnableMouse(true);
-		scrollFrame:SetMovable(true);
-		scrollFrame:RegisterForDrag("LeftButton");
-		scrollFrame:SetVerticalScroll(0);
-		scrollFrame:SetScrollChild(scrollChild);
-		scrollFrame:SetScript("OnMouseWheel", function(self, delta, stepSize)
-			stepSize = stepSize or buttonHeight;
-			local minVal, maxVal = scrollBar:GetMinMaxValues();
-			scrollBar:SetValue(min(maxVal, max(minVal, scrollBar:GetValue() - delta * stepSize)));
+		ScrollFrame:Show();
+		ScrollFrame:EnableMouse(true);
+		ScrollFrame:SetMovable(true);
+		ScrollFrame:RegisterForDrag("LeftButton");
+		ScrollFrame:SetVerticalScroll(0);
+		ScrollFrame:SetScrollChild(ScrollChild);
+		ScrollFrame:SetScript("OnMouseWheel", function(self, delta, stepSize)
+			stepSize = stepSize or ButtonHeight;
+			local minVal, maxVal = ScrollBar:GetMinMaxValues();
+			ScrollBar:SetValue(min(maxVal, max(minVal, ScrollBar:GetValue() - delta * stepSize)));
 		end);
-		function scrollFrame:OnSizeChanged(width, height)
-			-- width = width or scrollFrame:GetWidth();
-			height = height or scrollFrame:GetHeight();
-			scrollChild:SetHeight(height);
-			--scrollBar:SetValue(mscrollBar:GetValue());
-			scrollChild:CreateScrollChildButtons();
-			scrollFrame:Update();
+		function ScrollFrame:OnSizeChanged(width, height)
+			-- width = width or ScrollFrame:GetWidth();
+			height = height or ScrollFrame:GetHeight();
+			ScrollChild:SetHeight(height);
+			--ScrollBar:SetValue(mscrollBar:GetValue());
+			ScrollChild:CreateScrollChildButtons();
+			ScrollFrame:Update();
 		end
-		function scrollFrame:SetButtonHeight(height)
-			if buttonHeight == height then
+		function ScrollFrame:SetButtonHeight(height)
+			if ButtonHeight == height then
 				return;
 			end
-			buttonHeight = height;
-			scrollFrame:OnSizeChanged();
+			ButtonHeight = height;
+			ScrollFrame:OnSizeChanged();
 		end
-		-- scrollFrame._SetSize = scrollFrame.SetSize;
-		-- function scrollFrame:SetSize(...)
-		-- 	scrollFrame:_SetSize(...);
-		-- 	scrollFrame:OnSizeChanged(...);
+		-- ScrollFrame._SetSize = ScrollFrame.SetSize;
+		-- function ScrollFrame:SetSize(...)
+		-- 	ScrollFrame:_SetSize(...);
+		-- 	ScrollFrame:OnSizeChanged(...);
 		-- end
-		-- scrollFrame._SetHeight = scrollFrame.SetHeight;
-		-- function scrollFrame:SetHeight(...)
-		-- 	scrollFrame:_SetHeight(...);
-		-- 	scrollFrame:OnSizeChange(scrollFrame:GetWidth(), ...);
+		-- ScrollFrame._SetHeight = ScrollFrame.SetHeight;
+		-- function ScrollFrame:SetHeight(...)
+		-- 	ScrollFrame:_SetHeight(...);
+		-- 	ScrollFrame:OnSizeChange(ScrollFrame:GetWidth(), ...);
 		-- end
-		-- scrollFrame._SetWidth = scrollFrame.SetWidth;
-		-- function scrollFrame:SetWidth(...)
-		-- 	scrollFrame:_SetWidth(...);
-		-- 	scrollChild:SetWidth(...);
+		-- ScrollFrame._SetWidth = ScrollFrame.SetWidth;
+		-- function ScrollFrame:SetWidth(...)
+		-- 	ScrollFrame:_SetWidth(...);
+		-- 	ScrollChild:SetWidth(...);
 		-- end
-		scrollFrame:SetScript("OnSizeChanged", scrollFrame.OnSizeChanged);
-		scrollFrame:SetScript("OnDragStart", function(self, button)
-				if parent:IsMovable() then
-					parent:StartMoving();
-				end
+		ScrollFrame:SetScript("OnSizeChanged", ScrollFrame.OnSizeChanged);
+		ScrollFrame:SetScript("OnDragStart", function(self, button)
+			if Parent:IsMovable() then
+				Parent:StartMoving();
 			end
-		);
-		scrollFrame:SetScript("OnDragStop", function(self, button)
-				parent:StopMovingOrSizing();
-			end
-		);
-		scrollFrame:SetScript("OnShow", function(self)
-			scrollFrame:Update();
 		end);
-		function scrollFrame:UpdateButtons()
-			if scrollFrame:IsVisible() then
-				for i = 1, nButtonsShown do
-					functToSetButton(buttons[i], i + ofsIndex);
+		ScrollFrame:SetScript("OnDragStop", function(self, button)
+			Parent:StopMovingOrSizing();
+		end);
+		ScrollFrame:SetScript("OnShow", function(self)
+			ScrollFrame:Update();
+		end);
+		function ScrollFrame:UpdateButtons()
+			if ScrollFrame:IsVisible() then
+				for i = 1, NumShown do
+					-- Settor(TblButtons[i], i + IndexOffset);
+					After(0.0, TblButtons[i].ScopedUpdate);
 				end
 			end
 		end
-		function scrollFrame:Update()
-			if scrollFrame:IsVisible() then
-				local maxVal = max(numValue - nButtonsShown + 2, 0) * buttonHeight;
-				local val = min(scrollBar:GetValue(), maxVal);
-				scrollBar:SetMinMaxValues(0, maxVal);
-				scrollBar:SetValue(val);
-				if nButtonsShown - 1 > numValue then
-					scrollBar:Hide();
-					scrollChild:SetWidth(scrollFrame:GetWidth());
+		function ScrollFrame:Update()
+			if ScrollFrame:IsVisible() then
+				local maxVal = max(NumValues - NumShown + 2, 0) * ButtonHeight;
+				local val = min(ScrollBar:GetValue(), maxVal);
+				ScrollBar:SetMinMaxValues(0, maxVal);
+				ScrollBar:SetValue(val);
+				if NumShown - 1 > NumValues then
+					ScrollBar:Hide();
+					ScrollChild:SetWidth(ScrollFrame:GetWidth());
 				else
-					scrollBar:Show();
-					scrollChild:SetWidth(scrollFrame:GetWidth() - sbWidth);
+					ScrollBar:Show();
+					ScrollChild:SetWidth(ScrollFrame:GetWidth() - BarWidth);
 				end
-				scrollFrame:UpdateButtons();
+				ScrollFrame:UpdateButtons();
 			end
 		end
-		function scrollFrame:SetNumValue(n)
-			if n >= 0 and numValue ~= n then
-				numValue = n;
-				scrollFrame:Update();
+		function ScrollFrame:SetNumValue(num)
+			if num >= 0 and NumValues ~= num then
+				NumValues = num;
+				ScrollFrame:Update();
 			end
 		end
-		function scrollFrame:HandleButtonByDataIndex(index, func, ...)
-			return scrollFrame:HandleButtonByRawIndex(index - ofsIndex, func, ...);
+		function ScrollFrame:HandleButtonByDataIndex(index, func, ...)
+			return ScrollFrame:HandleButtonByRawIndex(index - IndexOffset, func, ...);
 		end
-		function scrollFrame:HandleButtonByRawIndex(index, func, ...)
-			if index >= 1 and index <= #buttons then
-				return func(buttons[index], ...);
+		function ScrollFrame:HandleButtonByRawIndex(index, func, ...)
+			if index >= 1 and index <= #TblButtons then
+				return func(TblButtons[index], ...);
 			else
 				-- _error_("HandleButtonByRawIndex", index);
 				return nil;
 			end
 		end
-		function scrollFrame:CallButtonFuncByRawIndex(index, func, ...)
-			if index >= 1 and index <= #buttons then
-				func = buttons[index][func];
+		function ScrollFrame:CallButtonFuncByRawIndex(index, func, ...)
+			if index >= 1 and index <= #TblButtons then
+				func = TblButtons[index][func];
 				if func then
-					return func(buttons[index], ...);
+					return func(TblButtons[index], ...);
 				else
 					_error_("CallButtonFuncByRawIndex", index);
 					return nil;
@@ -169,130 +167,131 @@ local __ala_meta__ = _G.__ala_meta__;
 			end
 			return nil;
 		end
-		function scrollFrame:CallButtonFuncByDataIndex(index, func, ...)
-			return scrollFrame:CallButtonFuncByRawIndex(index - ofsIndex, func, ...);
+		function ScrollFrame:CallButtonFuncByDataIndex(index, func, ...)
+			return ScrollFrame:CallButtonFuncByRawIndex(index - IndexOffset, func, ...);
 		end
 
-
-		scrollChild:Show();
-		scrollChild:SetPoint("LEFT", scrollFrame);
+		ScrollChild:Show();
+		ScrollChild:SetPoint("LEFT", ScrollFrame);
 		local function GetDataIndex(self)
-			return self.id + ofsIndex;
+			return self.id + IndexOffset;
 		end
-		function scrollChild:CreateScrollChildButtons()
-			local num = ceil(scrollChild:GetHeight() / buttonHeight) + 1;
-			if num == nButtonsShown then
+		function ScrollChild:CreateScrollChildButtons()
+			local num = ceil(ScrollChild:GetHeight() / ButtonHeight) + 1;
+			if num == NumShown then
 				return;
 			end
-			if not buttons[1] then
-				local button = funcToCreateButton(scrollChild, 1, buttonHeight);
-				button.id = 1;
-				buttons[1] = button;
-				button:SetPoint("TOPLEFT");
-				button:SetPoint("TOPRIGHT");
-				button:Show();
-				nButtonsShown = 1;
-				button.GetDataIndex = GetDataIndex;
-			end
-			if num < nButtonsShown then
-				for i = num + 1, nButtonsShown do
-					buttons[i]:Hide();
+			if num < NumShown then
+				for i = num + 1, NumShown do
+					TblButtons[i]:Hide();
 				end
 			else
-				for i = nButtonsShown + 1, num do
-					local button = funcToCreateButton(scrollChild, i, buttonHeight);
-					button.id = i;
-					buttons[i] = button;
-					button:SetPoint("TOPLEFT", buttons[i - 1], "BOTTOMLEFT", 0, 0);
-					button:SetPoint("TOPRIGHT", buttons[i - 1], "BOTTOMRIGHT", 0, 0);
-					buttons[i]:Show();
-					button.GetDataIndex = GetDataIndex;
+				if num > NumButtons then
+					for i = NumButtons + 1, num do
+						local Button = Creator(ScrollChild, i, ButtonHeight);
+						Button.id = i;
+						TblButtons[i] = Button;
+						if i == 1 then
+							Button:SetPoint("TOPLEFT");
+							Button:SetPoint("TOPRIGHT");
+						else
+							Button:SetPoint("TOPLEFT", TblButtons[i - 1], "BOTTOMLEFT", 0, 0);
+							Button:SetPoint("TOPRIGHT", TblButtons[i - 1], "BOTTOMRIGHT", 0, 0);
+						end
+						TblButtons[i]:Show();
+						Button.GetDataIndex = GetDataIndex;
+						Button.ScopedUpdate = function()
+							return Settor(Button, i + IndexOffset);
+						end
+						NumButtons = i;
+					end
+				end
+				for i = NumShown + 1, num do
+					TblButtons[i]:Show();
 				end
 			end
-			nButtonsShown = num;
-			--scrollChild:SetHeight(buttonHeight * nButtonsShown);
-			-- scrollBar:SetStepsPerPage(nButtonsShown - 2);
+			NumShown = num;
+			-- ScrollChild:SetHeight(ButtonHeight * NumShown);
+			-- ScrollBar:SetStepsPerPage(NumShown - 2);
 		end
 
 
-		scrollBar:SetWidth(sbWidth);
-		scrollBar:SetPoint("TOPRIGHT", scrollFrame, "TOPRIGHT", 0, 0);
-		scrollBar:SetPoint("BOTTOMRIGHT", scrollFrame, "BOTTOMRIGHT", 0, 0);
-		scrollBar:Show();
-		scrollBar:EnableMouse(true);
-		scrollBar:SetValueStep(buttonHeight);
-		scrollBar:SetMinMaxValues(0, 0);
-		scrollBar:SetValue(0);
-		-- local top = scrollBar:CreateTexture(nil, "ARTWORK");
-		-- top:SetTexture("Interface\\PaperDollInfoFrame\\UI-Character-ScrollBar");
-		-- top:SetSize(27, 24);
-		-- top:SetTexCoord(0.0, 0.484375, 0.0, 0.10);
-		-- top:SetPoint("TOPLEFT", -4, 17);
-		-- local bot = scrollBar:CreateTexture(nil, "ARTWORK");
-		-- bot:SetTexture("Interface\\PaperDollInfoFrame\\UI-Character-ScrollBar");
-		-- bot:SetSize(27, 24);
-		-- bot:SetTexCoord(0.515625, 1.0, 0.3140625, 0.4140625);
-		-- bot:SetPoint("BOTTOMLEFT", -4, -15);
-		-- local mid = scrollBar:CreateTexture(nil, "ARTWORK");
-		-- mid:SetTexture("Interface\\PaperDollInfoFrame\\UI-Character-ScrollBar");
-		-- mid:SetTexCoord(0.0, 0.484375, 0.1640625, 1.0);
-		-- mid:SetPoint("TOPLEFT", top, "BOTTOMLEFT", 0, 0);
-		-- mid:SetPoint("BOTTOMRIGHT", bot, "TOPRIGHT", 0, 0);
+		ScrollBar:SetWidth(BarWidth);
+		ScrollBar:SetPoint("TOPRIGHT", ScrollFrame, "TOPRIGHT", 0, 0);
+		ScrollBar:SetPoint("BOTTOMRIGHT", ScrollFrame, "BOTTOMRIGHT", 0, 0);
+		ScrollBar:Show();
+		ScrollBar:EnableMouse(true);
+		ScrollBar:SetValueStep(ButtonHeight);
+		ScrollBar:SetMinMaxValues(0, 0);
+		ScrollBar:SetValue(0);
 		do
-			local left = scrollBar:CreateTexture(nil, "ARTWORK");
-			left:SetWidth(2);
-			left:SetPoint("TOPLEFT");
-			left:SetPoint("BOTTOMLEFT");
-			left:SetColorTexture(0.0, 0.0, 0.0, 1.0);
-			local right = scrollBar:CreateTexture(nil, "ARTWORK");
-			right:SetWidth(2);
-			right:SetPoint("TOPRIGHT");
-			right:SetPoint("BOTTOMRIGHT");
-			right:SetColorTexture(0.0, 0.0, 0.0, 1.0);
-			local top = scrollBar:CreateTexture(nil, "ARTWORK");
-			top:SetHeight(2);
-			top:SetPoint("TOPLEFT");
-			top:SetPoint("TOPRIGHT");
-			top:SetColorTexture(0.0, 0.0, 0.0, 1.0);
-			local bot = scrollBar:CreateTexture(nil, "ARTWORK");
-			bot:SetHeight(2);
-			bot:SetPoint("BOTTOMLEFT");
-			bot:SetPoint("BOTTOMRIGHT");
-			bot:SetColorTexture(0.0, 0.0, 0.0, 1.0);
+			local Left = ScrollBar:CreateTexture(nil, "ARTWORK");
+			Left:SetWidth(2);
+			Left:SetPoint("TOPLEFT");
+			Left:SetPoint("BOTTOMLEFT");
+			Left:SetColorTexture(0.0, 0.0, 0.0, 1.0);
+			local Right = ScrollBar:CreateTexture(nil, "ARTWORK");
+			Right:SetWidth(2);
+			Right:SetPoint("TOPRIGHT");
+			Right:SetPoint("BOTTOMRIGHT");
+			Right:SetColorTexture(0.0, 0.0, 0.0, 1.0);
+			local Top = ScrollBar:CreateTexture(nil, "ARTWORK");
+			Top:SetHeight(2);
+			Top:SetPoint("TOPLEFT");
+			Top:SetPoint("TOPRIGHT");
+			Top:SetColorTexture(0.0, 0.0, 0.0, 1.0);
+			local Bot = ScrollBar:CreateTexture(nil, "ARTWORK");
+			Bot:SetHeight(2);
+			Bot:SetPoint("BOTTOMLEFT");
+			Bot:SetPoint("BOTTOMRIGHT");
+			Bot:SetColorTexture(0.0, 0.0, 0.0, 1.0);
+			-- local Top = ScrollBar:CreateTexture(nil, "ARTWORK");
+			-- Top:SetTexture("Interface\\PaperDollInfoFrame\\UI-Character-ScrollBar");
+			-- Top:SetSize(27, 24);
+			-- Top:SetTexCoord(0.0, 0.484375, 0.0, 0.10);
+			-- Top:SetPoint("TOPLEFT", -4, 17);
+			-- local Bot = ScrollBar:CreateTexture(nil, "ARTWORK");
+			-- Bot:SetTexture("Interface\\PaperDollInfoFrame\\UI-Character-ScrollBar");
+			-- Bot:SetSize(27, 24);
+			-- Bot:SetTexCoord(0.515625, 1.0, 0.3140625, 0.4140625);
+			-- Bot:SetPoint("BOTTOMLEFT", -4, -15);
+			-- local mid = ScrollBar:CreateTexture(nil, "ARTWORK");
+			-- mid:SetTexture("Interface\\PaperDollInfoFrame\\UI-Character-ScrollBar");
+			-- mid:SetTexCoord(0.0, 0.484375, 0.1640625, 1.0);
+			-- mid:SetPoint("TOPLEFT", Top, "BOTTOMLEFT", 0, 0);
+			-- mid:SetPoint("BOTTOMRIGHT", Bot, "TOPRIGHT", 0, 0);
 		end
-		scrollBar:SetThumbTexture("Interface\\Buttons\\UI-ScrollBar-Knob");
-		local thumb = scrollBar:GetThumbTexture();
-		thumb:SetSize(sbWidth - 2, 24);
-		thumb:SetTexCoord(0.20, 0.80, 0.125, 0.875);
-		thumb:SetColorTexture(0.25, 0.25, 0.25, 1.0);
+		ScrollBar:SetThumbTexture("Interface\\Buttons\\UI-ScrollBar-Knob");
+		local Thumb = ScrollBar:GetThumbTexture();
+		Thumb:SetSize(BarWidth - 2, 24);
+		-- Thumb:SetTexCoord(0.20, 0.80, 0.125, 0.875);
+		Thumb:SetColorTexture(0.25, 0.25, 0.25, 1.0);
 
-		scrollBar:SetScript("OnValueChanged", function(self, value)
-			value = value or scrollBar:GetValue();
-			local index = value / buttonHeight;
-			local ofs = (index - floor(index)) * buttonHeight;
-			scrollFrame:SetVerticalScroll(ofs);
-			ofsIndex = floor(index);
-			scrollFrame:UpdateButtons();
+		ScrollBar:SetScript("OnValueChanged", function(self, value)
+			value = value or ScrollBar:GetValue();
+			local index = value / ButtonHeight;
+			local ofs = (index - floor(index)) * ButtonHeight;
+			ScrollFrame:SetVerticalScroll(ofs);
+			IndexOffset = floor(index);
+			ScrollFrame:UpdateButtons();
 		end);
 
-		function scrollFrame:SetBarWidth(w)
-			sbWidth = w;
-			scrollBar:SetWidth(sbWidth);
-			thumb:SetSize(sbWidth - 2, 24);
-			scrollFrame:Update();
+		function ScrollFrame:SetBarWidth(width)
+			BarWidth = width;
+			ScrollBar:SetWidth(BarWidth);
+			Thumb:SetSize(BarWidth - 2, 24);
+			ScrollFrame:Update();
 		end
 
-		if width and height then
-			scrollFrame:SetSize(width, height);
-		end
+		FrameWidth = FrameWidth and max(FrameWidth, def_inner_size) or def_inner_size;
+		FrameHeight = FrameHeight and max(FrameHeight, def_inner_size) or def_inner_size;
+		ScrollFrame:SetSize(FrameWidth, FrameHeight);
 
-		scrollFrame:SetNumValue(0);
+		ScrollFrame:SetNumValue(0);
 
-		__scrolllib._Created[scrollFrame] = __version;
+		__scrolllib._Created[ScrollFrame] = __version;
 
-		return scrollFrame;
+		return ScrollFrame;
 	end
 
 -->
-
-

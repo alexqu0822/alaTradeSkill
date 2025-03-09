@@ -1579,6 +1579,9 @@ end
 		if type(sid) == 'table' then
 			sid = sid[1];
 		end
+		if sid == nil then
+			return;
+		end
 		local pid = Frame.flag or DataAgent.get_pid_by_sid(sid) or DataAgent.get_pid_by_pname(Frame.F_GetSkillName());
 		if pid ~= nil then
 			local set = VT.SET[pid];
@@ -4527,9 +4530,9 @@ local function LF_AddOnCallback_Blizzard_TradeSkillUI(addon)
 		local TradeSkillCollapseAllButton = _G.TradeSkillCollapseAllButton;
 		local TradeSkillExpandButtonFrame = _G.TradeSkillExpandButtonFrame;
 		local TradeSkillSubClassDropDown = _G.TradeSkillSubClassDropDown or _G.TradeSkillSubClassDropdown;
-		local TradeSkillSubClassDropDownButton = _G.TradeSkillSubClassDropDownButton or _G.TradeSkillSubClassDropdownButton;
+		local TradeSkillSubClassDropDownButton = _G.TradeSkillSubClassDropDownButton or _G.TradeSkillSubClassDropdownButton or TradeSkillSubClassDropDown.Arrow;
 		local TradeSkillInvSlotDropDown = _G.TradeSkillInvSlotDropDown or _G.TradeSkillInvSlotDropdown;
-		local TradeSkillInvSlotDropDownButton = _G.TradeSkillInvSlotDropDownButton or _G.TradeSkillInvSlotDropdownButton;
+		local TradeSkillInvSlotDropDownButton = _G.TradeSkillInvSlotDropDownButton or _G.TradeSkillInvSlotDropdownButton or TradeSkillInvSlotDropDown.Arrow;
 		local TradeSkillDescription = _G.TradeSkillDescription;
 		local TradeSkillReagentLabel = _G.TradeSkillReagentLabel;
 

@@ -1,4 +1,4 @@
-## Interface: 40401
+## Interface: 40402
 ## Title: ala's Trade Skill
 ## Title-zhCN: ala商业技能助手
 ## Title-zhTW: ala商業技能助手
@@ -12,7 +12,7 @@
 ## Author: |cff00ff00ALA|r
 ## Author-zhCN: |cff00ff00ALA|r
 ## Author-zhTW: |cff00ff00ALA|r
-## Version: 404r.250305
+## Version: 404r.250308
 
 load.xml
 
