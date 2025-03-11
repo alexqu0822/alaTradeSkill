@@ -782,16 +782,20 @@ end
 	end
 	--	obj style
 		function LT_SharedMethod.WidgetHidePermanently(obj)
-			obj._SetAlpha = obj._SetAlpha or obj.SetAlpha;
-			obj._EnableMouse = obj._EnableMouse or obj.EnableMouse;
-			obj:_SetAlpha(0.0);
-			obj:_EnableMouse(false);
+			if obj then
+				obj._SetAlpha = obj._SetAlpha or obj.SetAlpha;
+				obj._EnableMouse = obj._EnableMouse or obj.EnableMouse;
+				obj:_SetAlpha(0.0);
+				obj:_EnableMouse(false);
+			end
 		end
 		function LT_SharedMethod.WidgetUnhidePermanently(obj)
-			obj._SetAlpha = obj._SetAlpha or obj.SetAlpha;
-			obj._EnableMouse = obj._EnableMouse or obj.EnableMouse;
-			obj:_SetAlpha(1.0);
-			obj:_EnableMouse(true);
+			if obj then
+				obj._SetAlpha = obj._SetAlpha or obj.SetAlpha;
+				obj._EnableMouse = obj._EnableMouse or obj.EnableMouse;
+				obj:_SetAlpha(1.0);
+				obj:_EnableMouse(true);
+			end
 		end
 		local function LF_HookALAScrollBarOnValueChanged(self, val)
 			val = val or self:GetValue();
@@ -4530,9 +4534,9 @@ local function LF_AddOnCallback_Blizzard_TradeSkillUI(addon)
 		local TradeSkillCollapseAllButton = _G.TradeSkillCollapseAllButton;
 		local TradeSkillExpandButtonFrame = _G.TradeSkillExpandButtonFrame;
 		local TradeSkillSubClassDropDown = _G.TradeSkillSubClassDropDown or _G.TradeSkillSubClassDropdown;
-		local TradeSkillSubClassDropDownButton = _G.TradeSkillSubClassDropDownButton or _G.TradeSkillSubClassDropdownButton or TradeSkillSubClassDropDown.Arrow;
+		local TradeSkillSubClassDropDownButton = _G.TradeSkillSubClassDropDownButton or _G.TradeSkillSubClassDropdownButton or (TradeSkillSubClassDropDown and TradeSkillSubClassDropDown.Arrow) or nil;
 		local TradeSkillInvSlotDropDown = _G.TradeSkillInvSlotDropDown or _G.TradeSkillInvSlotDropdown;
-		local TradeSkillInvSlotDropDownButton = _G.TradeSkillInvSlotDropDownButton or _G.TradeSkillInvSlotDropdownButton or TradeSkillInvSlotDropDown.Arrow;
+		local TradeSkillInvSlotDropDownButton = _G.TradeSkillInvSlotDropDownButton or _G.TradeSkillInvSlotDropdownButton or (TradeSkillInvSlotDropDown and TradeSkillInvSlotDropDown.Arrow) or nil;
 		local TradeSkillDescription = _G.TradeSkillDescription;
 		local TradeSkillReagentLabel = _G.TradeSkillReagentLabel;
 
