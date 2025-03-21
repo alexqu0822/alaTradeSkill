@@ -288,16 +288,25 @@ MT.BuildEnv('Init');
 	hooksecurefunc("seterrorhandler", function(ErrorHandler)
 		MT.ErrorHandler = ErrorHandler;
 	end);
-	function MT.SafeCall(func, ...)
-		local success, result = xpcall(
-			func,
-			MT.ErrorHandler,
-			...
-		);
-		if success then
-			return true, result;
-		else
-			return false;
+	if xpcall == nil then
+		local function _Proc(success, ret1, ...)
+			if success then
+				return success, ret1, ...;
+			else
+				MT.ErrorHandler(ret1);
+				return false, nil;
+			end
+		end
+		function MT.SafeCall(func, ...)
+			return _Proc(pcall(func, ...));
+		end
+	else
+		function MT.SafeCall(func, ...)
+			return xpcall(
+				func,
+				MT.ErrorHandler,
+				...
+			);
 		end
 	end
 
@@ -574,21 +583,17 @@ MT.BuildEnv('Init');
 				for index = 1, #__beforeinit do
 					local key = __beforeinit[index];
 					local method = __beforeinit[key];
-					xpcall(method, MT.ErrorHandler, VT.__is_loggedin);
+					MT.SafeCall(method, VT.__is_loggedin);
 				end
 				for index = 1, #__oninit do
 					local key = __oninit[index];
 					local method = __oninit[key];
-					xpcall(method, MT.ErrorHandler, VT.__is_loggedin);
-					--[==[local success, message = pcall(method);
-					if not success then
-						MT.ErrorHandler(message or (__addon .. " INIT SCRIPT [[" .. key .. "]] ERROR."));
-					end]==]
+					MT.SafeCall(method, VT.__is_loggedin);
 				end
 				for index = 1, #__afterinit do
 					local key = __afterinit[index];
 					local method = __afterinit[key];
-					xpcall(method, MT.ErrorHandler, VT.__is_loggedin);
+					MT.SafeCall(method, VT.__is_loggedin);
 				end
 				VT.__is_this_loaded = true;
 				if VT.__is_loggedin then
@@ -610,7 +615,7 @@ MT.BuildEnv('Init');
 				for index = 1, #__onlogin do
 					local key = __onlogin[index];
 					local method = __onlogin[key];
-					xpcall(method, MT.ErrorHandler, true);
+					MT.SafeCall(method, true);
 				end
 				for addon, callbacks in next, __onaddonloaded do
 					if IsAddOnLoaded(addon) then
@@ -624,7 +629,7 @@ MT.BuildEnv('Init');
 			for index = 1, #__onquit do
 				local key = __onquit[index];
 				local method = __onquit[key];
-				xpcall(method, MT.ErrorHandler);
+				MT.SafeCall(method);
 			end
 		end
 	end);

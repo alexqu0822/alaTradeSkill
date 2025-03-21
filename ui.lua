@@ -162,6 +162,8 @@ local T_UIDefinition = {
 	TEXTURE_MODERN_ARROW_RIGHT = CT.TEXTUREPATH .. [[ArrowRight]],
 	TEXTURE_MODERN_BUTTON_MINUS = CT.TEXTUREPATH .. [[MinusButton]],
 	TEXTURE_MODERN_BUTTON_PLUS = CT.TEXTUREPATH .. [[PlusButton]],
+	TEXTURE_MODERN_BUTTON_MINUS_CLEAR = CT.TEXTUREPATH .. [[MinusButtonClear]],
+	TEXTURE_MODERN_BUTTON_PLUS_CLEAR = CT.TEXTUREPATH .. [[PlusButtonClear]],
 	TEXTURE_MODERN_BUTTON_CLOSE = CT.TEXTUREPATH .. [[Close]],
 	TEXTURE_MODERN_CHECK_BUTTON_BORDER = CT.TEXTUREPATH .. [[CheckButtonBorder]],
 	TEXTURE_MODERN_CHECK_BUTTON_CENTER = CT.TEXTUREPATH .. [[CheckButtonCenter]],
@@ -209,10 +211,10 @@ local T_UIDefinition = {
 	ModernCheckButtonColorDisabled = { 0.5, 0.5, 0.5, 0.25, },
 	ModernCheckButtonColorDisabledChecked = { 0.5, 0.5, 0.5, 0.4, },
 
-	SkillListButtonHeight = 15,
 	ListButtonHighlightColor = { 0.5, 0.5, 0.75, 0.25, },
 	ListButtonSelectedColor = { 0.5, 0.5, 0.5, 0.25, },
 
+	SkillListButtonHeight = 15,
 	QueueListButtonHeight = 15,
 
 	TabSize = 24,
@@ -221,12 +223,17 @@ local T_UIDefinition = {
 	ExplorerWidth = 360,
 	ExplorerHeight = 480,
 
+	QueueFrameWidth = 256,
+	QueueFrameHeight = 256,
+
 	CharListButtonHeight = 20,
 };
 
 local LT_SharedMethod = {  };
 local LT_ExplorerStat = { Skill = {  }, Type = {  }, SubType = {  }, EquipLoc = {  }, };
 local LT_LinkedSkillVar = { {  }, {  }, cur_rank = 0, max_rank = 75, };
+local LT_FrameMethod = {  };
+local LT_WidgetMethod = {  };
 
 
 function LT_SharedMethod.ButtonInfoOnEnter(self)
@@ -905,6 +912,10 @@ end
 			local ptex = Button:GetPushedTexture();
 			local htex = Button:GetHighlightTexture();
 			local dtex = Button:GetDisabledTexture();
+			if bak == true then
+				Button.backup = {  };
+				bak = Button.backup;
+			end
 			if bak and not bak._got then
 				bak[1] = ntex and ntex:GetTexture() or nil;
 				bak[2] = ptex and ptex:GetTexture() or nil;
@@ -1725,7 +1736,7 @@ end
 
 		local Title = Button:CreateFontString(nil, "OVERLAY");
 		Title:SetFont(T_UIDefinition.FrameNormalFont, T_UIDefinition.FrameNormalFontSize, T_UIDefinition.FrameNormalFontFlag);
-		Title:SetPoint("LEFT", Icon, "RIGHT", 4, 0);
+		Title:SetPoint("LEFT", Icon, "RIGHT", 2, 0);
 		-- Title:SetWidth(160);
 		Title:SetMaxLines(1);
 		Title:SetJustifyH("LEFT");
@@ -1740,7 +1751,7 @@ end
 		Button.Num = Num;
 
 		local Note = Button:CreateFontString(nil, "ARTWORK");
-		Note:SetFont(T_UIDefinition.FrameNormalFont, T_UIDefinition.FrameNormalFontSize, T_UIDefinition.FrameNormalFontFlag);
+		Note:SetFont(T_UIDefinition.FrameNormalFont, T_UIDefinition.FrameNormalFontSize - 1, T_UIDefinition.FrameNormalFontFlag);
 		Note:SetPoint("RIGHT", -4, 0);
 		Button.Note = Note;
 
@@ -2137,12 +2148,6 @@ end
 			Button:Hide();
 		end
 	end
-	function LT_SharedMethod.CreateQueueListButton(parent, index, buttonHeight)
-		local Button = LT_SharedMethod.CreateSkillListButton(parent, index, buttonHeight);
-		return Button;
-	end
-	function LT_SharedMethod.SetQueueListButton(Button, data_index)
-	end
 	--
 	function LT_SharedMethod.CreateExplorerSkillListButton(parent, index, buttonHeight)
 		local Button = CreateFrame('BUTTON', nil, parent);
@@ -2161,14 +2166,14 @@ end
 
 		local Title = Button:CreateFontString(nil, "OVERLAY");
 		Title:SetFont(T_UIDefinition.FrameNormalFont, T_UIDefinition.FrameNormalFontSize, T_UIDefinition.FrameNormalFontFlag);
-		Title:SetPoint("LEFT", Icon, "RIGHT", 4, 0);
+		Title:SetPoint("LEFT", Icon, "RIGHT", 2, 0);
 		-- Title:SetWidth(160);
 		Title:SetMaxLines(1);
 		Title:SetJustifyH("LEFT");
 		Button.Title = Title;
 
 		local Note = Button:CreateFontString(nil, "ARTWORK");
-		Note:SetFont(T_UIDefinition.FrameNormalFont, T_UIDefinition.FrameNormalFontSize, T_UIDefinition.FrameNormalFontFlag);
+		Note:SetFont(T_UIDefinition.FrameNormalFont, T_UIDefinition.FrameNormalFontSize - 1, T_UIDefinition.FrameNormalFontFlag);
 		Note:SetPoint("RIGHT", -4, 0);
 		Button.Note = Note;
 
@@ -2277,11 +2282,185 @@ end
 			Button:Hide();
 		end
 	end
+	--
+	function LT_SharedMethod.CreateQueueListButton(parent, index, buttonHeight)
+		local Button = CreateFrame('BUTTON', nil, parent);
+		Button:SetHeight(buttonHeight);
+		VT.__uireimp._SetSimpleBackdrop(Button, 0, 1, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0);
+		Button:SetHighlightTexture(T_UIDefinition.TEXTURE_WHITE);
+		Button:GetHighlightTexture():SetVertexColor(unpack(T_UIDefinition.ListButtonHighlightColor));
+		Button:EnableMouse(true);
+		Button:Show();
+
+		local Icon = Button:CreateTexture(nil, "BORDER");
+		Icon:SetTexture(T_UIDefinition.TEXTURE_UNK);
+		Icon:SetSize(buttonHeight - 4, buttonHeight - 4);
+		Icon:SetPoint("LEFT", 8, 0);
+		Button.Icon = Icon;
+
+		local Title = Button:CreateFontString(nil, "OVERLAY");
+		Title:SetFont(T_UIDefinition.FrameNormalFont, T_UIDefinition.FrameNormalFontSize, T_UIDefinition.FrameNormalFontFlag);
+		Title:SetPoint("LEFT", Icon, "RIGHT", 2, 0);
+		-- Title:SetWidth(160);
+		Title:SetMaxLines(1);
+		Title:SetJustifyH("LEFT");
+		Button.Title = Title;
+
+		local Del = CreateFrame('BUTTON', nil, Button);
+		Del:SetSize(buttonHeight - 4, buttonHeight - 4);
+		Del:SetPoint("RIGHT", -4, 0);
+		Del:SetNormalTexture(T_UIDefinition.TEXTURE_MODERN_BUTTON_CLOSE);
+		Del:SetPushedTexture(T_UIDefinition.TEXTURE_MODERN_BUTTON_CLOSE);
+		Del:SetHighlightTexture(T_UIDefinition.TEXTURE_MODERN_BUTTON_CLOSE);
+		Del:SetDisabledTexture(T_UIDefinition.TEXTURE_MODERN_BUTTON_CLOSE);
+		Del:GetNormalTexture():SetVertexColor(unpack(T_UIDefinition.TextureButtonColorNormal));
+		Del:GetPushedTexture():SetVertexColor(unpack(T_UIDefinition.TextureButtonColorPushed));
+		Del:GetHighlightTexture():SetVertexColor(unpack(T_UIDefinition.TextureButtonColorHighlight));
+		Del:GetHighlightTexture():SetVertexColor(unpack(T_UIDefinition.TextureButtonColorDisabled));
+		Del:SetScript("OnClick", LT_WidgetMethod.QueueButtonDel_OnClick);
+		Button.Del = Del;
+		Del.Button = Button;
+
+		local Inc = CreateFrame('BUTTON', nil, Button);
+		Inc:SetSize(buttonHeight - 4, buttonHeight - 4);
+		Inc:SetPoint("RIGHT", Del, "LEFT", -6, 0);
+		Inc:SetNormalTexture(T_UIDefinition.TEXTURE_MODERN_BUTTON_PLUS_CLEAR);
+		Inc:SetPushedTexture(T_UIDefinition.TEXTURE_MODERN_BUTTON_PLUS_CLEAR);
+		Inc:SetHighlightTexture(T_UIDefinition.TEXTURE_MODERN_BUTTON_PLUS_CLEAR);
+		Inc:SetDisabledTexture(T_UIDefinition.TEXTURE_MODERN_BUTTON_PLUS_CLEAR);
+		Inc:GetNormalTexture():SetVertexColor(unpack(T_UIDefinition.TextureButtonColorNormal));
+		Inc:GetPushedTexture():SetVertexColor(unpack(T_UIDefinition.TextureButtonColorPushed));
+		Inc:GetHighlightTexture():SetVertexColor(unpack(T_UIDefinition.TextureButtonColorHighlight));
+		Inc:GetHighlightTexture():SetVertexColor(unpack(T_UIDefinition.TextureButtonColorDisabled));
+		Inc:SetScript("OnClick", LT_WidgetMethod.QueueButtonInc_OnClick);
+		Button.Inc = Inc;
+		Inc.Button = Button;
+
+		local Num = CreateFrame('EDITBOX', nil, Button);
+		Num:SetFont(T_UIDefinition.FrameNormalFont, T_UIDefinition.FrameNormalFontSize - 3, T_UIDefinition.FrameNormalFontFlag);
+		Num:SetWidth(24);
+		Num:SetHeight(buttonHeight - 4);
+		Num:SetPoint("RIGHT", Inc, "LEFT", -2, 0);
+		Num:SetAutoFocus(false);
+		Num:SetJustifyH("CENTER");
+		Num:Show();
+		Num:EnableMouse(true);
+		Num:SetNumeric(true);
+		Num:ClearFocus();
+		Num:SetScript("OnEnterPressed", Num.ClearFocus);
+		Num:SetScript("OnEscapePressed", Num.ClearFocus);
+		Button.Num = Num;
+
+		local Dec = CreateFrame('BUTTON', nil, Button);
+		Dec:SetSize(buttonHeight - 4, buttonHeight - 4);
+		Dec:SetPoint("RIGHT", Num, "LEFT", -2, 0);
+		Dec:SetNormalTexture(T_UIDefinition.TEXTURE_MODERN_BUTTON_MINUS_CLEAR);
+		Dec:SetPushedTexture(T_UIDefinition.TEXTURE_MODERN_BUTTON_MINUS_CLEAR);
+		Dec:SetHighlightTexture(T_UIDefinition.TEXTURE_MODERN_BUTTON_MINUS_CLEAR);
+		Dec:SetDisabledTexture(T_UIDefinition.TEXTURE_MODERN_BUTTON_MINUS_CLEAR);
+		Dec:GetNormalTexture():SetVertexColor(unpack(T_UIDefinition.TextureButtonColorNormal));
+		Dec:GetPushedTexture():SetVertexColor(unpack(T_UIDefinition.TextureButtonColorPushed));
+		Dec:GetHighlightTexture():SetVertexColor(unpack(T_UIDefinition.TextureButtonColorHighlight));
+		Dec:GetHighlightTexture():SetVertexColor(unpack(T_UIDefinition.TextureButtonColorDisabled));
+		Dec:SetScript("OnClick", LT_WidgetMethod.QueueButtonDec_OnClick);
+		Button.Dec = Dec;
+		Dec.Button = Button;
+
+		local QualityGlow = Button:CreateTexture(nil, "ARTWORK");
+		QualityGlow:SetTexture([[Interface\Buttons\UI-ActionButton-Border]]);
+		QualityGlow:SetBlendMode("ADD");
+		QualityGlow:SetTexCoord(0.25, 0.75, 0.25, 0.75);
+		QualityGlow:SetSize(buttonHeight - 2, buttonHeight - 2);
+		QualityGlow:SetPoint("CENTER", Icon);
+		-- QualityGlow:SetAlpha(0.75);
+		QualityGlow:Show();
+		Button.QualityGlow = QualityGlow;
+
+		local Star = Button:CreateTexture(nil, "OVERLAY");
+		Star:SetTexture([[Interface\Collections\Collections]]);
+		Star:SetTexCoord(100 / 512, 118 / 512, 10 / 512, 28 / 512);
+		Star:SetSize(buttonHeight * 0.75, buttonHeight * 0.75);
+		Star:SetPoint("CENTER", Button, "TOPLEFT", buttonHeight * 0.25, -buttonHeight * 0.25);
+		Star:Hide();
+		Button.Star = Star;
+
+		local SelectionGlow = Button:CreateTexture(nil, "OVERLAY");
+		SelectionGlow:SetTexture(T_UIDefinition.TEXTURE_WHITE);
+		-- SelectionGlow:SetTexCoord(0.25, 0.75, 0.25, 0.75);
+		SelectionGlow:SetVertexColor(unpack(T_UIDefinition.ListButtonSelectedColor));
+		SelectionGlow:SetAllPoints();
+		SelectionGlow:SetBlendMode("ADD");
+		SelectionGlow:Hide();
+		Button.SelectionGlow = SelectionGlow;
+
+		Button:SetScript("OnEnter", LT_SharedMethod.SkillListButton_OnEnter);
+		Button:SetScript("OnLeave", LT_SharedMethod.SkillListButton_OnLeave);
+		Button:RegisterForClicks("AnyUp");
+		Button:SetScript("OnClick", LT_SharedMethod.SkillListButton_OnClick);
+		Button:RegisterForDrag("LeftButton");
+		Button:SetScript("OnHide", VT.__menulib.ShowMenu);
+
+		function Button:Select()
+			SelectionGlow:Show();
+		end
+		function Button:Deselect()
+			SelectionGlow:Hide();
+		end
+
+		local Frame = parent:GetParent():GetParent();
+		Button.Frame = Frame;
+		Button.Parent = Frame;
+
+		return Button;
+	end
+	function LT_SharedMethod.SetQueueListButton(Button, data_index)
+		local Frame = Button.Frame;
+		local Parent = Button.Parent;
+		local list = Parent.list;
+		local todo = Parent.todo;
+		if data_index <= #list then
+			local sid = list[data_index];
+			local num = todo[data_index];
+			local cid = DataAgent.get_cid_by_sid(sid);
+			Button:Show();
+			local _, quality, icon;
+			if cid then
+				_, _, quality, _, icon = DataAgent.item_info(cid);
+			else
+				quality = nil;
+				icon = ICON_FOR_NO_CID;
+			end
+			Button.Icon:SetTexture(icon);
+			Button.Title:SetText(DataAgent.spell_name_s(sid));
+			Button.Num:SetText(num);
+			if quality then
+				local r, g, b, code = GetItemQualityColor(quality);
+				Button.QualityGlow:SetVertexColor(r, g, b);
+				Button.QualityGlow:Show();
+			else
+				Button.QualityGlow:Hide();
+			end
+			if VT.FAV[sid] then
+				Button.Star:Show();
+			else
+				Button.Star:Hide();
+			end
+			if GetMouseFocus() == Button then
+				LT_SharedMethod.SkillListButton_OnEnter(Button);
+			end
+			Button:Deselect();
+			if Button.prev_sid ~= sid then
+				VT.__menulib.ShowMenu(Button);
+				Button.prev_sid = sid;
+			end
+		else
+			VT.__menulib.ShowMenu(Button);
+			Button:Hide();
+		end
+	end
 --
 --
 --	Method
-	local LT_FrameMethod = {  };
-	local LT_WidgetMethod = {  };
 	--
 	function LT_FrameMethod.F_UpdatePriceInfo(Frame)
 		local T_PriceInfoInFrame = Frame.T_PriceInfoInFrame;
@@ -2461,12 +2640,6 @@ end
 			if Frame.IsQueueEnabled then
 				local QueueToggleButton = Frame.QueueToggleButton;
 				LT_SharedMethod.StyleBLZButton(QueueToggleButton, not loading and QueueToggleButton.backup or nil);
-				local QueueFrame = Frame.QueueFrame;
-				LT_SharedMethod.StyleBLZBackdrop(QueueFrame);
-				local QueueAdd = QueueFrame.Add;
-				LT_SharedMethod.StyleBLZButton(QueueAdd, not loading and QueueAdd.backup or nil);
-				local QueueCreate = QueueFrame.Create;
-				LT_SharedMethod.StyleBLZButton(QueueCreate, not loading and QueueCreate.backup or nil);
 			end
 
 			Frame.HookedFrame:SetHitRectInsets(11, 29, 9, 67);
@@ -2504,13 +2677,8 @@ end
 			end
 			T_HookedFrameButtons.CloseButton:SetSize(32, 32);
 			local backup = T_HookedFrameWidgets.backup;
-			for _, Button in next, T_HookedFrameButtons do
-				local name = Button:GetName();
-				if name == nil then
-					Button.name = _;
-					name = _;
-				end
-				LT_SharedMethod.StyleBLZButton(Button, not loading and backup[name] or nil);
+			for key, Button in next, T_HookedFrameButtons do
+				LT_SharedMethod.StyleBLZButton(Button, not loading and backup[key] or nil);
 			end
 			local T_HookedFrameDropdowns = T_HookedFrameWidgets.T_HookedFrameDropdowns;
 			if T_HookedFrameDropdowns ~= nil then
@@ -2520,16 +2688,11 @@ end
 			end
 			local T_HookedFrameChecks = T_HookedFrameWidgets.T_HookedFrameChecks;
 			if T_HookedFrameChecks ~= nil then
-				for _, Check in next, T_HookedFrameChecks do
-					local name = Check:GetName();
-					if name == nil then
-						Check.name = _;
-						name = _;
-					end
+				for key, Check in next, T_HookedFrameChecks do
 					if loading then
 						LT_SharedMethod.StyleBLZCheckButton(Check);
 					else
-						local bak = backup[name];
+						local bak = backup[key];
 						if bak == nil then
 							LT_SharedMethod.StyleBLZCheckButton(Check);
 						else
@@ -2562,28 +2725,13 @@ end
 				LT_SharedMethod.StyleModernALADropButton(FilterDropdown);
 			end
 			local FrameToggleButton = Frame.ToggleButton;
-			if FrameToggleButton.backup == nil then
-				FrameToggleButton.backup = {  };
-				LT_SharedMethod.StyleModernButton(FrameToggleButton, FrameToggleButton.backup, nil);
-			else
-				LT_SharedMethod.StyleModernButton(FrameToggleButton, nil, nil);
-			end
+			LT_SharedMethod.StyleModernButton(FrameToggleButton, FrameToggleButton.backup == nil, nil);
 			local OverrideMinRankButton = Frame.OverrideMinRankButton;
 			OverrideMinRankButton:SetSize(32, 14);
-			if OverrideMinRankButton.backup == nil then
-				OverrideMinRankButton.backup = {  };
-				LT_SharedMethod.StyleModernButton(OverrideMinRankButton, OverrideMinRankButton.backup, nil);
-			else
-				LT_SharedMethod.StyleModernButton(OverrideMinRankButton, nil, nil);
-			end
+			LT_SharedMethod.StyleModernButton(OverrideMinRankButton, OverrideMinRankButton.backup == nil, nil);
 			local RankOffsetButton = Frame.RankOffsetButton;
 			RankOffsetButton:SetSize(32, 14);
-			if RankOffsetButton.backup == nil then
-				RankOffsetButton.backup = {  };
-				LT_SharedMethod.StyleModernButton(RankOffsetButton, RankOffsetButton.backup, nil);
-			else
-				LT_SharedMethod.StyleModernButton(RankOffsetButton, nil, nil);
-			end
+			LT_SharedMethod.StyleModernButton(RankOffsetButton, RankOffsetButton.backup == nil, nil);
 			Frame.HaveMaterialsCheck:SetSize(14, 14);
 			LT_SharedMethod.StyleModernCheckButton(Frame.HaveMaterialsCheck);
 			Frame.SearchEditBoxNameOnly:SetSize(14, 14);
@@ -2604,36 +2752,10 @@ end
 			LT_SharedMethod.StyleModernCheckButton(ProfitFrame.CostOnlyCheck);
 			local ProfitFrameCloseButton = ProfitFrame.CloseButton;
 			ProfitFrameCloseButton:SetSize(16, 16);
-			if ProfitFrameCloseButton.backup == nil then
-				ProfitFrameCloseButton.backup = {  };
-				LT_SharedMethod.StyleModernButton(ProfitFrameCloseButton, ProfitFrameCloseButton.backup, T_UIDefinition.TEXTURE_MODERN_BUTTON_CLOSE);
-			else
-				LT_SharedMethod.StyleModernButton(ProfitFrameCloseButton, nil, T_UIDefinition.TEXTURE_MODERN_BUTTON_CLOSE);
-			end
+			LT_SharedMethod.StyleModernButton(ProfitFrameCloseButton, ProfitFrameCloseButton.backup == nil, T_UIDefinition.TEXTURE_MODERN_BUTTON_CLOSE);
 			if Frame.IsQueueEnabled then
 				local QueueToggleButton = Frame.QueueToggleButton;
-				if QueueToggleButton.backup == nil then
-					QueueToggleButton.backup = {  };
-					LT_SharedMethod.StyleModernButton(QueueToggleButton, QueueToggleButton.backup, nil);
-				else
-					LT_SharedMethod.StyleModernButton(QueueToggleButton, nil, nil);
-				end
-				local QueueFrame = Frame.QueueFrame;
-				LT_SharedMethod.StyleModernBackdrop(QueueFrame);
-				local QueueAdd = QueueFrame.Add;
-				if QueueAdd.backup == nil then
-					QueueAdd.backup = {  };
-					LT_SharedMethod.StyleModernButton(QueueAdd, QueueAdd.backup, nil);
-				else
-					LT_SharedMethod.StyleModernButton(QueueAdd, nil, nil);
-				end
-				local QueueCreate = QueueFrame.Create;
-				if QueueCreate.backup == nil then
-					QueueCreate.backup = {  };
-					LT_SharedMethod.StyleModernButton(QueueCreate, QueueCreate.backup, nil);
-				else
-					LT_SharedMethod.StyleModernButton(QueueCreate, nil, nil);
-				end
+				LT_SharedMethod.StyleModernButton(QueueToggleButton, QueueToggleButton.backup == nil, nil);
 			end
 
 			Frame.HookedFrame:SetHitRectInsets(17, 35, 11, 73);
@@ -2669,18 +2791,13 @@ end
 			T_HookedFrameButtons.CloseButton:SetSize(16, 16);
 			local backup = T_HookedFrameWidgets.backup;
 			local T_ButtonModernTexture = T_HookedFrameWidgets.T_ButtonModernTexture;
-			for _, Button in next, T_HookedFrameButtons do
-				local name = Button:GetName();
-				if name == nil then
-					Button.name = _;
-					name = _;
-				end
-				if backup[name] == nil then
+			for key, Button in next, T_HookedFrameButtons do
+				if backup[key] == nil then
 					local bak = {  };
-					backup[name] = bak;
-					LT_SharedMethod.StyleModernButton(Button, bak, T_ButtonModernTexture[_]);
+					backup[key] = bak;
+					LT_SharedMethod.StyleModernButton(Button, bak, T_ButtonModernTexture[key]);
 				else
-					LT_SharedMethod.StyleModernButton(Button, nil, T_ButtonModernTexture[_]);
+					LT_SharedMethod.StyleModernButton(Button, nil, T_ButtonModernTexture[key]);
 				end
 			end
 			local T_HookedFrameDropdowns = T_HookedFrameWidgets.T_HookedFrameDropdowns;
@@ -2691,15 +2808,10 @@ end
 			end
 			local T_HookedFrameChecks = T_HookedFrameWidgets.T_HookedFrameChecks;
 			if T_HookedFrameChecks ~= nil then
-				for _, Check in next, T_HookedFrameChecks do
-					local name = Check:GetName();
-					if name == nil then
-						Check.name = _;
-						name = _;
-					end
-					if backup[name] == nil then
+				for key, Check in next, T_HookedFrameChecks do
+					if backup[key] == nil then
 						local bak = {  };
-						backup[name] = bak;
+						backup[key] = bak;
 						bak.size = bak.size or { Check:GetSize() };
 						Check:SetSize(16, 16);
 						LT_SharedMethod.StyleModernCheckButton(Check, bak);
@@ -2724,7 +2836,7 @@ end
 			Frame.F_HookedFrameUpdate();
 		end
 	end
-	function LT_FrameMethod.F_ExplorerSetStyle(Frame, blz_style, loading)
+	function LT_FrameMethod.F_ExplorerFrameSetStyle(Frame, blz_style, loading)
 		if blz_style then
 			LT_SharedMethod.StyleBLZBackdrop(Frame);
 			local CloseButton = Frame.CloseButton;
@@ -2757,12 +2869,7 @@ end
 			LT_SharedMethod.StyleModernBackdrop(Frame);
 			local CloseButton = Frame.CloseButton;
 			CloseButton:SetSize(16, 16);
-			if CloseButton.backup == nil then
-				CloseButton.backup = {  };
-				LT_SharedMethod.StyleModernButton(CloseButton, CloseButton.backup, T_UIDefinition.TEXTURE_MODERN_BUTTON_CLOSE);
-			else
-				LT_SharedMethod.StyleModernButton(CloseButton, nil, T_UIDefinition.TEXTURE_MODERN_BUTTON_CLOSE);
-			end
+			LT_SharedMethod.StyleModernButton(CloseButton, CloseButton.backup == nil, T_UIDefinition.TEXTURE_MODERN_BUTTON_CLOSE);
 			LT_SharedMethod.StyleModernCheckButton(Frame.SearchEditBoxNameOnly);
 			Frame.SearchEditBoxNameOnly:SetSize(14, 14);
 			LT_SharedMethod.StyleModernScrollFrame(Frame.ScrollFrame);
@@ -2785,12 +2892,7 @@ end
 			LT_SharedMethod.StyleModernScrollFrame(ProfitFrame.ScrollFrame);
 			local ProfitFrameCloseButton = ProfitFrame.CloseButton;
 			ProfitFrameCloseButton:SetSize(16, 16);
-			if ProfitFrameCloseButton.backup == nil then
-				ProfitFrameCloseButton.backup = {  };
-				LT_SharedMethod.StyleModernButton(ProfitFrameCloseButton, ProfitFrameCloseButton.backup, T_UIDefinition.TEXTURE_MODERN_BUTTON_CLOSE);
-			else
-				LT_SharedMethod.StyleModernButton(ProfitFrameCloseButton, nil, T_UIDefinition.TEXTURE_MODERN_BUTTON_CLOSE);
-			end
+			LT_SharedMethod.StyleModernButton(ProfitFrameCloseButton, ProfitFrameCloseButton.backup == nil, T_UIDefinition.TEXTURE_MODERN_BUTTON_CLOSE);
 		end
 	end
 	function LT_FrameMethod.F_FixSkillList(Frame, expanded)
@@ -2871,66 +2973,74 @@ end
 			SetFrame:SetPoint("BOTTOM", Frame.Background, "TOP", 0, 1);
 		end
 		if show ~= false then
-			SetFrame:Show();
-			LT_WidgetMethod.SetFrame_OnShow(SetFrame);
+			if SetFrame:IsShown() then
+				LT_WidgetMethod.SetFrame_OnShow(SetFrame);
+			else
+				SetFrame:Show();
+			end
 		end
 	end
 	function LT_FrameMethod.F_HideSetFrame(Frame)
 		local SetFrame = Frame.SetFrame;
-		SetFrame:Hide();
-		LT_WidgetMethod.SetFrame_OnHide(SetFrame);
+		if SetFrame:IsShown() then
+			SetFrame:Hide();
+		else
+			LT_WidgetMethod.SetFrame_OnHide(SetFrame);
+		end
 	end
 	function LT_FrameMethod.F_ShowProfitFrame(Frame, show)
 		local ProfitFrame = Frame.ProfitFrame;
 		if show ~= false then
-			ProfitFrame:Show();
-			LT_WidgetMethod.ProfitFrame_OnShow(ProfitFrame);
+			if ProfitFrame:IsShown() then
+				LT_WidgetMethod.ProfitFrame_OnShow(ProfitFrame);
+			else
+				ProfitFrame:Show();
+			end
 		end
 	end
 	function LT_FrameMethod.F_HideProfitFrame(Frame)
 		local ProfitFrame = Frame.ProfitFrame;
-		ProfitFrame:Hide();
-		LT_WidgetMethod.ProfitFrame_OnHide(ProfitFrame);
-	end
-	function LT_FrameMethod.F_ShowQueueFrame(Frame, show)
-		if Frame.IsQueueEnabled then
-			local QueueFrame = Frame.QueueFrame;
-			if show ~= false then
-				QueueFrame:Show();
-				LT_WidgetMethod.QueueFrame_OnShow(QueueFrame);
-			end
-		end
-	end
-	function LT_FrameMethod.F_HideQueueFrame(Frame)
-		if Frame.IsQueueEnabled then
-			local QueueFrame = Frame.QueueFrame;
-			QueueFrame:Hide();
-			LT_WidgetMethod.QueueFrame_OnHide(QueueFrame);
+		if ProfitFrame:IsShown() then
+			ProfitFrame:Hide();
+		else
+			LT_WidgetMethod.ProfitFrame_OnHide(ProfitFrame);
 		end
 	end
 	function LT_FrameMethod.F_ExplorerShowSetFrame(Frame, show)
 		local SetFrame = Frame.SetFrame;
 		if show ~= false then
-			SetFrame:Show();
-			LT_WidgetMethod.SetFrame_OnShow(SetFrame);
+			if SetFrame:IsShown() then
+				LT_WidgetMethod.SetFrame_OnShow(SetFrame);
+			else
+				SetFrame:Show();
+			end
 		end
 	end
 	function LT_FrameMethod.F_ExplorerHideSetFrame(Frame)
 		local SetFrame = Frame.SetFrame;
-		SetFrame:Hide();
-		LT_WidgetMethod.SetFrame_OnHide(SetFrame);
+		if SetFrame:IsShown() then
+			SetFrame:Hide();
+		else
+			LT_WidgetMethod.SetFrame_OnHide(SetFrame);
+		end
 	end
 	function LT_FrameMethod.F_ExplorerShowProfitFrame(Frame, show)
 		local ProfitFrame = Frame.ProfitFrame;
 		if show ~= false then
-			ProfitFrame:Show();
-			LT_WidgetMethod.ProfitFrame_OnShow(ProfitFrame);
+			if ProfitFrame:IsShown() then
+				LT_WidgetMethod.ProfitFrame_OnShow(ProfitFrame);
+			else
+				ProfitFrame:Show();
+			end
 		end
 	end
 	function LT_FrameMethod.F_ExplorerHideProfitFrame(Frame)
 		local ProfitFrame = Frame.ProfitFrame;
-		ProfitFrame:Hide();
-		LT_WidgetMethod.ProfitFrame_OnHide(ProfitFrame);
+		if ProfitFrame:IsShown() then
+			ProfitFrame:Hide();
+		else
+			LT_WidgetMethod.ProfitFrame_OnHide(ProfitFrame);
+		end
 	end
 	function LT_FrameMethod.F_RefreshSetFrame(Frame)
 		local pid = Frame.flag or DataAgent.get_pid_by_pname(Frame.F_GetSkillName());
@@ -3254,6 +3364,14 @@ end
 		TabFrame:F_SetTab(numSkill, '@toggle', T_UIDefinition.TEXTURE_TOGGLE);
 		TabFrame:F_SetNumTabs(numSkill);
 	end
+	function LT_WidgetMethod.HaveMaterialsCheck_OnClick(self)
+		local Frame = self.Frame;
+		local pid = Frame.flag or DataAgent.get_pid_by_pname(Frame.F_GetSkillName());
+		if pid ~= nil then
+			MT.ChangeSetWithUpdate(VT.SET[pid], "haveMaterials", self:GetChecked());
+		end
+		Frame.F_Update();
+	end
 	function LT_WidgetMethod.ProfitFrame_OnShow(self)
 		if VT.AuctionMod ~= nil then
 			LT_SharedMethod.UpdateProfitFrame(self.Frame);
@@ -3342,21 +3460,26 @@ end
 	function LT_WidgetMethod.SetFrameCheckButton_OnLeave(self)
 		self.TipInfo:SetText("");
 	end
+	function LT_WidgetMethod.SetFramePhaseSlider__OnValueChanged(self, value, userInput)
+		if userInput then
+			local Frame = self.Frame;
+			local pid = Frame.flag or DataAgent.get_pid_by_pname(Frame.F_GetSkillName());
+			if pid ~= nil then
+				MT.ChangeSetWithUpdate(VT.SET[pid], "phase", value);
+				Frame.F_Update();
+			end
+		end
+		self.Text:SetText("|cffffff00" .. l10n["phase"] .. "|r " .. value);
+	end
 	function LT_WidgetMethod.QueueFrameToggleButton_OnClick(self)
 		local Frame = self.Frame;
-		if self.QueueFrame:IsShown() then
+		if VT.UIFrames["QUEUE"]:IsShown() then
 			Frame:F_HideQueueFrame();
 			VT.SET.show_queue = false;
 		else
 			Frame:F_ShowQueueFrame();
 			VT.SET.show_queue = true;
 		end
-	end
-	function LT_WidgetMethod.QueueFrame_OnShow(self)
-		self.ToggleButton:GetNormalTexture():SetVertexColor(1.0, 1.0, 1.0, 1.0);
-	end
-	function LT_WidgetMethod.QueueFrame_OnHide(self)
-		self.ToggleButton:GetNormalTexture():SetVertexColor(0.5, 0.5, 0.5, 1.0);
 	end
 	--
 		--	l10n.ITEM_TYPE_LIST
@@ -3485,25 +3608,6 @@ end
 		end
 		VT.__menulib.ShowMenu(self, "BOTTOMRIGHT", T_ExplorerSetMeta);
 	end
-	function LT_WidgetMethod.SetFramePhaseSlider__OnValueChanged(self, value, userInput)
-		if userInput then
-			local Frame = self.Frame;
-			local pid = Frame.flag or DataAgent.get_pid_by_pname(Frame.F_GetSkillName());
-			if pid ~= nil then
-				MT.ChangeSetWithUpdate(VT.SET[pid], "phase", value);
-				Frame.F_Update();
-			end
-		end
-		self.Text:SetText("|cffffff00" .. l10n["phase"] .. "|r " .. value);
-	end
-	function LT_WidgetMethod.HaveMaterialsCheck_OnClick(self)
-		local Frame = self.Frame;
-		local pid = Frame.flag or DataAgent.get_pid_by_pname(Frame.F_GetSkillName());
-		if pid ~= nil then
-			MT.ChangeSetWithUpdate(VT.SET[pid], "haveMaterials", self:GetChecked());
-		end
-		Frame.F_Update();
-	end
 	function LT_WidgetMethod.PrevButton_OnEnter(self)
 		local Frame = self.Frame;
 		if not Frame.switching then
@@ -3535,7 +3639,9 @@ end
 					end
 				end
 				if History.top > max then
-					GameTooltip:AddDoubleLine("...", "x" .. (History.top - max));
+					GameTooltip:AddDoubleLine("...", "x" .. (History.top - max), 1, 0, 0, 1, 1, 1);
+				else
+					GameTooltip:AddLine("END", 1, 1, 1);
 				end
 				GameTooltip:Show();
 			end
@@ -3584,7 +3690,9 @@ end
 					end
 				end
 				if History.top > max then
-					GameTooltip:AddDoubleLine("...", "x" .. (History.top - max));
+					GameTooltip:AddDoubleLine("...", "x" .. (History.top - max), 1, 0, 0, 1, 1, 1);
+				else
+					GameTooltip:AddLine("END", 1, 1, 1);
 				end
 				GameTooltip:Show();
 			end
@@ -3601,6 +3709,108 @@ end
 				LT_WidgetMethod.NextButton_OnEnter(self);
 			end
 		end
+	end
+	--
+	function LT_FrameMethod.F_QueueFrameSetStyle(QueueFrame, blz_style, loading)
+		if blz_style then
+			LT_SharedMethod.StyleBLZBackdrop(QueueFrame);
+			local QueueAdd = QueueFrame.Add;
+			LT_SharedMethod.StyleBLZButton(QueueAdd, not loading and QueueAdd.backup or nil);
+			local QueueCreate = QueueFrame.Create;
+			LT_SharedMethod.StyleBLZButton(QueueCreate, not loading and QueueCreate.backup or nil);
+		else
+			LT_SharedMethod.StyleModernBackdrop(QueueFrame);
+			local QueueAdd = QueueFrame.Add;
+			LT_SharedMethod.StyleModernButton(QueueAdd, QueueAdd.backup == nil, nil);
+			local QueueCreate = QueueFrame.Create;
+			LT_SharedMethod.StyleModernButton(QueueCreate, QueueCreate.backup == nil, nil);
+		end
+	end
+	function LT_FrameMethod.F_ShowQueueFrame(Frame, show)
+		if Frame.IsQueueEnabled then
+			local QueueFrame = VT.UIFrames["QUEUE"];
+			if show ~= false then
+				QueueFrame:SetParent(Frame);
+				if QueueFrame:IsShown() then
+					LT_WidgetMethod.QueueFrame_OnShow(QueueFrame);
+				else
+					QueueFrame:Show();
+				end
+			end
+		end
+	end
+	function LT_FrameMethod.F_HideQueueFrame(Frame)
+		if Frame.IsQueueEnabled then
+			local QueueFrame = VT.UIFrames["QUEUE"];
+			if QueueFrame:IsShown() then
+				QueueFrame:Hide();
+			else
+				LT_WidgetMethod.QueueFrame_OnHide(QueueFrame);
+			end
+		end
+	end
+	function LT_WidgetMethod.QueueFrame_OnShow(self)
+		local Frame = self:GetParent();
+		if Frame ~= nil then
+			self.Parent = Frame;
+			self:SetPoint("BOTTOMLEFT", Frame.Background, "BOTTOMRIGHT", 0, 0);
+			Frame.QueueToggleButton:GetNormalTexture():SetVertexColor(1.0, 1.0, 1.0, 1.0);
+		end
+	end
+	function LT_WidgetMethod.QueueFrame_OnHide(self)
+		local Frame = self:GetParent();
+		if Frame ~= nil then
+			self.Parent = nil;
+			Frame.QueueToggleButton:GetNormalTexture():SetVertexColor(0.5, 0.5, 0.5, 1.0);
+		end
+	end
+	--
+	function LT_WidgetMethod.QueueButtonDel_OnClick(self)
+		local Button = self.Button;
+		local Frame = Button.Frame;
+		local Parent = Button.Parent;
+		local list = Parent.list;
+		local todo = Parent.todo;
+		local data_index = Button:GetDataIndex();
+		tremove(list, data_index);
+		tremove(todo, data_index);
+		Parent.ScrollFrame:Update();
+	end
+	function LT_WidgetMethod.QueueButtonInc_OnClick(self)
+		local Button = self.Button;
+		local Frame = Button.Frame;
+		local Parent = Button.Parent;
+		local list = Parent.list;
+		local todo = Parent.todo;
+		local data_index = Button:GetDataIndex();
+		todo[data_index] = todo[data_index] + 1;
+		Button.Num:SetText(todo[data_index]);
+	end
+	function LT_WidgetMethod.QueueButtonDec_OnClick(self)
+		local Button = self.Button;
+		local Frame = Button.Frame;
+		local Parent = Button.Parent;
+		local list = Parent.list;
+		local todo = Parent.todo;
+		local data_index = Button:GetDataIndex();
+		todo[data_index] = todo[data_index] - 1;
+		if todo[data_index] <= 0 then
+			todo[data_index] = 1;
+		end
+		Button.Num:SetText(todo[data_index]);
+	end
+	function LT_WidgetMethod.QueueFrameAdd_OnClick(self)
+		local QueueFrame = self.QueueFrame;
+		local Frame = QueueFrame.Parent;
+		local list = QueueFrame.list;
+		local todo = QueueFrame.todo;
+		if Frame.selected_sid ~= nil then
+			list[#list + 1] = Frame.selected_sid;
+			todo[#todo + 1] = tonumber(QueueFrame.EditBox:GetText()) or 1;
+			QueueFrame.ScrollFrame:Update();
+		end
+	end
+	function LT_WidgetMethod.QueueFrameCreate_OnClick(self)
 	end
 --
 local function LF_HookFrame(addon, meta)
@@ -3647,7 +3857,7 @@ local function LF_HookFrame(addon, meta)
 	Frame.prev_selected_sid = nil;
 	function Frame.F_OnSelection()
 		Frame.selected_sid = Frame.F_GetRecipeSpellID(Frame.F_GetSelection());
-			MT.Debug("OnSelection", Frame.prev_selected_sid, Frame.selected_sid);
+		MT.Debug("OnSelection", Frame.prev_selected_sid, Frame.selected_sid);
 		if Frame.prev_selected_sid ~= Frame.selected_sid then
 			Frame.prev_selected_sid = Frame.selected_sid;
 			for i = 1, #Frame.T_OnSelection do
@@ -3730,7 +3940,6 @@ local function LF_HookFrame(addon, meta)
 			local regions = { HookedFrame:GetRegions() };
 			for index = 1, #regions do
 				local obj = regions[index];
-				local name = obj:GetName();
 				if obj ~= meta.HookedPortrait and strupper(obj:GetObjectType()) == 'TEXTURE' then
 					obj._Show = obj.Show;
 					obj.Show = MT.noop;
@@ -4299,75 +4508,6 @@ local function LF_HookFrame(addon, meta)
 			ToggleButton:SetScript("OnClick", LT_WidgetMethod.QueueFrameToggleButton_OnClick);
 			Frame.QueueToggleButton = ToggleButton;
 			ToggleButton.Frame = Frame;
-
-			local QueueFrame = CreateFrame('FRAME', nil, Frame);
-			QueueFrame:SetWidth(180);
-			QueueFrame:SetHeight(256);
-			QueueFrame:SetPoint("BOTTOMLEFT", Frame.Background, "BOTTOMRIGHT", 0, 0);
-			QueueFrame:Hide();
-			local Background = QueueFrame:CreateTexture(nil, "BACKGROUND");
-			Background:SetAllPoints();
-			Background:SetColorTexture(0.0, 0.0, 0.0, 0.25);
-			QueueFrame.Background = Background;
-			Frame.QueueFrame = QueueFrame;
-			QueueFrame.ToggleButton = ToggleButton;
-			ToggleButton.QueueFrame = QueueFrame;
-
-			QueueFrame:SetScript("OnShow", LT_WidgetMethod.QueueFrame_OnShow);
-			QueueFrame:SetScript("OnHide", LT_WidgetMethod.QueueFrame_OnHide);
-
-			local EditBox = CreateFrame('EDITBOX', nil, QueueFrame);
-			EditBox:SetPoint("BOTTOMLEFT", QueueFrame, "BOTTOMLEFT", 4, 5);
-			EditBox:SetWidth(72);
-			EditBox:SetHeight(16);
-			EditBox:SetFont(T_UIDefinition.FrameNormalFont, T_UIDefinition.FrameNormalFontSize, T_UIDefinition.FrameNormalFontFlag);
-			EditBox:SetAutoFocus(false);
-			EditBox:SetJustifyH("LEFT");
-			EditBox:Show();
-			EditBox:EnableMouse(true);
-			EditBox:ClearFocus();
-			EditBox:SetScript("OnEnterPressed", EditBox.ClearFocus);
-			EditBox:SetScript("OnEscapePressed", EditBox.ClearFocus);
-			QueueFrame.EditBox = EditBox;
-
-			local EditBoxTexture = EditBox:CreateTexture(nil, "ARTWORK");
-			EditBoxTexture:SetPoint("TOPLEFT");
-			EditBoxTexture:SetPoint("BOTTOMRIGHT");
-			EditBoxTexture:SetTexture([[Interface\Buttons\GreyScaleramp64]]);
-			EditBoxTexture:SetTexCoord(0.0, 0.25, 0.0, 0.25);
-			EditBoxTexture:SetAlpha(0.75);
-			EditBoxTexture:SetBlendMode("ADD");
-			EditBoxTexture:SetVertexColor(0.25, 0.25, 0.25);
-			EditBox.Texture = EditBoxTexture;
-
-			local Add = CreateFrame('BUTTON', nil, QueueFrame, "UIPanelButtonTemplate");
-			Add:SetSize(18, 18);
-			Add:SetPoint("LEFT", EditBox, "RIGHT", 4, 0);
-			Add:SetFrameLevel(127);
-			Add:SetScript("OnClick", nil);
-			Add:SetText("+");
-			QueueFrame.Add = Add;
-			Add.QueueFrame = QueueFrame;
-
-			local Create = CreateFrame('BUTTON', nil, QueueFrame, "UIPanelButtonTemplate");
-			Create:SetSize(72, 18);
-			Create:SetPoint("BOTTOMRIGHT", QueueFrame, "BOTTOMRIGHT", -4, 4);
-			Create:SetFrameLevel(127);
-			Create:SetScript("OnClick", nil);
-			Create:SetText("Create");
-			QueueFrame.Create = Create;
-			Create.QueueFrame = QueueFrame;
-
-			QueueFrame.flag = 'queue';
-			QueueFrame.list = {  };
-			QueueFrame.hash = {  };
-
-			-- local ScrollFrame = VT.__scrolllib.CreateScrollFrame(QueueFrame, nil, nil, T_UIDefinition.QueueListButtonHeight, LT_SharedMethod.CreateQueueListButton, LT_SharedMethod.SetQueueListButton);
-			-- ScrollFrame:SetPoint("BOTTOMLEFT", 4, 26);
-			-- ScrollFrame:SetPoint("TOPRIGHT", -4, -4);
-			-- LT_SharedMethod.ModifyALAScrollFrame(ScrollFrame);
-			-- QueueFrame.ScrollFrame = ScrollFrame;
-
 		end
 		Frame.F_ShowQueueFrame = LT_FrameMethod.F_ShowQueueFrame;
 		Frame.F_HideQueueFrame = LT_FrameMethod.F_HideQueueFrame;
@@ -5223,7 +5363,7 @@ local function LF_CreateExplorerFrame()
 
 		LT_SharedMethod.ModifyALAScrollFrame(ScrollFrame);
 
-		Frame.F_SetStyle = LT_FrameMethod.F_ExplorerSetStyle;
+		Frame.F_SetStyle = LT_FrameMethod.F_ExplorerFrameSetStyle;
 	end
 
 	do	--	search_box
@@ -5533,6 +5673,78 @@ local function LF_CreateExplorerFrame()
 	end);
 
 	return Frame;
+end
+--	Queue
+local function LF_CreateQueueFrame()
+	local QueueFrame = CreateFrame('FRAME', nil, nil);
+	QueueFrame:SetWidth(T_UIDefinition.QueueFrameWidth);
+	QueueFrame:SetHeight(T_UIDefinition.QueueFrameHeight);
+	QueueFrame:Hide();
+	local Background = QueueFrame:CreateTexture(nil, "BACKGROUND");
+	Background:SetAllPoints();
+	Background:SetColorTexture(0.0, 0.0, 0.0, 0.25);
+	QueueFrame.Background = Background;
+
+	QueueFrame:SetScript("OnShow", LT_WidgetMethod.QueueFrame_OnShow);
+	QueueFrame:SetScript("OnHide", LT_WidgetMethod.QueueFrame_OnHide);
+
+	local EditBox = CreateFrame('EDITBOX', nil, QueueFrame);
+	EditBox:SetPoint("BOTTOMLEFT", QueueFrame, "BOTTOMLEFT", 4, 5);
+	EditBox:SetWidth(72);
+	EditBox:SetHeight(16);
+	EditBox:SetFont(T_UIDefinition.FrameNormalFont, T_UIDefinition.FrameNormalFontSize, T_UIDefinition.FrameNormalFontFlag);
+	EditBox:SetAutoFocus(false);
+	EditBox:SetJustifyH("LEFT");
+	EditBox:Show();
+	EditBox:EnableMouse(true);
+	EditBox:SetNumeric(true);
+	EditBox:ClearFocus();
+	EditBox:SetScript("OnEnterPressed", EditBox.ClearFocus);
+	EditBox:SetScript("OnEscapePressed", EditBox.ClearFocus);
+	QueueFrame.EditBox = EditBox;
+
+	local EditBoxTexture = EditBox:CreateTexture(nil, "ARTWORK");
+	EditBoxTexture:SetPoint("TOPLEFT");
+	EditBoxTexture:SetPoint("BOTTOMRIGHT");
+	EditBoxTexture:SetTexture([[Interface\Buttons\GreyScaleramp64]]);
+	EditBoxTexture:SetTexCoord(0.0, 0.25, 0.0, 0.25);
+	EditBoxTexture:SetAlpha(0.75);
+	EditBoxTexture:SetBlendMode("ADD");
+	EditBoxTexture:SetVertexColor(0.25, 0.25, 0.25);
+	EditBox.Texture = EditBoxTexture;
+
+	local Add = CreateFrame('BUTTON', nil, QueueFrame, "UIPanelButtonTemplate");
+	Add:SetSize(18, 18);
+	Add:SetPoint("LEFT", EditBox, "RIGHT", 4, 0);
+	Add:SetFrameLevel(127);
+	Add:SetScript("OnClick", LT_WidgetMethod.QueueFrameAdd_OnClick);
+	Add:SetText("+");
+	QueueFrame.Add = Add;
+	Add.QueueFrame = QueueFrame;
+
+	local Create = CreateFrame('BUTTON', nil, QueueFrame, "UIPanelButtonTemplate");
+	Create:SetSize(72, 18);
+	Create:SetPoint("BOTTOMRIGHT", QueueFrame, "BOTTOMRIGHT", -4, 4);
+	Create:SetFrameLevel(127);
+	Create:SetScript("OnClick", LT_WidgetMethod.QueueFrameCreate_OnClick);
+	Create:SetText("Create");
+	QueueFrame.Create = Create;
+	Create.QueueFrame = QueueFrame;
+
+	QueueFrame.flag = 'queue';
+	QueueFrame.list = {  };
+	QueueFrame.todo = {  };
+	QueueFrame.hash = {  };
+
+	local ScrollFrame = VT.__scrolllib.CreateScrollFrame(QueueFrame, nil, nil, T_UIDefinition.QueueListButtonHeight, LT_SharedMethod.CreateQueueListButton, LT_SharedMethod.SetQueueListButton);
+	ScrollFrame:SetPoint("BOTTOMLEFT", 4, 26);
+	ScrollFrame:SetPoint("TOPRIGHT", -4, -4);
+	LT_SharedMethod.ModifyALAScrollFrame(ScrollFrame);
+	QueueFrame.ScrollFrame = ScrollFrame;
+
+	QueueFrame.F_SetStyle = LT_FrameMethod.F_QueueFrameSetStyle;
+
+	return QueueFrame;
 end
 --	Board
 	local T_BoardDropMeta = {
@@ -6657,6 +6869,10 @@ end
 		if EFrame ~= nil then
 			EFrame:F_SetStyle(VT.SET.blz_style, loading);
 		end
+		local QFrame = VT.UIFrames["QUEUE"];
+		if QFrame ~= nil then
+			QFrame:F_SetStyle(VT.SET.blz_style, loading);
+		end
 	end
 	function MT.RefreshConfigFrame()
 		VT.UIFrames["CONFIG"]:F_Refresh();
@@ -6788,6 +7004,7 @@ MT.RegisterOnInit('ui', function(LoggedIn)
 	_, VT.UIFrames["EXPLORER"] = MT.SafeCall(LF_CreateExplorerFrame);
 	_, VT.UIFrames["CONFIG"] = MT.SafeCall(LF_CreateConfigFrame);
 	_, VT.UIFrames["BOARD"] = MT.SafeCall(LF_CreateBoard);
+	_, VT.UIFrames["QUEUE"] = MT.SafeCall(LF_CreateQueueFrame);
 	F:RegisterEvent("SKILL_LINES_CHANGED");
 	F:RegisterEvent("NEW_RECIPE_LEARNED");
 	MT.HookTooltip(SkillTip);
