@@ -62,10 +62,6 @@ end
 		GetAddOnInfo, IsAddOnLoaded, GetAddOnEnableState = _G.GetAddOnInfo, _G.IsAddOnLoaded, function(addon, name) return _GetAddOnEnableState(name, addon) end;
 	end
 	local Ambiguate = Ambiguate;
-	local _GetGlyphSocketInfo = __ala_meta__.TOC_VERSION < 40000 and GetGlyphSocketInfo or function(index, group)
-		local Enabled, GlyphType, GlyphTooltipIndex, GlyphSpell, Icon = GetGlyphSocketInfo(index, group);
-		return Enabled, GlyphType, GlyphSpell, Icon;
-	end;
 
 	local function __table_sub(T, index, index2)
 		return T[index];
@@ -1056,7 +1052,7 @@ end
 			wipe(data);
 		end
 		for index = 1, NUMGLYPHSOCKETS do
-			local Enabled, GlyphType, GlyphSpell, Icon = _GetGlyphSocketInfo(index, group);
+			local Enabled, GlyphType, GlyphTooltipIndex, GlyphSpell, Icon = GetGlyphSocketInfo(index, group);
 			if GlyphSpell ~= nil then
 				data[index] = { Enabled and 1 or 0, GlyphType, GlyphSpell, Icon, };
 			end
