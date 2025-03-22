@@ -64,7 +64,8 @@ local DT = __private.DT;
 	local _G = _G;
 	local SystemFont_Shadow_Med1 = SystemFont_Shadow_Med1;
 
-	local InterfaceOptions_AddCategory = InterfaceOptions_AddCategory;
+	local Settings = Settings;
+	local InterfaceOptions_AddCategory = _G.InterfaceOptions_AddCategory;
 	if InterfaceOptions_AddCategory == nil then
 		function InterfaceOptions_AddCategory(frame, addOn, position)
 			-- cancel is no longer a default option. May add menu extension for this.
@@ -85,7 +86,19 @@ local DT = __private.DT;
 			end
 		end
 	end
--->
+	local InterfaceOptionsFrame_OpenToCategory = _G.InterfaceOptionsFrame_OpenToCategory;
+	if InterfaceOptionsFrame_OpenToCategory == nil then
+		function InterfaceOptionsFrame_OpenToCategory(categoryIDOrFrame)
+			if __env.type(categoryIDOrFrame) == "table" then
+				local categoryID = categoryIDOrFrame.name;
+				return Settings.OpenToCategory(categoryID);
+			else
+				return Settings.OpenToCategory(categoryIDOrFrame);
+			end
+		end
+	end
+	
+		-->
 	local DataAgent = DT.DataAgent;
 	local l10n = CT.l10n;
 

@@ -22,6 +22,7 @@
 	<script file = "setting.lua" />
 
 	<include file = "plugin\plugin.xml" />
+	<!-- <include file = "hook\hook.xml" /> -->
 	<!-- <include file = "Bindings.xml" /> -->
 
 

@@ -39,7 +39,8 @@ local min, max = math.min, math.max, math;
 local CreateFrame = CreateFrame;
 local UIParent = UIParent;
 local _G = _G;
-local InterfaceOptions_AddCategory = InterfaceOptions_AddCategory;
+local Settings = Settings;
+local InterfaceOptions_AddCategory = _G.InterfaceOptions_AddCategory;
 if InterfaceOptions_AddCategory == nil then
 	function InterfaceOptions_AddCategory(frame, addOn, position)
 		-- cancel is no longer a default option. May add menu extension for this.
@@ -60,6 +61,19 @@ if InterfaceOptions_AddCategory == nil then
 		end
 	end
 end
+local InterfaceOptionsFrame_OpenToCategory = _G.InterfaceOptionsFrame_OpenToCategory;
+if InterfaceOptionsFrame_OpenToCategory == nil then
+	function InterfaceOptionsFrame_OpenToCategory(categoryIDOrFrame)
+		if __env.type(categoryIDOrFrame) == "table" then
+			local categoryID = categoryIDOrFrame.name;
+			return Settings.OpenToCategory(categoryID);
+		else
+			return Settings.OpenToCategory(categoryIDOrFrame);
+		end
+	end
+end
+
+
 
 local TEXTURE_PATH = strmatch(debugstack(), [[(Interface[^:"|]+[/\])[^/\:"|]+%.lua]]) .. [[Media\Texture\]];
 local SettingUIColWidth = 180;
