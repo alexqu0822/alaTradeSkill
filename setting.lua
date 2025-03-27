@@ -171,24 +171,30 @@ MT.BuildEnv("setting");
 				set = {
 					explorer = default_explorer_set,
 					board = default_board_set,
-					queue = {  },
 				},
 				var = {  },
 				fav = alaTradeSkillSV ~= nil and alaTradeSkillSV.fav or {  },
 				cmm = {  },
 				cache = {  },
+				queue = {
+					list = {  },
+					todo = {  },
+				},
 			};
 			_G.alaTradeSkillSV = alaTradeSkillSV;
 		else
 			if alaTradeSkillSV._version < 241010.1 then
 				alaTradeSkillSV.set.board = default_board_set;
 				alaTradeSkillSV.set.board.pos = default_board_set.pos;
-				alaTradeSkillSV.set.queue = {  };
-			elseif alaTradeSkillSV._version < 250301.1 then
-				alaTradeSkillSV.set.queue = {  };
+			end
+			if alaTradeSkillSV._version < 250320.1 then
+				alaTradeSkillSV.queue = {
+					list = {  },
+					todo = {  },
+				};
 			end
 		end
-		alaTradeSkillSV._version = 250301.1;
+		alaTradeSkillSV._version = 250320.1;
 		MT.MergeGlobal(alaTradeSkillSV);
 		VT.SET = alaTradeSkillSV.set;
 		for pid = DataAgent.DBMINPID, DataAgent.DBMAXPID do
@@ -281,6 +287,7 @@ MT.BuildEnv("setting");
 		end
 		VT.SVAR = alaTradeSkillSV;
 		VT.CACHE = alaTradeSkillSV.cache;
+		VT.QUEUE = alaTradeSkillSV.queue;
 	end
 -->
 

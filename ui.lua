@@ -46,6 +46,7 @@ local DT = __private.DT;
 	-- local IsSpellKnown = IsSpellKnown;
 	local GetSpellInfo = GetSpellInfo;
 	local GetItemInfo = GetItemInfo;
+	local GetItemCount = GetItemCount;
 	local GetTradeTargetItemLink = GetTradeTargetItemLink;
 	local GetPlayerInfoByGUID = GetPlayerInfoByGUID;
 	local GetItemQualityColor = GetItemQualityColor;
@@ -89,7 +90,7 @@ local DT = __private.DT;
 	local InterfaceOptionsFrame_OpenToCategory = _G.InterfaceOptionsFrame_OpenToCategory;
 	if InterfaceOptionsFrame_OpenToCategory == nil then
 		function InterfaceOptionsFrame_OpenToCategory(categoryIDOrFrame)
-			if __env.type(categoryIDOrFrame) == "table" then
+			if type(categoryIDOrFrame) == "table" then
 				local categoryID = categoryIDOrFrame.name;
 				return Settings.OpenToCategory(categoryID);
 			else
@@ -245,7 +246,6 @@ local T_UIDefinition = {
 local LT_SharedMethod = {  };
 local LT_ExplorerStat = { Skill = {  }, Type = {  }, SubType = {  }, EquipLoc = {  }, };
 local LT_LinkedSkillVar = { {  }, {  }, cur_rank = 0, max_rank = 75, };
-local LT_FrameMethod = {  };
 local LT_WidgetMethod = {  };
 
 
@@ -308,7 +308,7 @@ end
 	function LT_SharedMethod.UpdateProfitFrame(Frame)
 		local ProfitFrame = Frame.ProfitFrame;
 		if ProfitFrame:IsVisible() then
-			MT.Debug("UpdateProfitFrame|cff00ff00#1L1|r");
+			-- MT.Debug("UpdateProfitFrame|cff00ff00#1L1|r");
 			local list = ProfitFrame.list;
 			local pid = Frame.flag or DataAgent.get_pid_by_pname(Frame.F_GetSkillName());
 			if ProfitFrame.CostOnlyCheck then
@@ -422,7 +422,7 @@ end
 						local sids = var[1];
 						local hash = var[2];
 						if update_var then
-							MT.Debug("UpdateFrame|cff00ff00#1L1|r");
+							-- MT.Debug("UpdateFrame|cff00ff00#1L1|r");
 							local num = Frame.F_GetRecipeNumAvailable();
 							if num <= 0 then
 								-- Frame.mute_update = false;
@@ -474,12 +474,13 @@ end
 							end
 							var.update = nil;
 							Frame.update = nil;
+							Frame.IsDirty = false;
 							if Frame.prev_pid ~= pid then
 								Frame.prev_selected_sid = nil;
 								Frame.F_SetSelection(Frame.F_GetSelection());
 							end
 						else
-							MT.Debug("UpdateFrame|cff00ff00#1L2|r");
+							-- MT.Debug("UpdateFrame|cff00ff00#1L2|r");
 						end
 						if #sids > 0 then
 							if Frame.prev_pid ~= pid then
@@ -552,7 +553,7 @@ end
 							-- Frame.mute_update = false;
 						end
 					else
-						MT.Debug("UpdateFrame|cff00ff00#2L1|r");
+						-- MT.Debug("UpdateFrame|cff00ff00#2L1|r");
 						if #var[1] > 0 then
 							Frame.ScrollFrame:Update();
 							if Frame.ProfitFrame:IsShown() then
@@ -571,7 +572,7 @@ end
 						local sids = var[1];
 						local hash = var[2];
 						if update_var then
-							MT.Debug("UpdateFrame|cff00ff00#1L1|r");
+							-- MT.Debug("UpdateFrame|cff00ff00#1L1|r");
 							local num = Frame.F_GetRecipeNumAvailable();
 							if num <= 0 then
 								-- Frame.mute_update = false;
@@ -751,7 +752,7 @@ end
 			local hash = Frame.hash;
 			local list = Frame.list;
 			if update_list then
-				MT.Debug("UpdateExplorerFrame|cff00ff00#1L1|r");
+				-- MT.Debug("UpdateExplorerFrame|cff00ff00#1L1|r");
 				if set.showProfit then
 					Frame:F_ShowProfitFrame();
 				else
@@ -767,7 +768,7 @@ end
 											list, hash, set.phase, nil, set.rankReversed, set.showKnown, set.showUnkown, set.showHighRank, set.filterClass, set.filterSpec);
 				LT_SharedMethod.UpdateProfitFrame(Frame);
 			else
-				MT.Debug("UpdateExplorerFrame|cff00ff00#1L2|r");
+				-- MT.Debug("UpdateExplorerFrame|cff00ff00#1L2|r");
 			end
 			Frame.ScrollFrame:SetNumValue(#list);
 			Frame.ScrollFrame:Update();
@@ -799,6 +800,19 @@ end
 				Frame.ProfitFrame.ScrollFrame:Update();
 			end
 		end
+	end
+	function LT_SharedMethod.IsSkillLearned(pid)
+		return rawget(VT.VAR, pid) ~= nil;
+	end
+	function LT_SharedMethod.GetAvaiableCraftCount(sid, cap)
+		local avl = cap or CT.BIGNUMBER;
+		local ids, counts = DataAgent.get_reagents_by_sid(sid);
+		for i = 1, #ids do
+			local n = GetItemCount(ids[i]);
+			avl = min(avl, n / counts[i]);
+		end
+		avl = avl - avl % 1.0;
+		return avl;
 	end
 	--	obj style
 		function LT_SharedMethod.WidgetHidePermanently(obj)
@@ -2360,9 +2374,10 @@ end
 		Num:EnableMouse(true);
 		Num:SetNumeric(true);
 		Num:ClearFocus();
-		Num:SetScript("OnEnterPressed", Num.ClearFocus);
+		Num:SetScript("OnEnterPressed", LT_WidgetMethod.QueueButtonNum_OnEnterPressed);
 		Num:SetScript("OnEscapePressed", Num.ClearFocus);
 		Button.Num = Num;
+		Num.Button = Button;
 
 		local Dec = CreateFrame('BUTTON', nil, Button);
 		Dec:SetSize(buttonHeight - 4, buttonHeight - 4);
@@ -2427,10 +2442,8 @@ end
 		return Button;
 	end
 	function LT_SharedMethod.SetQueueListButton(Button, data_index)
-		local Frame = Button.Frame;
-		local Parent = Button.Parent;
-		local list = Parent.list;
-		local todo = Parent.todo;
+		local list = VT.QUEUE.list;
+		local todo = VT.QUEUE.todo;
 		if data_index <= #list then
 			local sid = list[data_index];
 			local num = todo[data_index];
@@ -2475,7 +2488,7 @@ end
 --
 --	Method
 	--
-	function LT_FrameMethod.F_UpdatePriceInfo(Frame)
+	function LT_WidgetMethod.F_UpdatePriceInfo(Frame)
 		local T_PriceInfoInFrame = Frame.T_PriceInfoInFrame;
 		if VT.AuctionMod ~= nil and VT.SET.show_tradeskill_frame_price_info then
 			local sid = Frame.selected_sid;
@@ -2566,7 +2579,7 @@ end
 			T_PriceInfoInFrame[3]:SetText(nil);
 		end
 	end
-	function LT_FrameMethod.F_UpdateRankInfo(Frame)
+	function LT_WidgetMethod.F_UpdateRankInfo(Frame)
 		if VT.SET.show_tradeskill_frame_rank_info then
 			Frame.RankInfoInFrame:SetText(DataAgent.get_difficulty_rank_list_text_by_sid(Frame.selected_sid, true));
 		else
@@ -2574,7 +2587,7 @@ end
 		end
 	end
 	--
-	function LT_FrameMethod.F_Expand(Frame, expanded)
+	function LT_WidgetMethod.F_Expand(Frame, expanded)
 		local T_StyleLayout = Frame.T_StyleLayout;
 		local layout = T_StyleLayout[expanded and 'expand' or 'normal'];
 		Frame:ClearAllPoints();
@@ -2614,7 +2627,7 @@ end
 			end
 		end
 	end
-	function LT_FrameMethod.F_SetStyle(Frame, blz_style, loading)
+	function LT_WidgetMethod.F_SetStyle(Frame, blz_style, loading)
 		if blz_style then
 			LT_SharedMethod.StyleBLZScrollFrame(Frame.ScrollFrame);
 			local FilterDropdown = Frame.FilterDropdown;
@@ -2849,7 +2862,7 @@ end
 			Frame.F_HookedFrameUpdate();
 		end
 	end
-	function LT_FrameMethod.F_ExplorerFrameSetStyle(Frame, blz_style, loading)
+	function LT_WidgetMethod.F_ExplorerFrameSetStyle(Frame, blz_style, loading)
 		if blz_style then
 			LT_SharedMethod.StyleBLZBackdrop(Frame);
 			local CloseButton = Frame.CloseButton;
@@ -2908,7 +2921,7 @@ end
 			LT_SharedMethod.StyleModernButton(ProfitFrameCloseButton, ProfitFrameCloseButton.backup == nil, T_UIDefinition.TEXTURE_MODERN_BUTTON_CLOSE);
 		end
 	end
-	function LT_FrameMethod.F_FixSkillList(Frame, expanded)
+	function LT_WidgetMethod.F_FixSkillList(Frame, expanded)
 		local layout = Frame.T_StyleLayout[expanded and 'expand' or 'normal'];
 		local pref = Frame.T_HookedFrameWidgets.C_SkillListButtonNamePrefix;
 		local index = layout.scroll_button_num + 1;
@@ -2922,7 +2935,7 @@ end
 			index = index + 1;
 		end
 	end
-	function LT_FrameMethod.F_LayoutOnShow(Frame)
+	function LT_WidgetMethod.F_LayoutOnShow(Frame)
 		local HookedFrame = Frame.HookedFrame;
 		local T_HookedFrameWidgets = Frame.T_HookedFrameWidgets;
 		local T_HookedFrameButtons = T_HookedFrameWidgets.T_HookedFrameButtons;
@@ -2935,14 +2948,14 @@ end
 		T_HookedFrameButtons.CloseButton:ClearAllPoints();
 		T_HookedFrameButtons.CloseButton:SetPoint("CENTER", HookedFrame, "TOPRIGHT", -51, -24);
 	end
-	function LT_FrameMethod.F_ToggleOnSkill(Frame, val)
+	function LT_WidgetMethod.F_ToggleOnSkill(Frame, val)
 		val = not val;
 		local T_ToggleOnSkill = Frame.T_ToggleOnSkill;
 		for index = 1, #T_ToggleOnSkill do
 			T_ToggleOnSkill[index]:SetShown(val);
 		end
 	end
-	function LT_FrameMethod.F_RefreshOverrideMinRank(Frame)
+	function LT_WidgetMethod.F_RefreshOverrideMinRank(Frame)
 		local pid = Frame.flag or DataAgent.get_pid_by_pname(Frame.F_GetSkillName());
 		if pid ~= nil then
 			local set = VT.SET[pid];
@@ -2957,7 +2970,7 @@ end
 			end
 		end
 	end
-	function LT_FrameMethod.F_RefreshRankOffset(Frame)
+	function LT_WidgetMethod.F_RefreshRankOffset(Frame)
 		local pid = Frame.flag or DataAgent.get_pid_by_pname(Frame.F_GetSkillName());
 		if pid ~= nil then
 			local set = VT.SET[pid];
@@ -2972,7 +2985,7 @@ end
 			end
 		end
 	end
-	function LT_FrameMethod.F_ShowSetFrame(Frame, show)
+	function LT_WidgetMethod.F_ShowSetFrame(Frame, show)
 		local SetFrame = Frame.SetFrame;
 		if VT.SET.show_tab then
 			SetFrame:ClearAllPoints();
@@ -2993,7 +3006,7 @@ end
 			end
 		end
 	end
-	function LT_FrameMethod.F_HideSetFrame(Frame)
+	function LT_WidgetMethod.F_HideSetFrame(Frame)
 		local SetFrame = Frame.SetFrame;
 		if SetFrame:IsShown() then
 			SetFrame:Hide();
@@ -3001,7 +3014,7 @@ end
 			LT_WidgetMethod.SetFrame_OnHide(SetFrame);
 		end
 	end
-	function LT_FrameMethod.F_ShowProfitFrame(Frame, show)
+	function LT_WidgetMethod.F_ShowProfitFrame(Frame, show)
 		local ProfitFrame = Frame.ProfitFrame;
 		if show ~= false then
 			if ProfitFrame:IsShown() then
@@ -3011,7 +3024,7 @@ end
 			end
 		end
 	end
-	function LT_FrameMethod.F_HideProfitFrame(Frame)
+	function LT_WidgetMethod.F_HideProfitFrame(Frame)
 		local ProfitFrame = Frame.ProfitFrame;
 		if ProfitFrame:IsShown() then
 			ProfitFrame:Hide();
@@ -3019,7 +3032,7 @@ end
 			LT_WidgetMethod.ProfitFrame_OnHide(ProfitFrame);
 		end
 	end
-	function LT_FrameMethod.F_ExplorerShowSetFrame(Frame, show)
+	function LT_WidgetMethod.F_ExplorerShowSetFrame(Frame, show)
 		local SetFrame = Frame.SetFrame;
 		if show ~= false then
 			if SetFrame:IsShown() then
@@ -3029,7 +3042,7 @@ end
 			end
 		end
 	end
-	function LT_FrameMethod.F_ExplorerHideSetFrame(Frame)
+	function LT_WidgetMethod.F_ExplorerHideSetFrame(Frame)
 		local SetFrame = Frame.SetFrame;
 		if SetFrame:IsShown() then
 			SetFrame:Hide();
@@ -3037,7 +3050,7 @@ end
 			LT_WidgetMethod.SetFrame_OnHide(SetFrame);
 		end
 	end
-	function LT_FrameMethod.F_ExplorerShowProfitFrame(Frame, show)
+	function LT_WidgetMethod.F_ExplorerShowProfitFrame(Frame, show)
 		local ProfitFrame = Frame.ProfitFrame;
 		if show ~= false then
 			if ProfitFrame:IsShown() then
@@ -3047,7 +3060,7 @@ end
 			end
 		end
 	end
-	function LT_FrameMethod.F_ExplorerHideProfitFrame(Frame)
+	function LT_WidgetMethod.F_ExplorerHideProfitFrame(Frame)
 		local ProfitFrame = Frame.ProfitFrame;
 		if ProfitFrame:IsShown() then
 			ProfitFrame:Hide();
@@ -3055,7 +3068,7 @@ end
 			LT_WidgetMethod.ProfitFrame_OnHide(ProfitFrame);
 		end
 	end
-	function LT_FrameMethod.F_RefreshSetFrame(Frame)
+	function LT_WidgetMethod.F_RefreshSetFrame(Frame)
 		local pid = Frame.flag or DataAgent.get_pid_by_pname(Frame.F_GetSkillName());
 		if pid ~= nil then
 			local SetFrame = Frame.SetFrame;
@@ -3067,7 +3080,7 @@ end
 			SetFrame.PhaseSlider:SetValue(set.phase);
 		end
 	end
-	function LT_FrameMethod.F_ExplorerRefreshSetFrame(Frame)
+	function LT_WidgetMethod.F_ExplorerRefreshSetFrame(Frame)
 		local SetFrame = Frame.SetFrame;
 		local set = VT.SET.explorer;
 		for index = 1, #SetFrame.T_CheckButtons do
@@ -3107,7 +3120,7 @@ end
 		end
 		SetFrame.PhaseSlider:SetValue(set.phase);
 	end
-	function LT_FrameMethod._OnShow(Frame)
+	function LT_WidgetMethod._OnShow(Frame)
 		Frame:F_WithDisabledFrame(LT_SharedMethod.WidgetHidePermanently);
 		-- Frame.HookedListFrame:Hide();
 		Frame.F_ClearFilter();
@@ -3115,7 +3128,7 @@ end
 			_G[name] = MT.noop;
 		end
 	end
-	function LT_FrameMethod._OnHide(Frame)
+	function LT_WidgetMethod._OnHide(Frame)
 		Frame:F_WithDisabledFrame(LT_SharedMethod.WidgetUnhidePermanently);
 		-- Frame.HookedListFrame:Show();
 		for name, func in next, Frame.T_DisabledFunc do
@@ -3123,10 +3136,13 @@ end
 		end
 		Frame.F_HookedFrameUpdate()
 	end
-	function LT_FrameMethod._OnEvent(Frame, event, _1, ...)
+	function LT_WidgetMethod._OnEvent(Frame, event, _1, ...)
 		Frame.update = true;
 		if event == Frame.C_SwitchEvent then
 			Frame.switching = true;
+		end
+		if Frame.T_MarkDirtyEvents[event] or Frame.prev_pid ~= DataAgent.get_pid_by_pname(Frame.F_GetSkillName()) then
+			Frame.IsDirty = true;
 		end
 		MT._TimerStart(Frame.F_Update, 0.2, 1);
 	end
@@ -3188,7 +3204,7 @@ end
 				if set.overrideminrank ~= value then
 					set.overrideminrank = value;
 					Frame.update = true;
-					MT._TimerStart(Frame.F_Update, 0.2, 1);
+					Frame.F_Update();
 				end
 			end
 		end
@@ -3206,7 +3222,7 @@ end
 				if set.rankoffset ~= value then
 					set.rankoffset = value;
 					Frame.update = true;
-					MT._TimerStart(Frame.F_Update, 0.2, 1);
+					Frame.F_Update();
 				end
 			end
 		end
@@ -3278,6 +3294,20 @@ end
 	function LT_WidgetMethod.PortraitButton_OnClick(self)
 		VT.__menulib.ShowMenu(self, "BOTTOM", self.T_PortraitDropMeta);
 	end
+	function LT_WidgetMethod.Tab_OnClick(self)
+		local pname = self.pname;
+		if pname ~= nil and not DataAgent.is_name_same_skill(pname, Frame.F_GetSkillName()) then
+			if pname == '@explorer' then
+				MT.ToggleFrame("EXPLORER");
+			elseif pname == '@config' then
+				MT.ToggleFrame("CONFIG");
+			elseif pname == '@toggle' then
+				LT_WidgetMethod.ToggleFrame(self);
+			else
+				CastSpellByName(pname);
+			end
+		end
+	end
 	function LT_WidgetMethod.TabFrame_CreateTab(TabFrame, index)
 		local Frame = TabFrame.Frame;
 		local Tab = CreateFrame('BUTTON', nil, TabFrame);
@@ -3292,20 +3322,7 @@ end
 		-- Tab:GetHighlightTexture():SetBlendMode("BLEND");
 		Tab:GetHighlightTexture():SetVertexColor(unpack(T_UIDefinition.TextureButtonColorHighlight));
 		Tab:EnableMouse(true);
-		Tab:SetScript("OnClick", function(self)
-			local pname = self.pname;
-			if pname ~= nil and not DataAgent.is_name_same_skill(pname, Frame.F_GetSkillName()) then
-				if pname == '@explorer' then
-					MT.ToggleFrame("EXPLORER");
-				elseif pname == '@config' then
-					MT.ToggleFrame("CONFIG");
-				elseif pname == '@toggle' then
-					LT_WidgetMethod.ToggleFrame(self);
-				else
-					CastSpellByName(pname);
-				end
-			end
-		end);
+		Tab:SetScript("OnClick", LT_WidgetMethod.Tab_OnClick);
 		TabFrame.T_Tabs[index] = Tab;
 		Tab.Frame = Frame;
 		if index == 1 then
@@ -3724,7 +3741,7 @@ end
 		end
 	end
 	--
-	function LT_FrameMethod.F_QueueFrameSetStyle(QueueFrame, blz_style, loading)
+	function LT_WidgetMethod.F_QueueFrameSetStyle(QueueFrame, blz_style, loading)
 		if blz_style then
 			LT_SharedMethod.StyleBLZBackdrop(QueueFrame);
 			local QueueAdd = QueueFrame.Add;
@@ -3739,11 +3756,12 @@ end
 			LT_SharedMethod.StyleModernButton(QueueCreate, QueueCreate.backup == nil, nil);
 		end
 	end
-	function LT_FrameMethod.F_ShowQueueFrame(Frame, show)
+	function LT_WidgetMethod.F_ShowQueueFrame(Frame, show)
 		if Frame.IsQueueEnabled then
 			local QueueFrame = VT.UIFrames["QUEUE"];
 			if show ~= false then
 				QueueFrame:SetParent(Frame);
+				QueueFrame.RegisterFrameOnSelection(Frame);
 				if QueueFrame:IsShown() then
 					LT_WidgetMethod.QueueFrame_OnShow(QueueFrame);
 				else
@@ -3752,7 +3770,7 @@ end
 			end
 		end
 	end
-	function LT_FrameMethod.F_HideQueueFrame(Frame)
+	function LT_WidgetMethod.F_HideQueueFrame(Frame)
 		if Frame.IsQueueEnabled then
 			local QueueFrame = VT.UIFrames["QUEUE"];
 			if QueueFrame:IsShown() then
@@ -3760,6 +3778,60 @@ end
 			else
 				LT_WidgetMethod.QueueFrame_OnHide(QueueFrame);
 			end
+		end
+	end
+	function LT_WidgetMethod.F_QueueFrameStartCraftQueue(QueueFrame)
+		local Frame = QueueFrame.Parent;
+		local list = VT.QUEUE.list;
+		local todo = VT.QUEUE.todo;
+		for index = #list, 1, -1 do
+			if todo[index] <= 0 then
+				tremove(list, index);
+				tremove(todo, index);
+			end
+		end
+		for index = 1, #list do
+			if todo[index] > 0 then
+				local sid = list[index];
+				local pid = DataAgent.get_pid_by_sid(sid);
+				if LT_SharedMethod.IsSkillLearned(pid) then
+					local available = LT_SharedMethod.GetAvaiableCraftCount(sid, todo[index]);
+					if available > 0 then
+						if pid ~= DataAgent.get_pid_by_pname(Frame.F_GetSkillName()) then
+							-- MT.Debug("Switch", pid);
+							CastSpellByName(DataAgent.get_pname_by_pid(pid));
+						end
+						-- MT.Debug("avl", sid, available, Frame.IsDirty);
+						if Frame.IsDirty then
+							-- return QueueFrame.F_ScheduleCraftQueue();	--	DoTradeSkill needs hardware event.
+							QueueFrame.Focus:Hide();
+							return;
+						end
+						QueueFrame.ScrollFrame:HandleButtonByDataIndex(index, QueueFrame.PlaceFocus);
+						QueueFrame.Focus.Num:SetText(available);
+						LT_SharedMethod.SelectRecipe(Frame, sid);
+						Frame.F_DoTradeCraft(Frame.hash[sid], available);
+						QueueFrame.CraftingID = sid;
+						QueueFrame.IsCrafting = true;
+						return true;
+					end
+				end
+			end
+		end
+		QueueFrame.CraftingID = nil;
+		QueueFrame.IsCrafting = false;
+		QueueFrame.Focus:Hide();
+		return false;
+	end
+	function LT_WidgetMethod.F_QueueFrameScheduleCraftQueue(QueueFrame)
+		if not QueueFrame:IsShown() then
+			QueueFrame.CraftingID = nil;
+			QueueFrame.IsCrafting = false;
+			QueueFrame.Focus:Hide();
+		elseif QueueFrame.Parent.IsDirty then
+			MT._TimerStart(QueueFrame.F_ScheduleCraftQueue, 0.25, 1);
+		else
+			return QueueFrame.F_StartCraftQueue();
 		end
 	end
 	function LT_WidgetMethod.QueueFrame_OnShow(self)
@@ -3777,13 +3849,80 @@ end
 			Frame.QueueToggleButton:GetNormalTexture():SetVertexColor(0.5, 0.5, 0.5, 1.0);
 		end
 	end
+	function LT_WidgetMethod.QueueFrame_OnSucceededDelay(self)
+		-- MT.Debug("OnSucceed", self.CraftingID, self:IsShown(), self.IsCrafting);
+		if self:IsShown() and self.IsCrafting then
+			local list = VT.QUEUE.list;
+			local todo = VT.QUEUE.todo;
+			for index = 1, #list do
+				if list[index] == self.CraftingID then
+					todo[index] = todo[index] - 1;
+					-- MT.Debug("Sub", self.CraftingID, todo[index]);
+					if todo[index] <= 0 then
+						tremove(list, index);
+						tremove(todo, index);
+						self.ScrollFrame:Update();
+						-- self.F_StartCraftQueue();	--	DoTradeSkill needs hardware event.
+						self.Focus:Hide();
+						return;
+					end
+					self.ScrollFrame:Update();
+					local available = LT_SharedMethod.GetAvaiableCraftCount(self.CraftingID);
+					-- MT.Debug(name, "num =", available);
+					if available <= 0 then
+						-- self.F_StartCraftQueue();	--	DoTradeSkill needs hardware event.
+						self.Focus:Hide();
+						return;
+					end
+					self.Focus.Num:SetText(available);
+					return;
+				end
+			end
+		end
+	end
+	function LT_WidgetMethod.QueueFrame_OnEvent(self, event, ...)
+		-- unit, castID, spellID
+		if event == "UNIT_SPELLCAST_SUCCEEDED" then
+			local unit, castID, sid = ...;
+			-- MT.Debug("SUCCEED", sid, self.CraftingID, self:IsShown(), self.IsCrafting);
+			if self.CraftingID == sid then
+				MT._TimerStart(self.F_OnSucceededDelay, 0.1, 1);
+			end
+		elseif event == "UNIT_SPELLCAST_INTERRUPTED" then
+			local unit, castID, sid = ...;
+			if self.CraftingID == sid then
+				self.CraftingID = nil;
+				self.IsCrafting = false;
+				QueueFrame.Focus:Hide();
+			end
+		end
+	end
 	--
+	function LT_WidgetMethod.QueueButtonNum_OnEnterPressed(self)
+		local Button = self.Button;
+		local QueueFrame = Button.Frame;
+		local Parent = Button.Parent;
+		local n = tonumber(self:GetText());
+		if n ~= nil then
+			local list = VT.QUEUE.list;
+			local todo = VT.QUEUE.todo;
+			local data_index = self.Button:GetDataIndex();
+			if n == 0 then
+				tremove(list, data_index);
+				tremove(todo, data_index);
+				Parent.ScrollFrame:Update();
+			else
+				todo[data_index] = n;
+			end
+			self:ClearFocus();
+		end
+	end
 	function LT_WidgetMethod.QueueButtonDel_OnClick(self)
 		local Button = self.Button;
-		local Frame = Button.Frame;
+		local QueueFrame = Button.Frame;
 		local Parent = Button.Parent;
-		local list = Parent.list;
-		local todo = Parent.todo;
+		local list = VT.QUEUE.list;
+		local todo = VT.QUEUE.todo;
 		local data_index = Button:GetDataIndex();
 		tremove(list, data_index);
 		tremove(todo, data_index);
@@ -3791,20 +3930,20 @@ end
 	end
 	function LT_WidgetMethod.QueueButtonInc_OnClick(self)
 		local Button = self.Button;
-		local Frame = Button.Frame;
+		local QueueFrame = Button.Frame;
 		local Parent = Button.Parent;
-		local list = Parent.list;
-		local todo = Parent.todo;
+		local list = VT.QUEUE.list;
+		local todo = VT.QUEUE.todo;
 		local data_index = Button:GetDataIndex();
 		todo[data_index] = todo[data_index] + 1;
 		Button.Num:SetText(todo[data_index]);
 	end
 	function LT_WidgetMethod.QueueButtonDec_OnClick(self)
 		local Button = self.Button;
-		local Frame = Button.Frame;
+		local QueueFrame = Button.Frame;
 		local Parent = Button.Parent;
-		local list = Parent.list;
-		local todo = Parent.todo;
+		local list = VT.QUEUE.list;
+		local todo = VT.QUEUE.todo;
 		local data_index = Button:GetDataIndex();
 		todo[data_index] = todo[data_index] - 1;
 		if todo[data_index] <= 0 then
@@ -3815,8 +3954,8 @@ end
 	function LT_WidgetMethod.QueueFrameAdd_OnClick(self)
 		local QueueFrame = self.QueueFrame;
 		local Frame = QueueFrame.Parent;
-		local list = QueueFrame.list;
-		local todo = QueueFrame.todo;
+		local list = VT.QUEUE.list;
+		local todo = VT.QUEUE.todo;
 		if Frame.selected_sid ~= nil then
 			list[#list + 1] = Frame.selected_sid;
 			todo[#todo + 1] = tonumber(QueueFrame.EditBox:GetText()) or 1;
@@ -3824,6 +3963,7 @@ end
 		end
 	end
 	function LT_WidgetMethod.QueueFrameCreate_OnClick(self)
+		self.QueueFrame.F_StartCraftQueue();
 	end
 --
 local function LF_HookFrame(addon, meta)
@@ -3870,7 +4010,7 @@ local function LF_HookFrame(addon, meta)
 	Frame.prev_selected_sid = nil;
 	function Frame.F_OnSelection()
 		Frame.selected_sid = Frame.F_GetRecipeSpellID(Frame.F_GetSelection());
-		MT.Debug("OnSelection", Frame.prev_selected_sid, Frame.selected_sid);
+		-- MT.Debug("OnSelection", Frame.prev_selected_sid, Frame.selected_sid);
 		if Frame.prev_selected_sid ~= Frame.selected_sid then
 			Frame.prev_selected_sid = Frame.selected_sid;
 			for i = 1, #Frame.T_OnSelection do
@@ -3887,14 +4027,15 @@ local function LF_HookFrame(addon, meta)
 			function Frame.F_Update()
 				LT_SharedMethod.UpdateFrame(Frame);
 			end
-			Frame:SetScript("OnShow", LT_FrameMethod._OnShow);
-			Frame:SetScript("OnHide", LT_FrameMethod._OnHide);
+			Frame:SetScript("OnShow", LT_WidgetMethod._OnShow);
+			Frame:SetScript("OnHide", LT_WidgetMethod._OnHide);
 			if meta.T_MonitoredEvents then
 				for index = 1, #meta.T_MonitoredEvents do
 					Frame:RegisterEvent(meta.T_MonitoredEvents[index]);
 				end
-				Frame:SetScript("OnEvent", LT_FrameMethod._OnEvent);
+				Frame:SetScript("OnEvent", LT_WidgetMethod._OnEvent);
 			end
+			Frame.IsDirty = true;
 			MT._TimerStart(Frame.F_Update, PERIODIC_UPDATE_PERIOD);
 			Frame.list = {  };
 			Frame.prev_var_update_time = GetTime() - MAXIMUM_VAR_UPDATE_PERIOD;
@@ -3993,7 +4134,7 @@ local function LF_HookFrame(addon, meta)
 			OverrideMinRankSlider:HookScript("OnValueChanged", LT_WidgetMethod.OverrideMinRankSlider__OnValueChanged);
 			Frame.OverrideMinRankSlider = OverrideMinRankSlider;
 			OverrideMinRankSlider.Frame = Frame;
-			Frame.F_RefreshOverrideMinRank = LT_FrameMethod.F_RefreshOverrideMinRank;
+			Frame.F_RefreshOverrideMinRank = LT_WidgetMethod.F_RefreshOverrideMinRank;
 
 			local RankOffsetButton = CreateFrame('BUTTON', nil, Frame, "UIPanelButtonTemplate");
 			RankOffsetButton:SetSize(40, 20);
@@ -4016,7 +4157,7 @@ local function LF_HookFrame(addon, meta)
 			RankOffsetSlider:HookScript("OnValueChanged", LT_WidgetMethod.RankOffsetSlider__OnValueChanged);
 			Frame.RankOffsetSlider = RankOffsetSlider;
 			RankOffsetSlider.Frame = Frame;
-			Frame.F_RefreshRankOffset = LT_FrameMethod.F_RefreshRankOffset;
+			Frame.F_RefreshRankOffset = LT_WidgetMethod.F_RefreshRankOffset;
 		--	objects
 			local T_HookedFrameDropdowns = T_HookedFrameWidgets.T_HookedFrameDropdowns;
 			local T_HookedFrameButtons = T_HookedFrameWidgets.T_HookedFrameButtons;
@@ -4161,14 +4302,14 @@ local function LF_HookFrame(addon, meta)
 			T_HookedFrameWidgets.ProductionIcon:HookScript("OnClick", LT_WidgetMethod.ProductionIcon__OnClick);
 		--
 
-		Frame.F_LayoutOnShow = LT_FrameMethod.F_LayoutOnShow;
-		Frame.F_Expand = LT_FrameMethod.F_Expand;
-		Frame.F_FixSkillList = LT_FrameMethod.F_FixSkillList;
-		Frame.F_SetStyle = LT_FrameMethod.F_SetStyle;
+		Frame.F_LayoutOnShow = LT_WidgetMethod.F_LayoutOnShow;
+		Frame.F_Expand = LT_WidgetMethod.F_Expand;
+		Frame.F_FixSkillList = LT_WidgetMethod.F_FixSkillList;
+		Frame.F_SetStyle = LT_WidgetMethod.F_SetStyle;
 		if meta.T_ToggleOnSkill == nil then
 			Frame.F_ToggleOnSkill = MT.noop;
 		else
-			Frame.F_ToggleOnSkill = LT_FrameMethod.F_ToggleOnSkill;
+			Frame.F_ToggleOnSkill = LT_WidgetMethod.F_ToggleOnSkill;
 		end
 	end
 
@@ -4296,8 +4437,8 @@ local function LF_HookFrame(addon, meta)
 
 		LT_SharedMethod.ModifyALAScrollFrame(ScrollFrame);
 
-		Frame.F_ShowProfitFrame = LT_FrameMethod.F_ShowProfitFrame;
-		Frame.F_HideProfitFrame = LT_FrameMethod.F_HideProfitFrame;
+		Frame.F_ShowProfitFrame = LT_WidgetMethod.F_ShowProfitFrame;
+		Frame.F_HideProfitFrame = LT_WidgetMethod.F_HideProfitFrame;
 	end
 
 	do	--	SetFrame
@@ -4404,9 +4545,9 @@ local function LF_HookFrame(addon, meta)
 		PhaseSlider.SetFrame = SetFrame;
 		PhaseSlider.Frame = Frame;
 
-		Frame.F_ShowSetFrame = LT_FrameMethod.F_ShowSetFrame;
-		Frame.F_HideSetFrame = LT_FrameMethod.F_HideSetFrame;
-		Frame.F_RefreshSetFrame = LT_FrameMethod.F_RefreshSetFrame;
+		Frame.F_ShowSetFrame = LT_WidgetMethod.F_ShowSetFrame;
+		Frame.F_HideSetFrame = LT_WidgetMethod.F_HideSetFrame;
+		Frame.F_RefreshSetFrame = LT_WidgetMethod.F_RefreshSetFrame;
 	end
 
 	do	--	InfoInFrame
@@ -4449,8 +4590,8 @@ local function LF_HookFrame(addon, meta)
 			end
 			MT._TimerStart(LF_DelayUpdateInfoInFrame, 0.5, 1);
 		end
-		Frame.F_UpdatePriceInfo = LT_FrameMethod.F_UpdatePriceInfo;
-		Frame.F_UpdateRankInfo = LT_FrameMethod.F_UpdateRankInfo;
+		Frame.F_UpdatePriceInfo = LT_WidgetMethod.F_UpdatePriceInfo;
+		Frame.F_UpdateRankInfo = LT_WidgetMethod.F_UpdateRankInfo;
 	end
 
 	do	--	Select History
@@ -4495,7 +4636,7 @@ local function LF_HookFrame(addon, meta)
 			if sid ~= nil then
 				local pid = DataAgent.get_pid_by_sid(sid);
 				local History = Frame.T_SelectionHistory[pid];
-				MT.Debug("Selection", pid, sid);
+				-- MT.Debug("Selection", pid, sid);
 				if History == nil then
 					Frame.T_SelectionHistory[pid] = {
 						pos = 1,
@@ -4522,8 +4663,8 @@ local function LF_HookFrame(addon, meta)
 			Frame.QueueToggleButton = ToggleButton;
 			ToggleButton.Frame = Frame;
 		end
-		Frame.F_ShowQueueFrame = LT_FrameMethod.F_ShowQueueFrame;
-		Frame.F_HideQueueFrame = LT_FrameMethod.F_HideQueueFrame;
+		Frame.F_ShowQueueFrame = LT_WidgetMethod.F_ShowQueueFrame;
+		Frame.F_HideQueueFrame = LT_WidgetMethod.F_HideQueueFrame;
 	end
 
 	--	Update after all hooks
@@ -4846,9 +4987,12 @@ local function LF_AddOnCallback_Blizzard_TradeSkillUI(addon)
 			--	name, texture, numRequired, numHave = GetTradeSkillReagentInfo(tradeSkillRecipeId, reagentId);
 
 		F_HookedFrameUpdate = TradeSkillFrame_Update,
+		T_MarkDirtyEvents = {
+			["TRADE_SKILL_SHOW"] = true,
+		},
 		T_MonitoredEvents = {
 			-- "NEW_RECIPE_LEARNED",
-			-- "TRADE_SKILL_SHOW",
+			"TRADE_SKILL_SHOW",
 			"TRADE_SKILL_UPDATE",
 		},
 		C_SwitchEvent = "TRADE_SKILL_SHOW",
@@ -4890,7 +5034,7 @@ local function LF_AddOnCallback_Blizzard_TradeSkillUI(addon)
 			F_SetSelection = "TradeSkillFrame_SetSelection",
 		},
 
-		IsQueueEnabled = false,
+		IsQueueEnabled = true,
 	};
 	local Frame = LF_HookFrame(addon, meta);
 	VT.UIFrames[addon] = Frame;
@@ -5041,7 +5185,7 @@ local function LF_AddOnCallback_Blizzard_CraftUI(addon)
 		local CraftRankFrame = _G.CraftRankFrame;
 		local CraftRankFrameBorder = _G.CraftRankFrameBorder;
 		local CraftFrameAvailableFilterCheckButton = _G.CraftFrameAvailableFilterCheckButton;
-		local CraftFrameFilterDropDown = _G.CraftFrameFilterDropDown or _G.CraftFrameFilterDropdown;
+		local CraftFrameFilterDropDown = _G.CraftFrameFilterDropDown or _G.CraftFrameFilterDropdown or CraftFrame.Dropdown;
 		local CraftListScrollFrame = _G.CraftListScrollFrame;
 		local CraftListScrollFrameScrollBar = _G.CraftListScrollFrameScrollBar;
 		local CraftHighlightFrame = _G.CraftHighlightFrame;
@@ -5179,9 +5323,12 @@ local function LF_AddOnCallback_Blizzard_CraftUI(addon)
 			-- name, texture, numRequired, numHave = GetCraftReagentInfo(tradeSkillRecipeId, reagentId);
 
 		F_HookedFrameUpdate = CraftFrame_Update,
+		T_MarkDirtyEvents = {
+			["CRAFT_SHOW"] = true,
+		},
 		T_MonitoredEvents = {
 			-- "NEW_RECIPE_LEARNED",
-			-- "CRAFT_SHOW",
+			"CRAFT_SHOW",
 			"CRAFT_UPDATE",
 		},
 		C_SwitchEvent = "CRAFT_SHOW",
@@ -5376,7 +5523,7 @@ local function LF_CreateExplorerFrame()
 
 		LT_SharedMethod.ModifyALAScrollFrame(ScrollFrame);
 
-		Frame.F_SetStyle = LT_FrameMethod.F_ExplorerFrameSetStyle;
+		Frame.F_SetStyle = LT_WidgetMethod.F_ExplorerFrameSetStyle;
 	end
 
 	do	--	search_box
@@ -5452,8 +5599,8 @@ local function LF_CreateExplorerFrame()
 
 		LT_SharedMethod.ModifyALAScrollFrame(Frame.ProfitFrame.ScrollFrame);
 
-		Frame.F_ShowProfitFrame = LT_FrameMethod.F_ExplorerShowProfitFrame;
-		Frame.F_HideProfitFrame = LT_FrameMethod.F_ExplorerHideProfitFrame;
+		Frame.F_ShowProfitFrame = LT_WidgetMethod.F_ExplorerShowProfitFrame;
+		Frame.F_HideProfitFrame = LT_WidgetMethod.F_ExplorerHideProfitFrame;
 	end
 
 	do	--	SetFrame
@@ -5641,9 +5788,9 @@ local function LF_CreateExplorerFrame()
 		end);
 		SetFrame.PhaseSlider = PhaseSlider;
 
-		Frame.F_ShowSetFrame = LT_FrameMethod.F_ExplorerShowSetFrame;
-		Frame.F_HideSetFrame = LT_FrameMethod.F_ExplorerHideSetFrame;
-		Frame.F_RefreshSetFrame = LT_FrameMethod.F_ExplorerRefreshSetFrame;
+		Frame.F_ShowSetFrame = LT_WidgetMethod.F_ExplorerShowSetFrame;
+		Frame.F_HideSetFrame = LT_WidgetMethod.F_ExplorerHideSetFrame;
+		Frame.F_RefreshSetFrame = LT_WidgetMethod.F_ExplorerRefreshSetFrame;
 
 	end
 
@@ -5698,12 +5845,42 @@ local function LF_CreateQueueFrame()
 	Background:SetColorTexture(0.0, 0.0, 0.0, 0.25);
 	QueueFrame.Background = Background;
 
+	QueueFrame.list = VT.QUEUE.list;
+	QueueFrame.hash = {  };
+	QueueFrame.todo = VT.QUEUE.todo;
+
+	QueueFrame.F_SetStyle = LT_WidgetMethod.F_QueueFrameSetStyle;
+	-- QueueFrame.F_StartCraftQueue = LT_WidgetMethod.F_QueueFrameStartCraftQueue;
+	function QueueFrame.F_StartCraftQueue()
+		return LT_WidgetMethod.F_QueueFrameStartCraftQueue(QueueFrame);
+	end
+	-- QueueFrame.F_ScheduleCraftQueue = LT_WidgetMethod.F_QueueFrameScheduleCraftQueue
+	function QueueFrame.F_ScheduleCraftQueue()
+		return LT_WidgetMethod.F_QueueFrameScheduleCraftQueue(QueueFrame);
+	end
+	-- QueueFrame.F_OnSucceededDelay = LT_WidgetMethod.QueueFrame_OnSucceededDelay;
+	function QueueFrame.F_OnSucceededDelay()
+		return LT_WidgetMethod.QueueFrame_OnSucceededDelay(QueueFrame);
+	end
+
 	QueueFrame:SetScript("OnShow", LT_WidgetMethod.QueueFrame_OnShow);
 	QueueFrame:SetScript("OnHide", LT_WidgetMethod.QueueFrame_OnHide);
 
+	QueueFrame:RegisterUnitEvent("UNIT_SPELLCAST_SUCCEEDED", 'player');
+	QueueFrame:RegisterUnitEvent("UNIT_SPELLCAST_INTERRUPTED", 'player');
+	QueueFrame:SetScript("OnEvent", LT_WidgetMethod.QueueFrame_OnEvent);
+
+	local Name = QueueFrame:CreateFontString(nil, "ARTWORK");
+	Name:SetFont(T_UIDefinition.FrameNormalFont, T_UIDefinition.FrameNormalFontSize, T_UIDefinition.FrameNormalFontFlag);
+	Name:SetMaxLines(1);
+	Name:SetJustifyH("LEFT");
+	Name:SetPoint("BOTTOMLEFT", QueueFrame, "BOTTOMLEFT", 4, 5);
+	Name:SetWidth(118);
+	QueueFrame.Name = Name;
+
 	local EditBox = CreateFrame('EDITBOX', nil, QueueFrame);
-	EditBox:SetPoint("BOTTOMLEFT", QueueFrame, "BOTTOMLEFT", 4, 5);
-	EditBox:SetWidth(72);
+	EditBox:SetPoint("LEFT", Name, "RIGHT", 4, 0);
+	EditBox:SetWidth(36);
 	EditBox:SetHeight(16);
 	EditBox:SetFont(T_UIDefinition.FrameNormalFont, T_UIDefinition.FrameNormalFontSize, T_UIDefinition.FrameNormalFontFlag);
 	EditBox:SetAutoFocus(false);
@@ -5714,6 +5891,8 @@ local function LF_CreateQueueFrame()
 	EditBox:ClearFocus();
 	EditBox:SetScript("OnEnterPressed", EditBox.ClearFocus);
 	EditBox:SetScript("OnEscapePressed", EditBox.ClearFocus);
+	-- EditBox:SetScript("OnMouseWheel", LT_WidgetMethod.QueueFrameEditBox_OnMouseWheel);
+	EditBox:SetText("1");
 	QueueFrame.EditBox = EditBox;
 
 	local EditBoxTexture = EditBox:CreateTexture(nil, "ARTWORK");
@@ -5744,18 +5923,44 @@ local function LF_CreateQueueFrame()
 	QueueFrame.Create = Create;
 	Create.QueueFrame = QueueFrame;
 
-	QueueFrame.flag = 'queue';
-	QueueFrame.list = {  };
-	QueueFrame.todo = {  };
-	QueueFrame.hash = {  };
-
 	local ScrollFrame = VT.__scrolllib.CreateScrollFrame(QueueFrame, nil, nil, T_UIDefinition.QueueListButtonHeight, LT_SharedMethod.CreateQueueListButton, LT_SharedMethod.SetQueueListButton);
 	ScrollFrame:SetPoint("BOTTOMLEFT", 4, 26);
 	ScrollFrame:SetPoint("TOPRIGHT", -4, -4);
 	LT_SharedMethod.ModifyALAScrollFrame(ScrollFrame);
 	QueueFrame.ScrollFrame = ScrollFrame;
 
-	QueueFrame.F_SetStyle = LT_FrameMethod.F_QueueFrameSetStyle;
+	local Focus = CreateFrame('FRAME', nil, QueueFrame);
+	Focus:SetSize(32, 16);
+	Focus:EnableMouse(false);
+	local FocusArrow = Focus:CreateTexture(nil, "ARTWORK");
+	FocusArrow:SetSize(16, 8);
+	FocusArrow:SetPoint("LEFT", 2, 0);
+	FocusArrow:SetTexture(T_UIDefinition.TEXTURE_MODERN_ARROW_LEFT);
+	FocusArrow:SetVertexColor(1.0, 0.5, 0.0);
+	local FocusNum = Focus:CreateFontString(nil, "ARTWORK");
+	FocusNum:SetFont(T_UIDefinition.FrameNormalFont, T_UIDefinition.FrameNormalFontSize, T_UIDefinition.FrameNormalFontFlag);
+	FocusNum:SetMaxLines(1);
+	FocusNum:SetJustifyH("RIGHT");
+	FocusNum:SetPoint("RIGHT", -2, 0);
+	Focus.Num = FocusNum;
+	QueueFrame.Focus = Focus;
+
+	local LT_Hooked = {  };
+	function QueueFrame.RegisterFrameOnSelection(Frame)
+		if LT_Hooked[Frame] == nil then
+			LT_Hooked[Frame] = true;
+			Frame.T_OnSelection[#Frame.T_OnSelection + 1] = function()
+				local name, rank, num = Frame.F_GetRecipeInfo(Frame.F_GetSelection());
+				Name:SetText(name or "");
+				Name:SetTextColor(unpack(CT.T_RankColor[CT.T_RankIndex[rank]] or T_UIDefinition.COLOR_WHITE));
+			end
+		end
+	end
+	function QueueFrame.PlaceFocus(Button, ...)
+		Focus:Show();
+		Focus:ClearAllPoints();
+		Focus:SetPoint("LEFT", Button, "RIGHT", 2, 0);
+	end
 
 	return QueueFrame;
 end

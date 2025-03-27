@@ -906,7 +906,7 @@ local function FilterAdd(list, sid, class, spec, filterClass, filterSpec)
 end
 function DataAgent.get_ordered_list(pid, list, check_hash, phase, rank, minRankOverride, maxRankOffset, rankReversed, showKnown, showUnkown, showHighRank, filterClass, filterSpec, donot_wipe)
 	if pid == nil then
-		MT.Debug("DataAgent.get_ordered_list|cff00ff00#1L1|r");
+		-- MT.Debug("DataAgent.get_ordered_list|cff00ff00#1L1|r");
 		if not donot_wipe then
 			wipe(list);
 		end
@@ -916,7 +916,7 @@ function DataAgent.get_ordered_list(pid, list, check_hash, phase, rank, minRankO
 			end
 		end
 	elseif T_TradeSkill_RecipeList[pid] ~= nil then
-		MT.Debug("DataAgent.get_ordered_list|cff00ff00#1L2|r", pid);
+		-- MT.Debug("DataAgent.get_ordered_list|cff00ff00#1L2|r", pid);
 		local recipe = T_TradeSkill_RecipeList[pid];
 		if not donot_wipe then
 			wipe(list);

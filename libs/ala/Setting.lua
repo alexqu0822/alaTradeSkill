@@ -64,7 +64,7 @@ end
 local InterfaceOptionsFrame_OpenToCategory = _G.InterfaceOptionsFrame_OpenToCategory;
 if InterfaceOptionsFrame_OpenToCategory == nil then
 	function InterfaceOptionsFrame_OpenToCategory(categoryIDOrFrame)
-		if __env.type(categoryIDOrFrame) == "table" then
+		if type(categoryIDOrFrame) == "table" then
 			local categoryID = categoryIDOrFrame.name;
 			return Settings.OpenToCategory(categoryID);
 		else
