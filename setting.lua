@@ -86,7 +86,6 @@ MT.BuildEnv("setting");
 	end
 	--
 	local default_SET = {
-		expand = false,
 		blz_style = false,
 		bg_color = { 0.0, 0.0, 0.0, 0.75, },
 		show_tradeskill_frame_price_info = true,
@@ -292,9 +291,7 @@ MT.BuildEnv("setting");
 -->
 
 function MT.OnSettingChanged(key, val, loading)
-	if key == 'expand' then
-		MT.ToggleFrameExpand(val);
-	elseif key == 'blz_style' then
+	if key == 'blz_style' then
 		MT.RefreshFramesStyle(loading);
 	elseif key == 'bg_color' then
 		MT.RefreshFramesStyle(loading);
@@ -352,20 +349,6 @@ do	--	SLASH
 	local SEPARATOR = "[ %`%~%!%@%#%$%%%^%&%*%(%)%-%_%=%+%[%{%]%}%\\%|%;%:%\'%\"%,%<%.%>%/%?]*";
 	--	1type, 2pattern, 3key, 4note(string or func), 5proc_func(key, val), 6func_to_mod_val, 7config_type(nil for check), 8cmd_for_config / drop_meta, 9para[slider:{min, max, step}], 10sub_config_on_val
 	VT.SetCommandList = {
-		{	--	expand
-			'bool',
-			"^expand" .. SEPARATOR .. "(.*)" .. SEPARATOR .. "$",
-			"expand",
-			l10n.SLASH_NOTE["expand"],
-			nil,
-			[8] = function(self)
-				if self:GetChecked() then
-					SlashCmdList["ALATRADEFRAME"]("setexpand1");
-				else
-					SlashCmdList["ALATRADEFRAME"]("setexpand0");
-				end
-			end,
-		},
 		{	--	blz_style
 			'bool',
 			"^blz" .. SEPARATOR .. "style" .. SEPARATOR .. "(.*)" .. SEPARATOR .. "$",
@@ -764,7 +747,6 @@ do	--	SLASH
 		--	default
 		if strfind(msg, "[A-Za-z0-9]+" ) then
 			MT.Print("Invalid command: [[", msg, "]] Use: ");
-			MT.Print("  /atf setexpand on/off");
 			MT.Print("  /atf setblzstyle on/off");
 			MT.Print("  /atf setpriceinfo on/off");
 			MT.Print("  /atf setrank on/off");
