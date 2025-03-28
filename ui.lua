@@ -186,9 +186,6 @@ local T_UIDefinition = {
 	TEXTURE_MODERN_CHECK_BUTTON_BORDER = CT.TEXTUREPATH .. [[CheckButtonBorder]],
 	TEXTURE_MODERN_CHECK_BUTTON_CENTER = CT.TEXTUREPATH .. [[CheckButtonCenter]],
 
-	TEXTURE_EXPAND = CT.TEXTUREPATH .. [[ArrowRight]],
-	TEXTURE_SHRINK = CT.TEXTUREPATH .. [[ArrowLeft]],
-
 	COLOR_WHITE = { 1.0, 1.0, 1.0, 1.0, },
 
 	FrameNormalFont = SystemFont_Shadow_Med1:GetFont(),	--	"Fonts\ARKai_T.ttf"
@@ -2638,42 +2635,30 @@ end
 			Frame.RankInfoInFrame:SetText("");
 		end
 	end
-	--
-	function LT_WidgetMethod.F_Expand(Frame, expanded)
+	function LT_WidgetMethod.F_ApplyLayout(Frame)
 		local T_StyleLayout = Frame.T_StyleLayout;
-		local layout = T_StyleLayout[expanded and 'expand' or 'normal'];
 		Frame:ClearAllPoints();
-		for index = 1, #layout.anchor do
-			Frame:SetPoint(unpack(layout.anchor[index]));
+		for index = 1, #T_StyleLayout.anchor do
+			Frame:SetPoint(unpack(T_StyleLayout.anchor[index]));
 		end
-		Frame:SetSize(unpack(layout.size));
-		Frame.HookedFrame:SetSize(unpack(layout.frame_size));
+		Frame:SetSize(unpack(T_StyleLayout.size));
+		Frame.HookedFrame:SetSize(unpack(T_StyleLayout.frame_size));
 		Frame.HookedListFrame:ClearAllPoints();
-		for index = 1, #layout.list_anchor do
-			Frame.HookedListFrame:SetPoint(unpack(layout.list_anchor[index]));
+		for index = 1, #T_StyleLayout.list_anchor do
+			Frame.HookedListFrame:SetPoint(unpack(T_StyleLayout.list_anchor[index]));
 		end
-		Frame.HookedListFrame:SetSize(unpack(layout.list_size));
+		Frame.HookedListFrame:SetSize(unpack(T_StyleLayout.list_size));
 		Frame.HookedDetailFrame:ClearAllPoints();
-		for index = 1, #layout.detail_anchor do
-			Frame.HookedDetailFrame:SetPoint(unpack(layout.detail_anchor[index]));
+		for index = 1, #T_StyleLayout.detail_anchor do
+			Frame.HookedDetailFrame:SetPoint(unpack(T_StyleLayout.detail_anchor[index]));
 		end
-		Frame.HookedDetailFrame:SetSize(unpack(layout.detail_size));
+		Frame.HookedDetailFrame:SetSize(unpack(T_StyleLayout.detail_size));
 		Frame.HookedDetailFrame:UpdateScrollChildRect();
-		if expanded then
-			Frame.LineBottom:Hide();
-			Frame.HookedRankFrame:SetWidth(360);
-			SetUIPanelAttribute(Frame.HookedFrame, 'width', 684);
-			_G[T_StyleLayout.C_VariableName_NumSkillListButton] = layout.scroll_button_num;
-			Frame.F_HookedFrameUpdate();
-		else
-			Frame.LineBottom:Show();
-			Frame.HookedRankFrame:SetWidth(210);
-			SetUIPanelAttribute(Frame.HookedFrame, 'width', 353);
-			_G[T_StyleLayout.C_VariableName_NumSkillListButton] = layout.scroll_button_num;
-			for index = layout.scroll_button_num + 1, T_StyleLayout.expand.scroll_button_num do
-				Frame.T_SkillListButtons[index]:Hide();
-			end
-		end
+		Frame.LineBottom:Hide();
+		Frame.HookedRankFrame:SetWidth(360);
+		SetUIPanelAttribute(Frame.HookedFrame, 'width', 684);
+		_G[T_StyleLayout.C_VariableName_NumSkillListButton] = T_StyleLayout.scroll_button_num;
+		Frame.F_HookedFrameUpdate();
 	end
 	function LT_WidgetMethod.F_SetStyle(Frame, blz_style, loading)
 		if blz_style then
@@ -2962,8 +2947,8 @@ end
 			LT_SharedMethod.StyleModernButton(ProfitFrameCloseButton, ProfitFrameCloseButton.backup == nil, T_UIDefinition.TEXTURE_MODERN_BUTTON_CLOSE);
 		end
 	end
-	function LT_WidgetMethod.F_FixSkillList(Frame, expanded)
-		local layout = Frame.T_StyleLayout[expanded and 'expand' or 'normal'];
+	function LT_WidgetMethod.F_FixSkillList(Frame)
+		local layout = Frame.T_StyleLayout;
 		local pref = Frame.T_HookedFrameWidgets.C_SkillListButtonNamePrefix;
 		local index = layout.scroll_button_num + 1;
 		while true do
@@ -3220,14 +3205,6 @@ end
 			Frame.update = true;
 			Frame.F_Update();
 		end
-	end
-	function LT_WidgetMethod.ExpandButton_OnClick(self)
-		self.Frame:F_Expand(true);
-		VT.SET.expand = true;
-	end
-	function LT_WidgetMethod.ShrinkButton_OnClick(self)
-		self.Frame:F_Expand(false);
-		VT.SET.expand = false;
 	end
 	function LT_WidgetMethod.OverrideMinRankSlider__OnValueChanged(self, value, userInput)
 		if userInput then
@@ -4089,29 +4066,27 @@ local function LF_HookFrame(addon, meta)
 		meta.T_DisabledFunc[name] = _G[name];
 	end
 	local T_StyleLayout = meta.T_StyleLayout;
-	for _, layout in next, T_StyleLayout do
-		if layout.anchor ~= nil then
-			for index = 1, #layout.anchor do
-				local point = layout.anchor[index];
-				if point[2] == nil then
-					point[2] = Frame;
-				end
+	if T_StyleLayout.anchor ~= nil then
+		for index = 1, #T_StyleLayout.anchor do
+			local point = T_StyleLayout.anchor[index];
+			if point[2] == nil then
+				point[2] = Frame;
 			end
 		end
-		if layout.list_anchor ~= nil then
-			for index = 1, #layout.list_anchor do
-				local point = layout.list_anchor[index];
-				if point[2] == nil then
-					point[2] = Frame;
-				end
+	end
+	if T_StyleLayout.list_anchor ~= nil then
+		for index = 1, #T_StyleLayout.list_anchor do
+			local point = T_StyleLayout.list_anchor[index];
+			if point[2] == nil then
+				point[2] = Frame;
 			end
 		end
-		if layout.detail_anchor ~= nil then
-			for index = 1, #layout.detail_anchor do
-				local point = layout.detail_anchor[index];
-				if point[2] == nil then
-					point[2] = Frame;
-				end
+	end
+	if T_StyleLayout.detail_anchor ~= nil then
+		for index = 1, #T_StyleLayout.detail_anchor do
+			local point = T_StyleLayout.detail_anchor[index];
+			if point[2] == nil then
+				point[2] = Frame;
 			end
 		end
 	end
@@ -4355,7 +4330,7 @@ local function LF_HookFrame(addon, meta)
 			for index = 1, NumDisplayed do
 				T_SkillListButtons[index] = _G[T_HookedFrameWidgets.C_SkillListButtonNamePrefix .. index];
 			end
-			for index = NumDisplayed + 1, T_StyleLayout.expand.scroll_button_num do
+			for index = NumDisplayed + 1, T_StyleLayout.scroll_button_num do
 				local name = T_HookedFrameWidgets.C_SkillListButtonNamePrefix .. index;
 				local Button = _G[name] or CreateFrame('BUTTON', name, HookedFrame, T_HookedFrameWidgets.C_SkillListButtonTemplate);
 				Button:SetPoint("TOPLEFT", T_SkillListButtons[index - 1], "BOTTOMLEFT", 0, 0);
@@ -4388,7 +4363,7 @@ local function LF_HookFrame(addon, meta)
 		--
 
 		Frame.F_LayoutOnShow = LT_WidgetMethod.F_LayoutOnShow;
-		Frame.F_Expand = LT_WidgetMethod.F_Expand;
+		Frame.F_ApplyLayout = LT_WidgetMethod.F_ApplyLayout;
 		Frame.F_FixSkillList = LT_WidgetMethod.F_FixSkillList;
 		Frame.F_SetStyle = LT_WidgetMethod.F_SetStyle;
 		if meta.T_ToggleOnSkill == nil then
@@ -4772,8 +4747,8 @@ local function LF_FrameApplySetting(Frame)
 	--
 	Frame.TabFrame:F_Update();
 	Frame.PortraitButton:F_Update();
-	Frame:F_Expand(VT.SET.expand);
-	Frame:F_FixSkillList(VT.SET.expand);
+	Frame:F_ApplyLayout();
+	Frame:F_FixSkillList();
 	Frame:F_SetStyle(VT.SET.blz_style, true);
 	if VT.SET.show_call then
 		Frame.ToggleButton:Show();
@@ -4860,7 +4835,6 @@ local function LF_AddOnCallback_Blizzard_TradeSkillUI(addon)
 		local TradeSkillCancelButton = _G.TradeSkillCancelButton;
 
 		local TradeSkillCollapseAllButton = _G.TradeSkillCollapseAllButton;
-		local TradeSkillExpandButtonFrame = _G.TradeSkillExpandButtonFrame;
 		local TradeSkillSubClassDropDown = _G.TradeSkillSubClassDropDown or _G.TradeSkillSubClassDropdown;
 		local TradeSkillSubClassDropDownButton = _G.TradeSkillSubClassDropDownButton or _G.TradeSkillSubClassDropdownButton or (TradeSkillSubClassDropDown and TradeSkillSubClassDropDown.Arrow) or nil;
 		local TradeSkillInvSlotDropDown = _G.TradeSkillInvSlotDropDown or _G.TradeSkillInvSlotDropdown;
@@ -4882,39 +4856,20 @@ local function LF_AddOnCallback_Blizzard_TradeSkillUI(addon)
 		HookedRankFrame = TradeSkillRankFrame,
 		HookedPortrait = TradeSkillFramePortrait,
 		T_StyleLayout = {
-			normal = {
-				frame_size = { 384, 512, },
-				anchor = {
-					{ "TOPLEFT", TradeSkillFrame, "TOPLEFT", 18, -68, },
-					-- { "BOTTOMRIGHT", TradeSkillFrame, "TOPRIGHT", -38, -230, },
-				},
-				size = { 328, 156, },
-				list_anchor = {
-					{ "TOPLEFT", TradeSkillFrame, "TOPLEFT", 22, -96, },
-				},
-				list_size = { 298, 128, },
-				scroll_button_num = 8,
-				detail_anchor = {
-					{ "TOPLEFT", TradeSkillFrame, "TOPLEFT", 22, -234, },
-				},
-				detail_size = { 298, 176 },
+			frame_size = { 715, 650, },
+			anchor = {
+				{ "TOPLEFT", TradeSkillFrame, "TOPLEFT", 18, -68, },
 			},
-			expand = {
-				frame_size = { 715, 650, },
-				anchor = {
-					{ "TOPLEFT", TradeSkillFrame, "TOPLEFT", 18, -68, },
-				},
-				size = { 328, 510, },
-				list_anchor = {
-					{ "TOPLEFT", TradeSkillFrame, "TOPLEFT", 22, -96, },
-				},
-				list_size = { 298, 30 * 16, },
-				scroll_button_num = 30,
-				detail_anchor = {
-					{ "TOPLEFT", nil, "TOPRIGHT", 2, -28, },
-				},
-				detail_size = { 328, 480, },
+			size = { 328, 510, },
+			list_anchor = {
+				{ "TOPLEFT", TradeSkillFrame, "TOPLEFT", 22, -96, },
 			},
+			list_size = { 298, 30 * 16, },
+			scroll_button_num = 30,
+			detail_anchor = {
+				{ "TOPLEFT", nil, "TOPRIGHT", 2, -28, },
+			},
+			detail_size = { 328, 480, },
 			C_VariableName_NumSkillListButton = "TRADE_SKILLS_DISPLAYED",
 		},
 		Widget_AnchorTop = TradeSkillFrameCloseButton,
@@ -5077,7 +5032,6 @@ local function LF_AddOnCallback_Blizzard_TradeSkillUI(addon)
 		TradeSkillFrameAvailableFilterCheckButton:ClearAllPoints();
 		TradeSkillFrameAvailableFilterCheckButton:SetPoint("TOPLEFT", TradeSkillFrame, "TOPLEFT", 80, -40);
 	end
-	TradeSkillExpandButtonFrame:Hide();
 	--
 	if CT.VGT3X then
 		local ENCHANT_FILTER = l10n.ENCHANT_FILTER;
@@ -5244,39 +5198,20 @@ local function LF_AddOnCallback_Blizzard_CraftUI(addon)
 		HookedRankFrame = CraftRankFrame,
 		HookedPortrait = CraftFramePortrait,
 		T_StyleLayout = {
-			normal = {
-				frame_size = { 384, 512, },
-				anchor = {
-					{ "TOPLEFT", CraftFrame, "TOPLEFT", 18, -68, },
-					-- { "BOTTOMRIGHT", CraftFrame, "TOPRIGHT", -38, -230, },
-				},
-				size = { 328, 156, },
-				list_anchor = {
-					{ "TOPLEFT", CraftFrame, "TOPLEFT", 22, -96, },
-				},
-				list_size = { 298, 128, },
-				scroll_button_num = 8,
-				detail_anchor = {
-					{ "TOPLEFT", CraftFrame, "TOPLEFT", 22, -234, },
-				},
-				detail_size = { 298, 176 },
+			frame_size = { 715, 512, },
+			anchor = {
+				{ "TOPLEFT", CraftFrame, "TOPLEFT", 18, -68, },
 			},
-			expand = {
-				frame_size = { 715, 512, },
-				anchor = {
-					{ "TOPLEFT", CraftFrame, "TOPLEFT", 18, -68, },
-				},
-				size = { 328, 366, },
-				list_anchor = {
-					{ "TOPLEFT", CraftFrame, "TOPLEFT", 22, -96, },
-				},
-				list_size = { 298, 21 * 16, },
-				scroll_button_num = 21,
-				detail_anchor = {
-					{ "TOPLEFT", nil, "TOPRIGHT", 2, -4, },
-				},
-				detail_size = { 328, 318, },
+			size = { 328, 366, },
+			list_anchor = {
+				{ "TOPLEFT", CraftFrame, "TOPLEFT", 22, -96, },
 			},
+			list_size = { 298, 21 * 16, },
+			scroll_button_num = 21,
+			detail_anchor = {
+				{ "TOPLEFT", nil, "TOPRIGHT", 2, -4, },
+			},
+			detail_size = { 328, 318, },
 			C_VariableName_NumSkillListButton = "CRAFTS_DISPLAYED",
 		},
 		Widget_AnchorTop = CraftFrameCloseButton,
@@ -7131,24 +7066,14 @@ end
 	function MT.RefreshConfigFrame()
 		VT.UIFrames["CONFIG"]:F_Refresh();
 	end
-	function MT.ToggleFrameExpand(val)
-		local TFrame = VT.UIFrames["BLIZZARD_TRADESKILLUI"];
-		if TFrame ~= nil then
-			TFrame:F_Expand(val);
-		end
-		local CFrame = VT.UIFrames["BLIZZARD_CRAFTUI"];
-		if CFrame ~= nil then
-			CFrame:F_Expand(val);
-		end
-	end
 	function MT.FrameFixSkillList()
 		local TFrame = VT.UIFrames["BLIZZARD_TRADESKILLUI"];
 		if TFrame ~= nil then
-			TFrame:F_FixSkillList(VT.SET.expand);
+			TFrame:F_FixSkillList();
 		end
 		local CFrame = VT.UIFrames["BLIZZARD_CRAFTUI"];
 		if CFrame ~= nil then
-			CFrame:F_FixSkillList(VT.SET.expand);
+			CFrame:F_FixSkillList();
 		end
 	end
 	function MT.ToggleFrameRankInfo(val)
@@ -7193,7 +7118,7 @@ function F.SKILL_LINES_CHANGED_Alt()
 		end
 	end
 	for index = 1, GetNumSkillLines() do
-		local pname, header, expanded, cur_rank, _, _, max_rank  = GetSkillLineInfo(index);
+		local pname, header, ed, cur_rank, _, _, max_rank  = GetSkillLineInfo(index);
 		if not header then
 			local pid = DataAgent.get_pid_by_pname(pname);
 			if pid ~= nil then

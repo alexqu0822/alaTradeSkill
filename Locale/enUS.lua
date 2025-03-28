@@ -461,7 +461,6 @@ l10n.ITEM_EQUIP_LOC = {
 l10n["EXPLORER_CLEAR_FILTER"] = "|cff00ff00Clear|r";
 --
 l10n.SLASH_NOTE = {
-	["expand"] = "Expand frame",
 	["blz_style"] = "Blizzard style",
 	["bg_color"] = "Click to set background color",
 	["show_tradeskill_frame_price_info"] = "Show price info in tradeskill frame",
