@@ -2660,16 +2660,12 @@ end
 		Frame.HookedDetailFrame:SetSize(unpack(layout.detail_size));
 		Frame.HookedDetailFrame:UpdateScrollChildRect();
 		if expanded then
-			Frame.ExpandButton:Hide();
-			Frame.ShrinkButton:Show();
 			Frame.LineBottom:Hide();
 			Frame.HookedRankFrame:SetWidth(360);
 			SetUIPanelAttribute(Frame.HookedFrame, 'width', 684);
 			_G[T_StyleLayout.C_VariableName_NumSkillListButton] = layout.scroll_button_num;
 			Frame.F_HookedFrameUpdate();
 		else
-			Frame.ExpandButton:Show();
-			Frame.ShrinkButton:Hide();
 			Frame.LineBottom:Show();
 			Frame.HookedRankFrame:SetWidth(210);
 			SetUIPanelAttribute(Frame.HookedFrame, 'width', 353);
@@ -2730,10 +2726,6 @@ end
 			LineTop:SetTexture([[Interface\Dialogframe\UI-Dialogbox-Divider]], "MIRROR");
 			LineTop:SetTexCoord(4 / 256, 188 / 256, 5 / 32, 13 / 32);
 			LineTop:SetHeight(2);
-			local LineMiddle = Frame.LineMiddle;
-			LineMiddle:SetTexture([[Interface\Dialogframe\UI-Dialogbox-Divider]], "MIRROR");
-			LineMiddle:SetTexCoord(4 / 256, 188 / 256, 5 / 32, 13 / 32);
-			LineMiddle:SetHeight(2);
 			local LineBottom = Frame.LineBottom;
 			LineBottom:SetTexture([[Interface\Dialogframe\UI-Dialogbox-Divider]], "MIRROR");
 			LineBottom:SetTexCoord(4 / 256, 188 / 256, 5 / 32, 13 / 32);
@@ -2845,9 +2837,6 @@ end
 			local LineTop = Frame.LineTop;
 			LineTop:SetColorTexture(unpack(T_UIDefinition.ModernDividerColor));
 			LineTop:SetHeight(1);
-			local LineMiddle = Frame.LineMiddle;
-			LineMiddle:SetColorTexture(unpack(T_UIDefinition.ModernDividerColor));
-			LineMiddle:SetHeight(1);
 			local LineBottom = Frame.LineBottom;
 			LineBottom:SetColorTexture(unpack(T_UIDefinition.ModernDividerColor));
 			LineBottom:SetHeight(1);
@@ -2993,7 +2982,7 @@ end
 		local T_HookedFrameButtons = T_HookedFrameWidgets.T_HookedFrameButtons;
 		T_HookedFrameButtons.CancelButton:SetSize(72, 18);
 		T_HookedFrameButtons.CancelButton:ClearAllPoints();
-		T_HookedFrameButtons.CancelButton:SetPoint("TOPRIGHT", -42, -415);
+		T_HookedFrameButtons.CancelButton:SetPoint("TOPRIGHT", -42, -555);
 		T_HookedFrameButtons.CreateButton:SetSize(72, 18);
 		T_HookedFrameButtons.CreateButton:ClearAllPoints();
 		T_HookedFrameButtons.CreateButton:SetPoint("RIGHT", T_HookedFrameButtons.CancelButton, "LEFT", -7, 0);
@@ -4180,27 +4169,6 @@ local function LF_HookFrame(addon, meta)
 			-- ToggleButton:SetScript("OnLeave", Info_OnLeave);
 			Frame.ToggleButton = ToggleButton;
 			ToggleButton.Frame = Frame;
-
-			local ExpandButton = CreateFrame('BUTTON', nil, HookedFrame);
-			ExpandButton:SetSize(16, 12);
-			ExpandButton:SetNormalTexture(T_UIDefinition.TEXTURE_EXPAND);
-			ExpandButton:SetPushedTexture(T_UIDefinition.TEXTURE_EXPAND);
-			ExpandButton:SetHighlightTexture(T_UIDefinition.TEXTURE_EXPAND);
-			ExpandButton:SetPoint("CENTER", Frame, "TOPRIGHT", 4, -358);
-			ExpandButton:SetFrameLevel(127);
-			ExpandButton:SetScript("OnClick", LT_WidgetMethod.ExpandButton_OnClick);
-			Frame.ExpandButton = ExpandButton;
-			ExpandButton.Frame = Frame;
-			local ShrinkButton = CreateFrame('BUTTON', nil, HookedFrame);
-			ShrinkButton:SetSize(16, 12);
-			ShrinkButton:SetNormalTexture(T_UIDefinition.TEXTURE_SHRINK);
-			ShrinkButton:SetPushedTexture(T_UIDefinition.TEXTURE_SHRINK);
-			ShrinkButton:SetHighlightTexture(T_UIDefinition.TEXTURE_SHRINK);
-			ShrinkButton:SetPoint("CENTER", Frame, "TOPRIGHT", 4, -358);
-			ShrinkButton:SetFrameLevel(127);
-			ShrinkButton:SetScript("OnClick", LT_WidgetMethod.ShrinkButton_OnClick);
-			Frame.ShrinkButton = ShrinkButton;
-			ShrinkButton.Frame = Frame;
 		--	DetailFrame
 			if Frame.HookedDetailBar then
 				LT_SharedMethod.ModifyBLZScrollBar(Frame.HookedDetailBar);
@@ -4291,43 +4259,44 @@ local function LF_HookFrame(addon, meta)
 				if InvSlotDropDown ~= nil then
 					LT_SharedMethod.RelayoutDropDownMenu(InvSlotDropDown);
 					InvSlotDropDown:ClearAllPoints();
-					-- InvSlotDropDown:SetPoint("RIGHT", HookedFrame, "TOPLEFT", 342 / 0.9, -81 / 0.9);
-					if T_HookedFrameEditboxes.SearchInputBox then
-						InvSlotDropDown:SetPoint("RIGHT", HookedFrame, "TOPRIGHT", -35 / 0.9, -81 / 0.9);
-					else
-						InvSlotDropDown:SetPoint("RIGHT", HookedFrame, "TOPRIGHT", -35 / 0.9, -70 / 0.9);
-					end
+					InvSlotDropDown:SetPoint("RIGHT", HookedFrame, "TOPRIGHT", -40, -80);
 				end
 				local SubClassDropDown = T_HookedFrameDropdowns.SubClassDropDown;
 				if SubClassDropDown ~= nil then
 					LT_SharedMethod.RelayoutDropDownMenu(SubClassDropDown);
 					SubClassDropDown:ClearAllPoints();
-					SubClassDropDown:SetPoint("RIGHT", InvSlotDropDown, "LEFT", -4 / 0.9, 0);
+					SubClassDropDown:SetPoint("RIGHT", InvSlotDropDown, "LEFT", -4, 0);
 				end
 			end
 			T_HookedFrameButtons.CancelButton:SetSize(72, 18);
 			T_HookedFrameButtons.CancelButton:ClearAllPoints();
-			T_HookedFrameButtons.CancelButton:SetPoint("TOPRIGHT", -42, -415);
+			T_HookedFrameButtons.CancelButton:SetPoint("TOPRIGHT", -42, -555);
 			T_HookedFrameButtons.CreateButton:SetSize(72, 18);
 			T_HookedFrameButtons.CreateButton:ClearAllPoints();
 			T_HookedFrameButtons.CreateButton:SetPoint("RIGHT", T_HookedFrameButtons.CancelButton, "LEFT", -7, 0);
 			T_HookedFrameButtons.CloseButton:ClearAllPoints();
 			T_HookedFrameButtons.CloseButton:SetPoint("CENTER", HookedFrame, "TOPRIGHT", -51, -24);
-			if T_HookedFrameEditboxes ~= nil and T_HookedFrameEditboxes.InputBox then
-				local Left = _G[T_HookedFrameEditboxes.InputBox:GetName() .. "Left"];
-				Left:ClearAllPoints();
-				Left:SetPoint("LEFT", 0, 0);
-				T_HookedFrameEditboxes.InputBox:SetTextInsets(3, 0, 0, 0);
-				T_HookedFrameButtons.CreateAllButton:SetSize(72, 18);
-				T_HookedFrameButtons.IncrementButton:ClearAllPoints();
-				T_HookedFrameEditboxes.InputBox:ClearAllPoints();
-				T_HookedFrameButtons.DecrementButton:ClearAllPoints();
-				T_HookedFrameButtons.CreateAllButton:ClearAllPoints();
-				T_HookedFrameButtons.IncrementButton:SetPoint("CENTER", T_HookedFrameButtons.CreateButton, "LEFT", -16, 0);
-				T_HookedFrameEditboxes.InputBox:SetHeight(18);
-				T_HookedFrameEditboxes.InputBox:SetPoint("RIGHT", T_HookedFrameButtons.IncrementButton, "CENTER", -16, 0);
-				T_HookedFrameButtons.DecrementButton:SetPoint("CENTER", T_HookedFrameEditboxes.InputBox, "LEFT", -16, 0);
-				T_HookedFrameButtons.CreateAllButton:SetPoint("RIGHT", T_HookedFrameButtons.DecrementButton, "LEFT", -7, 0);
+			if T_HookedFrameEditboxes ~= nil then
+				if T_HookedFrameEditboxes.InputBox then
+					local Left = _G[T_HookedFrameEditboxes.InputBox:GetName() .. "Left"];
+					Left:ClearAllPoints();
+					Left:SetPoint("LEFT", 0, 0);
+					T_HookedFrameEditboxes.InputBox:SetTextInsets(3, 0, 0, 0);
+					T_HookedFrameButtons.CreateAllButton:SetSize(72, 18);
+					T_HookedFrameButtons.IncrementButton:ClearAllPoints();
+					T_HookedFrameEditboxes.InputBox:ClearAllPoints();
+					T_HookedFrameButtons.DecrementButton:ClearAllPoints();
+					T_HookedFrameButtons.CreateAllButton:ClearAllPoints();
+					T_HookedFrameButtons.IncrementButton:SetPoint("CENTER", T_HookedFrameButtons.CreateButton, "LEFT", -16, 0);
+					T_HookedFrameEditboxes.InputBox:SetHeight(18);
+					T_HookedFrameEditboxes.InputBox:SetPoint("RIGHT", T_HookedFrameButtons.IncrementButton, "CENTER", -16, 0);
+					T_HookedFrameButtons.DecrementButton:SetPoint("CENTER", T_HookedFrameEditboxes.InputBox, "LEFT", -16, 0);
+					T_HookedFrameButtons.CreateAllButton:SetPoint("RIGHT", T_HookedFrameButtons.DecrementButton, "LEFT", -7, 0);
+				end
+				if T_HookedFrameEditboxes.SearchInputBox then
+					T_HookedFrameEditboxes.SearchInputBox:ClearAllPoints()
+					T_HookedFrameEditboxes.SearchInputBox:SetPoint("LEFT", meta.HookedRankFrame, "RIGHT", 10, 0)
+				end
 			end
 			local CollapseAllButton = T_HookedFrameWidgets.CollapseAllButton;
 			if CollapseAllButton ~= nil then
@@ -4337,7 +4306,8 @@ local function LF_HookFrame(addon, meta)
 			end
 			local HookedRankFrame = meta.HookedRankFrame;
 			HookedRankFrame:ClearAllPoints();
-			HookedRankFrame:SetPoint("TOP", 16, -42);
+			HookedRankFrame:SetPoint("TOP", 0, -42);
+			HookedRankFrame:SetHeight(22)
 			local HookedRankFrameName = HookedRankFrame:GetName();
 			local HookedRankFrameSkillName = _G[HookedRankFrameName .. "SkillName"];
 			if HookedRankFrameSkillName ~= nil then HookedRankFrameSkillName:Hide(); end
@@ -4369,15 +4339,6 @@ local function LF_HookFrame(addon, meta)
 			LineTop:SetPoint("RIGHT", -2, 0);
 			LineTop:SetPoint("BOTTOM", HookedFrame, "TOP", 0, -38);
 			Frame.LineTop = LineTop;
-
-			local LineMiddle = Background:CreateTexture(nil, "BACKGROUND");
-			LineMiddle:SetDrawLayer("BACKGROUND", 7);
-			LineMiddle:SetHorizTile(true);
-			LineMiddle:SetHeight(4);
-			LineMiddle:SetPoint("LEFT", 2, 0);
-			LineMiddle:SetPoint("RIGHT", -2, 0);
-			LineMiddle:SetPoint("TOP", HookedFrame, "TOP", 0, -61);
-			Frame.LineMiddle = LineMiddle;
 
 			local LineBottom = Background:CreateTexture(nil, "BACKGROUND");
 			LineBottom:SetDrawLayer("BACKGROUND", 7);
@@ -4673,7 +4634,15 @@ local function LF_HookFrame(addon, meta)
 		Frame.F_HideSetFrame = LT_WidgetMethod.F_HideSetFrame;
 		Frame.F_RefreshSetFrame = LT_WidgetMethod.F_RefreshSetFrame;
 	end
-
+	do
+		local regions = { Frame.HookedDetailChild:GetRegions() }
+		for index = 1, #regions do
+			local obj = regions[index]
+			if strupper(obj:GetObjectType()) == "TEXTURE" then
+				obj:Hide()
+			end
+		end
+	end
 	do	--	InfoInFrame
 		local RankInfoInFrame = Frame.HookedDetailChild:CreateFontString(nil, "OVERLAY");
 		RankInfoInFrame:SetFont(T_UIDefinition.FrameNormalFont, T_UIDefinition.FrameNormalFontSize, T_UIDefinition.FrameNormalFontFlag);
@@ -4717,65 +4686,6 @@ local function LF_HookFrame(addon, meta)
 		Frame.F_UpdatePriceInfo = LT_WidgetMethod.F_UpdatePriceInfo;
 		Frame.F_UpdateRankInfo = LT_WidgetMethod.F_UpdateRankInfo;
 	end
-
-	do	--	Select History
-		local HookedDetailFrame = meta.HookedDetailFrame;
-
-		local HistoryFrame = CreateFrame('FRAME', nil, HookedDetailFrame);
-		HistoryFrame:SetSize(32, 20);
-		HistoryFrame:SetPoint("TOPRIGHT", HookedDetailFrame, "TOPRIGHT", 4, -2);
-		Frame.HistoryFrame = HistoryFrame;
-		HistoryFrame.Frame = Frame;
-
-		local PrevButton = CreateFrame('BUTTON', nil, HistoryFrame);
-		PrevButton:SetSize(12, 8);
-		PrevButton:SetNormalTexture(T_UIDefinition.TEXTURE_SHRINK);
-		PrevButton:SetPushedTexture(T_UIDefinition.TEXTURE_SHRINK);
-		PrevButton:SetHighlightTexture(T_UIDefinition.TEXTURE_SHRINK);
-		PrevButton:SetPoint("LEFT", HistoryFrame, "LEFT", 2, 0);
-		PrevButton:SetFrameLevel(127);
-		PrevButton:SetScript("OnClick", LT_WidgetMethod.PrevButton_OnClick);
-		PrevButton:SetScript("OnEnter", LT_WidgetMethod.PrevButton_OnEnter);
-		PrevButton:SetScript("OnLeave", LT_SharedMethod.ButtonInfoOnLeave);
-		HistoryFrame.PrevButton = PrevButton;
-		PrevButton.HistoryFrame = HistoryFrame;
-		PrevButton.Frame = Frame;
-		local NextButton = CreateFrame('BUTTON', nil, HistoryFrame);
-		NextButton:SetSize(12, 8);
-		NextButton:SetNormalTexture(T_UIDefinition.TEXTURE_EXPAND);
-		NextButton:SetPushedTexture(T_UIDefinition.TEXTURE_EXPAND);
-		NextButton:SetHighlightTexture(T_UIDefinition.TEXTURE_EXPAND);
-		NextButton:SetPoint("RIGHT", HistoryFrame, "RIGHT", -2, 0);
-		NextButton:SetFrameLevel(127);
-		NextButton:SetScript("OnClick", LT_WidgetMethod.NextButton_OnClick);
-		NextButton:SetScript("OnEnter", LT_WidgetMethod.NextButton_OnEnter);
-		NextButton:SetScript("OnLeave", LT_SharedMethod.ButtonInfoOnLeave);
-		HistoryFrame.NextButton = NextButton;
-		NextButton.HistoryFrame = HistoryFrame;
-		NextButton.Frame = Frame;
-
-		Frame.T_SelectionHistory = {  };
-		Frame.T_OnSelection[#Frame.T_OnSelection + 1] = function()
-			local sid = Frame.selected_sid;
-			if sid ~= nil then
-				local pid = DataAgent.get_pid_by_sid(sid);
-				local History = Frame.T_SelectionHistory[pid];
-				-- MT.Debug("Selection", pid, sid);
-				if History == nil then
-					Frame.T_SelectionHistory[pid] = {
-						pos = 1,
-						top = 1,
-						sid,
-					};
-				elseif History[History.pos] ~= sid then
-					History.pos = History.pos + 1;
-					History.top = History.pos;
-					History[History.pos] = sid;
-				end
-			end
-		end
-	end
-
 	do	--	Craft Queue
 		if Frame.IsQueueEnabled then
 			local ToggleButton = CreateFrame('BUTTON', nil, Frame, "UIPanelButtonTemplate");
@@ -4990,20 +4900,20 @@ local function LF_AddOnCallback_Blizzard_TradeSkillUI(addon)
 				detail_size = { 298, 176 },
 			},
 			expand = {
-				frame_size = { 715, 512, },
+				frame_size = { 715, 650, },
 				anchor = {
 					{ "TOPLEFT", TradeSkillFrame, "TOPLEFT", 18, -68, },
 				},
-				size = { 328, 366, },
+				size = { 328, 510, },
 				list_anchor = {
 					{ "TOPLEFT", TradeSkillFrame, "TOPLEFT", 22, -96, },
 				},
-				list_size = { 298, 21 * 16, },
-				scroll_button_num = 21,
+				list_size = { 298, 30 * 16, },
+				scroll_button_num = 30,
 				detail_anchor = {
-					{ "TOPLEFT", nil, "TOPRIGHT", 2, -4, },
+					{ "TOPLEFT", nil, "TOPRIGHT", 2, -28, },
 				},
-				detail_size = { 328, 318, },
+				detail_size = { 328, 480, },
 			},
 			C_VariableName_NumSkillListButton = "TRADE_SKILLS_DISPLAYED",
 		},
@@ -5165,7 +5075,7 @@ local function LF_AddOnCallback_Blizzard_TradeSkillUI(addon)
 	--
 	if CT.VGT2X then
 		TradeSkillFrameAvailableFilterCheckButton:ClearAllPoints();
-		TradeSkillFrameAvailableFilterCheckButton:SetPoint("TOPLEFT", TradeSkillFrame, "TOPLEFT", 68, -56);
+		TradeSkillFrameAvailableFilterCheckButton:SetPoint("TOPLEFT", TradeSkillFrame, "TOPLEFT", 80, -40);
 	end
 	TradeSkillExpandButtonFrame:Hide();
 	--
