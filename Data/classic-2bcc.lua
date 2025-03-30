@@ -4865,6 +4865,7 @@ DataAgent.T_RaceBonus = {
 	},
 };
 
+DataAgent.T_SkillTools = {  };
 
 if DataAgent.CURPHASE >= 4 then
 	T_Recipe_Data[47280][index_cid] = 191061;

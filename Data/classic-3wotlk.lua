@@ -7958,6 +7958,12 @@ DataAgent.T_RaceBonus = {
 	},
 };
 
+DataAgent.T_SkillTools = {
+	[56001] = GetMinimapZoneText,	--	月影布
+	[56002] = GetMinimapZoneText,	--	乌纹布
+	[56003] = GetMinimapZoneText,	--	法纹布
+};
+
 T_Recipe_Data[15628][index_spec] = 20222;	--	地精工程学续费礼包开出
 T_Recipe_Data[15633][index_spec] = 20219;	--	侏儒工程学续费礼包开出
 

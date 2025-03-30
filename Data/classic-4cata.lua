@@ -8953,6 +8953,8 @@ DataAgent.T_RaceBonus = {
 	},
 };
 
+DataAgent.T_SkillTools = {  };
+
 T_Recipe_Data[15628][index_spec] = 20222;	--	地精工程学续费礼包开出
 T_Recipe_Data[15633][index_spec] = 20219;	--	侏儒工程学续费礼包开出
 

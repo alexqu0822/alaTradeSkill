@@ -41,10 +41,14 @@ local DT = __private.DT;
 	local GetTime = GetTime;
 	local GetServerTime = GetServerTime;
 
+	local GetBestMapForUnit = C_Map.GetBestMapForUnit;
+	local UnitPosition = UnitPosition;
+	local IsInInstance = IsInInstance;
 	local GetNumSkillLines = GetNumSkillLines;
 	local GetSkillLineInfo = GetSkillLineInfo;
 	-- local IsSpellKnown = IsSpellKnown;
 	local GetSpellInfo = GetSpellInfo;
+	local GetSpellCooldown = GetSpellCooldown;
 	local GetItemInfo = GetItemInfo;
 	local GetItemCount = GetItemCount;
 	local GetTradeTargetItemLink = GetTradeTargetItemLink;
@@ -237,7 +241,7 @@ local T_UIDefinition = {
 	ExplorerWidth = 360,
 	ExplorerHeight = 480,
 
-	QueueFrameWidth = 256,
+	QueueFrameWidth = 300,
 	QueueFrameHeight = 256,
 
 	CharListButtonHeight = 20,
@@ -813,6 +817,24 @@ end
 		end
 		avl = avl - avl % 1.0;
 		return avl;
+	end
+	function LT_SharedMethod.GetPositionKey()
+		--	铁毡，月亮井等无法通过api获取可用状态
+		--	碧蓝巨龙圣地等可以通过地区检测判定
+		local map = GetBestMapForUnit('player');
+		local y, x, z;
+		if IsInInstance() then
+			y, x, z = UnitPosition('player');
+			x = x * 0.5 + 0.5;
+			x = x - x % 1.0;
+			y = y * 0.5 + 0.5;
+			y = y - y % 1.0;
+			z = z * 0.5 + 0.5;
+			z = z - z % 1.0;
+		else
+			y, x, z = 0, 0, 0;
+		end
+		return format("%08d%08d%08d%08d", map, x, y, z);
 	end
 	--	obj style
 		function LT_SharedMethod.WidgetHidePermanently(obj)
@@ -2328,10 +2350,20 @@ end
 		local Title = Button:CreateFontString(nil, "OVERLAY");
 		Title:SetFont(T_UIDefinition.FrameNormalFont, T_UIDefinition.FrameNormalFontSize, T_UIDefinition.FrameNormalFontFlag);
 		Title:SetPoint("LEFT", Icon, "RIGHT", 2, 0);
-		-- Title:SetWidth(160);
+		Title:SetWidth(160);
 		Title:SetMaxLines(1);
 		Title:SetJustifyH("LEFT");
 		Button.Title = Title;
+
+		local CD = Button:CreateFontString(nil, "OVERLAY");
+		CD:SetFont(T_UIDefinition.FrameNormalFont, T_UIDefinition.FrameNormalFontSize - 3, T_UIDefinition.FrameNormalFontFlag);
+		CD:SetPoint("LEFT", Title, "RIGHT", 2, 0);
+		CD:SetMaxLines(1);
+		CD:SetJustifyH("LEFT");
+		CD:SetText("CD");
+		CD:SetTextColor(1.0, 0.25, 0.0, 1.0);
+		CD:Hide();
+		Button.CD = CD;
 
 		local Del = CreateFrame('BUTTON', nil, Button);
 		Del:SetSize(buttonHeight - 4, buttonHeight - 4);
@@ -2365,7 +2397,7 @@ end
 
 		local Num = CreateFrame('EDITBOX', nil, Button);
 		Num:SetFont(T_UIDefinition.FrameNormalFont, T_UIDefinition.FrameNormalFontSize - 3, T_UIDefinition.FrameNormalFontFlag);
-		Num:SetWidth(24);
+		Num:SetWidth(40);
 		Num:SetHeight(buttonHeight - 4);
 		Num:SetPoint("RIGHT", Inc, "LEFT", -2, 0);
 		Num:SetAutoFocus(false);
@@ -2375,7 +2407,7 @@ end
 		Num:SetNumeric(true);
 		Num:ClearFocus();
 		Num:SetScript("OnEnterPressed", LT_WidgetMethod.QueueButtonNum_OnEnterPressed);
-		Num:SetScript("OnEscapePressed", Num.ClearFocus);
+		Num:SetScript("OnEscapePressed", LT_WidgetMethod.QueueButtonNum_OnEscapePressed);
 		Button.Num = Num;
 		Num.Button = Button;
 
@@ -2458,6 +2490,12 @@ end
 			end
 			Button.Icon:SetTexture(icon);
 			Button.Title:SetText(DataAgent.spell_name_s(sid));
+			local start, duration, enabled, modRate = GetSpellCooldown(sid);
+			if start == nil or start <= 0 then
+				Button.CD:Hide();
+			else
+				Button.CD:Show();
+			end
 			Button.Num:SetText(num);
 			if quality then
 				local r, g, b, code = GetItemQualityColor(quality);
@@ -3296,7 +3334,7 @@ end
 	end
 	function LT_WidgetMethod.Tab_OnClick(self)
 		local pname = self.pname;
-		if pname ~= nil and not DataAgent.is_name_same_skill(pname, Frame.F_GetSkillName()) then
+		if pname ~= nil and not DataAgent.is_name_same_skill(pname, self.Frame.F_GetSkillName()) then
 			if pname == '@explorer' then
 				MT.ToggleFrame("EXPLORER");
 			elseif pname == '@config' then
@@ -3790,30 +3828,52 @@ end
 				tremove(todo, index);
 			end
 		end
+		local t = QueueFrame.BlackPos[LT_SharedMethod.GetPositionKey()];
 		for index = 1, #list do
 			if todo[index] > 0 then
 				local sid = list[index];
 				local pid = DataAgent.get_pid_by_sid(sid);
 				if LT_SharedMethod.IsSkillLearned(pid) then
-					local available = LT_SharedMethod.GetAvaiableCraftCount(sid, todo[index]);
-					if available > 0 then
-						if pid ~= DataAgent.get_pid_by_pname(Frame.F_GetSkillName()) then
-							-- MT.Debug("Switch", pid);
-							CastSpellByName(DataAgent.get_pname_by_pid(pid));
+					local start, duration, enabled, modRate = GetSpellCooldown(sid);
+					if start == nil or start <= 0 then
+						local available = LT_SharedMethod.GetAvaiableCraftCount(sid, todo[index]);
+						if available > 0 then
+							local tools = { Frame.F_GetRecipeTools(sid) };
+							if tools[1] ~= nil and (t == nil or t[sid] == nil) then
+								local check = DataAgent.T_SkillTools[sid];
+								if check ~= nil then
+									if tools[1] ~= check() then
+										tools = false;
+									end
+								else
+									for i = 1, #tools, 2 do
+										if not tools[i + 1] then
+											tools = false;
+											break;
+										end
+									end
+								end
+							end
+							if tools ~= false then
+								if pid ~= DataAgent.get_pid_by_pname(Frame.F_GetSkillName()) then
+									-- MT.Debug("Switch", pid);
+									CastSpellByName(DataAgent.get_pname_by_pid(pid));
+								end
+								-- MT.Debug("avl", sid, available, Frame.IsDirty);
+								if Frame.IsDirty then
+									-- return QueueFrame.F_ScheduleCraftQueue();	--	DoTradeSkill needs hardware event.
+									QueueFrame.Focus:Hide();
+									return;
+								end
+								QueueFrame.ScrollFrame:HandleButtonByDataIndex(index, QueueFrame.PlaceFocus);
+								QueueFrame.Focus.Num:SetText(available);
+								QueueFrame.CraftingID = sid;
+								QueueFrame.IsCrafting = true;
+								LT_SharedMethod.SelectRecipe(Frame, sid);
+								Frame.F_DoTradeCraft(Frame.hash[sid], available);
+								return true;
+							end
 						end
-						-- MT.Debug("avl", sid, available, Frame.IsDirty);
-						if Frame.IsDirty then
-							-- return QueueFrame.F_ScheduleCraftQueue();	--	DoTradeSkill needs hardware event.
-							QueueFrame.Focus:Hide();
-							return;
-						end
-						QueueFrame.ScrollFrame:HandleButtonByDataIndex(index, QueueFrame.PlaceFocus);
-						QueueFrame.Focus.Num:SetText(available);
-						LT_SharedMethod.SelectRecipe(Frame, sid);
-						Frame.F_DoTradeCraft(Frame.hash[sid], available);
-						QueueFrame.CraftingID = sid;
-						QueueFrame.IsCrafting = true;
-						return true;
 					end
 				end
 			end
@@ -3893,7 +3953,43 @@ end
 			if self.CraftingID == sid then
 				self.CraftingID = nil;
 				self.IsCrafting = false;
-				QueueFrame.Focus:Hide();
+				self.Focus:Hide();
+			end
+		elseif event == "UNIT_SPELLCAST_FAILED" then
+			local unit, castID, sid = ...;
+			-- MT.Debug("FAILED", sid, self.CraftingID, self:IsShown(), self.IsCrafting);
+			if self.CraftingID == sid then
+				self.CraftingID = nil;
+				self.IsCrafting = false;
+				self.Focus:Hide();
+				local start, duration, enabled, modRate = GetSpellCooldown(sid);
+				if start == nil or start <= 0 then
+					local available = LT_SharedMethod.GetAvaiableCraftCount(sid);
+					if available > 0 then
+						local tools = { Frame.F_GetRecipeTools(sid) };
+						local check = DataAgent.T_SkillTools[sid];
+						if check ~= nil then
+							if tools[1] ~= check() then
+								return;
+							end
+						else
+							for i = 1, #tools, 2 do
+								if not tools[i + 1] then
+									return;
+								end
+							end
+						end
+					end
+				end
+				local p = T_SharedMethod.GetPositionKey();
+				local t = self.BlackPos[p];
+				if t then
+					t[sid] = true;
+				else
+					self.BlackPos[p] = {
+						[sid] = true,
+					};
+				end
 			end
 		end
 	end
@@ -3906,7 +4002,7 @@ end
 		if n ~= nil then
 			local list = VT.QUEUE.list;
 			local todo = VT.QUEUE.todo;
-			local data_index = self.Button:GetDataIndex();
+			local data_index = Button:GetDataIndex();
 			if n == 0 then
 				tremove(list, data_index);
 				tremove(todo, data_index);
@@ -3916,6 +4012,10 @@ end
 			end
 			self:ClearFocus();
 		end
+	end
+	function LT_WidgetMethod.QueueButtonNum_OnEscapePressed(self)
+		self:ClearFocus();
+		self:SetText(VT.QUEUE.todo[self.Button:GetDataIndex()]);
 	end
 	function LT_WidgetMethod.QueueButtonDel_OnClick(self)
 		local Button = self.Button;
@@ -3961,6 +4061,7 @@ end
 			todo[#todo + 1] = tonumber(QueueFrame.EditBox:GetText()) or 1;
 			QueueFrame.ScrollFrame:Update();
 		end
+		QueueFrame.EditBox:ClearFocus();
 	end
 	function LT_WidgetMethod.QueueFrameCreate_OnClick(self)
 		self.QueueFrame.F_StartCraftQueue();
@@ -5848,6 +5949,7 @@ local function LF_CreateQueueFrame()
 	QueueFrame.list = VT.QUEUE.list;
 	QueueFrame.hash = {  };
 	QueueFrame.todo = VT.QUEUE.todo;
+	QueueFrame.BlackPos = {  };
 
 	QueueFrame.F_SetStyle = LT_WidgetMethod.F_QueueFrameSetStyle;
 	-- QueueFrame.F_StartCraftQueue = LT_WidgetMethod.F_QueueFrameStartCraftQueue;
@@ -5868,6 +5970,7 @@ local function LF_CreateQueueFrame()
 
 	QueueFrame:RegisterUnitEvent("UNIT_SPELLCAST_SUCCEEDED", 'player');
 	QueueFrame:RegisterUnitEvent("UNIT_SPELLCAST_INTERRUPTED", 'player');
+	QueueFrame:RegisterUnitEvent("UNIT_SPELLCAST_FAILED", 'player');
 	QueueFrame:SetScript("OnEvent", LT_WidgetMethod.QueueFrame_OnEvent);
 
 	local Name = QueueFrame:CreateFontString(nil, "ARTWORK");
