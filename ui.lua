@@ -3844,6 +3844,7 @@ end
 				tremove(todo, index);
 			end
 		end
+		local hash = Frame.hash;
 		local t = QueueFrame.BlackPos[LT_SharedMethod.GetPositionKey()];
 		for index = 1, #list do
 			if todo[index] > 0 then
@@ -3854,7 +3855,8 @@ end
 					if start == nil or start <= 0 then
 						local available = LT_SharedMethod.GetAvaiableCraftCount(sid, todo[index]);
 						if available > 0 then
-							local tools = { Frame.F_GetRecipeTools(sid) };
+							local recipeindex = hash[sid];
+							local tools = { Frame.F_GetRecipeTools(recipeindex) };
 							if tools[1] ~= nil and (t == nil or t[sid] == nil) then
 								local check = DataAgent.T_SkillTools[sid];
 								if check ~= nil then
@@ -3886,7 +3888,7 @@ end
 								QueueFrame.CraftingID = sid;
 								QueueFrame.IsCrafting = true;
 								LT_SharedMethod.SelectRecipe(Frame, sid);
-								Frame.F_DoTradeCraft(Frame.hash[sid], available);
+								Frame.F_DoTradeCraft(recipeindex, available);
 								return true;
 							end
 						end
@@ -3983,7 +3985,8 @@ end
 				if start == nil or start <= 0 then
 					local available = LT_SharedMethod.GetAvaiableCraftCount(sid);
 					if available > 0 then
-						local tools = { Frame.F_GetRecipeTools(sid) };
+						local Frame = self.Parent;
+						local tools = { Frame.F_GetRecipeTools(Frame.hash[sid]) };
 						local check = DataAgent.T_SkillTools[sid];
 						if check ~= nil then
 							if tools[1] ~= check() then
