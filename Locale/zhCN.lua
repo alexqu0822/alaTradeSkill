@@ -217,7 +217,7 @@ l10n.ITEM_TYPE_LIST = {
 	[LE_ITEM_CLASS_REAGENT] = "材料",					--	5	Reagent Obsolete
 	[LE_ITEM_CLASS_PROJECTILE] = "弹药",				--	6	Projectile Obsolete
 	[LE_ITEM_CLASS_TRADEGOODS] = "商品",				--	7	Tradeskill
-	[LE_ITEM_CLASS_ITEM_ENHANCEMENT] = "Item Enhancement",	--	8	Item Enhancement
+	[LE_ITEM_CLASS_ITEM_ENHANCEMENT] = "物品附魔",		--	8	Item Enhancement
 	[LE_ITEM_CLASS_RECIPE] = "配方",					--	9	Recipe
 	[10] = "Money",										--	10	Money(OBSOLETE)
 	[LE_ITEM_CLASS_QUIVER] = "箭袋",					--	11	Quiver Obsolete
@@ -225,7 +225,7 @@ l10n.ITEM_TYPE_LIST = {
 	[LE_ITEM_CLASS_KEY] = "钥匙",						--	13	Key Obsolete
 	[14] = "Permanent",									--	14	Permanent(OBSOLETE)
 	[LE_ITEM_CLASS_MISCELLANEOUS] = "其它",				--	15	Miscellaneous
-	[LE_ITEM_CLASS_GLYPH] = "铭文",					--	16	Glyph
+	[LE_ITEM_CLASS_GLYPH] = "铭文",						--	16	Glyph
 	[LE_ITEM_CLASS_BATTLEPET] = "战斗宠物",				--	17	Battle Pets
 	[LE_ITEM_CLASS_WOW_TOKEN] = "WoW Token",			--	18	WoW Token
 };

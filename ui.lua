@@ -853,7 +853,7 @@ end
 				obj:_EnableMouse(true);
 			end
 		end
-		local function LF_HookALAScrollBarOnValueChanged(self, val)
+		local function LF_HookALAScrollBar_OnValueChanged(self, val)
 			val = val or self:GetValue();
 			local minVal, maxVal = self:GetMinMaxValues();
 			if minVal >= val then
@@ -879,8 +879,8 @@ end
 						if strupper(obj2:GetObjectType()) == 'TEXTURE' then
 							obj2:Hide();
 						end
-						obj:GetThumbTexture():Show();
 					end
+					obj:GetThumbTexture():Show();
 					obj:SetWidth(12);
 					obj:ClearAllPoints();
 					obj:SetPoint("TOPRIGHT", ScrollFrame, "TOPRIGHT", 0, -16);
@@ -901,11 +901,28 @@ end
 						obj:SetValue(obj:GetValue() + obj:GetValueStep());
 					end);
 					obj.ScrollDownButton = down;
-					obj:HookScript("OnValueChanged", LF_HookALAScrollBarOnValueChanged);
+					obj:HookScript("OnValueChanged", LF_HookALAScrollBar_OnValueChanged);
 					hooksecurefunc(ScrollFrame, "SetNumValue", function(self)
-						LF_HookALAScrollBarOnValueChanged(obj);
+						LF_HookALAScrollBar_OnValueChanged(obj);
 					end);
 					break;
+				end
+			end
+		end
+		local function LF_HookBLZScrollBar_UpdateThumbHeight(self)
+			local minVal, maxVal = self:GetMinMaxValues();
+			if maxVal > 0 then
+				local Thumb = self:GetThumbTexture();
+				if Thumb ~= nil then
+					local width, height = self:GetSize();
+					local th = height * height / (maxVal + height);
+					if th < width then
+						th = width;
+					elseif th > height * 0.75 then
+						th = height * 0.75;
+						th = th - th % 1.0;
+					end
+					Thumb:SetHeight(th);
 				end
 			end
 		end
@@ -926,6 +943,8 @@ end
 			ScrollBar:SetPoint("TOPRIGHT", frame, "TOPRIGHT");
 			ScrollBar:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT");
 			ScrollBar:SetWidth(12);
+			ScrollBar:HookScript("OnSizeChanged", LF_HookBLZScrollBar_UpdateThumbHeight);
+			hooksecurefunc(ScrollBar, "SetMinMaxValues", LF_HookBLZScrollBar_UpdateThumbHeight);
 			if ScrollBar.ScrollUpButton then
 				ScrollBar.ScrollUpButton:ClearAllPoints();
 				ScrollBar.ScrollUpButton:SetPoint("BOTTOMLEFT", ScrollBar, "TOPLEFT", -1, 0);
@@ -1054,14 +1073,14 @@ end
 			end
 			--
 			local bar = ScrollFrame.ScrollBar;
-			bar:SetWidth(12);
-			VT.__uireimp._SetSimpleBackdrop(bar, 0, 1, 0.0, 0.0, 0.0, 0.0, 0.25, 0.25, 0.25, 1.0);
+			bar:SetWidth(8);
+			VT.__uireimp._SetSimpleBackdrop(bar, -1, 1, 0.0, 0.0, 0.0, 0.0, 0.25, 0.25, 0.25, 1.0);
 			local thumb = bar:GetThumbTexture();
 			if thumb == nil then
 				bar:SetThumbTexture([[Interface\Buttons\UI-ScrollBar-Knob]]);
 				thumb = bar:GetThumbTexture();
 			end
-			thumb:SetColorTexture(0.25, 0.25, 0.25, 1.0);
+			thumb:SetColorTexture(0.25, 0.25, 0.25, 0.75);
 			thumb:SetWidth(bar:GetWidth());
 			local up = bar.ScrollUpButton;
 			up:SetNormalTexture(T_UIDefinition.TEXTURE_MODERN_ARROW_UP);
@@ -3786,12 +3805,14 @@ end
 			LT_SharedMethod.StyleBLZButton(QueueAdd, not loading and QueueAdd.backup or nil);
 			local QueueCreate = QueueFrame.Create;
 			LT_SharedMethod.StyleBLZButton(QueueCreate, not loading and QueueCreate.backup or nil);
+			LT_SharedMethod.StyleBLZScrollFrame(QueueFrame.ScrollFrame);
 		else
 			LT_SharedMethod.StyleModernBackdrop(QueueFrame);
 			local QueueAdd = QueueFrame.Add;
 			LT_SharedMethod.StyleModernButton(QueueAdd, QueueAdd.backup == nil, nil);
 			local QueueCreate = QueueFrame.Create;
 			LT_SharedMethod.StyleModernButton(QueueCreate, QueueCreate.backup == nil, nil);
+			LT_SharedMethod.StyleModernScrollFrame(QueueFrame.ScrollFrame);
 		end
 	end
 	function LT_WidgetMethod.F_ShowQueueFrame(Frame, show)
@@ -3921,6 +3942,7 @@ end
 					if todo[index] <= 0 then
 						tremove(list, index);
 						tremove(todo, index);
+						self.ScrollFrame:SetNumValue(#list);
 						self.ScrollFrame:Update();
 						-- self.F_StartCraftQueue();	--	DoTradeSkill needs hardware event.
 						self.Focus:Hide();
@@ -3981,7 +4003,7 @@ end
 						end
 					end
 				end
-				local p = T_SharedMethod.GetPositionKey();
+				local p = LT_SharedMethod.GetPositionKey();
 				local t = self.BlackPos[p];
 				if t then
 					t[sid] = true;
@@ -4006,6 +4028,7 @@ end
 			if n == 0 then
 				tremove(list, data_index);
 				tremove(todo, data_index);
+				Parent.ScrollFrame:SetNumValue(#list);
 				Parent.ScrollFrame:Update();
 			else
 				todo[data_index] = n;
@@ -4026,6 +4049,7 @@ end
 		local data_index = Button:GetDataIndex();
 		tremove(list, data_index);
 		tremove(todo, data_index);
+		Parent.ScrollFrame:SetNumValue(#list);
 		Parent.ScrollFrame:Update();
 	end
 	function LT_WidgetMethod.QueueButtonInc_OnClick(self)
@@ -4059,6 +4083,7 @@ end
 		if Frame.selected_sid ~= nil then
 			list[#list + 1] = Frame.selected_sid;
 			todo[#todo + 1] = tonumber(QueueFrame.EditBox:GetText()) or 1;
+			QueueFrame.ScrollFrame:SetNumValue(#list);
 			QueueFrame.ScrollFrame:Update();
 		end
 		QueueFrame.EditBox:ClearFocus();

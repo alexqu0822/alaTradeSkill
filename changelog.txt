@@ -1,0 +1,6 @@
+
+2025-04-02
+Update scroll lib.
+Try to fix leatherwork ui in Korean client.
+Correct some translations.
+Add changelog file

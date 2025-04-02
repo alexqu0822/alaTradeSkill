@@ -133,12 +133,13 @@ local T_Temp_pid = {  };
 --
 local function LF_HashTradeSkill(pid, pname, pname_lower)
 	T_TradeSkill_Name[pid] = pname;
-	if l10n.extra_skill_name[pid] == nil then
-		T_TradeSkill_Hash[pname] = pid;
-		T_TradeSkill_Hash[pname_lower] = pid;
-	else
-		T_TradeSkill_Hash[l10n.extra_skill_name[pid]] = pid;
-		T_TradeSkill_Hash[strlower(l10n.extra_skill_name[pid])] = pid;
+	T_TradeSkill_Hash[pname] = pid;
+	T_TradeSkill_Hash[pname_lower] = pid;
+	if l10n.extra_skill_name[pid] ~= nil then
+		for _, pn in next, l10n.extra_skill_name[pid] do
+			T_TradeSkill_Hash[pn] = pid;
+			T_TradeSkill_Hash[strlower(pn)] = pid;
+		end
 	end
 end
 local function LF_HashSpell(sid, sname, sname_lower)
