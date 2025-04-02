@@ -423,29 +423,29 @@ do	--	SLASH
 		},
 		{	--	show_tradeskill_tip_craft_item_price
 			'bool',
-			"^tip" .. SEPARATOR .. "item" .. SEPARATOR .. "(.*)" .. SEPARATOR .. "$",
+			"^tip" .. SEPARATOR .. "itemprice" .. SEPARATOR .. "(.*)" .. SEPARATOR .. "$",
 			"show_tradeskill_tip_craft_item_price",
 			l10n.SLASH_NOTE["show_tradeskill_tip_craft_item_price"],
 			nil,
 			[8] = function(self)
 				if self:GetChecked() then
-					SlashCmdList["ALATRADEFRAME"]("settipitem1");
+					SlashCmdList["ALATRADEFRAME"]("settipitemprice1");
 				else
-					SlashCmdList["ALATRADEFRAME"]("settipitem0");
+					SlashCmdList["ALATRADEFRAME"]("settipitemprice0");
 				end
 			end,
 		},
 		{	--	show_tradeskill_tip_craft_spell_price
 			'bool',
-			"^tip" .. SEPARATOR .. "spell" .. SEPARATOR .. "(.*)" .. SEPARATOR .. "$",
+			"^tip" .. SEPARATOR .. "spellprice" .. SEPARATOR .. "(.*)" .. SEPARATOR .. "$",
 			"show_tradeskill_tip_craft_spell_price",
 			l10n.SLASH_NOTE["show_tradeskill_tip_craft_spell_price"],
 			nil,
 			[8] = function(self)
 				if self:GetChecked() then
-					SlashCmdList["ALATRADEFRAME"]("settipspell1");
+					SlashCmdList["ALATRADEFRAME"]("settipspellprice1");
 				else
-					SlashCmdList["ALATRADEFRAME"]("settipspell0");
+					SlashCmdList["ALATRADEFRAME"]("settipspellprice0");
 				end
 			end,
 		},

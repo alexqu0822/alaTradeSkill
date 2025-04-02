@@ -136,7 +136,6 @@ l10n["showRankTip"] = "Show colored difficulty rank";
 --
 l10n["PROFIT_SHOW_COST_ONLY"] = "Show cost only";
 --
-l10n["LABEL_RANK_LEVEL"] = "|cffff7f00Rank: |r";
 l10n["LABEL_GET_FROM"] = "|cffff7f00Get from: |r";
 l10n["quest"] = "Quest";
 l10n["item"] = "Item";

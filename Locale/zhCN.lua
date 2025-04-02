@@ -124,7 +124,7 @@ l10n["showHighRank"] = "高等级";
 l10n["filterClass"] = CT.SELFLCLASS;
 l10n["filterSpec"] = "专精";
 l10n["showItemInsteadOfSpell"] = "物品";
-l10n["showRank"] = "等级";
+l10n["showRank"] = "难度等级";
 l10n["haveMaterials"] = "材料";
 l10n["showUnkownTip"] = "显示还没学会的配方";
 l10n["showKnownTip"] = "显示已经学会的配方";
@@ -136,7 +136,6 @@ l10n["showRankTip"] = "显示难度等级";
 --
 l10n["PROFIT_SHOW_COST_ONLY"] = "只显示成本";
 --
-l10n["LABEL_RANK_LEVEL"] = "|cffff7f00技能等级: |r";
 l10n["LABEL_GET_FROM"] = "|cffff7f00来源: |r";
 l10n["quest"] = "任务";
 l10n["item"] = "物品";

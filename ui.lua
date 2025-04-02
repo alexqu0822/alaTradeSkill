@@ -1681,15 +1681,10 @@ end
 				if phase > DataAgent.CURPHASE then
 					SkillTip:AddLine("|cffff0000" .. l10n["AVAILABLE_IN_PHASE_"] .. phase .. "|r");
 				end
-				SkillTip:Show();
 			else
 				SkillTip:SetSpellByID(sid);
 			end
-			local text = DataAgent.get_difficulty_rank_list_text_by_sid(sid, true);
-			if text ~= nil then
-				SkillTip:AddDoubleLine(l10n["LABEL_RANK_LEVEL"], text);
-				SkillTip:Show();
-			end
+			SkillTip:Show();
 			local recipeindex = Frame.hash[sid];
 			if pid == 'explorer' then
 				local hash = DataAgent.LearnedRecipesHash[sid];
