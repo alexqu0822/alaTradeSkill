@@ -323,7 +323,6 @@ end
 				LT_SharedMethod.ProfitFilterList(Frame, list);
 			end
 			ProfitFrame.ScrollFrame:SetNumValue(#list);
-			ProfitFrame.ScrollFrame:Update();
 		end
 	end
 	function LT_SharedMethod.ProcessTextFilter(list, searchText, searchNameOnly)
@@ -544,7 +543,6 @@ end
 								Frame:F_SearchEditValid();
 							end
 							Frame.ScrollFrame:SetNumValue(#list);
-							Frame.ScrollFrame:Update();
 							Frame:F_RefreshSetFrame();
 							Frame:F_RefreshSearchEdit();
 							Frame:F_RefreshOverrideMinRank();
@@ -775,7 +773,6 @@ end
 				-- MT.Debug("UpdateExplorerFrame|cff00ff00#1L2|r");
 			end
 			Frame.ScrollFrame:SetNumValue(#list);
-			Frame.ScrollFrame:Update();
 			Frame:F_RefreshSetFrame();
 			Frame:F_RefreshSearchEdit();
 		end
@@ -851,62 +848,6 @@ end
 				obj._EnableMouse = obj._EnableMouse or obj.EnableMouse;
 				obj:_SetAlpha(1.0);
 				obj:_EnableMouse(true);
-			end
-		end
-		local function LF_HookALAScrollBar_OnValueChanged(self, val)
-			val = val or self:GetValue();
-			local minVal, maxVal = self:GetMinMaxValues();
-			if minVal >= val then
-				self.ScrollUpButton:Disable();
-			else
-				self.ScrollUpButton:Enable();
-			end
-			if maxVal <= val then
-				self.ScrollDownButton:Disable();
-			else
-				self.ScrollDownButton:Enable();
-			end
-		end
-		function LT_SharedMethod.ModifyALAScrollFrame(ScrollFrame)
-			local children = { ScrollFrame:GetChildren() };
-			for index = 1, #children do
-				local obj = children[index];
-				if strupper(obj:GetObjectType()) == 'SLIDER' then
-					ScrollFrame.ScrollBar = obj;
-					local regions = { obj:GetRegions() };
-					for index2 = 1, #regions do
-						local obj2 = regions[index2];
-						if strupper(obj2:GetObjectType()) == 'TEXTURE' then
-							obj2:Hide();
-						end
-					end
-					obj:GetThumbTexture():Show();
-					obj:SetWidth(12);
-					obj:ClearAllPoints();
-					obj:SetPoint("TOPRIGHT", ScrollFrame, "TOPRIGHT", 0, -16);
-					obj:SetPoint("BOTTOMRIGHT", ScrollFrame, "BOTTOMRIGHT", 0, 16);
-					local up = CreateFrame('BUTTON', nil, obj);
-					up:SetSize(12, 16);
-					up:SetPoint("BOTTOMLEFT", obj, "TOPLEFT", -1, 0);
-					up:SetPoint("BOTTOMRIGHT", obj, "TOPRIGHT", 1, 0);
-					up:SetScript("OnClick", function(self)
-						obj:SetValue(obj:GetValue() - obj:GetValueStep());
-					end);
-					obj.ScrollUpButton = up;
-					local down = CreateFrame('BUTTON', nil, obj);
-					down:SetSize(12, 16);
-					down:SetPoint("TOPLEFT", obj, "BOTTOMLEFT", -1, 0);
-					down:SetPoint("TOPRIGHT", obj, "BOTTOMRIGHT", 1, 0);
-					down:SetScript("OnClick", function(self)
-						obj:SetValue(obj:GetValue() + obj:GetValueStep());
-					end);
-					obj.ScrollDownButton = down;
-					obj:HookScript("OnValueChanged", LF_HookALAScrollBar_OnValueChanged);
-					hooksecurefunc(ScrollFrame, "SetNumValue", function(self)
-						LF_HookALAScrollBar_OnValueChanged(obj);
-					end);
-					break;
-				end
 			end
 		end
 		local function LF_HookBLZScrollBar_UpdateThumbHeight(self)
@@ -3940,7 +3881,6 @@ end
 						tremove(list, index);
 						tremove(todo, index);
 						self.ScrollFrame:SetNumValue(#list);
-						self.ScrollFrame:Update();
 						-- self.F_StartCraftQueue();	--	DoTradeSkill needs hardware event.
 						self.Focus:Hide();
 						return;
@@ -4027,7 +3967,6 @@ end
 				tremove(list, data_index);
 				tremove(todo, data_index);
 				Parent.ScrollFrame:SetNumValue(#list);
-				Parent.ScrollFrame:Update();
 			else
 				todo[data_index] = n;
 			end
@@ -4048,7 +3987,6 @@ end
 		tremove(list, data_index);
 		tremove(todo, data_index);
 		Parent.ScrollFrame:SetNumValue(#list);
-		Parent.ScrollFrame:Update();
 	end
 	function LT_WidgetMethod.QueueButtonInc_OnClick(self)
 		local Button = self.Button;
@@ -4082,7 +4020,6 @@ end
 			list[#list + 1] = Frame.selected_sid;
 			todo[#todo + 1] = tonumber(QueueFrame.EditBox:GetText()) or 1;
 			QueueFrame.ScrollFrame:SetNumValue(#list);
-			QueueFrame.ScrollFrame:Update();
 		end
 		QueueFrame.EditBox:ClearFocus();
 	end
@@ -4167,7 +4104,6 @@ local function LF_HookFrame(addon, meta)
 			local ScrollFrame = VT.__scrolllib.CreateScrollFrame(Frame, nil, nil, T_UIDefinition.SkillListButtonHeight, LT_SharedMethod.CreateSkillListButton, LT_SharedMethod.SetSkillListButton);
 			ScrollFrame:SetPoint("BOTTOMLEFT", 4, 0);
 			ScrollFrame:SetPoint("TOPRIGHT", -4, -28);
-			LT_SharedMethod.ModifyALAScrollFrame(ScrollFrame);
 			Frame.ScrollFrame = ScrollFrame;
 
 			local ToggleButton = CreateFrame('BUTTON', nil, HookedFrame, "UIPanelButtonTemplate");
@@ -4558,8 +4494,6 @@ local function LF_HookFrame(addon, meta)
 		ProfitFrame.CloseButton = CloseButton;
 		CloseButton.ProfitFrame = ProfitFrame;
 		CloseButton.Frame = Frame;
-
-		LT_SharedMethod.ModifyALAScrollFrame(ScrollFrame);
 
 		Frame.F_ShowProfitFrame = LT_WidgetMethod.F_ShowProfitFrame;
 		Frame.F_HideProfitFrame = LT_WidgetMethod.F_HideProfitFrame;
@@ -5645,8 +5579,6 @@ local function LF_CreateExplorerFrame()
 		end);
 		Frame.CloseButton = CloseButton;
 
-		LT_SharedMethod.ModifyALAScrollFrame(ScrollFrame);
-
 		Frame.F_SetStyle = LT_WidgetMethod.F_ExplorerFrameSetStyle;
 	end
 
@@ -5720,8 +5652,6 @@ local function LF_CreateExplorerFrame()
 		CloseButton:SetScript("OnClick", LT_WidgetMethod.ProfitFrameCloseButton_OnClick);
 		ProfitFrame.CloseButton = CloseButton;
 		CloseButton.Frame = Frame;
-
-		LT_SharedMethod.ModifyALAScrollFrame(Frame.ProfitFrame.ScrollFrame);
 
 		Frame.F_ShowProfitFrame = LT_WidgetMethod.F_ExplorerShowProfitFrame;
 		Frame.F_HideProfitFrame = LT_WidgetMethod.F_ExplorerHideProfitFrame;
@@ -6052,7 +5982,6 @@ local function LF_CreateQueueFrame()
 	local ScrollFrame = VT.__scrolllib.CreateScrollFrame(QueueFrame, nil, nil, T_UIDefinition.QueueListButtonHeight, LT_SharedMethod.CreateQueueListButton, LT_SharedMethod.SetQueueListButton);
 	ScrollFrame:SetPoint("BOTTOMLEFT", 4, 26);
 	ScrollFrame:SetPoint("TOPRIGHT", -4, -4);
-	LT_SharedMethod.ModifyALAScrollFrame(ScrollFrame);
 	QueueFrame.ScrollFrame = ScrollFrame;
 
 	local Focus = CreateFrame('FRAME', nil, QueueFrame);
@@ -7047,7 +6976,6 @@ local function LF_CreateConfigFrame()
 
 		function CharList:F_Update()
 			self.ScrollFrame:SetNumValue(#VT.SET.char_list);
-			self.ScrollFrame:Update();
 		end
 	end
 	function Frame:F_Refresh()
