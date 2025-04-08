@@ -322,7 +322,9 @@ end
 			else
 				LT_SharedMethod.ProfitFilterList(Frame, list);
 			end
-			ProfitFrame.ScrollFrame:SetNumValue(#list);
+			 if not ProfitFrame.ScrollFrame:SetNumValue(#list) then
+				ProfitFrame.ScrollFrame:Update();
+			end
 		end
 	end
 	function LT_SharedMethod.ProcessTextFilter(list, searchText, searchNameOnly)
@@ -542,7 +544,9 @@ end
 							else
 								Frame:F_SearchEditValid();
 							end
-							Frame.ScrollFrame:SetNumValue(#list);
+							 if not Frame.ScrollFrame:SetNumValue(#list) then
+								Frame.ScrollFrame:Update();
+							end
 							Frame:F_RefreshSetFrame();
 							Frame:F_RefreshSearchEdit();
 							Frame:F_RefreshOverrideMinRank();
@@ -772,7 +776,9 @@ end
 			else
 				-- MT.Debug("UpdateExplorerFrame|cff00ff00#1L2|r");
 			end
-			Frame.ScrollFrame:SetNumValue(#list);
+			 if not Frame.ScrollFrame:SetNumValue(#list) then
+				Frame.ScrollFrame:Update();
+			end
 			Frame:F_RefreshSetFrame();
 			Frame:F_RefreshSearchEdit();
 		end
@@ -3880,7 +3886,9 @@ end
 					if todo[index] <= 0 then
 						tremove(list, index);
 						tremove(todo, index);
-						self.ScrollFrame:SetNumValue(#list);
+						 if not self.ScrollFrame:SetNumValue(#list) then
+							self.ScrollFrame:Update();
+						end
 						-- self.F_StartCraftQueue();	--	DoTradeSkill needs hardware event.
 						self.Focus:Hide();
 						return;
@@ -3966,7 +3974,9 @@ end
 			if n == 0 then
 				tremove(list, data_index);
 				tremove(todo, data_index);
-				Parent.ScrollFrame:SetNumValue(#list);
+				 if not Parent.ScrollFrame:SetNumValue(#list) then
+					Parent.ScrollFrame:Update();
+				end
 			else
 				todo[data_index] = n;
 			end
@@ -3986,7 +3996,9 @@ end
 		local data_index = Button:GetDataIndex();
 		tremove(list, data_index);
 		tremove(todo, data_index);
-		Parent.ScrollFrame:SetNumValue(#list);
+		 if not Parent.ScrollFrame:SetNumValue(#list) then
+			Parent.ScrollFrame:Update();
+		end
 	end
 	function LT_WidgetMethod.QueueButtonInc_OnClick(self)
 		local Button = self.Button;
@@ -4019,7 +4031,9 @@ end
 		if Frame.selected_sid ~= nil then
 			list[#list + 1] = Frame.selected_sid;
 			todo[#todo + 1] = tonumber(QueueFrame.EditBox:GetText()) or 1;
-			QueueFrame.ScrollFrame:SetNumValue(#list);
+			 if not QueueFrame.ScrollFrame:SetNumValue(#list) then
+				QueueFrame.ScrollFrame:Update();
+			end
 		end
 		QueueFrame.EditBox:ClearFocus();
 	end
@@ -6926,7 +6940,9 @@ local function LF_CreateConfigFrame()
 		ScrollFrame:SetPoint("BOTTOMLEFT", 4, 12);
 		ScrollFrame:SetPoint("TOPRIGHT", -4, -24);
 		CharList.ScrollFrame = ScrollFrame;
-		ScrollFrame:SetNumValue(#VT.SET.char_list);
+		 if not ScrollFrame:SetNumValue(#VT.SET.char_list) then
+			ScrollFrame:Update();
+		end
 
 		CharList:SetScript("OnShow", function(self)
 			VT.UIFrames["CONFIG"].CharListToggleButton:F_SetStatusTexture(true);
@@ -6975,7 +6991,9 @@ local function LF_CreateConfigFrame()
 		ToggleButton.Text = Text;
 
 		function CharList:F_Update()
-			self.ScrollFrame:SetNumValue(#VT.SET.char_list);
+			 if not self.ScrollFrame:SetNumValue(#VT.SET.char_list) then
+				self.ScrollFrame:Update();
+			end
 		end
 	end
 	function Frame:F_Refresh()

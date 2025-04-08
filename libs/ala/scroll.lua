@@ -10,7 +10,7 @@
 	Scroll:CallButtonFuncByDataIndex(index, FuncName, ...)		Button:func(...)
 	Button:GetDataIndex()
 ]]
-local __version = 250404;
+local __version = 250405;
 
 local _G = _G;
 _G.__ala_meta__ = _G.__ala_meta__ or {  };
@@ -227,6 +227,7 @@ local uireimp = __ala_meta__.uireimp;
 				NumValues = num;
 				self:Update();
 				ScrollBar:UpdateButtonState();
+				return true;
 			end
 		end
 		function ScrollFrame:HandleButtonByDataIndex(index, func, ...)
