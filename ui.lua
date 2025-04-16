@@ -3881,19 +3881,6 @@ end
 			local todo = VT.QUEUE.todo;
 			for index = 1, #list do
 				if list[index] == self.CraftingID then
-					todo[index] = todo[index] - 1;
-					-- MT.Debug("Sub", self.CraftingID, todo[index]);
-					if todo[index] <= 0 then
-						tremove(list, index);
-						tremove(todo, index);
-						 if not self.ScrollFrame:SetNumValue(#list) then
-							self.ScrollFrame:Update();
-						end
-						-- self.F_StartCraftQueue();	--	DoTradeSkill needs hardware event.
-						self.Focus:Hide();
-						return;
-					end
-					self.ScrollFrame:Update();
 					local available = LT_SharedMethod.GetAvaiableCraftCount(self.CraftingID);
 					-- MT.Debug(name, "num =", available);
 					if available <= 0 then
@@ -3905,6 +3892,7 @@ end
 					return;
 				end
 			end
+			self.Focus:Hide();
 		end
 	end
 	function LT_WidgetMethod.QueueFrame_OnEvent(self, event, ...)
@@ -3913,6 +3901,25 @@ end
 			local unit, castID, sid = ...;
 			-- MT.Debug("SUCCEED", sid, self.CraftingID, self:IsShown(), self.IsCrafting);
 			if self.CraftingID == sid then
+				local list = VT.QUEUE.list;
+				local todo = VT.QUEUE.todo;
+				for index = 1, #list do
+					if list[index] == self.CraftingID then
+						todo[index] = todo[index] - 1;
+						-- MT.Debug("Sub", self.CraftingID, todo[index]);
+						if todo[index] <= 0 then
+							tremove(list, index);
+							tremove(todo, index);
+							if not self.ScrollFrame:SetNumValue(#list) then
+								self.ScrollFrame:Update();
+							end
+							-- self.F_StartCraftQueue();	--	DoTradeSkill needs hardware event.
+							self.Focus:Hide();
+							return;
+						end
+						self.ScrollFrame:Update();
+					end
+				end
 				MT._TimerStart(self.F_OnSucceededDelay, 0.1, 1);
 			end
 		elseif event == "UNIT_SPELLCAST_INTERRUPTED" then
