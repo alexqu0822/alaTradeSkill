@@ -15,9 +15,9 @@
 			2 key		'string'
 			3 type		'string'	['button', 'boolean', 'number', 'editor', 'color', 'list' / 'input-list', 'raido'],
 			4 extra		--	number : range{ min, max, step, }	--	editor : 4th param of LookupText 	--	list, radio : list{} or list()
-			5 func		function(val)
-			6 mod		nil/'number'/'function'
-			7 exhibit	function(val)
+			5 callback	function(val)
+			6 modfunc	nil/'number'/'function'
+			7 display	function(val)
 			[8 get]		'function'
 			[9 label]	'string'
 		}
@@ -27,7 +27,7 @@
 	SettingUI:AddSetting(category, meta, indent, col, icon)
 --]]--
 
-local __version = 250420.0;
+local __version = 250425.0;
 
 local _G = _G;
 _G.__ala_meta__ = _G.__ala_meta__ or {  };
@@ -160,21 +160,21 @@ local TWidgetMethod = {  };
 	function TSettingUIMixin.AddSetting(SettingUI, category, meta, indent, col, icon)
 		category = category or "GENERAL";
 		meta.category = category;
-		local module = meta[1];
-		local key = meta[2];
-		local Type = meta[3];
+		local module = meta.module or meta[1];
+		local key = meta.key or meta[2];
+		local Type = meta.type or meta[3];
 		local _SettingList = SettingUI._SettingList;
 		_SettingList[module] = _SettingList[module] or {  };
 		_SettingList[module][key] = meta;
 		if Type == 'number' then
-			local modfunc = meta[6];
-			meta[6] = type(modfunc) == 'function' and modfunc or (type(modfunc) == 'number' and round_func_table[modfunc]) or nil;
+			local modfunc = meta.modfunc or meta[6];
+			meta.modfunc = type(modfunc) == 'function' and modfunc or (type(modfunc) == 'number' and round_func_table[modfunc]) or nil;
 		elseif Type == 'boolean' then
-			meta[6] = meta[6] or boolean_func;
+			meta.modfunc = meta.modfunc or boolean_func;
 		end
 		local CategoryTable = SettingUI._CategoryList[category] or SettingUI:CreateCategory(category);
 		CategoryTable.Setting[#CategoryTable.Setting + 1] = meta;
-		SettingUI:CreateSetting(CategoryTable.Panel, module, key, Type, meta[4], meta[7], indent, col, icon, meta[8], meta[9]);
+		SettingUI:CreateSetting(CategoryTable.Panel, module, key, Type, meta.extra or meta[4], meta.display or meta[7], indent, col, icon, meta.get or meta[8], meta.label or meta[9]);
 	end
 -->	Tab	<--
 	function TWidgetMethod.Tab_OnClick(Tab)
@@ -259,10 +259,11 @@ local TWidgetMethod = {  };
 		--	editor
 		function TWidgetMethod.EditorCallOutButton_OnClick(self)
 			local SettingUI = self.__SettingUI;
-			SettingUI.__Editor.To = self;
-			SettingUI.__Editor:Show();
-			SettingUI.__Editor.EditBox:SetText(self.get and self.get() or SettingUI.GetConfig(self.module, self.key));
-			SettingUI.__Editor.Information:SetText(self.extra);
+			local Editor = SettingUI.__Editor;
+			Editor.To = self;
+			Editor:Show();
+			Editor.EditBox:SetText(self.get and self.get() or SettingUI.GetConfig(self.module, self.key));
+			Editor.Information:SetText(self.extra);
 		end
 		--	color
 		function TWidgetMethod.ColorCallOutButton_OnClick(self)
@@ -360,7 +361,7 @@ local TWidgetMethod = {  };
 			end
 		end
 	-->
-	function TSettingUIMixin.CreateSetting(SettingUI, Panel, module, key, Type, extra, exhibit, indent, col, icon, get, label)
+	function TSettingUIMixin.CreateSetting(SettingUI, Panel, module, key, Type, extra, display, indent, col, icon, get, label)
 		indent = indent or 0;
 		col = col or 1;
 		local LookupText = SettingUI.LookupText;
@@ -606,10 +607,10 @@ local TWidgetMethod = {  };
 				EditBox:SetScript("OnEnterPressed", TWidgetMethod.InputListEditBox_OnEnterPressed);
 				EditBox:SetScript("OnEscapePressed", TWidgetMethod.InputListEditBox_OnEscapePressed);
 				EditBox:SetScript("OnTextChanged", TWidgetMethod.InputListEditBox_OnTextChanged);
-				if exhibit ~= nil then
+				if display ~= nil then
 					function Drop:SetVal(val)
 						EditBox:SetText(val);
-						EditBox.Err:SetText(LookupText('value', module, key, val) or exhibit(val) or val);
+						EditBox.Err:SetText(LookupText('value', module, key, val) or display(val) or val);
 						EditBox.Err:SetVertexColor(1.0, 1.0, 1.0, 1.0);
 					end
 				else
@@ -658,9 +659,9 @@ local TWidgetMethod = {  };
 				EditBox.Err = Err;
 			else
 				EditBox:SetSize(128, 16);
-				if exhibit ~= nil then
+				if display ~= nil then
 					function Drop:SetVal(val)
-						EditBox:SetText(LookupText('value', module, key, val) or exhibit(val) or val);
+						EditBox:SetText(LookupText('value', module, key, val) or display(val) or val);
 					end
 				else
 					function Drop:SetVal(val)
@@ -854,7 +855,7 @@ local TWidgetMethod = {  };
 	function TWidgetMethod.EditorSaveValueOnClick(self)
 		local Editor = self.__Editor;
 		local To = Editor.To;
-		Editor.__SettingUI:SetConfigInner(To.module, To.key, EditorEditBox:GetText(), false);
+		Editor.__SettingUI:SetConfigInner(To.module, To.key, Editor.EditBox:GetText(), false);
 		Editor:Hide();
 	end
 	function TWidgetMethod.EditorCancelOnClick(self)
@@ -1097,11 +1098,13 @@ end
 function TSettingUIMixin.SetConfigInner(SettingUI, module, key, val, loading)
 	local meta = SettingUI._SettingList[module][key];
 	if meta ~= nil then
-		if meta[6] ~= nil then
-			val = meta[6](val);
+		local modfunc = meta.modfunc or meta[6];
+		if modfunc ~= nil then
+			val = modfunc(val);
 		end
-		if meta[5] ~= nil then
-			meta[5](val);
+		local callback = meta.callback or meta[5];
+		if callback ~= nil then
+			callback(val);
 		else
 			SettingUI.SetConfig(module, key, val, loading);
 		end
