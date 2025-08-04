@@ -1,6 +1,7 @@
 
-2025-08-01
+2025-08-04
 Update MOP Data. Leave cooking way to do.
+Thanks to Hubbotu's ruRU translations.
 
 2025-07-01
 Support MOP UI. (data to do)
