@@ -14,7 +14,7 @@ end
 
 local DataAgent = DT.DataAgent;
 
-DataAgent.__DataVersion = ;
+DataAgent.__DataVersion = 250801;
 
 DataAgent.CURPHASE = 1;
 DataAgent.MAXPHASE = 5;
