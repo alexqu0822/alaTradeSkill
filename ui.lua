@@ -274,7 +274,7 @@ end
 		local sid_list = Frame.list;
 		wipe(list);
 		if VT.AuctionMod ~= nil then
-			local pid = Frame.flag or DataAgent.get_pid_by_pname(Frame.F_GetSkillName());
+			local pid = Frame.flag or Frame.F_GetPID();
 			if only_cost and Frame.flag ~= 'explorer' then
 				local var = rawget(VT.VAR, pid);
 				local cur_rank = var and var.cur_rank or 0;
@@ -314,7 +314,7 @@ end
 		if ProfitFrame:IsVisible() then
 			-- MT.Debug("UpdateProfitFrame|cff00ff00#1L1|r");
 			local list = ProfitFrame.list;
-			local pid = Frame.flag or DataAgent.get_pid_by_pname(Frame.F_GetSkillName());
+			local pid = Frame.flag or Frame.F_GetPID();
 			if ProfitFrame.CostOnlyCheck then
 				local only_cost = VT.SET[pid].PROFIT_SHOW_COST_ONLY;
 				LT_SharedMethod.ProfitFilterList(Frame, list, only_cost);
@@ -385,7 +385,7 @@ end
 			local notlinked = not Frame.F_IsLinked();
 			Frame:F_LayoutOnShow();
 			local skillName, cur_rank, max_rank = Frame.F_GetSkillInfo();
-			local pid = DataAgent.get_pid_by_pname(skillName);
+			local pid = Frame.F_GetPID();
 			Frame.flag = pid;
 			Frame.notlinked = notlinked;
 			if pid ~= nil then
@@ -413,7 +413,7 @@ end
 				if VT.SET.show_call then
 					Frame.ToggleButton:Show();
 				end
-				if CT.VLE3X then
+				if CT.VGE3X then
 					if pid == 10 then
 						Frame.FilterDropdown:Show();
 					else
@@ -1445,7 +1445,7 @@ end
 		SearchEditBoxNameOnly:SetScript("OnEnter", LT_SharedMethod.ButtonInfoOnEnter);
 		SearchEditBoxNameOnly:SetScript("OnLeave", LT_SharedMethod.ButtonInfoOnLeave);
 		SearchEditBoxNameOnly:SetScript("OnClick", function(self)
-			local pid = Frame.flag or DataAgent.get_pid_by_pname(Frame.F_GetSkillName());
+			local pid = Frame.flag or Frame.F_GetPID() or Frame.F_GetPID();
 			if pid ~= nil then
 				MT.ChangeSetWithUpdate(VT.SET[pid], "searchNameOnly", self:GetChecked());
 			end
@@ -1454,7 +1454,7 @@ end
 		Frame.SearchEditBoxNameOnly = SearchEditBoxNameOnly;
 
 		function Frame:F_Search(text)
-			local pid = Frame.flag or DataAgent.get_pid_by_pname(Frame.F_GetSkillName());
+			local pid = Frame.flag or Frame.F_GetPID();
 			if pid ~= nil then
 				if text == "" then
 					MT.ChangeSetWithUpdate(VT.SET[pid], "searchText", nil);
@@ -1471,7 +1471,7 @@ end
 			Frame.F_Update();
 		end
 		function Frame:F_RefreshSearchEdit(pid)
-			local pid = Frame.flag or DataAgent.get_pid_by_pname(Frame.F_GetSkillName());
+			local pid = Frame.flag or Frame.F_GetPID();
 			if pid ~= nil then
 				local searchText = VT.SET[pid].searchText or "";
 				if SearchEditBox:GetText() ~= searchText then
@@ -1612,7 +1612,7 @@ end
 		if sid == nil then
 			return;
 		end
-		local pid = Frame.flag or DataAgent.get_pid_by_sid(sid) or DataAgent.get_pid_by_pname(Frame.F_GetSkillName());
+		local pid = Frame.flag or DataAgent.get_pid_by_sid(sid) or Frame.F_GetPID();
 		if pid ~= nil then
 			local set = VT.SET[pid];
 			SkillTip.__phase = set.phase;
@@ -1709,7 +1709,7 @@ end
 				sid = sid[1];
 			end
 			Frame.SearchEditBox:ClearFocus();
-			local pid = Frame.flag or DataAgent.get_pid_by_sid(sid) or DataAgent.get_pid_by_pname(Frame.F_GetSkillName());
+			local pid = Frame.flag or DataAgent.get_pid_by_sid(sid) or Frame.F_GetPID();
 			T_SkillListDropMeta.param[1] = Frame;
 			T_SkillListDropMeta.param[2] = pid;
 			T_SkillListDropMeta.param[3] = sid;
@@ -1923,7 +1923,7 @@ end
 				Button.Title:SetWidth(0);
 				Button.Title:SetText(DataAgent.spell_name_s(sid));
 				if VT.SET.colored_rank_for_unknown and Frame.flag ~= 'explorer' then
-					local pid = Frame.flag or DataAgent.get_pid_by_sid(sid) or DataAgent.get_pid_by_pname(Frame.F_GetSkillName());
+					local pid = Frame.flag or DataAgent.get_pid_by_sid(sid) or Frame.F_GetPID();
 					local var = rawget(VT.VAR, pid);
 					local cur_rank = var and var.cur_rank or 0;
 					Button.Title:SetTextColor(unpack(CT.T_RankColor[DataAgent.get_difficulty_rank_by_sid(sid, cur_rank)] or T_UIDefinition.COLOR_WHITE));
@@ -2052,7 +2052,7 @@ end
 		local hash = Frame.hash;
 		if data_index <= #list then
 			local sid = list[data_index];
-			local pid = Frame.flag or DataAgent.get_pid_by_sid(sid) or DataAgent.get_pid_by_pname(Frame.F_GetSkillName());
+			local pid = Frame.flag or DataAgent.get_pid_by_sid(sid) or Frame.F_GetPID();
 			local set = VT.SET[pid];
 			local cid = DataAgent.get_cid_by_sid(sid);
 			local recipeindex = hash[sid];
@@ -2955,7 +2955,7 @@ end
 		end
 	end
 	function LT_WidgetMethod.F_RefreshOverrideMinRank(Frame)
-		local pid = Frame.flag or DataAgent.get_pid_by_pname(Frame.F_GetSkillName());
+		local pid = Frame.flag or Frame.F_GetPID();
 		if pid ~= nil then
 			local set = VT.SET[pid];
 			local var = Frame.notlinked and VT.VAR[pid] or LT_LinkedSkillVar;
@@ -2970,7 +2970,7 @@ end
 		end
 	end
 	function LT_WidgetMethod.F_RefreshRankOffset(Frame)
-		local pid = Frame.flag or DataAgent.get_pid_by_pname(Frame.F_GetSkillName());
+		local pid = Frame.flag or Frame.F_GetPID();
 		if pid ~= nil then
 			local set = VT.SET[pid];
 			local var = Frame.notlinked and VT.VAR[pid] or LT_LinkedSkillVar;
@@ -3068,7 +3068,7 @@ end
 		end
 	end
 	function LT_WidgetMethod.F_RefreshSetFrame(Frame)
-		local pid = Frame.flag or DataAgent.get_pid_by_pname(Frame.F_GetSkillName());
+		local pid = Frame.flag or Frame.F_GetPID();
 		if pid ~= nil then
 			local SetFrame = Frame.SetFrame;
 			local set = VT.SET[pid];
@@ -3140,7 +3140,7 @@ end
 		if event == Frame.C_SwitchEvent then
 			Frame.switching = true;
 		end
-		if Frame.T_MarkDirtyEvents[event] or Frame.prev_pid ~= DataAgent.get_pid_by_pname(Frame.F_GetSkillName()) then
+		if Frame.T_MarkDirtyEvents[event] or Frame.prev_pid ~= Frame.F_GetPID() then
 			Frame.IsDirty = true;
 		end
 		MT._TimerStart(Frame.F_Update, 0.2, 1);
@@ -3162,7 +3162,7 @@ end
 	end
 	function LT_WidgetMethod.ToggleFrame(self)
 		local Frame = self.Frame;
-		local pid = Frame.flag or DataAgent.get_pid_by_pname(Frame.F_GetSkillName());
+		local pid = Frame.flag or Frame.F_GetPID();
 		if Frame:IsShown() then
 			Frame:Hide();
 			Frame.ToggleButton:SetText(l10n["OVERRIDE_OPEN"]);
@@ -3190,7 +3190,7 @@ end
 	function LT_WidgetMethod.OverrideMinRankSlider__OnValueChanged(self, value, userInput)
 		if userInput then
 			local Frame = self.Frame;
-			local pid = Frame.flag or DataAgent.get_pid_by_pname(Frame.F_GetSkillName());
+			local pid = Frame.flag or Frame.F_GetPID();
 			if pid ~= nil then
 				local set = VT.SET[pid];
 				local var = Frame.notlinked and VT.VAR[pid] or LT_LinkedSkillVar;
@@ -3211,7 +3211,7 @@ end
 	function LT_WidgetMethod.RankOffsetSlider__OnValueChanged(self, value, userInput)
 		if userInput then
 			local Frame = self.Frame;
-			local pid = Frame.flag or DataAgent.get_pid_by_pname(Frame.F_GetSkillName());
+			local pid = Frame.flag or Frame.F_GetPID();
 			if pid ~= nil then
 				local set = VT.SET[pid];
 				local var = Frame.notlinked and VT.VAR[pid] or LT_LinkedSkillVar;
@@ -3240,7 +3240,7 @@ end
 		elseif IsAltKeyDown() then
 		else
 			local Frame = self.Frame;
-			local pid = Frame.flag or DataAgent.get_pid_by_pname(Frame.F_GetSkillName());
+			local pid = Frame.flag or Frame.F_GetPID();
 			local cid = Frame.F_GetRecipeReagentID(Frame.F_GetSelection(), self:GetID());
 			if cid ~= nil then
 				local nsids, sids = DataAgent.get_sid_by_pid_cid(pid, cid);
@@ -3395,7 +3395,7 @@ end
 	end
 	function LT_WidgetMethod.HaveMaterialsCheck_OnClick(self)
 		local Frame = self.Frame;
-		local pid = Frame.flag or DataAgent.get_pid_by_pname(Frame.F_GetSkillName());
+		local pid = Frame.flag or Frame.F_GetPID();
 		if pid ~= nil then
 			MT.ChangeSetWithUpdate(VT.SET[pid], "haveMaterials", self:GetChecked());
 		end
@@ -3415,7 +3415,7 @@ end
 	function LT_WidgetMethod.ProfitFrameToggleButton_OnClick(self)
 		if VT.AuctionMod ~= nil then
 			local Frame = self.Frame;
-			local pid = Frame.flag or DataAgent.get_pid_by_pname(Frame.F_GetSkillName());
+			local pid = Frame.flag or Frame.F_GetPID();
 			if self.ProfitFrame:IsShown() then
 				Frame:F_HideProfitFrame();
 				if pid ~= nil then
@@ -3432,7 +3432,7 @@ end
 	function LT_WidgetMethod.ProfitFrameCostOnlyCheck_OnClick(self)
 		local Frame = self.Frame;
 		local checked = self:GetChecked();
-		local pid = Frame.flag or DataAgent.get_pid_by_pname(Frame.F_GetSkillName());
+		local pid = Frame.flag or Frame.F_GetPID();
 		if pid ~= nil then
 			VT.SET[pid].PROFIT_SHOW_COST_ONLY = checked;
 			LT_SharedMethod.UpdateProfitFrame(Frame);
@@ -3440,7 +3440,7 @@ end
 	end
 	function LT_WidgetMethod.ProfitFrameCloseButton_OnClick(self)
 		local Frame = self.Frame;
-		local pid = Frame.flag or DataAgent.get_pid_by_pname(Frame.F_GetSkillName());
+		local pid = Frame.flag or Frame.F_GetPID();
 		if pid ~= nil then
 			VT.SET[pid].showProfit = false;
 		end
@@ -3454,7 +3454,7 @@ end
 	end
 	function LT_WidgetMethod.SetFrameToggleButton_OnClick(self)
 		local Frame = self.Frame;
-		local pid = Frame.flag or DataAgent.get_pid_by_pname(Frame.F_GetSkillName());
+		local pid = Frame.flag or Frame.F_GetPID();
 		if self.SetFrame:IsShown() then
 			Frame:F_HideSetFrame();
 			if pid ~= nil then
@@ -3469,7 +3469,7 @@ end
 	end
 	function LT_WidgetMethod.SetFrameCheckButton_OnClick_WithUpdate(self)
 		local Frame = self.Frame;
-		local pid = Frame.flag or DataAgent.get_pid_by_pname(Frame.F_GetSkillName());
+		local pid = Frame.flag or Frame.F_GetPID();
 		if pid ~= nil then
 			MT.ChangeSetWithUpdate(VT.SET[pid], self.key, self:GetChecked());
 		end
@@ -3477,7 +3477,7 @@ end
 	end
 	function LT_WidgetMethod.SetFrameCheckButton_OnClick(self)
 		local Frame = self.Frame;
-		local pid = Frame.flag or DataAgent.get_pid_by_pname(Frame.F_GetSkillName());
+		local pid = Frame.flag or Frame.F_GetPID();
 		if pid ~= nil then
 			MT.ChangeSetWithUpdate(VT.SET[pid], self.key, self:GetChecked());
 		end
@@ -3492,7 +3492,7 @@ end
 	function LT_WidgetMethod.SetFramePhaseSlider__OnValueChanged(self, value, userInput)
 		if userInput then
 			local Frame = self.Frame;
-			local pid = Frame.flag or DataAgent.get_pid_by_pname(Frame.F_GetSkillName());
+			local pid = Frame.flag or Frame.F_GetPID();
 			if pid ~= nil then
 				MT.ChangeSetWithUpdate(VT.SET[pid], "phase", value);
 				Frame.F_Update();
@@ -3821,7 +3821,7 @@ end
 								end
 							end
 							if tools ~= false then
-								if pid ~= DataAgent.get_pid_by_pname(Frame.F_GetSkillName()) then
+								if pid ~= Frame.F_GetPID() then
 									-- MT.Debug("Switch", pid);
 									CastSpellByName(DataAgent.get_pname_by_pid(pid));
 								end
@@ -4758,7 +4758,7 @@ local function LF_HookFrame(addon, meta)
 		if Frame:IsVisible() and addon ~= __addon and not (BrowseName ~= nil and BrowseName:IsVisible()) then
 			local name, _, _, _, _, _, _, _, loc = GetItemInfo(link);
 			if name ~= nil and name ~= "" then
-				local pid = Frame.flag or DataAgent.get_pid_by_pname(Frame.F_GetSkillName());
+				local pid = Frame.flag or Frame.F_GetPID();
 				Frame.SearchEditBox:ClearFocus();
 				if pid == 10 and loc and loc ~= "" then
 					local id = tonumber(strmatch(link, "item:(%d+)"));
@@ -4925,6 +4925,35 @@ local function LF_AddOnCallback_Blizzard_TradeSkillUI(addon)
 		local UIDropDownMenu_SetSelectedID = _G.UIDropDownMenu_SetSelectedID;
 	-->
 
+	local function F_GetPID()
+		if CT.VGE3X then
+			for index = 1, GetNumTradeSkills() do
+				local link = GetTradeSkillRecipeLink(index);
+				if link then
+					local sid = tonumber(strmatch(link, "[a-zA-Z]:(%d+)"));
+					local pid = DataAgent.get_pid_by_sid(sid);
+					if pid then
+						return pid;
+					end
+				end
+			end
+		else
+			for index = 1, GetNumTradeSkills() do
+				local link = GetTradeSkillItemLink(index);
+				if link then
+					local cid = tonumber(strmatch(link, "[a-zA-Z]:(%d+)"));
+					local num, sids = DataAgent.get_sid_by_cid(cid);
+					if num == 1 then
+						local pid = DataAgent.get_pid_by_sid(sids[1]);
+						if pid then
+							return pid;
+						end
+					end
+				end
+			end
+		end
+		return DataAgent.get_pid_by_pname(GetTradeSkillLine());
+	end
 	local meta; meta = {
 		HookedFrame = TradeSkillFrame,
 		HookedDetailFrame = TradeSkillDetailScrollFrame,
@@ -4992,7 +5021,7 @@ local function LF_AddOnCallback_Blizzard_TradeSkillUI(addon)
 				IncrementButton = T_UIDefinition.TEXTURE_MODERN_ARROW_RIGHT,
 				DecrementButton = T_UIDefinition.TEXTURE_MODERN_ARROW_LEFT,
 			},
-			T_HookedFrameDropdowns = CT.VSE5X and {
+			T_HookedFrameDropdowns = CT.VLE5X and {
 				InvSlotDropDown = TradeSkillInvSlotDropDown,
 				SubClassDropDown = TradeSkillSubClassDropDown,
 			} or {},
@@ -5010,7 +5039,7 @@ local function LF_AddOnCallback_Blizzard_TradeSkillUI(addon)
 		-- collapse = CollapseTradeSkillSubClass,
 		F_ClearFilter = function()
 			SetTradeSkillSubClassFilter(0, 1, 1);
-			if CT.VSE5X then
+			if CT.VLE5X then
 				if TradeSkillSubClassDropDown.OnMenuChanged then
 					TradeSkillSubClassDropDown:OnMenuChanged();
 				else
@@ -5018,14 +5047,14 @@ local function LF_AddOnCallback_Blizzard_TradeSkillUI(addon)
 				end
 			end
 			SetTradeSkillInvSlotFilter(0, 1, 1);
-			if CT.VLE5X then
+			if CT.VGE5X then
 				TradeSkillOnlyShowSkillUps(false);
 			end
-			if CT.VLE2X then
+			if CT.VGE2X then
 				SetTradeSkillItemNameFilter(nil);
 				SetTradeSkillItemLevelFilter(0, 0);
 			end
-			if CT.VSE5X then
+			if CT.VLE5X then
 				if TradeSkillInvSlotDropDown.OnMenuChanged then
 					TradeSkillInvSlotDropDown:OnMenuChanged();
 				else
@@ -5033,7 +5062,7 @@ local function LF_AddOnCallback_Blizzard_TradeSkillUI(addon)
 				end
 			end
 			ExpandTradeSkillSubClass(0);
-			if CT.VLE2XSE5X then
+			if CT.VGE2XLE5X then
 				TradeSkillFrameAvailableFilterCheckButton:SetChecked(false);
 			end
 			if TradeSkillCollapseAllButton ~= nil then
@@ -5053,18 +5082,19 @@ local function LF_AddOnCallback_Blizzard_TradeSkillUI(addon)
 		F_SetSelection = TradeSkillFrame_SetSelection,		-- SelectTradeSkill
 		F_GetSelection = GetTradeSkillSelectionIndex,
 
+		F_GetPID = F_GetPID,
 		F_GetRecipeInfo = GetTradeSkillInfo,
 			--	skillName, difficult & header, numAvailable, isExpanded = GetTradeSkillInfo(skillIndex)
-		F_GetRecipeSpellID = CT.VLE3X and
+		F_GetRecipeSpellID = CT.VGE3X and
 								function(arg1)
 									local link = GetTradeSkillRecipeLink(arg1);
 									return link and tonumber(strmatch(link, "[a-zA-Z]:(%d+)")) or nil;
 								end
 							or
 								function(arg1)
-									return DataAgent.get_sid_by_pid_sname_cid(DataAgent.get_pid_by_pname(meta.F_GetSkillName()), meta.F_GetRecipeInfo(arg1), meta.F_GetRecipeItemID(arg1));
+									return DataAgent.get_sid_by_pid_sname_cid(F_GetPID(), meta.F_GetRecipeInfo(arg1), meta.F_GetRecipeItemID(arg1));
 								end,
-		F_GetRecipeSpellLink = CT.VLE3X and GetTradeSkillRecipeLink or nil;
+		F_GetRecipeSpellLink = CT.VGE3X and GetTradeSkillRecipeLink or nil;
 		F_GetRecipeItemID = function(arg1) local link = GetTradeSkillItemLink(arg1); return link and tonumber(strmatch(link, "[a-zA-Z]:(%d+)")) or nil; end,
 		F_GetRecipeItemLink = GetTradeSkillItemLink,
 		F_GetRecipeIcon = GetTradeSkillIcon,
@@ -5092,27 +5122,27 @@ local function LF_AddOnCallback_Blizzard_TradeSkillUI(addon)
 		C_SwitchEvent = "TRADE_SKILL_SHOW",
 
 		F_WithDisabledFrame = function(self, func)
-			if CT.VLE2XSE5X then
+			if CT.VGE2XLE5X then
 				func(TradeSkillFrameAvailableFilterCheckButton);
 			end
-			if CT.VLE2X then
+			if CT.VGE2X then
 				func(TradeSearchInputBox);
 				TradeSearchInputBox:ClearFocus();
 			end
 			func(TradeSkillCollapseAllButton);
-			if CT.VSE5X then
+			if CT.VLE5X then
 				func(TradeSkillSubClassDropDown);
 			end
-			if CT.VLE2XSE5X then
+			if CT.VGE2XLE5X then
 				func(TradeSkillSubClassDropDownButton);
 			end
-			if CT.VSE5X then
+			if CT.VLE5X then
 				func(TradeSkillInvSlotDropDown);
 			end
-			if CT.VLE2XSE5X then
+			if CT.VGE2XLE5X then
 				func(TradeSkillInvSlotDropDownButton);
 			end
-			if CT.VLE5X then
+			if CT.VGE5X then
 				func(TradeSkillFrame.FilterDropdown);
 			end
 			func(TradeSkillListScrollFrame);
@@ -5143,13 +5173,13 @@ local function LF_AddOnCallback_Blizzard_TradeSkillUI(addon)
 	local Frame = LF_HookFrame(addon, meta);
 	VT.UIFrames[addon] = Frame;
 	--
-	if CT.VLE2XSE5X then
+	if CT.VGE2XLE5X then
 		TradeSkillFrameAvailableFilterCheckButton:ClearAllPoints();
 		TradeSkillFrameAvailableFilterCheckButton:SetPoint("TOPLEFT", TradeSkillFrame, "TOPLEFT", 68, -56);
 	end
 	TradeSkillExpandButtonFrame:Hide();
 	--
-	if CT.VLE3X then
+	if CT.VGE3X then
 		local ENCHANT_FILTER = l10n.ENCHANT_FILTER;
 	--	Dropdown Filter
 		local T_TradeSkillFrameFilterMeta = {
@@ -5255,6 +5285,11 @@ local function LF_AddOnCallback_Blizzard_TradeSkillUI(addon)
 		end);
 	end
 	--
+	if CT.VGE2XLE5X then
+		TradeSkillSubClassDropDownButton.EnableMouse = MT.noop;
+		TradeSkillInvSlotDropDownButton.EnableMouse = MT.noop;
+	end
+	--
 	LF_FrameApplySetting(Frame);
 end
 local function LF_AddOnCallback_Blizzard_CraftUI(addon)
@@ -5304,6 +5339,22 @@ local function LF_AddOnCallback_Blizzard_CraftUI(addon)
 		local CraftCancelButton = _G.CraftCancelButton;
 	-->
 
+	local function F_GetPID()
+		for index = 1, GetNumCrafts() do
+			local link = GetCraftItemLink(index);
+			if link then
+				local cid = tonumber(strmatch(link, "[a-zA-Z]:(%d+)"));
+				local num, sids = DataAgent.get_sid_by_cid(cid);
+				if num == 1 then
+					local pid = DataAgent.get_pid_by_sid(sids[1]);
+					if pid then
+						return pid;
+					end
+				end
+			end
+		end
+		return DataAgent.get_pid_by_pname(GetCraftName());
+	end
 	local meta; meta = {
 		HookedFrame = CraftFrame,
 		HookedDetailFrame = CraftDetailScrollFrame,
@@ -5382,7 +5433,7 @@ local function LF_AddOnCallback_Blizzard_CraftUI(addon)
 
 		-- expand = ExpandCraftSkillLine,
 		-- collapse = CollapseCraftSkillLine,
-		F_ClearFilter = CT.VLE2X and function()
+		F_ClearFilter = CT.VGE2X and function()
 			CraftOnlyShowMakeable(false);
 			CraftFrameAvailableFilterCheckButton:SetChecked(false);
 			SetCraftFilter(1);
@@ -5401,16 +5452,17 @@ local function LF_AddOnCallback_Blizzard_CraftUI(addon)
 		F_SetSelection = CraftFrame_SetSelection,		-- SelectCraft
 		F_GetSelection = GetCraftSelectionIndex,
 
+		F_GetPID = F_GetPID,
 		F_GetRecipeInfo = function(arg1) local _1, _2, _3, _4, _5, _6, _7 = GetCraftInfo(arg1); return _1, _3, _4, _5, _6, _7; end,
 			--	craftName, craftSubSpellName(""), difficult, numAvailable, isExpanded, trainingPointCost, requiredLevel = GetCraftInfo(index)
-		F_GetRecipeSpellID = CT.VLE3X and
+		F_GetRecipeSpellID = CT.VGE3X and
 								function(arg1)
 									local link = GetCraftRecipeLink(arg1);
 									return link and tonumber(strmatch(link, "[a-zA-Z]:(%d+)")) or nil;
 								end
 							or
 								function(arg1)
-									return DataAgent.get_sid_by_pid_sname_cid(DataAgent.get_pid_by_pname(meta.F_GetSkillName()), meta.F_GetRecipeInfo(arg1), meta.F_GetRecipeItemID(arg1));
+									return DataAgent.get_sid_by_pid_sname_cid(F_GetPID(), meta.F_GetRecipeInfo(arg1), meta.F_GetRecipeItemID(arg1));
 								end,
 		F_GetRecipeItemID = function(arg1) local link = GetCraftItemLink(arg1); return link and tonumber(strmatch(link, "[a-zA-Z]:(%d+)")) or nil; end,
 		F_GetRecipeItemLink = GetCraftItemLink,
@@ -5438,7 +5490,7 @@ local function LF_AddOnCallback_Blizzard_CraftUI(addon)
 		C_SwitchEvent = "CRAFT_SHOW",
 
 		F_WithDisabledFrame = function(self, func)
-			if CT.VLE2X then
+			if CT.VGE2X then
 				func(CraftFrameAvailableFilterCheckButton);
 				func(CraftFrameFilterDropDown);
 			end
@@ -5465,7 +5517,7 @@ local function LF_AddOnCallback_Blizzard_CraftUI(addon)
 	local Frame = LF_HookFrame(addon, meta);
 	VT.UIFrames[addon] = Frame;
 	--
-	if CT.VLE2X then
+	if CT.VGE2X then
 		CraftFrameAvailableFilterCheckButton:ClearAllPoints();
 		CraftFrameAvailableFilterCheckButton:SetPoint("TOPLEFT", CraftFrame, "TOPLEFT", 68, -56);
 		CraftFrameAvailableFilterCheckButton:SetSize(20, 20);

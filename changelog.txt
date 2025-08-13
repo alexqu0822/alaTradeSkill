@@ -1,4 +1,7 @@
 
+2025-08-13
+Fix an issue occured in some language.
+
 2025-08-06
 Change the default phase to 4 in wotlk.
 
