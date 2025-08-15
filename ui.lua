@@ -442,37 +442,22 @@ end
 							for index = 1, num do
 								local sname, srank = Frame.F_GetRecipeInfo(index);
 								if sname ~= nil and srank ~= nil and srank ~= 'header' then
-									local sid = Frame.F_GetRecipeSpellID ~= nil and Frame.F_GetRecipeSpellID(index) or nil;
+									local sid = Frame.F_GetRecipeSpellID(pid, index);
 									if sid == nil then
-										local cid = Frame.F_GetRecipeItemID(index);
-										if cid ~= nil then
-											local sid = DataAgent.get_sid_by_pid_sname_cid(pid, sname, cid);
-											local info = DataAgent.get_info_by_sid(sid);
-											if info ~= nil then
-												if hash[sid] ~= nil then
-													MT.Debug("UpdateFrame#0E3", pid .. "#" .. cid .. "#" .. sname .. "#" .. sid);
-												else
-													sids[#sids + 1] = sid;
-													hash[sid] = index;
-													if notlinked then
-														DataAgent.MarkKnown(sid, CT.SELFGUID);
-													end
-												end
-												if index == Frame.F_GetSelection() then
-													Frame.selected_sid = sid;
-												end
-											else
-												MT.Debug("UpdateFrame#0E2", pid .. "#" .. cid .. "#" .. sname, sid or "_NIL");
-											end
-										else
-											MT.Debug("UpdateFrame#0E1", pid .. "#" .. sname);
-										end
+										MT.Debug("UpdateFrame#0E2", pid, sname, "_NIL");
 									else
-										sids[#sids + 1] = sid;
-										hash[sid] = index;
-										DataAgent.DynamicCreateInfo(Frame, pid, cur_rank, index, sid, srank);
-										if notlinked then
-											DataAgent.MarkKnown(sid, CT.SELFGUID);
+										if hash[sid] ~= nil then
+											MT.Debug("UpdateFrame#0E3", pid, sname, sid);
+										else
+											sids[#sids + 1] = sid;
+											hash[sid] = index;
+											if notlinked then
+												DataAgent.MarkKnown(sid, CT.SELFGUID);
+											end
+											DataAgent.DynamicCreateInfo(Frame, pid, cur_rank, index, sid, srank);
+											if index == Frame.F_GetSelection() then
+												Frame.selected_sid = sid;
+											end
 										end
 									end
 								end
@@ -588,33 +573,23 @@ end
 							for index = 1, num do
 								local sname, srank = Frame.F_GetRecipeInfo(index);
 								if sname ~= nil and srank ~= nil and srank ~= 'header' then
-									local sid = Frame.F_GetRecipeSpellID(index);
+									local sid = Frame.F_GetRecipeSpellID(pid, index);
 									if sid == nil then
-										local cid = Frame.F_GetRecipeItemID(index);
-										if cid ~= nil then
-											local sid = DataAgent.get_sid_by_pid_sname_cid(pid, sname, cid);
-											local info = DataAgent.get_info_by_sid(sid);
-											if info ~= nil then
-												if hash[sid] == nil then
-													sids[#sids + 1] = sid;
-													hash[sid] = index;
-													if notlinked then
-														DataAgent.MarkKnown(sid, CT.SELFGUID);
-													end
-												end
-											else
-												MT.Debug("UpdateFrame#0E2", pid .. "#" .. cid .. "#" .. sname);
-											end
-										else
-											MT.Debug("UpdateFrame#0E1", pid .. "#" .. sname);
-										end
+										MT.Debug("UpdateFrame#0E2", pid, sname, "_NIL");
 									else
-										sids[#sids + 1] = sid;
-										hash[sid] = index;
-										if notlinked then
-											DataAgent.MarkKnown(sid, CT.SELFGUID);
+										if hash[sid] ~= nil then
+											MT.Debug("UpdateFrame#0E3", pid, sname, sid);
+										else
+											sids[#sids + 1] = sid;
+											hash[sid] = index;
+											if notlinked then
+												DataAgent.MarkKnown(sid, CT.SELFGUID);
+											end
+											DataAgent.DynamicCreateInfo(Frame, pid, cur_rank, index, sid, srank);
+											if index == Frame.F_GetSelection() then
+												Frame.selected_sid = sid;
+											end
 										end
-										DataAgent.DynamicCreateInfo(Frame, pid, cur_rank, index, sid, srank);
 									end
 								end
 							end
@@ -1445,7 +1420,7 @@ end
 		SearchEditBoxNameOnly:SetScript("OnEnter", LT_SharedMethod.ButtonInfoOnEnter);
 		SearchEditBoxNameOnly:SetScript("OnLeave", LT_SharedMethod.ButtonInfoOnLeave);
 		SearchEditBoxNameOnly:SetScript("OnClick", function(self)
-			local pid = Frame.flag or Frame.F_GetPID() or Frame.F_GetPID();
+			local pid = Frame.flag or Frame.F_GetPID();
 			if pid ~= nil then
 				MT.ChangeSetWithUpdate(VT.SET[pid], "searchNameOnly", self:GetChecked());
 			end
@@ -4093,7 +4068,7 @@ local function LF_HookFrame(addon, meta)
 	Frame.T_OnSelection = {  };
 	Frame.prev_selected_sid = nil;
 	function Frame.F_OnSelection()
-		Frame.selected_sid = Frame.F_GetRecipeSpellID(Frame.F_GetSelection());
+		Frame.selected_sid = Frame.F_GetRecipeSpellID(Frame.flag or Frame.F_GetPID(), Frame.F_GetSelection());
 		-- MT.Debug("OnSelection", Frame.prev_selected_sid, Frame.selected_sid);
 		if Frame.prev_selected_sid ~= Frame.selected_sid then
 			Frame.prev_selected_sid = Frame.selected_sid;
@@ -4925,35 +4900,6 @@ local function LF_AddOnCallback_Blizzard_TradeSkillUI(addon)
 		local UIDropDownMenu_SetSelectedID = _G.UIDropDownMenu_SetSelectedID;
 	-->
 
-	local function F_GetPID()
-		if CT.VGE3X then
-			for index = 1, GetNumTradeSkills() do
-				local link = GetTradeSkillRecipeLink(index);
-				if link then
-					local sid = tonumber(strmatch(link, "[a-zA-Z]:(%d+)"));
-					local pid = DataAgent.get_pid_by_sid(sid);
-					if pid then
-						return pid;
-					end
-				end
-			end
-		else
-			for index = 1, GetNumTradeSkills() do
-				local link = GetTradeSkillItemLink(index);
-				if link then
-					local cid = tonumber(strmatch(link, "[a-zA-Z]:(%d+)"));
-					local num, sids = DataAgent.get_sid_by_cid(cid);
-					if num == 1 then
-						local pid = DataAgent.get_pid_by_sid(sids[1]);
-						if pid then
-							return pid;
-						end
-					end
-				end
-			end
-		end
-		return DataAgent.get_pid_by_pname(GetTradeSkillLine());
-	end
 	local meta; meta = {
 		HookedFrame = TradeSkillFrame,
 		HookedDetailFrame = TradeSkillDetailScrollFrame,
@@ -5072,9 +5018,7 @@ local function LF_AddOnCallback_Blizzard_TradeSkillUI(addon)
 
 		F_IsLinked = IsTradeSkillLinked,
 		F_GetSkillName = GetTradeSkillLine,
-		F_GetSkillInfo = GetTradeSkillLine,
-		-- F_GetSkillInfo = function(...) return GetTradeSkillLine(...), DataAgent.MAXRANK, DataAgent.MAXRANK; end,
-			--	skillName, cur_rank, max_rank
+		F_GetSkillInfo = GetTradeSkillLine,	--	@return	skillName, cur_rank, max_rank
 
 		F_GetRecipeNumAvailable = GetNumTradeSkills,
 		F_DoTradeCraft = DoTradeSkill,
@@ -5082,27 +5026,62 @@ local function LF_AddOnCallback_Blizzard_TradeSkillUI(addon)
 		F_SetSelection = TradeSkillFrame_SetSelection,		-- SelectTradeSkill
 		F_GetSelection = GetTradeSkillSelectionIndex,
 
-		F_GetPID = F_GetPID,
+		F_GetPID = function()
+			if CT.VGE3X then
+				for index = 1, GetNumTradeSkills() do
+					local link = GetTradeSkillRecipeLink(index);
+					if link then
+						local sid = tonumber(strmatch(link, "[a-zA-Z]:(%d+)"));
+						local pid = DataAgent.get_pid_by_sid(sid);
+						if pid then
+							return pid;
+						end
+					end
+				end
+			else
+				for index = 1, GetNumTradeSkills() do
+					local sname, header = GetTradeSkillInfo(index);
+					if header ~= 'header' then
+						if sname then
+							local pid = DataAgent.try_get_pid_by_sname(sname);
+							if pid then
+								return pid;
+							end
+						end
+						local cid = meta.F_GetRecipeItemID(index);
+						if cid then
+							local num, sids = DataAgent.get_sid_by_cid(cid);
+							if num == 1 then
+								local pid = DataAgent.get_pid_by_sid(sids[1]);
+								if pid then
+									return pid;
+								end
+							end
+						end
+					end
+				end
+			end
+			return DataAgent.get_pid_by_pname(GetTradeSkillLine());
+		end,
 		F_GetRecipeInfo = GetTradeSkillInfo,
 			--	skillName, difficult & header, numAvailable, isExpanded = GetTradeSkillInfo(skillIndex)
 		F_GetRecipeSpellID = CT.VGE3X and
-								function(arg1)
-									local link = GetTradeSkillRecipeLink(arg1);
+								function(pid, index)
+									local link = GetTradeSkillRecipeLink(index);
 									return link and tonumber(strmatch(link, "[a-zA-Z]:(%d+)")) or nil;
 								end
 							or
-								function(arg1)
-									return DataAgent.get_sid_by_pid_sname_cid(F_GetPID(), meta.F_GetRecipeInfo(arg1), meta.F_GetRecipeItemID(arg1));
+								function(pid, index)
+									return DataAgent.get_sid_by_pid_sname_cid(pid, meta.F_GetRecipeInfo(index), meta.F_GetRecipeItemID(index));
 								end,
 		F_GetRecipeSpellLink = CT.VGE3X and GetTradeSkillRecipeLink or nil;
-		F_GetRecipeItemID = function(arg1) local link = GetTradeSkillItemLink(arg1); return link and tonumber(strmatch(link, "[a-zA-Z]:(%d+)")) or nil; end,
+		F_GetRecipeItemID = function(index) local link = GetTradeSkillItemLink(index); return link and tonumber(strmatch(link, "[a-zA-Z]:(%d+)")) or nil; end,
 		F_GetRecipeItemLink = GetTradeSkillItemLink,
 		F_GetRecipeIcon = GetTradeSkillIcon,
 		F_GetRecipeDesc = function() return ""; end,
 		F_GetRecipeTools = GetTradeSkillTools,
 		F_GetRecipeCooldown = GetTradeSkillCooldown,
-		F_GetRecipeNumMade = GetTradeSkillNumMade,
-			--	num_Made_Min, num_Made_Max
+		F_GetRecipeNumMade = GetTradeSkillNumMade,	--	@return	num_Made_Min, num_Made_Max
 
 		F_GetRecipeNumReagents = GetTradeSkillNumReagents,
 		F_GetRecipeReagentLink = GetTradeSkillReagentItemLink,
@@ -5339,22 +5318,6 @@ local function LF_AddOnCallback_Blizzard_CraftUI(addon)
 		local CraftCancelButton = _G.CraftCancelButton;
 	-->
 
-	local function F_GetPID()
-		for index = 1, GetNumCrafts() do
-			local link = GetCraftItemLink(index);
-			if link then
-				local cid = tonumber(strmatch(link, "[a-zA-Z]:(%d+)"));
-				local num, sids = DataAgent.get_sid_by_cid(cid);
-				if num == 1 then
-					local pid = DataAgent.get_pid_by_sid(sids[1]);
-					if pid then
-						return pid;
-					end
-				end
-			end
-		end
-		return DataAgent.get_pid_by_pname(GetCraftName());
-	end
 	local meta; meta = {
 		HookedFrame = CraftFrame,
 		HookedDetailFrame = CraftDetailScrollFrame,
@@ -5452,19 +5415,41 @@ local function LF_AddOnCallback_Blizzard_CraftUI(addon)
 		F_SetSelection = CraftFrame_SetSelection,		-- SelectCraft
 		F_GetSelection = GetCraftSelectionIndex,
 
-		F_GetPID = F_GetPID,
-		F_GetRecipeInfo = function(arg1) local _1, _2, _3, _4, _5, _6, _7 = GetCraftInfo(arg1); return _1, _3, _4, _5, _6, _7; end,
+		F_GetPID = function()
+			for index = 1, GetNumCrafts() do
+				local sname = GetCraftInfo(index);
+				if sname then
+					local pid = DataAgent.try_get_pid_by_sname(sname);
+					if pid then
+						return pid;
+					end
+				end
+				local link = GetCraftItemLink(index);
+				if link then
+					local cid = tonumber(strmatch(link, "[a-zA-Z]:(%d+)"));
+					local num, sids = DataAgent.get_sid_by_cid(cid);
+					if num == 1 then
+						local pid = DataAgent.get_pid_by_sid(sids[1]);
+						if pid then
+							return pid;
+						end
+					end
+				end
+			end
+			return DataAgent.get_pid_by_pname(GetCraftName());
+		end,
+		F_GetRecipeInfo = function(index) local _1, _2, _3, _4, _5, _6, _7 = GetCraftInfo(index); return _1, _3, _4, _5, _6, _7; end,
 			--	craftName, craftSubSpellName(""), difficult, numAvailable, isExpanded, trainingPointCost, requiredLevel = GetCraftInfo(index)
 		F_GetRecipeSpellID = CT.VGE3X and
-								function(arg1)
-									local link = GetCraftRecipeLink(arg1);
+								function(pid, index)
+									local link = GetCraftRecipeLink(index);
 									return link and tonumber(strmatch(link, "[a-zA-Z]:(%d+)")) or nil;
 								end
 							or
-								function(arg1)
-									return DataAgent.get_sid_by_pid_sname_cid(F_GetPID(), meta.F_GetRecipeInfo(arg1), meta.F_GetRecipeItemID(arg1));
+								function(pid, index)
+									return DataAgent.get_sid_by_pid_sname_cid(pid, meta.F_GetRecipeInfo(index), meta.F_GetRecipeItemID(index));
 								end,
-		F_GetRecipeItemID = function(arg1) local link = GetCraftItemLink(arg1); return link and tonumber(strmatch(link, "[a-zA-Z]:(%d+)")) or nil; end,
+		F_GetRecipeItemID = function(index) local link = GetCraftItemLink(index); return link and tonumber(strmatch(link, "[a-zA-Z]:(%d+)")) or nil; end,
 		F_GetRecipeItemLink = GetCraftItemLink,
 		F_GetRecipeIcon = GetCraftIcon,
 		F_GetRecipeDesc = GetCraftDescription,

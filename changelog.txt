@@ -1,4 +1,7 @@
 
+2025-08-15
+Try to fix the issue that enchanting does work.
+
 2025-08-13
 Fix an issue occured in some language.
 
