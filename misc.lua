@@ -71,10 +71,22 @@ if not _G.ALA_HOOK_ChatEdit_InsertLink then
 			end
 		end
 	end
+	local function ExistAndVisible(obj)
+		return obj and obj:IsVisible();
+	end
+	local function Overrided()
+		if ExistAndVisible(AuctionHouseFrame) and ExistAndVisible(AuctionHouseFrame.SearchBar) and ExistAndVisible(AuctionHouseFrame.SearchBar.SearchBox) then
+			return true;
+		end
+		if ExistAndVisible(AuctionFrame) and ExistAndVisible(AuctionFrameBrowse) and ExistAndVisible(BrowseName) then
+			return true;
+		end
+		return false;
+	end
 	local __ChatEdit_InsertLink = _G.ChatEdit_InsertLink;
 	function _G.ChatEdit_InsertLink(link, addon, ...)
 		if not link then return; end
-		if addon == false then
+		if addon == false or Overrided() then
 			return __ChatEdit_InsertLink(link, addon, ...);
 		end
 		local editBox = ChatEdit_ChooseBoxForSend();

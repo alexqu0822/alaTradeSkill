@@ -2,7 +2,7 @@
 	by ALA
 --]]--
 
-local __version = 251105;
+local __version = 251107;
 
 local _G = _G;
 _G.__ala_meta__ = _G.__ala_meta__ or {  };
@@ -44,6 +44,7 @@ end
 	local SendAddonMessage = C_ChatInfo ~= nil and C_ChatInfo.SendAddonMessage or SendAddonMessage;
 	local After = C_Timer.After;
 	local GetPlayerInfoByGUID = GetPlayerInfoByGUID;
+	local UnitGUID = UnitGUID;
 	local UnitLevel = UnitLevel;
 	local UnitInBattleground = UnitInBattleground;
 	local GetNumTalentGroups = GetNumTalentGroups or function() return 1; end
@@ -1282,7 +1283,10 @@ end
 					COMM_GLYPH_PREFIX ..
 					__base64[numGroup] ..
 					__base64[activeGroup] ..
-					__base64[lowbyte] .. __base64[(len1 - lowbyte) / 64] .. code1;
+					__base64[lowbyte] .. __base64[(len1 - lowbyte) / 64] .. code1,
+					1,
+					1,
+					data1;
 		else
 			local code1 = __emulib.EncodeGlyphBlock(data1);
 			local len1 = #code1;
@@ -1295,20 +1299,52 @@ end
 					__base64[numGroup] ..
 					__base64[activeGroup] ..
 					__base64[lowbyte1] .. __base64[(len1 - lowbyte1) / 64] .. code1 ..
-					__base64[lowbyte2] .. __base64[(len2 - lowbyte2) / 64] .. code2;
+					__base64[lowbyte2] .. __base64[(len2 - lowbyte2) / 64] .. code2,
+					2,
+					activeGroup,
+					data1,
+					data2;
 		end
 	end
 	function __emulib.EncodePlayerGlyphDataV2()
 		if SUPPORT_GLYPH then
-			return __emulib.EncodeGlyphDataV2(
-				_GetNumTalentGroups(false, false),
-				_GetActiveTalentGroup(false, false),
-				__emulib.GetGlyphData(nil, 1),
-				__emulib.GetGlyphData(nil, 2)
-			);
+			local numGroup = _GetNumTalentGroups(false, false);
+			local activeGroup = _GetActiveTalentGroup(false, false);
+			if numGroup < 2 then
+				return __emulib.EncodeGlyphDataV2(
+					numGroup,
+					activeGroup,
+					__emulib.GetGlyphData(nil, 1)
+				);
+			else
+				return __emulib.EncodeGlyphDataV2(
+					numGroup,
+					activeGroup,
+					__emulib.GetGlyphData(nil, 1),
+					__emulib.GetGlyphData(nil, 2)
+				);
+			end
 		end
 	end
 	function __emulib.EncodeInspectGlyphDataV2(unit)
+		if SUPPORT_GLYPH and unit and UnitGUID(unit) then
+			local numGroup = _GetNumTalentGroups(true, false);
+			local activeGroup = _GetActiveTalentGroup(true, false);
+			if numGroup < 2 then
+				return __emulib.EncodeGlyphDataV2(
+					numGroup,
+					activeGroup,
+					__emulib.GetGlyphData(nil, 1, true, unit)
+				);
+			else
+				return __emulib.EncodeGlyphDataV2(
+					numGroup,
+					activeGroup,
+					__emulib.GetGlyphData(nil, 1, true, unit),
+					__emulib.GetGlyphData(nil, 2, true, unit)
+				);
+			end
+		end
 	end
 -->		Addon Pack
 	--
@@ -1503,7 +1539,7 @@ end
 					else
 						item = nil;
 					end
-					if DataTable[start + i] ~= item then
+					if DataTable[slot] ~= item then
 						DataTable[slot] = item;
 						changed = true;
 					end

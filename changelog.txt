@@ -1,3 +1,5 @@
+2025-11-25
+no longer search by shift-clik when auctionhouse opened.
 
 2025-11-01
 Delete a wrong skill id.
