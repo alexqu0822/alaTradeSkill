@@ -13,6 +13,7 @@
 	<script file = "aux-addon.lua" />
 	<script file = "tdAuction.lua" />
 	<script file = "TradeSkillMaster.lua" />
+	<script file = "EasyAuction.lua" />
 
 	<script file = "Source.lua" />
 	<script file = "MissingTradeSkillsList.lua" />

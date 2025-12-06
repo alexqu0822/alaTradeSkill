@@ -1,3 +1,6 @@
+2025-12-05
+EasyAuction support
+
 2025-12-01
 fix an auctionhouse issue in wotlk-titan
 
