@@ -1,3 +1,6 @@
+2025-12-20
+GF_Auction support
+
 2025-12-05
 EasyAuction support
 
