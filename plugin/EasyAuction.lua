@@ -92,15 +92,20 @@ end
 
 MT.RegsiterAuctionModOnLoad("EasyAuction", function()
     local version = GetAddOnMetadata("EasyAuction", "Version");
-    mod.version = versionl
-    mod.dbver = 1;
+    mod.version = version
+    mod.dbver = 1
     if version then
-        local major, minor, patch = strsplit(".", version);
-        major = tonumber(major);
-        minor = tonumber(minor);
-        patch = tonumber(patch);
-        if major and major >= 2 and minor and minor >= 4 and patch and patch >= 6 then
-            mod.dbver = 2;
+        local major, minor, patch = strsplit(".", version)
+        major = tonumber(major)
+        minor = tonumber(minor)
+        patch = tonumber(patch)
+        if major and minor and patch then
+            if major > 2
+                or (major == 2 and minor > 3)
+                or (major == 2 and minor == 3 and patch >= 6)
+            then
+                mod.dbver = 2
+            end
         end
     end
     MT.AddAuctionMod("EasyAuction", mod)

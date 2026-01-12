@@ -18,7 +18,7 @@ DataAgent.__DataVersion = 250801;
 
 DataAgent.CURPHASE = 1;
 DataAgent.MAXPHASE = 5;
-DataAgent.MAXRANK = 525;
+DataAgent.MAXRANK = 600;
 DataAgent.DBMINPID = 1;
 DataAgent.DBMAXPID = 16;
 
