@@ -26,7 +26,7 @@ local DT = {  }; __private.DT = DT;		--	data
 	local SendChatMessage = SendChatMessage;
 	local GetSpellInfo = GetSpellInfo;
 	local GetSpellCooldown = GetSpellCooldown;
-	local IsAddOnLoaded = IsAddOnLoaded;
+	local IsAddOnLoaded = C_AddOns and C_AddOns.IsAddOnLoaded or IsAddOnLoaded;
 	local CreateFrame = CreateFrame;
 	local GetTime = GetTime;
 	local _G = _G;

@@ -91,6 +91,7 @@ function mod.F_QueryPriceByName(name, num)
 end
 
 MT.RegsiterAuctionModOnLoad("EasyAuction", function()
+    local GetAddOnMetadata = C_AddOns and C_AddOns.GetAddOnMetadata or GetAddOnMetadata;
     local version = GetAddOnMetadata("EasyAuction", "Version");
     mod.version = version
     mod.dbver = 1
