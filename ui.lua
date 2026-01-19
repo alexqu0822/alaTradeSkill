@@ -270,6 +270,13 @@ function LT_SharedMethod.ButtonInfoOnLeave(self)
 end
 
 --	Update
+	local T_ExpansionThreshold = {
+		[0] = 0,
+		[1] = 300,
+		[2] = 350,
+		[3] = 425,
+		[4] = 500,
+	};
 	function LT_SharedMethod.ProfitFilterList(Frame, list, only_cost)
 		local sid_list = Frame.list;
 		wipe(list);
@@ -282,7 +289,9 @@ end
 					local sid = sid_list[index];
 					local price_a_product, price_a_material, price_a_material_known, missing = MT.GetPriceInfoBySID(VT.SET[pid].phase, sid, DataAgent.get_num_made_by_sid(sid), nil);
 					if price_a_material then
-						list[#list + 1] = { sid, price_a_material, DataAgent.get_difficulty_rank_by_sid(sid, cur_rank), };
+						if not (VT.SET[pid].PROFIT_SHOW_CUR_EXPAC_ONLY and DataAgent.get_learn_rank_by_sid(sid) < (T_ExpansionThreshold[GetExpansionLevel and GetExpansionLevel() or 0] or 0)) then
+							list[#list + 1] = { sid, price_a_material, DataAgent.get_difficulty_rank_by_sid(sid, cur_rank), };
+						end
 					end
 				end
 				sort(list, function(v1, v2)
@@ -300,7 +309,9 @@ end
 					local price_a_product, price_a_material, price_a_material_known, missing = MT.GetPriceInfoBySID(VT.SET[pid].phase, sid, DataAgent.get_num_made_by_sid(sid), nil);
 					if price_a_product and price_a_material then
 						if price_a_product > price_a_material then
-							list[#list + 1] = { sid, price_a_product - price_a_material, };
+							if not (VT.SET[pid].PROFIT_SHOW_CUR_EXPAC_ONLY and DataAgent.get_learn_rank_by_sid(sid) < (T_ExpansionThreshold[GetExpansionLevel and GetExpansionLevel() or 0] or 0)) then
+								list[#list + 1] = { sid, price_a_product - price_a_material, };
+							end
 						end
 					end
 				end
@@ -319,6 +330,7 @@ end
 				local only_cost = VT.SET[pid].PROFIT_SHOW_COST_ONLY;
 				LT_SharedMethod.ProfitFilterList(Frame, list, only_cost);
 				ProfitFrame.CostOnlyCheck:SetChecked(only_cost);
+				ProfitFrame.CurExpacOnlyCheck:SetChecked(VT.SET[pid].PROFIT_SHOW_CUR_EXPAC_ONLY);
 			else
 				LT_SharedMethod.ProfitFilterList(Frame, list);
 			end
@@ -3413,6 +3425,15 @@ end
 			LT_SharedMethod.UpdateProfitFrame(Frame);
 		end
 	end
+	function LT_WidgetMethod.ProfitFrameCurExpacOnlyCheck_OnClick(self)
+		local Frame = self.Frame;
+		local checked = self:GetChecked();
+		local pid = Frame.flag or Frame.F_GetPID();
+		if pid ~= nil then
+			VT.SET[pid].PROFIT_SHOW_CUR_EXPAC_ONLY = checked;
+			LT_SharedMethod.UpdateProfitFrame(Frame);
+		end
+	end
 	function LT_WidgetMethod.ProfitFrameCloseButton_OnClick(self)
 		local Frame = self.Frame;
 		local pid = Frame.flag or Frame.F_GetPID();
@@ -4485,6 +4506,21 @@ local function LF_HookFrame(addon, meta)
 		ProfitFrame.CostOnlyCheck = CostOnlyCheck;
 		CostOnlyCheck.ProfitFrame = ProfitFrame;
 		CostOnlyCheck.Frame = Frame;
+
+		local CurExpacOnlyCheck = CreateFrame('CHECKBUTTON', nil, ProfitFrame, "OptionsBaseCheckButtonTemplate");
+		CurExpacOnlyCheck:SetSize(24, 24);
+		CurExpacOnlyCheck:SetHitRectInsets(0, 0, 0, 0);
+		CurExpacOnlyCheck:SetPoint("LEFT", CostOnlyCheck.Text, "RIGHT", 8, 0);
+		CurExpacOnlyCheck:Show();
+		local Text = ProfitFrame:CreateFontString(nil, "ARTWORK");
+		Text:SetFont(T_UIDefinition.FrameNormalFont, T_UIDefinition.FrameNormalFontSize, T_UIDefinition.FrameNormalFontFlag);
+		Text:SetPoint("LEFT", CurExpacOnlyCheck, "CENTER", 10, 0);
+		Text:SetText(l10n["PROFIT_SHOW_CUR_EXPAC_ONLY"]);
+		CurExpacOnlyCheck.Text = Text;
+		CurExpacOnlyCheck:SetScript("OnClick", LT_WidgetMethod.ProfitFrameCurExpacOnlyCheck_OnClick);
+		ProfitFrame.CurExpacOnlyCheck = CurExpacOnlyCheck;
+		CurExpacOnlyCheck.ProfitFrame = ProfitFrame;
+		CurExpacOnlyCheck.Frame = Frame;
 
 		local CloseButton = CreateFrame('BUTTON', nil, ProfitFrame, "UIPanelCloseButton");
 		CloseButton:SetSize(32, 32);
