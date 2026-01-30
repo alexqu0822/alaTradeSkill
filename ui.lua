@@ -5399,8 +5399,8 @@ local function LF_AddOnCallback_Blizzard_CraftUI(addon)
 		F_ClearFilter = CT.VGE2X and function()
 			CraftOnlyShowMakeable(false);
 			CraftFrameAvailableFilterCheckButton:SetChecked(false);
-			SetCraftFilter(1);
-			UIDropDownMenu_SetSelectedID(CraftFrameFilterDropDown, 1);
+			SetCraftFilter(12);
+			UIDropDownMenu_SetSelectedID(CraftFrameFilterDropDown, 12);
 		end or MT.noop,
 
 		F_IsLinked = function() return false; end,
