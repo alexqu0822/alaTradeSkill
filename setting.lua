@@ -135,6 +135,7 @@ MT.BuildEnv("setting");
 		searchNameOnly = false,
 		--
 		PROFIT_SHOW_COST_ONLY = false,
+		PROFIT_SHOW_CUR_EXPAC_ONLY = true,
 		--
 	};
 	local default_var = {
