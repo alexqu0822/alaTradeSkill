@@ -1,3 +1,6 @@
+2026-03-01
+TBC enchanting fix.
+
 2026-01-16
 TBC update.
 
