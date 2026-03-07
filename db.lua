@@ -37,7 +37,7 @@ local DT = __private.DT;
 -->
 MT.BuildEnv("db");
 -->		predef
-	local index_validated = 1;
+	local index_expansion = 1;
 	local index_phase = 2;
 	local index_pid = 3;
 	local index_sid = 4;
@@ -1584,6 +1584,7 @@ end
 -->
 
 MT.RegisterOnInit('db', function(LoggedIn)
+	local LT_Validated = {  };
 	for pid = DataAgent.DBMINPID, DataAgent.DBMAXPID do
 		local list = T_TradeSkill_RecipeList[pid];
 		if list ~= nil then
@@ -1592,7 +1593,7 @@ MT.RegisterOnInit('db', function(LoggedIn)
 			for index = 1, #list do
 				local sid = list[index];
 				local info = T_Recipe_Data[sid];
-				info[index_validated] = true;
+				LT_Validated[sid] = true;
 				local cid = info[index_cid];
 				if cid ~= nil then
 					local h1 = T_cis2sid[cid];
@@ -1642,7 +1643,7 @@ MT.RegisterOnInit('db', function(LoggedIn)
 			for index = 1, #list do
 				local sid = list[index];
 				local info = T_Recipe_Data[sid];
-				info[index_validated] = true;
+				LT_Validated[sid] = true;
 				local cid = info[index_cid];
 				if cid ~= nil then
 					local h1 = T_cis2sid[cid];
@@ -1676,7 +1677,7 @@ MT.RegisterOnInit('db', function(LoggedIn)
 		end
 	end
 	for sid, info in next, T_Recipe_Data do
-		if not info[index_validated] then
+		if not LT_Validated[sid] then
 			T_Recipe_Data[sid] = nil;
 		end
 	end

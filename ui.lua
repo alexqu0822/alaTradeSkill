@@ -110,7 +110,7 @@ local DT = __private.DT;
 -->
 MT.BuildEnv("ui");
 -->		predef
-	local index_validated = 1;
+	local index_expansion = 1;
 	local index_phase = 2;
 	local index_pid = 3;
 	local index_sid = 4;
@@ -270,13 +270,6 @@ function LT_SharedMethod.ButtonInfoOnLeave(self)
 end
 
 --	Update
-	local T_ExpansionThreshold = {
-		[0] = 0,
-		[1] = 300,
-		[2] = 350,
-		[3] = 425,
-		[4] = 500,
-	};
 	function LT_SharedMethod.ProfitFilterList(Frame, list, only_cost)
 		local sid_list = Frame.list;
 		wipe(list);
@@ -289,7 +282,7 @@ end
 					local sid = sid_list[index];
 					local price_a_product, price_a_material, price_a_material_known, missing = MT.GetPriceInfoBySID(VT.SET[pid].phase, sid, DataAgent.get_num_made_by_sid(sid), nil);
 					if price_a_material then
-						if not (VT.SET[pid].PROFIT_SHOW_CUR_EXPAC_ONLY and DataAgent.get_learn_rank_by_sid(sid) < (T_ExpansionThreshold[GetExpansionLevel and GetExpansionLevel() or 0] or 0)) then
+						if not (VT.SET[pid].PROFIT_SHOW_CUR_EXPAC_ONLY and CT.EXPANSIONTHRESHOLD > 0 and DataAgent.get_learn_rank_by_sid(sid) < CT.EXPANSIONTHRESHOLD) then
 							list[#list + 1] = { sid, price_a_material, DataAgent.get_difficulty_rank_by_sid(sid, cur_rank), };
 						end
 					end
@@ -309,7 +302,7 @@ end
 					local price_a_product, price_a_material, price_a_material_known, missing = MT.GetPriceInfoBySID(VT.SET[pid].phase, sid, DataAgent.get_num_made_by_sid(sid), nil);
 					if price_a_product and price_a_material then
 						if price_a_product > price_a_material then
-							if not (VT.SET[pid].PROFIT_SHOW_CUR_EXPAC_ONLY and DataAgent.get_learn_rank_by_sid(sid) < (T_ExpansionThreshold[GetExpansionLevel and GetExpansionLevel() or 0] or 0)) then
+							if not (VT.SET[pid].PROFIT_SHOW_CUR_EXPAC_ONLY and CT.EXPANSIONTHRESHOLD > 0 and DataAgent.get_learn_rank_by_sid(sid) < CT.EXPANSIONTHRESHOLD) then
 								list[#list + 1] = { sid, price_a_product - price_a_material, };
 							end
 						end
@@ -2646,6 +2639,8 @@ end
 			LT_SharedMethod.StyleBLZScrollFrame(ProfitFrame.ScrollFrame);
 			ProfitFrame.CostOnlyCheck:SetSize(24, 24);
 			LT_SharedMethod.StyleBLZCheckButton(ProfitFrame.CostOnlyCheck);
+			ProfitFrame.CurExpacOnlyCheck:SetSize(24, 24);
+			LT_SharedMethod.StyleBLZCheckButton(ProfitFrame.CurExpacOnlyCheck);
 			local ProfitFrameCloseButton = ProfitFrame.CloseButton;
 			ProfitFrameCloseButton:SetSize(32, 32);
 			LT_SharedMethod.StyleBLZButton(ProfitFrameCloseButton, not loading and ProfitFrameCloseButton.backup or nil);
@@ -2762,6 +2757,8 @@ end
 			LT_SharedMethod.StyleModernScrollFrame(ProfitFrame.ScrollFrame);
 			ProfitFrame.CostOnlyCheck:SetSize(14, 14);
 			LT_SharedMethod.StyleModernCheckButton(ProfitFrame.CostOnlyCheck);
+			ProfitFrame.CurExpacOnlyCheck:SetSize(14, 14);
+			LT_SharedMethod.StyleModernCheckButton(ProfitFrame.CurExpacOnlyCheck);
 			local ProfitFrameCloseButton = ProfitFrame.CloseButton;
 			ProfitFrameCloseButton:SetSize(16, 16);
 			LT_SharedMethod.StyleModernButton(ProfitFrameCloseButton, ProfitFrameCloseButton.backup == nil, T_UIDefinition.TEXTURE_MODERN_BUTTON_CLOSE);
@@ -5435,8 +5432,12 @@ local function LF_AddOnCallback_Blizzard_CraftUI(addon)
 		F_ClearFilter = CT.VGE2X and function()
 			CraftOnlyShowMakeable(false);
 			CraftFrameAvailableFilterCheckButton:SetChecked(false);
-			SetCraftFilter(1);
-			UIDropDownMenu_SetSelectedID(CraftFrameFilterDropDown, 1);
+			SetCraftFilter(0);
+			if CraftFrameFilterDropDown.UpdateSelections then
+				CraftFrameFilterDropDown:UpdateSelections();
+			else
+				UIDropDownMenu_SetSelectedID(CraftFrameFilterDropDown, 1);
+			end
 		end or MT.noop,
 
 		F_IsLinked = function() return false; end,
