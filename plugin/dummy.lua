@@ -4,6 +4,14 @@
 
 
 --	Howto
+--	实际并不需要放进alaTradeSkill的文件夹中，在哪儿都行
+--	Actually, the file doesn't have to be placed under the folder alaTradeSkill. Put it whereever u want.
+--	如果不放入alaTradeSkill文件夹中:		--	In that case: 
+--	local __private = __ala_meta__.prof;
+--	并且保证代码加载晚于alaTradeSkill	--	The file should be loaded after alaTradeSkill loaded.
+--	
+--	使用 `name = mod.F_QueryNameByID(ItemID)` 而不是 `GetItemInfo(ItemID)` 以保证结果	模块注册时，会自动添加 `mod.F_QueryNameByID` 函数
+--	using `name = mod.F_QueryNameByID(ItemID)` instead of `GetItemInfo(ItemID)`		`mod.F_QueryNameByID` is implemented by alaTradeSkill automatically.
 --[==[
 	local __addon, __private = ...;
 	local MT = __private.MT;
@@ -14,6 +22,20 @@
 
 	local mod = {  };
 	--****	Define methods.
+		--	must
+			function mod.F_QueryPriceByID(id, num)				return AHPrice;			--	nilable			--	must
+
+		--	optional.
+			-- function mod.F_OnDBUpdate(callback)					--	callback when price of new item add or refresh	--	当拍卖插件的价格数据更新
+			-- function mod.F_QueryPriceByName(name, num)			return AHPrice;			--	nilable			--	not used actually
+
+		--	optional. built-in alternative method declared in AuctionBase.lua. Define here will override the build-in methods.
+		--	可选。 alaTradeSkill内置以下函数。在此定义将覆盖内置函数
+			function mod.F_QueryVendorPriceByLink(link, num)	return VendorPrice;		--	nilable
+			function mod.F_QueryVendorPriceByID(id, num)		return VendorPrice;		--	nilable
+			function mod.F_QueryVendorPriceByName(name, num)	return VendorPrice;		--	nilable
+			function mod.F_QueryNameByID(id)					return name;			--	nilable
+			function mod.F_QueryQualityByID(id)					return quality;			--	nilable
 
 	MT.RegisterOnAddOnLoaded(ADDON_NAME, function()
 		--****	Define other methods of mod. Those to do after addon loaded. (hot-plug)
@@ -29,22 +51,7 @@
 
 	MT.FireCallback(
 		"AUCTION_MOD_LOADED",
-		{
-		--	must
-			function F_QueryPriceByID(id, num)				return AHPrice;			--	nilable			--	must
-
-		--	optional.
-			-- function F_OnDBUpdate(callback)					--	callback when price of new item add or refresh	--	当拍卖插件的价格数据更新
-			-- function F_QueryPriceByName(name, num)			return AHPrice;			--	nilable			--	not used actually
-
-		--	optional. built-in alternative method declared in AuctionBase.lua. Define here will override the build-in methods.
-		--	可选。 alaTradeSkill内置以下函数。在此定义将覆盖内置函数
-			function F_QueryVendorPriceByLink(link, num)	return VendorPrice;		--	nilable
-			function F_QueryVendorPriceByID(id, num)		return VendorPrice;		--	nilable
-			function F_QueryVendorPriceByName(name, num)	return VendorPrice;		--	nilable
-			function F_QueryNameByID(id)					return name;			--	nilable
-			function F_QueryQualityByID(id)					return quality;			--	nilable
-		}
+		mod
 	);
 	MT.FireCallback(
 		"UI_MOD_LOADED",

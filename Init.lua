@@ -112,15 +112,7 @@ local DT = {  }; __private.DT = DT;		--	data
 	end
 
 -->		constant
-	local LT_ExpansionThreshold = {
-		[0] = 0,
-		[1] = 300,
-		[2] = 350,
-		[3] = 425,
-		[4] = 500,
-	};
 	CT.EXPANSIONLEVEL = GetExpansionLevel and GetExpansionLevel() or -1;
-	CT.EXPANSIONTHRESHOLD = LT_ExpansionThreshold[CT.EXPANSIONLEVEL] or -1;
 	CT.CLIENTVERSION, CT.BUILDNUMBER, CT.BUILDDATE, CT.TOCVERSION = GetBuildInfo();
 	CT.ISCLASSIC = CT.TOCVERSION >= 11400 and CT.TOCVERSION < 20000;
 	CT.SEASON = C_Seasons and C_Seasons.HasActiveSeason() and C_Seasons.GetActiveSeason() or nil;

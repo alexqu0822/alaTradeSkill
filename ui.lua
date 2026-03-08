@@ -155,10 +155,6 @@ MT.BuildEnv("ui");
 local ICON_FOR_NO_CID = 135913;
 local PERIODIC_UPDATE_PERIOD = 1.0;
 local MAXIMUM_VAR_UPDATE_PERIOD = 4.0;
-local F = CreateFrame('FRAME');
-F:SetScript("OnEvent", function(self, event, ...)
-	return self[event](...);
-end);
 
 local SkillTip = GameTooltip;	--	CreateFrame('GAMETOOLTIP', "_TradeSkillTooltip", UIParent, "GameTooltipTemplate");
 
@@ -169,10 +165,11 @@ local T_UIDefinition = {
 	TEXTURE_TRIANGLE = [[Interface\Transmogrify\Transmog-Tooltip-Arrow]],
 	TEXTURE_COLOR_SELECT = CT.TEXTUREPATH .. [[ColorSelect]],
 	TEXTURE_ALPHA_RIBBON = CT.TEXTUREPATH .. [[AlphaRibbon]],
-	TEXTURE_CONFIG = [[Interface\Buttons\UI-OptionsButton]],
-	TEXTURE_PROFIT = [[Interface\Buttons\UI-GroupLoot-Coin-UP]],
-	TEXTURE_EXPLORER = CT.TEXTUREPATH .. [[explorer]],
+	TEXTURE_CONFIG = CT.TEXTUREPATH .. [[Config]],
+	TEXTURE_PROFIT = CT.TEXTUREPATH .. [[Money]],
+	TEXTURE_EXPLORER = CT.TEXTUREPATH .. [[Explorer]],
 	TEXTURE_TOGGLE = CT.TEXTUREPATH .. [[UI]],
+	TEXTURE_OK = CT.TEXTUREPATH .. [[OK]],
 
 	TEXTURE_MODERN_ARROW_DOWN = CT.TEXTUREPATH .. [[ArrowDown]],
 	TEXTURE_MODERN_ARROW_UP = CT.TEXTUREPATH .. [[ArrowUp]],
@@ -269,8 +266,8 @@ function LT_SharedMethod.ButtonInfoOnLeave(self)
 	end
 end
 
---	Update
-	function LT_SharedMethod.ProfitFilterList(Frame, list, only_cost)
+--	Backup
+	function LT_SharedMethod.ProfitFilterList2(Frame, list, only_cost)
 		local sid_list = Frame.list;
 		wipe(list);
 		if VT.AuctionMod ~= nil then
@@ -282,7 +279,7 @@ end
 					local sid = sid_list[index];
 					local price_a_product, price_a_material, price_a_material_known, missing = MT.GetPriceInfoBySID(VT.SET[pid].phase, sid, DataAgent.get_num_made_by_sid(sid), nil);
 					if price_a_material then
-						if not (VT.SET[pid].PROFIT_SHOW_CUR_EXPAC_ONLY and CT.EXPANSIONTHRESHOLD > 0 and DataAgent.get_learn_rank_by_sid(sid) < CT.EXPANSIONTHRESHOLD) then
+						if not (VT.SET[pid].PROFIT_SHOW_CUR_EXPAC_ONLY and DataAgent.get_expansion_by_sid(sid) >= CT.EXPANSIONLEVEL) then
 							list[#list + 1] = { sid, price_a_material, DataAgent.get_difficulty_rank_by_sid(sid, cur_rank), };
 						end
 					end
@@ -302,7 +299,7 @@ end
 					local price_a_product, price_a_material, price_a_material_known, missing = MT.GetPriceInfoBySID(VT.SET[pid].phase, sid, DataAgent.get_num_made_by_sid(sid), nil);
 					if price_a_product and price_a_material then
 						if price_a_product > price_a_material then
-							if not (VT.SET[pid].PROFIT_SHOW_CUR_EXPAC_ONLY and CT.EXPANSIONTHRESHOLD > 0 and DataAgent.get_learn_rank_by_sid(sid) < CT.EXPANSIONTHRESHOLD) then
+							if not (VT.SET[pid].PROFIT_SHOW_CUR_EXPAC_ONLY and DataAgent.get_expansion_by_sid(sid) >= CT.EXPANSIONLEVEL) then
 								list[#list + 1] = { sid, price_a_product - price_a_material, };
 							end
 						end
@@ -313,7 +310,7 @@ end
 		end
 		return list;
 	end
-	function LT_SharedMethod.UpdateProfitFrame(Frame)
+	function LT_SharedMethod.UpdateProfitFrame2(Frame)
 		local ProfitFrame = Frame.ProfitFrame;
 		if ProfitFrame:IsVisible() then
 			-- MT.Debug("UpdateProfitFrame|cff00ff00#1L1|r");
@@ -329,6 +326,143 @@ end
 			end
 			 if not ProfitFrame.ScrollFrame:SetNumValue(#list) then
 				ProfitFrame.ScrollFrame:Update();
+			end
+		end
+	end
+
+--	Update
+	function LT_SharedMethod.ProfitFilterList(Frame, list, pid, cost, exps, start, num)
+		local sid_list = Frame.list;
+		if VT.AuctionMod ~= nil then
+			if cost and Frame.flag ~= 'explorer' then
+				local var = rawget(VT.VAR, pid);
+				local cur_rank = var and var.cur_rank or 0;
+				local cap = #sid_list;
+				local lim = start + num;
+				local res = lim - cap;
+				MT.Debug("ProfitFilterList|cff00ff00#1L1|r", pid, cost, start, num, cap, res);
+				if res < 0 then
+					cap = lim;
+				end
+				for index = start, cap do
+					local sid = sid_list[index];
+					local price_a_product, price_a_material, price_a_material_known, missing = MT.GetPriceInfoBySID(VT.SET[pid].phase, sid, DataAgent.get_num_made_by_sid(sid), nil);
+					if price_a_material then
+						if not (exps and DataAgent.get_expansion_by_sid(sid) < CT.EXPANSIONLEVEL) then
+							list[#list + 1] = { sid, price_a_material, DataAgent.get_difficulty_rank_by_sid(sid, cur_rank), };
+						end
+					end
+				end
+				MT.Debug("ProfitFilterList|cff00ff00#1L2|r", res > num * 0.5);
+				if res > num * 0.5 then
+					sort(list, function(v1, v2)
+						if v1[3] < v2[3] then
+							return true;
+						elseif v1[3] == v2[3] then
+							return v1[2] < v2[2];
+						else
+							return false;
+						end
+					end);
+					return nil;
+				end
+				return cap + 1;
+			else
+				local cap = #sid_list;
+				local lim = start + num;
+				local res = lim - cap;
+				-- MT.Debug("ProfitFilterList|cff00ff00#2L1|r", pid, cost, start, num, cap, res);
+				if res < 0 then
+					cap = lim;
+				end
+				for index = start, cap do
+					local sid = sid_list[index];
+					local price_a_product, price_a_material, price_a_material_known, missing = MT.GetPriceInfoBySID(VT.SET[pid].phase, sid, DataAgent.get_num_made_by_sid(sid), nil);
+					if price_a_product and price_a_material then
+						if price_a_product > price_a_material then
+							if not (exps and DataAgent.get_expansion_by_sid(sid) < CT.EXPANSIONLEVEL) then
+								list[#list + 1] = { sid, price_a_product - price_a_material, };
+							end
+						end
+					end
+					if sid == 16988 then
+					end
+				end
+				-- MT.Debug("ProfitFilterList|cff00ff00#2L2|r", res, num * 0.5, res > num * 0.5);
+				if res > num * 0.5 then
+					sort(list, function(v1, v2) return v1[2] > v2[2]; end);
+					return nil;
+				end
+				return cap + 1;
+			end
+		end
+		return nil;
+	end
+	function LT_SharedMethod.UpdateProfitFramePeriodic(Frame)
+		local ProfitFrame = Frame.ProfitFrame;
+		if ProfitFrame:IsVisible() then
+			local list = ProfitFrame.list;
+			local pid = Frame.flag or Frame.F_GetPID();
+			-- MT.Debug("UpdateProfitFramePeriodic|cff00ff00#1L1|r", pid);
+			if pid ~= nil then
+				if pid ~= ProfitFrame.pid then
+					ProfitFrame.pid = pid;
+					ProfitFrame.cur = 1;
+					wipe(list);
+					-- MT.Debug("UpdateProfitFramePeriodic|cff00ff00#1L2|r", pid, 'wipe1');
+				end
+				local cost = ProfitFrame.cost;
+				if ProfitFrame.CostOnlyCheck then
+					if cost ~= VT.SET[pid].PROFIT_SHOW_COST_ONLY then
+						cost = VT.SET[pid].PROFIT_SHOW_COST_ONLY;
+						ProfitFrame.cost = cost;
+						ProfitFrame.cur = 1;
+						wipe(list);
+						-- MT.Debug("UpdateProfitFramePeriodic|cff00ff00#1L2|r", pid, 'wipe2');
+					end
+				end
+				local exps = ProfitFrame.exps;
+				if ProfitFrame.CurExpacOnlyCheck then
+					if exps ~= VT.SET[pid].PROFIT_SHOW_CUR_EXPAC_ONLY then
+						exps = VT.SET[pid].PROFIT_SHOW_CUR_EXPAC_ONLY;
+						ProfitFrame.exps = exps;
+						ProfitFrame.cur = 1;
+						wipe(list);
+						-- MT.Debug("UpdateProfitFramePeriodic|cff00ff00#1L2|r", pid, 'wipe3');
+					end
+				end
+				local cur = LT_SharedMethod.ProfitFilterList(Frame, list, pid, cost, exps, ProfitFrame.cur, 1000);
+				-- MT.Debug("UpdateProfitFramePeriodic|cff00ff00#2L1|r", cur, ProfitFrame.cur);
+				if not ProfitFrame.ScrollFrame:SetNumValue(#list) then
+					ProfitFrame.ScrollFrame:Update();
+				end
+				if cur then
+					ProfitFrame.cur = cur;
+					return MT.After(0.0, ProfitFrame.F_UpdateProfit);
+				end
+			end
+		end
+		ProfitFrame.pid = nil;
+		ProfitFrame.cost = nil;
+		ProfitFrame.exps = nil;
+		ProfitFrame.cur = nil;
+		ProfitFrame.IsUpdating = false;
+	end
+	function LT_SharedMethod.UpdateProfitFrame(Frame)
+		local ProfitFrame = Frame.ProfitFrame;
+		if ProfitFrame:IsVisible() and not ProfitFrame.IsUpdating then
+			-- MT.Debug("UpdateProfitFrame|cff00ff00#1L1|r");
+			ProfitFrame.IsUpdating = true;
+			local list = ProfitFrame.list;
+			local pid = Frame.flag or Frame.F_GetPID();
+			if pid ~= nil then
+				if ProfitFrame.CostOnlyCheck then
+					ProfitFrame.CostOnlyCheck:SetChecked(VT.SET[pid].PROFIT_SHOW_COST_ONLY);
+				end
+				if ProfitFrame.CurExpacOnlyCheck then
+					ProfitFrame.CurExpacOnlyCheck:SetChecked(VT.SET[pid].PROFIT_SHOW_CUR_EXPAC_ONLY);
+				end
+				MT.After(0.0, ProfitFrame.F_UpdateProfit);
 			end
 		end
 	end
@@ -421,8 +555,10 @@ end
 				if CT.VGE3X then
 					if pid == 10 then
 						Frame.FilterDropdown:Show();
+						Frame.SearchEditBox:SetPoint("TOPLEFT", Frame, "TOPLEFT", 18, -6);
 					else
 						Frame.FilterDropdown:Hide();
+						Frame.SearchEditBox:SetPoint("TOPLEFT", Frame, "TOPLEFT", 6, -6);
 					end
 				end
 				Frame:F_ToggleOnSkill(true);
@@ -1398,21 +1534,16 @@ end
 		SearchEditBoxCancel:SetScript("OnClick", function(self) SearchEditBox:SetText(""); Frame:F_Search(""); SearchEditBox:ClearFocus(); end);
 
 		local SearchEditBoxOK = CreateFrame('BUTTON', nil, Frame);
-		SearchEditBoxOK:SetSize(32, 16);
+		SearchEditBoxOK:SetSize(16, 16);
 		SearchEditBoxOK:Disable();
-		SearchEditBoxOK:SetNormalTexture(T_UIDefinition.TEXTURE_UNK);
-		SearchEditBoxOK:GetNormalTexture():SetColorTexture(0.25, 0.25, 0.25, 0.5);
-		local SearchEditBoxOKText = SearchEditBoxOK:CreateFontString(nil, "OVERLAY");
-		SearchEditBoxOKText:SetFont(T_UIDefinition.FrameNormalFont, T_UIDefinition.FrameNormalFontSize, T_UIDefinition.FrameNormalFontFlag);
-		SearchEditBoxOKText:SetTextColor(1.0, 1.0, 1.0, 0.5);
-		SearchEditBoxOKText:SetPoint("CENTER");
-		SearchEditBoxOKText:SetText(l10n["OK"]);
-
-		SearchEditBoxOK:SetFontString(SearchEditBoxOKText);
-		SearchEditBoxOK:SetPushedTextOffset(0, -1);
+		SearchEditBoxOK:SetNormalTexture(T_UIDefinition.TEXTURE_OK);
+		SearchEditBoxOK:SetPushedTexture(T_UIDefinition.TEXTURE_OK);
+		SearchEditBoxOK:GetPushedTexture():SetVertexColor(unpack(T_UIDefinition.TextureButtonColorPushed));
+		SearchEditBoxOK:SetHighlightTexture(T_UIDefinition.TEXTURE_OK);
+		SearchEditBoxOK:GetHighlightTexture():SetVertexColor(unpack(T_UIDefinition.TextureButtonColorHighlight));
+		SearchEditBoxOK:SetDisabledTexture(T_UIDefinition.TEXTURE_OK);
+		SearchEditBoxOK:GetDisabledTexture():SetVertexColor(0.25, 0.25, 0.25, 0.5);
 		SearchEditBoxOK:SetScript("OnClick", function(self) SearchEditBox:ClearFocus(); end);
-		SearchEditBoxOK:SetScript("OnEnable", function(self) SearchEditBoxOKText:SetTextColor(1.0, 1.0, 1.0, 1.0); end);
-		SearchEditBoxOK:SetScript("OnDisable", function(self) SearchEditBoxOKText:SetTextColor(1.0, 1.0, 1.0, 0.5); end);
 		SearchEditBoxOK:Disable();
 		Frame.SearchEditBoxOK = SearchEditBoxOK;
 
@@ -2605,25 +2736,23 @@ end
 				Frame.T_SkillListButtons[index]:Hide();
 			end
 		end
+		Frame.ScrollFrame:Update();
 	end
 	function LT_WidgetMethod.F_SetStyle(Frame, blz_style, loading)
 		if blz_style then
 			LT_SharedMethod.StyleBLZScrollFrame(Frame.ScrollFrame);
-			local FilterDropdown = Frame.FilterDropdown;
-			if FilterDropdown ~= nil then
-				LT_SharedMethod.StyleBLZALADropButton(FilterDropdown, not loading and FilterDropdown.backup or nil);
+			if Frame.FilterDropdown ~= nil then
+				LT_SharedMethod.StyleBLZALADropButton(Frame.FilterDropdown, not loading and Frame.FilterDropdown.backup or nil);
 			end
-			local FrameToggleButton = Frame.ToggleButton;
-			LT_SharedMethod.StyleBLZButton(FrameToggleButton, not loading and FrameToggleButton.backup or nil);
-			local OverrideMinRankButton = Frame.OverrideMinRankButton;
-			OverrideMinRankButton:SetSize(40, 20);
-			LT_SharedMethod.StyleBLZButton(OverrideMinRankButton, not loading and OverrideMinRankButton.backup or nil);
-			local RankOffsetButton = Frame.RankOffsetButton;
-			RankOffsetButton:SetSize(40, 20);
-			LT_SharedMethod.StyleBLZButton(RankOffsetButton, not loading and RankOffsetButton.backup or nil);
+			LT_SharedMethod.StyleBLZButton(Frame.ToggleButton, not loading and Frame.ToggleButton.backup or nil);
+			Frame.OverrideMinRankButton:SetSize(40, 20);
+			LT_SharedMethod.StyleBLZButton(Frame.OverrideMinRankButton, not loading and Frame.OverrideMinRankButton.backup or nil);
+			Frame.RankOffsetButton:SetSize(40, 20);
+			LT_SharedMethod.StyleBLZButton(Frame.RankOffsetButton, not loading and Frame.RankOffsetButton.backup or nil);
 			Frame.HaveMaterialsCheck:SetSize(24, 24);
 			LT_SharedMethod.StyleBLZCheckButton(Frame.HaveMaterialsCheck);
 			Frame.SearchEditBoxNameOnly:SetSize(24, 24);
+			Frame.SearchEditBoxNameOnly:SetPoint("TOPRIGHT", Frame, "TOPRIGHT", -63, -2);
 			LT_SharedMethod.StyleBLZCheckButton(Frame.SearchEditBoxNameOnly);
 			local SetFrame = Frame.SetFrame;
 			SetFrame:SetWidth(344);
@@ -2641,12 +2770,10 @@ end
 			LT_SharedMethod.StyleBLZCheckButton(ProfitFrame.CostOnlyCheck);
 			ProfitFrame.CurExpacOnlyCheck:SetSize(24, 24);
 			LT_SharedMethod.StyleBLZCheckButton(ProfitFrame.CurExpacOnlyCheck);
-			local ProfitFrameCloseButton = ProfitFrame.CloseButton;
-			ProfitFrameCloseButton:SetSize(32, 32);
-			LT_SharedMethod.StyleBLZButton(ProfitFrameCloseButton, not loading and ProfitFrameCloseButton.backup or nil);
+			ProfitFrame.CloseButton:SetSize(32, 32);
+			LT_SharedMethod.StyleBLZButton(ProfitFrame.CloseButton, not loading and ProfitFrame.CloseButton.backup or nil);
 			if Frame.IsQueueEnabled then
-				local QueueToggleButton = Frame.QueueToggleButton;
-				LT_SharedMethod.StyleBLZButton(QueueToggleButton, not loading and QueueToggleButton.backup or nil);
+				LT_SharedMethod.StyleBLZButton(Frame.QueueToggleButton, not loading and Frame.QueueToggleButton.backup or nil);
 			end
 
 			Frame.HookedFrame:SetHitRectInsets(11, 29, 9, 67);
@@ -2670,9 +2797,8 @@ end
 
 			LT_SharedMethod.StyleBLZScrollFrame(Frame.HookedListFrame);
 			LT_SharedMethod.StyleBLZScrollFrame(Frame.HookedDetailFrame);
-			local HookedRankFrame = Frame.HookedRankFrame;
-			HookedRankFrame.Border:Show();
-			VT.__uireimp._SetSimpleBackdrop(HookedRankFrame, 0, 1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+			Frame.HookedRankFrame.Border:Show();
+			VT.__uireimp._SetSimpleBackdrop(Frame.HookedRankFrame, 0, 1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
 			Frame.PortraitBorder:Show();
 			local T_HookedFrameWidgets = Frame.T_HookedFrameWidgets;
 			local T_HookedFrameButtons = T_HookedFrameWidgets.T_HookedFrameButtons;
@@ -2727,21 +2853,18 @@ end
 			Frame.F_HookedFrameUpdate();
 		else
 			LT_SharedMethod.StyleModernScrollFrame(Frame.ScrollFrame);
-			local FilterDropdown = Frame.FilterDropdown;
-			if FilterDropdown ~= nil then
-				LT_SharedMethod.StyleModernALADropButton(FilterDropdown);
+			if Frame.FilterDropdown ~= nil then
+				LT_SharedMethod.StyleModernALADropButton(Frame.FilterDropdown);
 			end
-			local FrameToggleButton = Frame.ToggleButton;
-			LT_SharedMethod.StyleModernButton(FrameToggleButton, FrameToggleButton.backup == nil, nil);
-			local OverrideMinRankButton = Frame.OverrideMinRankButton;
-			OverrideMinRankButton:SetSize(32, 14);
-			LT_SharedMethod.StyleModernButton(OverrideMinRankButton, OverrideMinRankButton.backup == nil, nil);
-			local RankOffsetButton = Frame.RankOffsetButton;
-			RankOffsetButton:SetSize(32, 14);
-			LT_SharedMethod.StyleModernButton(RankOffsetButton, RankOffsetButton.backup == nil, nil);
+			LT_SharedMethod.StyleModernButton(Frame.ToggleButton, Frame.ToggleButton.backup == nil, nil);
+			Frame.OverrideMinRankButton:SetSize(32, 14);
+			LT_SharedMethod.StyleModernButton(Frame.OverrideMinRankButton, Frame.OverrideMinRankButton.backup == nil, nil);
+			Frame.RankOffsetButton:SetSize(32, 14);
+			LT_SharedMethod.StyleModernButton(Frame.RankOffsetButton, Frame.RankOffsetButton.backup == nil, nil);
 			Frame.HaveMaterialsCheck:SetSize(14, 14);
 			LT_SharedMethod.StyleModernCheckButton(Frame.HaveMaterialsCheck);
 			Frame.SearchEditBoxNameOnly:SetSize(14, 14);
+			Frame.SearchEditBoxNameOnly:SetPoint("TOPRIGHT", Frame, "TOPRIGHT", -68, -7);
 			LT_SharedMethod.StyleModernCheckButton(Frame.SearchEditBoxNameOnly);
 			local SetFrame = Frame.SetFrame;
 			SetFrame:SetWidth(332);
@@ -2759,12 +2882,10 @@ end
 			LT_SharedMethod.StyleModernCheckButton(ProfitFrame.CostOnlyCheck);
 			ProfitFrame.CurExpacOnlyCheck:SetSize(14, 14);
 			LT_SharedMethod.StyleModernCheckButton(ProfitFrame.CurExpacOnlyCheck);
-			local ProfitFrameCloseButton = ProfitFrame.CloseButton;
-			ProfitFrameCloseButton:SetSize(16, 16);
-			LT_SharedMethod.StyleModernButton(ProfitFrameCloseButton, ProfitFrameCloseButton.backup == nil, T_UIDefinition.TEXTURE_MODERN_BUTTON_CLOSE);
+			ProfitFrame.CloseButton:SetSize(16, 16);
+			LT_SharedMethod.StyleModernButton(ProfitFrame.CloseButton, ProfitFrame.CloseButton.backup == nil, T_UIDefinition.TEXTURE_MODERN_BUTTON_CLOSE);
 			if Frame.IsQueueEnabled then
-				local QueueToggleButton = Frame.QueueToggleButton;
-				LT_SharedMethod.StyleModernButton(QueueToggleButton, QueueToggleButton.backup == nil, nil);
+				LT_SharedMethod.StyleModernButton(Frame.QueueToggleButton, Frame.QueueToggleButton.backup == nil, nil);
 			end
 
 			Frame.HookedFrame:SetHitRectInsets(17, 35, 11, 73);
@@ -2848,11 +2969,11 @@ end
 	function LT_WidgetMethod.F_ExplorerFrameSetStyle(Frame, blz_style, loading)
 		if blz_style then
 			LT_SharedMethod.StyleBLZBackdrop(Frame);
-			local CloseButton = Frame.CloseButton;
-			CloseButton:SetSize(32, 32);
-			LT_SharedMethod.StyleBLZButton(CloseButton, not loading and CloseButton.backup or nil);
+			Frame.CloseButton:SetSize(32, 32);
+			LT_SharedMethod.StyleBLZButton(Frame.CloseButton, not loading and Frame.CloseButton.backup or nil);
 			LT_SharedMethod.StyleBLZCheckButton(Frame.SearchEditBoxNameOnly);
 			Frame.SearchEditBoxNameOnly:SetSize(24, 24);
+			Frame.SearchEditBoxNameOnly:SetPoint("TOPRIGHT", Frame, "TOPRIGHT", -47, -28);
 			LT_SharedMethod.StyleBLZScrollFrame(Frame.ScrollFrame);
 			local SetFrame = Frame.SetFrame;
 			LT_SharedMethod.StyleBLZBackdrop(SetFrame);
@@ -2871,16 +2992,17 @@ end
 			local ProfitFrame = Frame.ProfitFrame;
 			LT_SharedMethod.StyleBLZBackdrop(ProfitFrame);
 			LT_SharedMethod.StyleBLZScrollFrame(ProfitFrame.ScrollFrame);
-			local ProfitFrameCloseButton = ProfitFrame.CloseButton;
-			ProfitFrameCloseButton:SetSize(32, 32);
-			LT_SharedMethod.StyleBLZButton(ProfitFrameCloseButton, not loading and ProfitFrameCloseButton.backup or nil);
+			ProfitFrame.CurExpacOnlyCheck:SetSize(24, 24);
+			LT_SharedMethod.StyleBLZCheckButton(ProfitFrame.CurExpacOnlyCheck);
+			ProfitFrame.CloseButton:SetSize(32, 32);
+			LT_SharedMethod.StyleBLZButton(ProfitFrame.CloseButton, not loading and ProfitFrame.CloseButton.backup or nil);
 		else
 			LT_SharedMethod.StyleModernBackdrop(Frame);
-			local CloseButton = Frame.CloseButton;
-			CloseButton:SetSize(16, 16);
-			LT_SharedMethod.StyleModernButton(CloseButton, CloseButton.backup == nil, T_UIDefinition.TEXTURE_MODERN_BUTTON_CLOSE);
+			Frame.CloseButton:SetSize(16, 16);
+			LT_SharedMethod.StyleModernButton(Frame.CloseButton, Frame.CloseButton.backup == nil, T_UIDefinition.TEXTURE_MODERN_BUTTON_CLOSE);
 			LT_SharedMethod.StyleModernCheckButton(Frame.SearchEditBoxNameOnly);
 			Frame.SearchEditBoxNameOnly:SetSize(14, 14);
+			Frame.SearchEditBoxNameOnly:SetPoint("TOPRIGHT", Frame, "TOPRIGHT", -52, -33);
 			LT_SharedMethod.StyleModernScrollFrame(Frame.ScrollFrame);
 			local SetFrame = Frame.SetFrame;
 			LT_SharedMethod.StyleModernBackdrop(SetFrame);
@@ -2899,9 +3021,10 @@ end
 			local ProfitFrame = Frame.ProfitFrame;
 			LT_SharedMethod.StyleModernBackdrop(ProfitFrame);
 			LT_SharedMethod.StyleModernScrollFrame(ProfitFrame.ScrollFrame);
-			local ProfitFrameCloseButton = ProfitFrame.CloseButton;
-			ProfitFrameCloseButton:SetSize(16, 16);
-			LT_SharedMethod.StyleModernButton(ProfitFrameCloseButton, ProfitFrameCloseButton.backup == nil, T_UIDefinition.TEXTURE_MODERN_BUTTON_CLOSE);
+			ProfitFrame.CurExpacOnlyCheck:SetSize(14, 14);
+			LT_SharedMethod.StyleModernCheckButton(ProfitFrame.CurExpacOnlyCheck);
+			ProfitFrame.CloseButton:SetSize(16, 16);
+			LT_SharedMethod.StyleModernButton(ProfitFrame.CloseButton, ProfitFrame.CloseButton.backup == nil, T_UIDefinition.TEXTURE_MODERN_BUTTON_CLOSE);
 		end
 	end
 	function LT_WidgetMethod.F_FixSkillList(Frame, expanded)
@@ -3858,14 +3981,14 @@ end
 		if Frame ~= nil then
 			self.Parent = Frame;
 			self:SetPoint("BOTTOMLEFT", Frame.Background, "BOTTOMRIGHT", 0, 0);
-			Frame.QueueToggleButton:GetNormalTexture():SetVertexColor(1.0, 1.0, 1.0, 1.0);
+			-- Frame.QueueToggleButton:GetNormalTexture():SetVertexColor(1.0, 1.0, 1.0, 1.0);
 		end
 	end
 	function LT_WidgetMethod.QueueFrame_OnHide(self)
 		local Frame = self:GetParent();
 		if Frame ~= nil then
 			self.Parent = nil;
-			Frame.QueueToggleButton:GetNormalTexture():SetVertexColor(0.5, 0.5, 0.5, 1.0);
+			-- Frame.QueueToggleButton:GetNormalTexture():SetVertexColor(0.5, 0.5, 0.5, 1.0);
 		end
 	end
 	function LT_WidgetMethod.QueueFrame_OnSucceededDelay(self)
@@ -4432,10 +4555,10 @@ local function LF_HookFrame(addon, meta)
 
 	do	--	search_box
 		local SearchEditBox, SearchEditBoxOK, SearchEditBoxNameOnly = LT_SharedMethod.UICreateSearchBox(Frame);
-		SearchEditBox:SetPoint("TOPLEFT", Frame, "TOPLEFT", 4, -6);
-		SearchEditBox:SetPoint("RIGHT", SearchEditBoxNameOnly, "LEFT", -4, 0);
-		SearchEditBoxNameOnly:SetPoint("RIGHT", SearchEditBoxOK, "LEFT", -4, 0);
-		SearchEditBoxOK:SetPoint("TOPRIGHT", Frame, "TOPRIGHT", -68, -6);
+		SearchEditBox:SetPoint("TOPLEFT", Frame, "TOPLEFT", 6, -6);
+		SearchEditBox:SetPoint("RIGHT", SearchEditBoxOK, "LEFT", -4, 0);
+		SearchEditBoxOK:SetPoint("RIGHT", SearchEditBoxNameOnly, "LEFT", -4, 0);
+		SearchEditBoxNameOnly:SetPoint("TOPRIGHT", Frame, "TOPRIGHT", -68, -7);
 	end
 
 	do	--	HaveMaterialsCheck
@@ -4455,7 +4578,7 @@ local function LF_HookFrame(addon, meta)
 
 	do	--	ProfitFrame
 		local ToggleButton = CreateFrame('BUTTON', nil, Frame);
-		ToggleButton:SetSize(20, 20);
+		ToggleButton:SetSize(16, 16);
 		ToggleButton:SetNormalTexture(T_UIDefinition.TEXTURE_PROFIT);
 		ToggleButton:SetPushedTexture(T_UIDefinition.TEXTURE_PROFIT);
 		ToggleButton:GetPushedTexture():SetVertexColor(unpack(T_UIDefinition.TextureButtonColorPushed));
@@ -4483,6 +4606,9 @@ local function LF_HookFrame(addon, meta)
 
 		ProfitFrame:SetScript("OnShow", LT_WidgetMethod.ProfitFrame_OnShow);
 		ProfitFrame:SetScript("OnHide", LT_WidgetMethod.ProfitFrame_OnHide);
+		function ProfitFrame.F_UpdateProfit()
+			LT_SharedMethod.UpdateProfitFramePeriodic(Frame);
+		end
 
 		local ScrollFrame = VT.__scrolllib.CreateScrollFrame(ProfitFrame, nil, nil, T_UIDefinition.SkillListButtonHeight, LT_SharedMethod.CreateProfitSkillListButton, LT_SharedMethod.SetProfitSkillListButton);
 		ScrollFrame:SetPoint("BOTTOMLEFT", 4, 8);
@@ -5236,7 +5362,7 @@ local function LF_AddOnCallback_Blizzard_TradeSkillUI(addon)
 			-- },
 		};
 		local FilterDropdown = CreateFrame('BUTTON', nil, Frame);
-		FilterDropdown:SetSize(16, 16);
+		FilterDropdown:SetSize(12, 16);
 		FilterDropdown:EnableMouse(true);
 		FilterDropdown:SetNormalTexture([[Interface\MainMenuBar\UI-MainMenu-ScrollDownButton-UP]]);
 		FilterDropdown:GetNormalTexture():SetTexCoord(6 / 32, 26 / 32, 6 / 32, 26 / 32);
@@ -5251,8 +5377,9 @@ local function LF_AddOnCallback_Blizzard_TradeSkillUI(addon)
 		end);
 
 		-- Frame.SearchEditBoxOK:SetPoint("TOPRIGHT", Frame, "TOPRIGHT", -46, -6);
-		Frame.SearchEditBox:SetPoint("RIGHT", FilterDropdown, "LEFT", -2, 0);
-		FilterDropdown:SetPoint("RIGHT", Frame.SearchEditBoxNameOnly, "LEFT", -2, 0);
+		-- Frame.SearchEditBox:SetPoint("RIGHT", FilterDropdown, "LEFT", -2, 0);
+		-- FilterDropdown:SetPoint("RIGHT", Frame.SearchEditBoxNameOnly, "LEFT", -2, 0);
+		FilterDropdown:SetPoint("RIGHT", Frame.SearchEditBox, "LEFT", -2, 0);
 		Frame.FilterDropdown = FilterDropdown;
 	--	Auto filter recipe when trading
 		local function LF_ProcessTradeTargetItemLink()
@@ -5349,6 +5476,9 @@ local function LF_AddOnCallback_Blizzard_CraftUI(addon)
 
 		local CraftCreateButton = _G.CraftCreateButton;
 		local CraftCancelButton = _G.CraftCancelButton;
+
+
+		local UIDropDownMenu_SetSelectedID = _G.UIDropDownMenu_SetSelectedID;
 	-->
 
 	local meta; meta = {
@@ -5433,8 +5563,8 @@ local function LF_AddOnCallback_Blizzard_CraftUI(addon)
 			CraftOnlyShowMakeable(false);
 			CraftFrameAvailableFilterCheckButton:SetChecked(false);
 			SetCraftFilter(0);
-			if CraftFrameFilterDropDown.UpdateSelections then
-				CraftFrameFilterDropDown:UpdateSelections();
+			if CraftFrameFilterDropDown.OnMenuChanged then
+				CraftFrameFilterDropDown:OnMenuChanged();
 			else
 				UIDropDownMenu_SetSelectedID(CraftFrameFilterDropDown, 1);
 			end
@@ -5591,7 +5721,7 @@ local function LF_AddOnCallback_Blizzard_CraftUI(addon)
 			-- },
 		};
 		local FilterDropdown = CreateFrame('BUTTON', nil, Frame);
-		FilterDropdown:SetSize(16, 16);
+		FilterDropdown:SetSize(12, 16);
 		FilterDropdown:EnableMouse(true);
 		FilterDropdown:SetNormalTexture([[Interface\MainMenuBar\UI-MainMenu-ScrollDownButton-UP]]);
 		FilterDropdown:GetNormalTexture():SetTexCoord(6 / 32, 26 / 32, 6 / 32, 26 / 32);
@@ -5606,8 +5736,9 @@ local function LF_AddOnCallback_Blizzard_CraftUI(addon)
 		end);
 
 		-- Frame.SearchEditBoxOK:SetPoint("TOPRIGHT", Frame, "TOPRIGHT", -46, -6);
-		Frame.SearchEditBox:SetPoint("RIGHT", FilterDropdown, "LEFT", -2, 0);
-		FilterDropdown:SetPoint("RIGHT", Frame.SearchEditBoxNameOnly, "LEFT", -2, 0);
+		-- Frame.SearchEditBox:SetPoint("RIGHT", FilterDropdown, "LEFT", -2, 0);
+		-- FilterDropdown:SetPoint("RIGHT", Frame.SearchEditBoxNameOnly, "LEFT", -2, 0);
+		FilterDropdown:SetPoint("RIGHT", Frame.SearchEditBox, "LEFT", -2, 0);
 		Frame.FilterDropdown = FilterDropdown;
 	--	Auto filter recipe when trading
 		local function LF_ProcessTradeTargetItemLink()
@@ -5705,12 +5836,27 @@ local function LF_CreateExplorerFrame()
 	do	--	search_box
 		local SearchEditBox, SearchEditBoxOK, SearchEditBoxNameOnly = LT_SharedMethod.UICreateSearchBox(Frame);
 		SearchEditBox:SetPoint("TOPLEFT", Frame, "TOPLEFT", 10, -32);
-		SearchEditBox:SetPoint("RIGHT", SearchEditBoxNameOnly, "LEFT", -4, 0);
-		SearchEditBoxNameOnly:SetPoint("RIGHT", SearchEditBoxOK, "LEFT", -4, 0);
-		SearchEditBoxOK:SetPoint("TOPRIGHT", Frame, "TOPRIGHT", -52, -32);
+		SearchEditBox:SetPoint("RIGHT", SearchEditBoxOK, "LEFT", -4, 0);
+		SearchEditBoxOK:SetPoint("RIGHT", SearchEditBoxNameOnly, "LEFT", -4, 0);
+		SearchEditBoxNameOnly:SetPoint("TOPRIGHT", Frame, "TOPRIGHT", -52, -32);
 	end
 
 	do	--	ProfitFrame
+		local ToggleButton = CreateFrame('BUTTON', nil, Frame);
+		ToggleButton:SetSize(16, 16);
+		ToggleButton:SetNormalTexture(T_UIDefinition.TEXTURE_PROFIT);
+		ToggleButton:SetPushedTexture(T_UIDefinition.TEXTURE_PROFIT);
+		ToggleButton:GetPushedTexture():SetVertexColor(unpack(T_UIDefinition.TextureButtonColorPushed));
+		ToggleButton:SetHighlightTexture(T_UIDefinition.TEXTURE_PROFIT);
+		ToggleButton:GetHighlightTexture():SetVertexColor(unpack(T_UIDefinition.TextureButtonColorHighlight));
+		ToggleButton:SetPoint("TOPRIGHT", Frame, "TOPRIGHT", -30, -32);
+		ToggleButton:SetScript("OnEnter", LT_SharedMethod.ButtonInfoOnEnter);
+		ToggleButton:SetScript("OnLeave", LT_SharedMethod.ButtonInfoOnLeave);
+		ToggleButton.info_lines = { l10n["TIP_PROFIT_FRAME_CALL_INFO"] };
+		ToggleButton:SetScript("OnClick", LT_WidgetMethod.ProfitFrameToggleButton_OnClick);
+		Frame.ProfitToggleButton = ToggleButton;
+		ToggleButton.Frame = Frame;
+
 		local ProfitFrame = CreateFrame('FRAME', nil, Frame);
 		ProfitFrame:SetFrameStrata("HIGH");
 		ProfitFrame:EnableMouse(true);
@@ -5722,25 +5868,14 @@ local function LF_CreateExplorerFrame()
 		ProfitFrame.flag = 'explorer';
 		Frame.ProfitFrame = ProfitFrame;
 		ProfitFrame.Frame = Frame;
-
-		local ToggleButton = CreateFrame('BUTTON', nil, Frame);
-		ToggleButton:SetSize(20, 20);
-		ToggleButton:SetNormalTexture(T_UIDefinition.TEXTURE_PROFIT);
-		ToggleButton:SetPushedTexture(T_UIDefinition.TEXTURE_PROFIT);
-		ToggleButton:GetPushedTexture():SetVertexColor(unpack(T_UIDefinition.TextureButtonColorPushed));
-		ToggleButton:SetHighlightTexture(T_UIDefinition.TEXTURE_PROFIT);
-		ToggleButton:GetHighlightTexture():SetVertexColor(unpack(T_UIDefinition.TextureButtonColorHighlight));
-		ToggleButton:SetPoint("TOPRIGHT", Frame, "TOPRIGHT", -30, -32);
-		ToggleButton:SetScript("OnEnter", LT_SharedMethod.ButtonInfoOnEnter);
-		ToggleButton:SetScript("OnLeave", LT_SharedMethod.ButtonInfoOnLeave);
-		ToggleButton.info_lines = { l10n["TIP_PROFIT_FRAME_CALL_INFO"] };
-		ToggleButton:SetScript("OnClick", LT_WidgetMethod.ProfitFrameToggleButton_OnClick);
 		ProfitFrame.ToggleButton = ToggleButton;
 		ToggleButton.ProfitFrame = ProfitFrame;
-		ToggleButton.Frame = Frame;
 
 		ProfitFrame:SetScript("OnShow", LT_WidgetMethod.ProfitFrame_OnShow);
 		ProfitFrame:SetScript("OnHide", LT_WidgetMethod.ProfitFrame_OnHide);
+		function ProfitFrame.F_UpdateProfit()
+			LT_SharedMethod.UpdateProfitFramePeriodic(Frame);
+		end
 
 		local ScrollFrame = VT.__scrolllib.CreateScrollFrame(ProfitFrame, nil, nil, T_UIDefinition.SkillListButtonHeight, LT_SharedMethod.CreateProfitSkillListButton, LT_SharedMethod.SetProfitSkillListButton);
 		ScrollFrame:SetPoint("BOTTOMLEFT", 4, 8);
@@ -5766,6 +5901,22 @@ local function LF_CreateExplorerFrame()
 		ProfitFrame.CostOnlyCheck = CostOnlyCheck;
 		--]]
 
+		local CurExpacOnlyCheck = CreateFrame('CHECKBUTTON', nil, ProfitFrame, "OptionsBaseCheckButtonTemplate");
+		CurExpacOnlyCheck:SetSize(24, 24);
+		CurExpacOnlyCheck:SetHitRectInsets(0, 0, 0, 0);
+		CurExpacOnlyCheck:SetPoint("CENTER", ProfitFrame, "TOPLEFT", 17, -10);
+		-- CurExpacOnlyCheck:SetPoint("LEFT", CostOnlyCheck.Text, "RIGHT", 8, 0);
+		CurExpacOnlyCheck:Show();
+		local Text = ProfitFrame:CreateFontString(nil, "ARTWORK");
+		Text:SetFont(T_UIDefinition.FrameNormalFont, T_UIDefinition.FrameNormalFontSize, T_UIDefinition.FrameNormalFontFlag);
+		Text:SetPoint("LEFT", CurExpacOnlyCheck, "CENTER", 10, 0);
+		Text:SetText(l10n["PROFIT_SHOW_CUR_EXPAC_ONLY"]);
+		CurExpacOnlyCheck.Text = Text;
+		CurExpacOnlyCheck:SetScript("OnClick", LT_WidgetMethod.ProfitFrameCurExpacOnlyCheck_OnClick);
+		ProfitFrame.CurExpacOnlyCheck = CurExpacOnlyCheck;
+		CurExpacOnlyCheck.ProfitFrame = ProfitFrame;
+		CurExpacOnlyCheck.Frame = Frame;
+
 		local CloseButton = CreateFrame('BUTTON', nil, ProfitFrame, "UIPanelCloseButton");
 		CloseButton:SetSize(32, 32);
 		CloseButton:SetPoint("CENTER", ProfitFrame, "TOPRIGHT", -18, -14);
@@ -5778,21 +5929,6 @@ local function LF_CreateExplorerFrame()
 	end
 
 	do	--	SetFrame
-		local SetFrame = CreateFrame('FRAME', nil, Frame);
-		SetFrame:SetFrameStrata("HIGH");
-		SetFrame:SetHeight(82);
-		SetFrame:SetPoint("LEFT", Frame);
-		SetFrame:SetPoint("RIGHT", Frame);
-		SetFrame:SetPoint("BOTTOM", Frame, "TOP", 0, 1);
-		SetFrame:Hide();
-		Frame.SetFrame = SetFrame;
-		SetFrame.Frame = Frame;
-
-		local TipInfo = SetFrame:CreateFontString(nil, "ARTWORK");
-		TipInfo:SetFont(T_UIDefinition.FrameNormalFont, T_UIDefinition.FrameNormalFontSize - 1, T_UIDefinition.FrameNormalFontFlag);
-		TipInfo:SetPoint("RIGHT", SetFrame, "BOTTOMRIGHT", -2, 9);
-		SetFrame.TipInfo = TipInfo;
-
 		local ToggleButton = CreateFrame('BUTTON', nil, Frame);
 		ToggleButton:SetSize(16, 16);
 		ToggleButton:SetNormalTexture(T_UIDefinition.TEXTURE_CONFIG);
@@ -5802,9 +5938,25 @@ local function LF_CreateExplorerFrame()
 		ToggleButton:GetHighlightTexture():SetVertexColor(unpack(T_UIDefinition.TextureButtonColorHighlight));
 		ToggleButton:SetPoint("TOPRIGHT", Frame, "TOPRIGHT", -10, -32);
 		ToggleButton:SetScript("OnClick", LT_WidgetMethod.SetFrameToggleButton_OnClick);
+		Frame.SetToggleButton = ToggleButton;
+		ToggleButton.Frame = Frame;
+
+		local SetFrame = CreateFrame('FRAME', nil, Frame);
+		SetFrame:SetFrameStrata("HIGH");
+		SetFrame:SetHeight(82);
+		SetFrame:SetPoint("LEFT", Frame);
+		SetFrame:SetPoint("RIGHT", Frame);
+		SetFrame:SetPoint("BOTTOM", Frame, "TOP", 0, 1);
+		SetFrame:Hide();
+		Frame.SetFrame = SetFrame;
+		SetFrame.Frame = Frame;
 		SetFrame.ToggleButton = ToggleButton;
 		ToggleButton.SetFrame = SetFrame;
-		ToggleButton.Frame = Frame;
+
+		local TipInfo = SetFrame:CreateFontString(nil, "ARTWORK");
+		TipInfo:SetFont(T_UIDefinition.FrameNormalFont, T_UIDefinition.FrameNormalFontSize - 1, T_UIDefinition.FrameNormalFontFlag);
+		TipInfo:SetPoint("RIGHT", SetFrame, "BOTTOMRIGHT", -2, 9);
+		SetFrame.TipInfo = TipInfo;
 
 		SetFrame:SetScript("OnShow", LT_WidgetMethod.SetFrame_OnShow);
 		SetFrame:SetScript("OnHide", LT_WidgetMethod.SetFrame_OnHide);
@@ -6050,7 +6202,7 @@ local function LF_CreateQueueFrame()
 	Name:SetFont(T_UIDefinition.FrameNormalFont, T_UIDefinition.FrameNormalFontSize, T_UIDefinition.FrameNormalFontFlag);
 	Name:SetMaxLines(1);
 	Name:SetJustifyH("LEFT");
-	Name:SetPoint("BOTTOMLEFT", QueueFrame, "BOTTOMLEFT", 4, 5);
+	Name:SetPoint("LEFT", QueueFrame, "BOTTOMLEFT", 4, 13);
 	Name:SetWidth(118);
 	QueueFrame.Name = Name;
 
@@ -7342,6 +7494,10 @@ end
 	end
 -->
 
+local F = CreateFrame('FRAME');
+F:SetScript("OnEvent", function(self, event, ...)
+	return self[event](...);
+end);
 function F.SKILL_LINES_CHANGED_Alt()
 	-- local check_id = DataAgent.table_tradeskill_check_id();
 	-- for pid = DataAgent.DBMINPID, DataAgent.DBMAXPID do

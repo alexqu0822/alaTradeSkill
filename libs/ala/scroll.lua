@@ -10,7 +10,7 @@
 	Scroll:CallButtonFuncByDataIndex(index, FuncName, ...)		Button:func(...)
 	Button:GetDataIndex()
 ]]
-local __version = 250405;
+local __version = 260306;
 
 local _G = _G;
 _G.__ala_meta__ = _G.__ala_meta__ or {  };
@@ -201,7 +201,7 @@ local uireimp = __ala_meta__.uireimp;
 		end
 		function ScrollFrame:Update()
 			if self:IsVisible() then
-				MaxValue = NumValues * ButtonHeight - FrameHeight;
+				MaxValue = NumValues * ButtonHeight - self:GetHeight();
 				if MaxValue < 0 then
 					MaxValue = 0;
 				end

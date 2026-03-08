@@ -601,6 +601,15 @@ end);
 			return T_Recipe_Data[sid];
 		end
 	end
+	--	sid | expansion
+	function DataAgent.get_expansion_by_sid(sid)
+		if sid ~= nil then
+			local info = T_Recipe_Data[sid];
+			if info ~= nil then
+				return info[index_expansion];
+			end
+		end
+	end
 	--	sid | phase
 	function DataAgent.get_phase_by_sid(sid)
 		if sid ~= nil then
