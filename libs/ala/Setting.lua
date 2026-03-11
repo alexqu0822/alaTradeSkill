@@ -412,7 +412,7 @@ local TWidgetMethod = {  };
 			Slider:SetHeight(15);
 			Slider:SetOrientation("HORIZONTAL");
 			Slider:SetMinMaxValues(extra[1], extra[2]);
-			Slider:SetValueStep(extra[3]);
+			Slider:SetValueStep(extra[3] or 1);
 			Slider:SetObeyStepOnDrag(true);
 			Slider:SetPoint("LEFT", Head, "CENTER", 16, -SettingUILineHeight * 0.75);
 			Slider:SetThumbTexture([[Interface\Buttons\UI-ScrollBar-Knob]]);

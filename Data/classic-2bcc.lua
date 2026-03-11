@@ -62,7 +62,7 @@ DataAgent.DBMAXPID = 15;
 	##	2022-04-01
 		Show 44343, 44344, 351766, 351769, 351768, 351770, 351771[leather]
 	##	2026-03-07
-		10097 : [ , 235, 242, 250 ]		thx to B_E_L_D_E_N@Curseforge
+		10098 : [ , 235, 242, 250 ]		thx to B_E_L_D_E_N@Curseforge
 --]==]--
 
 local bitclass = {

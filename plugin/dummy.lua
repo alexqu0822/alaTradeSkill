@@ -6,14 +6,14 @@
 --	Howto
 --	实际并不需要放进alaTradeSkill的文件夹中，在哪儿都行
 --	Actually, the file doesn't have to be placed under the folder alaTradeSkill. Put it whereever u want.
---	如果不放入alaTradeSkill文件夹中:		--	In that case: 
---	local __private = __ala_meta__.prof;
---	并且保证代码加载晚于alaTradeSkill	--	The file should be loaded after alaTradeSkill loaded.
 --	
 --	使用 `name = mod.F_QueryNameByID(ItemID)` 而不是 `GetItemInfo(ItemID)` 以保证结果	模块注册时，会自动添加 `mod.F_QueryNameByID` 函数
+--	alaTradeSkill会缓存所有商业技能涉及到的物品信息，而 `GetItemInfo` 在密集获取时会返回nil，即使曾经访问过的物品
 --	using `name = mod.F_QueryNameByID(ItemID)` instead of `GetItemInfo(ItemID)`		`mod.F_QueryNameByID` is implemented by alaTradeSkill automatically.
+--	alaTradeSkill manages a cache table that contains all related items. `GetItemInfo` may return nil when busy.
 --[==[
-	local __addon, __private = ...;
+	local __addon, __private = ...;				--	放入alaTradeSkill
+	-- local __private = __ala_meta__.prof;		--	外部
 	local MT = __private.MT;
 	local CT = __private.CT;
 	local VT = __private.VT;

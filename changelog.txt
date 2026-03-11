@@ -3,7 +3,7 @@ Update LibDBIcon.
 Add expansion data.
 UI optimization.
 Optimize the performance of ProfitFrame.
-[TBC] Truesilver(10097)'s color is [230, 235, 242, 250] now.	thx to B_E_L_D_E_N@Curseforge
+[TBC] Truesilver(10098)'s color is [230, 235, 242, 250] now.	thx to B_E_L_D_E_N@Curseforge
 
 2026-03-01
 [TBC] enchanting fix.
