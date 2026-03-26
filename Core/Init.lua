@@ -36,10 +36,7 @@ local DT = {  }; __private.DT = DT;		--	data
 -->
 	local __ala_meta__ = _G.__ala_meta__;
 	__ala_meta__.prof = __private;
-	VT.__super = __ala_meta__;
-	VT.__uireimp = __ala_meta__.uireimp;
-	VT.__menulib = __ala_meta__.__menulib;
-	VT.__scrolllib = __ala_meta__.__scrolllib;
+	VT.__dep = __ala_meta__;
 
 -->		Compatible
 	local _comptb = {  };

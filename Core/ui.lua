@@ -1021,13 +1021,13 @@ end
 		end
 		--	style
 		function LT_SharedMethod.StyleModernBackdrop(Frame)
-			VT.__uireimp._SetBackdrop(Frame, T_UIDefinition.ModernFrameBackdrop);
-			VT.__uireimp._SetBackdropColor(Frame, unpack(VT.SET.bg_color));
+			VT.__dep.uireimp._SetBackdrop(Frame, T_UIDefinition.ModernFrameBackdrop);
+			VT.__dep.uireimp._SetBackdropColor(Frame, unpack(VT.SET.bg_color));
 		end
 		function LT_SharedMethod.StyleBLZBackdrop(Frame)
-			VT.__uireimp._SetBackdrop(Frame, T_UIDefinition.BLZFrameBackdrop);
-			VT.__uireimp._SetBackdropColor(Frame, 1.0, 1.0, 1.0, 1.0);
-			VT.__uireimp._SetBackdropBorderColor(Frame, 1.0, 1.0, 1.0, 1.0);
+			VT.__dep.uireimp._SetBackdrop(Frame, T_UIDefinition.BLZFrameBackdrop);
+			VT.__dep.uireimp._SetBackdropColor(Frame, 1.0, 1.0, 1.0, 1.0);
+			VT.__dep.uireimp._SetBackdropBorderColor(Frame, 1.0, 1.0, 1.0, 1.0);
 		end
 		function LT_SharedMethod.StyleModernButton(Button, bak, texture)
 			if Button.Left then
@@ -1059,7 +1059,7 @@ end
 			htex = htex or Button:SetHighlightTexture(T_UIDefinition.TEXTURE_UNK) or Button:GetHighlightTexture();
 			dtex = dtex or Button:SetDisabledTexture(T_UIDefinition.TEXTURE_UNK) or Button:GetDisabledTexture();
 			if texture ~= nil then
-				VT.__uireimp._SetSimpleBackdrop(Button, 0, 1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+				VT.__dep.uireimp._SetSimpleBackdrop(Button, 0, 1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
 				Button:SetNormalTexture(texture);
 				Button:SetPushedTexture(texture);
 				Button:SetHighlightTexture(texture);
@@ -1073,7 +1073,7 @@ end
 				htex:SetVertexColor(unpack(T_UIDefinition.TextureButtonColorHighlight));
 				dtex:SetVertexColor(unpack(T_UIDefinition.TextureButtonColorDisabled));
 			else
-				VT.__uireimp._SetSimpleBackdrop(Button, 0, 1, 0.0, 0.0, 0.0, 0.25, 0.75, 1.0, 1.0, 0.25);
+				VT.__dep.uireimp._SetSimpleBackdrop(Button, 0, 1, 0.0, 0.0, 0.0, 0.25, 0.75, 1.0, 1.0, 0.25);
 				Button:SetPushedTextOffset(0.0, 0.0);
 				if ntex then ntex:SetColorTexture(unpack(T_UIDefinition.ModernColorButtonColorNormal)); end
 				if ptex then ptex:SetColorTexture(unpack(T_UIDefinition.ModernColorButtonColorPushed)); end
@@ -1117,7 +1117,7 @@ end
 			local ptex = Button:GetPushedTexture();
 			local htex = Button:GetHighlightTexture();
 			local dtex = Button:GetDisabledTexture();
-			VT.__uireimp._SetSimpleBackdrop(Button, 0, 1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+			VT.__dep.uireimp._SetSimpleBackdrop(Button, 0, 1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
 			Button:SetPushedTextOffset(1.55, -1.55);
 			if ntex then ntex:SetVertexColor(1.0, 1.0, 1.0, 1.0); end
 			if ptex then ptex:SetVertexColor(1.0, 1.0, 1.0, 1.0); end
@@ -1137,7 +1137,7 @@ end
 			--
 			local bar = ScrollFrame.ScrollBar;
 			bar:SetWidth(8);
-			VT.__uireimp._SetSimpleBackdrop(bar, -1, 1, 0.0, 0.0, 0.0, 0.0, 0.25, 0.25, 0.25, 1.0);
+			VT.__dep.uireimp._SetSimpleBackdrop(bar, -1, 1, 0.0, 0.0, 0.0, 0.0, 0.25, 0.25, 0.25, 1.0);
 			local thumb = bar:GetThumbTexture();
 			if thumb == nil then
 				bar:SetThumbTexture([[Interface\Buttons\UI-ScrollBar-Knob]]);
@@ -1189,7 +1189,7 @@ end
 			--
 			local bar = ScrollFrame.ScrollBar;
 			bar:SetWidth(16);
-			VT.__uireimp._SetSimpleBackdrop(bar, 0, 1, 0.0, 0.0, 0.0, 0.0, 0.5, 0.5, 0.5, 0.5);
+			VT.__dep.uireimp._SetSimpleBackdrop(bar, 0, 1, 0.0, 0.0, 0.0, 0.0, 0.5, 0.5, 0.5, 0.5);
 			bar:SetThumbTexture([[Interface\Buttons\UI-ScrollBar-Knob]]);
 			local thumb = bar:GetThumbTexture();
 			thumb:SetTexCoord(8 / 32, 23 / 32, 7 / 32, 24 / 32);
@@ -1258,7 +1258,7 @@ end
 			if Dropdown.Background then
 				Dropdown.Background:Hide();
 			end
-			VT.__uireimp._SetSimpleBackdrop(Dropdown, 0, 1, 0.0, 0.0, 0.0, 0.25, 0.75, 1.0, 1.0, 0.25);
+			VT.__dep.uireimp._SetSimpleBackdrop(Dropdown, 0, 1, 0.0, 0.0, 0.0, 0.25, 0.75, 1.0, 1.0, 0.25);
 			if Dropdown.Button then
 				local Button = Dropdown.Button;
 				Button:SetSize(17, 16);
@@ -1285,7 +1285,7 @@ end
 			if Dropdown.Background then
 				Dropdown.Background:Show();
 			end
-			VT.__uireimp._SetSimpleBackdrop(Dropdown, 0, 1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+			VT.__dep.uireimp._SetSimpleBackdrop(Dropdown, 0, 1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
 			if Dropdown.Button then
 				local Button = Dropdown.Button;
 				Button:SetSize(24, 24);
@@ -1307,14 +1307,14 @@ end
 					obj:Hide();
 				end
 			end
-			VT.__uireimp._SetSimpleBackdrop(EditBox, 2, 1, 0.0, 0.0, 0.0, 0.25, 0.75, 1.0, 1.0, 0.25);
+			VT.__dep.uireimp._SetSimpleBackdrop(EditBox, 2, 1, 0.0, 0.0, 0.0, 0.25, 0.75, 1.0, 1.0, 0.25);
 		end
 		function LT_SharedMethod.StyleBLZEditBox(EditBox)
 			local regions = { EditBox:GetRegions() };
 			for index = 1, #regions do
 				regions[index]:Show();
 			end
-			VT.__uireimp._SetSimpleBackdrop(EditBox, 0, 1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+			VT.__dep.uireimp._SetSimpleBackdrop(EditBox, 0, 1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
 		end
 		function LT_SharedMethod.StyleModernCheckButton(CheckButton)
 			CheckButton:SetNormalTexture(T_UIDefinition.TEXTURE_MODERN_CHECK_BUTTON_BORDER);
@@ -1836,14 +1836,14 @@ end
 			else
 				T_SkillListDropMeta.num = 2;
 			end
-			VT.__menulib.ShowMenu(self, "BOTTOMLEFT", T_SkillListDropMeta, T_SkillListDropMeta.param);
+			VT.__dep.__menulib.ShowMenu(self, "BOTTOMLEFT", T_SkillListDropMeta, T_SkillListDropMeta.param);
 		end
 	end
 	--
 	function LT_SharedMethod.CreateProfitSkillListButton(parent, index, buttonHeight)
 		local Button = CreateFrame('BUTTON', nil, parent);
 		Button:SetHeight(buttonHeight);
-		VT.__uireimp._SetSimpleBackdrop(Button, 0, 1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+		VT.__dep.uireimp._SetSimpleBackdrop(Button, 0, 1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
 		Button:SetHighlightTexture(T_UIDefinition.TEXTURE_WHITE);
 		Button:GetHighlightTexture():SetVertexColor(unpack(T_UIDefinition.ListButtonHighlightColor));
 		Button:EnableMouse(true);
@@ -1908,7 +1908,7 @@ end
 		Button:RegisterForClicks("AnyUp");
 		Button:SetScript("OnClick", LT_SharedMethod.SkillListButton_OnClick);
 		Button:RegisterForDrag("LeftButton");
-		Button:SetScript("OnHide", VT.__menulib.ShowMenu);
+		Button:SetScript("OnHide", VT.__dep.__menulib.ShowMenu);
 
 		function Button:Select()
 			SelectionGlow:Show();
@@ -1943,7 +1943,7 @@ end
 						quality = nil;
 						icon = ICON_FOR_NO_CID;
 					end
-					VT.__uireimp._SetSimpleBackdropCenter(Button, 0, 1, 0.0, 0.0, 0.0, 1.0);
+					VT.__dep.uireimp._SetSimpleBackdropCenter(Button, 0, 1, 0.0, 0.0, 0.0, 1.0);
 					Button.Icon:SetTexture(icon);
 					Button.Icon:SetVertexColor(1.0, 1.0, 1.0, 1.0);
 					Button.Title:SetText(DataAgent.spell_name_s(sid));
@@ -1967,7 +1967,7 @@ end
 					local name, rank, num = Frame.F_GetRecipeInfo(recipeindex);
 					if name ~= nil and rank ~= 'header' then
 						Button:Show();
-						VT.__uireimp._SetSimpleBackdropCenter(Button, 0, 1, 0.0, 0.0, 0.0, 1.0);
+						VT.__dep.uireimp._SetSimpleBackdropCenter(Button, 0, 1, 0.0, 0.0, 0.0, 1.0);
 						local _, quality, icon;
 						if cid ~= nil then
 							_, _, quality, _, icon = DataAgent.item_info(cid);
@@ -2018,9 +2018,9 @@ end
 			else
 				Button:Show();
 				if VT.SET.colored_rank_for_unknown and Frame.flag ~= 'explorer' then
-					VT.__uireimp._SetSimpleBackdropCenter(Button, 0, 1, 0.5, 0.25, 0.25, 0.5);
+					VT.__dep.uireimp._SetSimpleBackdropCenter(Button, 0, 1, 0.5, 0.25, 0.25, 0.5);
 				else
-					VT.__uireimp._SetSimpleBackdropCenter(Button, 0, 1, 0.0, 0.0, 0.0, 1.0);
+					VT.__dep.uireimp._SetSimpleBackdropCenter(Button, 0, 1, 0.0, 0.0, 0.0, 1.0);
 				end
 				local _, quality, icon;
 				if cid ~= nil then
@@ -2062,12 +2062,12 @@ end
 				LT_SharedMethod.SkillListButton_OnEnter(Button);
 			end
 			if Button.prev_sid ~= sid then
-				VT.__menulib.ShowMenu(Button);
+				VT.__dep.__menulib.ShowMenu(Button);
 				Button.prev_sid = sid;
 			end
 			Button.val = val;
 		else
-			VT.__menulib.ShowMenu(Button);
+			VT.__dep.__menulib.ShowMenu(Button);
 			Button:Hide();
 			Button.val = nil;
 		end
@@ -2076,7 +2076,7 @@ end
 	function LT_SharedMethod.CreateSkillListButton(parent, index, buttonHeight)
 		local Button = CreateFrame('BUTTON', nil, parent);
 		Button:SetHeight(buttonHeight);
-		VT.__uireimp._SetSimpleBackdrop(Button, 0, 1, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0);
+		VT.__dep.uireimp._SetSimpleBackdrop(Button, 0, 1, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0);
 		Button:SetHighlightTexture(T_UIDefinition.TEXTURE_WHITE);
 		Button:GetHighlightTexture():SetVertexColor(unpack(T_UIDefinition.ListButtonHighlightColor));
 		Button:EnableMouse(true);
@@ -2141,7 +2141,7 @@ end
 		Button:RegisterForClicks("AnyUp");
 		Button:SetScript("OnClick", LT_SharedMethod.SkillListButton_OnClick);
 		Button:RegisterForDrag("LeftButton");
-		Button:SetScript("OnHide", VT.__menulib.ShowMenu);
+		Button:SetScript("OnHide", VT.__dep.__menulib.ShowMenu);
 
 		function Button:Select()
 			SelectionGlow:Show();
@@ -2171,7 +2171,7 @@ end
 				local name, rank, num = Frame.F_GetRecipeInfo(recipeindex);
 				if name ~= nil and rank ~= 'header' then
 					Button:Show();
-					VT.__uireimp._SetSimpleBackdropCenter(Button, 0, 1, 0.0, 0.0, 0.0, 1.0);
+					VT.__dep.uireimp._SetSimpleBackdropCenter(Button, 0, 1, 0.0, 0.0, 0.0, 1.0);
 					local quality = cid and DataAgent.item_rarity(cid);
 					Button.Icon:SetTexture(Frame.F_GetRecipeIcon(recipeindex));
 					Button.Icon:SetVertexColor(1.0, 1.0, 1.0, 1.0);
@@ -2216,9 +2216,9 @@ end
 			else
 				Button:Show();
 				if VT.SET.colored_rank_for_unknown then
-					VT.__uireimp._SetSimpleBackdropCenter(Button, 0, 1, 0.5, 0.25, 0.25, 0.5);
+					VT.__dep.uireimp._SetSimpleBackdropCenter(Button, 0, 1, 0.5, 0.25, 0.25, 0.5);
 				else
-					VT.__uireimp._SetSimpleBackdropCenter(Button, 0, 1, 0.0, 0.0, 0.0, 1.0);
+					VT.__dep.uireimp._SetSimpleBackdropCenter(Button, 0, 1, 0.0, 0.0, 0.0, 1.0);
 				end
 				local _, quality, icon;
 				if cid ~= nil then
@@ -2261,11 +2261,11 @@ end
 				LT_SharedMethod.SkillListButton_OnEnter(Button);
 			end
 			if Button.prev_sid ~= sid then
-				VT.__menulib.ShowMenu(Button);
+				VT.__dep.__menulib.ShowMenu(Button);
 				Button.prev_sid = sid;
 			end
 		else
-			VT.__menulib.ShowMenu(Button);
+			VT.__dep.__menulib.ShowMenu(Button);
 			Button:Hide();
 		end
 	end
@@ -2273,7 +2273,7 @@ end
 	function LT_SharedMethod.CreateExplorerSkillListButton(parent, index, buttonHeight)
 		local Button = CreateFrame('BUTTON', nil, parent);
 		Button:SetHeight(buttonHeight);
-		VT.__uireimp._SetSimpleBackdrop(Button, 0, 1, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0);
+		VT.__dep.uireimp._SetSimpleBackdrop(Button, 0, 1, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0);
 		Button:SetHighlightTexture(T_UIDefinition.TEXTURE_WHITE);
 		Button:GetHighlightTexture():SetVertexColor(unpack(T_UIDefinition.ListButtonHighlightColor));
 		Button:EnableMouse(true);
@@ -2332,7 +2332,7 @@ end
 		Button:RegisterForClicks("AnyUp");
 		Button:SetScript("OnClick", LT_SharedMethod.SkillListButton_OnClick);
 		Button:RegisterForDrag("LeftButton");
-		Button:SetScript("OnHide", VT.__menulib.ShowMenu);
+		Button:SetScript("OnHide", VT.__dep.__menulib.ShowMenu);
 
 		function Button:Select()
 			SelectionGlow:Show();
@@ -2395,11 +2395,11 @@ end
 			end
 			Button:Deselect();
 			if Button.prev_sid ~= sid then
-				VT.__menulib.ShowMenu(Button);
+				VT.__dep.__menulib.ShowMenu(Button);
 				Button.prev_sid = sid;
 			end
 		else
-			VT.__menulib.ShowMenu(Button);
+			VT.__dep.__menulib.ShowMenu(Button);
 			Button:Hide();
 		end
 	end
@@ -2407,7 +2407,7 @@ end
 	function LT_SharedMethod.CreateQueueListButton(parent, index, buttonHeight)
 		local Button = CreateFrame('BUTTON', nil, parent);
 		Button:SetHeight(buttonHeight);
-		VT.__uireimp._SetSimpleBackdrop(Button, 0, 1, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0);
+		VT.__dep.uireimp._SetSimpleBackdrop(Button, 0, 1, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0);
 		Button:SetHighlightTexture(T_UIDefinition.TEXTURE_WHITE);
 		Button:GetHighlightTexture():SetVertexColor(unpack(T_UIDefinition.ListButtonHighlightColor));
 		Button:EnableMouse(true);
@@ -2530,7 +2530,7 @@ end
 		Button:RegisterForClicks("AnyUp");
 		Button:SetScript("OnClick", LT_SharedMethod.SkillListButton_OnClick);
 		Button:RegisterForDrag("LeftButton");
-		Button:SetScript("OnHide", VT.__menulib.ShowMenu);
+		Button:SetScript("OnHide", VT.__dep.__menulib.ShowMenu);
 
 		function Button:Select()
 			SelectionGlow:Show();
@@ -2586,11 +2586,11 @@ end
 			end
 			Button:Deselect();
 			if Button.prev_sid ~= sid then
-				VT.__menulib.ShowMenu(Button);
+				VT.__dep.__menulib.ShowMenu(Button);
 				Button.prev_sid = sid;
 			end
 		else
-			VT.__menulib.ShowMenu(Button);
+			VT.__dep.__menulib.ShowMenu(Button);
 			Button:Hide();
 		end
 	end
@@ -2798,7 +2798,7 @@ end
 			LT_SharedMethod.StyleBLZScrollFrame(Frame.HookedListFrame);
 			LT_SharedMethod.StyleBLZScrollFrame(Frame.HookedDetailFrame);
 			Frame.HookedRankFrame.Border:Show();
-			VT.__uireimp._SetSimpleBackdrop(Frame.HookedRankFrame, 0, 1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+			VT.__dep.uireimp._SetSimpleBackdrop(Frame.HookedRankFrame, 0, 1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
 			Frame.PortraitBorder:Show();
 			local T_HookedFrameWidgets = Frame.T_HookedFrameWidgets;
 			local T_HookedFrameButtons = T_HookedFrameWidgets.T_HookedFrameButtons;
@@ -2908,7 +2908,7 @@ end
 			LT_SharedMethod.StyleModernScrollFrame(Frame.HookedDetailFrame);
 			local HookedRankFrame = Frame.HookedRankFrame;
 			HookedRankFrame.Border:Hide();
-			VT.__uireimp._SetSimpleBackdrop(HookedRankFrame, 0, 1, 0.0, 0.0, 0.0, 0.0, 0.25, 0.25, 0.25, 1.0);
+			VT.__dep.uireimp._SetSimpleBackdrop(HookedRankFrame, 0, 1, 0.0, 0.0, 0.0, 0.0, 0.25, 0.25, 0.25, 1.0);
 			Frame.PortraitBorder:Hide();
 			local T_HookedFrameWidgets = Frame.T_HookedFrameWidgets;
 			local T_HookedFrameButtons = T_HookedFrameWidgets.T_HookedFrameButtons;
@@ -3081,7 +3081,7 @@ end
 		if pid ~= nil then
 			local set = VT.SET[pid];
 			local var = Frame.notlinked and VT.VAR[pid] or LT_LinkedSkillVar;
-			Frame.RankOffsetSlider:SetMinMaxValues(var.cur_rank and (var.cur_rank - var.cur_rank % 5.0) or 1, var.max_rank ~= nil and var.max_rank > 1 and var.max_rank or 75);
+			Frame.RankOffsetSlider:SetMinMaxValues(var.cur_rank or 1, var.max_rank ~= nil and var.max_rank > 1 and var.max_rank or 75);
 			if set.rankoffset ~= nil and set.rankoffset > 0 then
 				Frame.RankOffsetButton:SetText("+" .. set.rankoffset);
 				Frame.RankOffsetSlider:SetValue(var.cur_rank + set.rankoffset);
@@ -3324,7 +3324,7 @@ end
 				local var = Frame.notlinked and VT.VAR[pid] or LT_LinkedSkillVar;
 				value = value + 0.5; value = value - value % 1.0;
 				value = value - var.cur_rank;
-				value = value + 0.1; value = value - value % 5.0 + 5;
+				value = value + 0.1; value = value - value % 5.0;
 				if set.rankoffset ~= value then
 					set.rankoffset = value;
 					Frame.update = true;
@@ -3398,7 +3398,7 @@ end
 		};
 	end
 	function LT_WidgetMethod.PortraitButton_OnClick(self)
-		VT.__menulib.ShowMenu(self, "BOTTOM", self.T_PortraitDropMeta);
+		VT.__dep.__menulib.ShowMenu(self, "BOTTOM", self.T_PortraitDropMeta);
 	end
 	function LT_WidgetMethod.Tab_OnClick(self)
 		local pname = self.pname;
@@ -3751,7 +3751,7 @@ end
 				end
 			end
 		end
-		VT.__menulib.ShowMenu(self, "BOTTOMRIGHT", T_ExplorerSetMeta);
+		VT.__dep.__menulib.ShowMenu(self, "BOTTOMRIGHT", T_ExplorerSetMeta);
 	end
 	function LT_WidgetMethod.PrevButton_OnEnter(self)
 		local Frame = self.Frame;
@@ -3947,7 +3947,7 @@ end
 									QueueFrame.Focus:Hide();
 									return;
 								end
-								QueueFrame.ScrollFrame:HandleButtonByDataIndex(index, QueueFrame.PlaceFocus);
+								QueueFrame.ScrollFrame:HandleLineByDataIndex(index, QueueFrame.PlaceFocus);
 								QueueFrame.Focus.Num:SetText(available);
 								QueueFrame.CraftingID = sid;
 								QueueFrame.IsCrafting = true;
@@ -4240,7 +4240,7 @@ local function LF_HookFrame(addon, meta)
 			Frame.list = {  };
 			Frame.prev_var_update_time = GetTime() - MAXIMUM_VAR_UPDATE_PERIOD;
 
-			local ScrollFrame = VT.__scrolllib.CreateScrollFrame(Frame, nil, nil, T_UIDefinition.SkillListButtonHeight, LT_SharedMethod.CreateSkillListButton, LT_SharedMethod.SetSkillListButton);
+			local ScrollFrame = VT.__dep.__scrolllib.CreateScrollFrame(Frame, nil, nil, T_UIDefinition.SkillListButtonHeight, LT_SharedMethod.CreateSkillListButton, LT_SharedMethod.SetSkillListButton);
 			ScrollFrame:SetPoint("BOTTOMLEFT", 4, 0);
 			ScrollFrame:SetPoint("TOPRIGHT", -4, -28);
 			Frame.ScrollFrame = ScrollFrame;
@@ -4610,7 +4610,7 @@ local function LF_HookFrame(addon, meta)
 			LT_SharedMethod.UpdateProfitFramePeriodic(Frame);
 		end
 
-		local ScrollFrame = VT.__scrolllib.CreateScrollFrame(ProfitFrame, nil, nil, T_UIDefinition.SkillListButtonHeight, LT_SharedMethod.CreateProfitSkillListButton, LT_SharedMethod.SetProfitSkillListButton);
+		local ScrollFrame = VT.__dep.__scrolllib.CreateScrollFrame(ProfitFrame, nil, nil, T_UIDefinition.SkillListButtonHeight, LT_SharedMethod.CreateProfitSkillListButton, LT_SharedMethod.SetProfitSkillListButton);
 		ScrollFrame:SetPoint("BOTTOMLEFT", 4, 8);
 		ScrollFrame:SetPoint("TOPRIGHT", -8, -28);
 		ProfitFrame.ScrollFrame = ScrollFrame;
@@ -5373,7 +5373,7 @@ local function LF_AddOnCallback_Blizzard_TradeSkillUI(addon)
 		FilterDropdown:GetHighlightTexture():SetTexCoord(6 / 32, 26 / 32, 6 / 32, 26 / 32);
 		FilterDropdown:GetHighlightTexture():SetVertexColor(unpack(T_UIDefinition.TextureButtonColorHighlight));
 		FilterDropdown:SetScript("OnClick", function(self, button)
-			VT.__menulib.ShowMenu(self, "BOTTOMRIGHT", T_TradeSkillFrameFilterMeta);
+			VT.__dep.__menulib.ShowMenu(self, "BOTTOMRIGHT", T_TradeSkillFrameFilterMeta);
 		end);
 
 		-- Frame.SearchEditBoxOK:SetPoint("TOPRIGHT", Frame, "TOPRIGHT", -46, -6);
@@ -5732,7 +5732,7 @@ local function LF_AddOnCallback_Blizzard_CraftUI(addon)
 		FilterDropdown:GetHighlightTexture():SetTexCoord(6 / 32, 26 / 32, 6 / 32, 26 / 32);
 		FilterDropdown:GetHighlightTexture():SetVertexColor(unpack(T_UIDefinition.TextureButtonColorHighlight));
 		FilterDropdown:SetScript("OnClick", function(self, button)
-			VT.__menulib.ShowMenu(self, "BOTTOMRIGHT", T_CraftFrameFilterMeta);
+			VT.__dep.__menulib.ShowMenu(self, "BOTTOMRIGHT", T_CraftFrameFilterMeta);
 		end);
 
 		-- Frame.SearchEditBoxOK:SetPoint("TOPRIGHT", Frame, "TOPRIGHT", -46, -6);
@@ -5817,7 +5817,7 @@ local function LF_CreateExplorerFrame()
 		Title:SetPoint("CENTER", Frame, "TOP", 0, -16);
 		Title:SetText(l10n["EXPLORER_TITLE"]);
 
-		local ScrollFrame = VT.__scrolllib.CreateScrollFrame(Frame, nil, nil, T_UIDefinition.SkillListButtonHeight, LT_SharedMethod.CreateExplorerSkillListButton, LT_SharedMethod.SetExplorerSkillListButton);
+		local ScrollFrame = VT.__dep.__scrolllib.CreateScrollFrame(Frame, nil, nil, T_UIDefinition.SkillListButtonHeight, LT_SharedMethod.CreateExplorerSkillListButton, LT_SharedMethod.SetExplorerSkillListButton);
 		ScrollFrame:SetPoint("BOTTOMLEFT", 6, 12);
 		ScrollFrame:SetPoint("TOPRIGHT", -10, -56);
 		Frame.ScrollFrame = ScrollFrame;
@@ -5877,7 +5877,7 @@ local function LF_CreateExplorerFrame()
 			LT_SharedMethod.UpdateProfitFramePeriodic(Frame);
 		end
 
-		local ScrollFrame = VT.__scrolllib.CreateScrollFrame(ProfitFrame, nil, nil, T_UIDefinition.SkillListButtonHeight, LT_SharedMethod.CreateProfitSkillListButton, LT_SharedMethod.SetProfitSkillListButton);
+		local ScrollFrame = VT.__dep.__scrolllib.CreateScrollFrame(ProfitFrame, nil, nil, T_UIDefinition.SkillListButtonHeight, LT_SharedMethod.CreateProfitSkillListButton, LT_SharedMethod.SetProfitSkillListButton);
 		ScrollFrame:SetPoint("BOTTOMLEFT", 4, 8);
 		ScrollFrame:SetPoint("TOPRIGHT", -8, -28);
 		ProfitFrame.ScrollFrame = ScrollFrame;
@@ -6251,7 +6251,7 @@ local function LF_CreateQueueFrame()
 	QueueFrame.Create = Create;
 	Create.QueueFrame = QueueFrame;
 
-	local ScrollFrame = VT.__scrolllib.CreateScrollFrame(QueueFrame, nil, nil, T_UIDefinition.QueueListButtonHeight, LT_SharedMethod.CreateQueueListButton, LT_SharedMethod.SetQueueListButton);
+	local ScrollFrame = VT.__dep.__scrolllib.CreateScrollFrame(QueueFrame, nil, nil, T_UIDefinition.QueueListButtonHeight, LT_SharedMethod.CreateQueueListButton, LT_SharedMethod.SetQueueListButton);
 	ScrollFrame:SetPoint("BOTTOMLEFT", 4, 26);
 	ScrollFrame:SetPoint("TOPRIGHT", -4, -4);
 	QueueFrame.ScrollFrame = ScrollFrame;
@@ -6438,7 +6438,7 @@ end
 			end
 			Frame:F_Update();
 		end
-		local cal = VT.__super.cal;
+		local cal = VT.__dep.cal;
 		if cal then
 			cal.ext_Reset();
 			for pid, list in next, DataAgent.T_TradeSkill_CooldownList do
@@ -6522,11 +6522,11 @@ local function LF_CreateBoard()
 
 	function Frame:F_Lock()
 		self:EnableMouse(false);
-		VT.__uireimp._SetSimpleBackdrop(self, 0, 1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+		VT.__dep.uireimp._SetSimpleBackdrop(self, 0, 1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
 	end
 	function Frame:F_Unlock()
 		self:EnableMouse(true);
-		VT.__uireimp._SetSimpleBackdrop(self, 0, 1, 0.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.5);
+		VT.__dep.uireimp._SetSimpleBackdrop(self, 0, 1, 0.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.5);
 	end
 	function Frame:F_StopMoving()
 		Pin:StopMovingOrSizing();
@@ -6537,7 +6537,7 @@ local function LF_CreateBoard()
 		if button == "LeftButton" then
 			Pin:StartMoving();
 		else
-			VT.__menulib.ShowMenu(self, "BOTTOMLEFT", T_BoardDropMeta);
+			VT.__dep.__menulib.ShowMenu(self, "BOTTOMLEFT", T_BoardDropMeta);
 		end
 	end);
 	Frame:SetScript("OnMouseUp", Frame.F_StopMoving);
@@ -6705,7 +6705,7 @@ end
 			if key ~= CT.SELFGUID then
 				T_CharListDrop_Del.param[1] = data_index;
 				T_CharListDrop_Del.param[2] = self.Frame;
-				VT.__menulib.ShowMenu(self, "BOTTOM", T_CharListDropMeta);
+				VT.__dep.__menulib.ShowMenu(self, "BOTTOM", T_CharListDropMeta);
 			end
 		end
 	end
@@ -6761,7 +6761,7 @@ end
 	local function LF_ConfigCreateCharListButton(parent, index, buttonHeight)
 		local Button = CreateFrame('BUTTON', nil, parent);
 		Button:SetHeight(buttonHeight);
-		VT.__uireimp._SetSimpleBackdrop(Button, 0, 1, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0);
+		VT.__dep.uireimp._SetSimpleBackdrop(Button, 0, 1, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0);
 		Button:SetHighlightTexture(T_UIDefinition.TEXTURE_WHITE);
 		Button:GetHighlightTexture():SetVertexColor(unpack(T_UIDefinition.ListButtonHighlightColor));
 		Button:EnableMouse(true);
@@ -6870,9 +6870,9 @@ end
 	end
 	local function LF_ConfigDrop_OnClick(self)
 		if type(self.meta) == 'function' then
-			VT.__menulib.ShowMenu(self, "BOTTOM", self.meta());
+			VT.__dep.__menulib.ShowMenu(self, "BOTTOM", self.meta());
 		else
-			VT.__menulib.ShowMenu(self, "BOTTOM", self.meta);
+			VT.__dep.__menulib.ShowMenu(self, "BOTTOM", self.meta);
 		end
 	end 
 	local function LF_ConfigCreateDrop(parent, key, text, meta)
@@ -7054,7 +7054,7 @@ local function LF_CreateConfigFrame()
 		end
 	end);
 	tinsert(UISpecialFrames, "ALATRADESKILL_SETTING_UI_C");
-	VT.__uireimp._SetSimpleBackdrop(SettingUIFreeContainer, 0, 1, 0.05, 0.05, 0.05, 1.0, 0.0, 0.0, 0.0, 1.0);
+	VT.__dep.uireimp._SetSimpleBackdrop(SettingUIFreeContainer, 0, 1, 0.05, 0.05, 0.05, 1.0, 0.0, 0.0, 0.0, 1.0);
 	--
 	local Close = CreateFrame('BUTTON', nil, SettingUIFreeContainer);
 	Close:SetSize(20, 20);
@@ -7180,7 +7180,7 @@ local function LF_CreateConfigFrame()
 	end
 	do	--	character list
 		local CharList = CreateFrame('FRAME', nil, Frame);
-		VT.__uireimp._SetSimpleBackdrop(CharList, 0, 1, 0.05, 0.05, 0.05, 1.0, 0.0, 0.0, 0.0, 1.0);
+		VT.__dep.uireimp._SetSimpleBackdrop(CharList, 0, 1, 0.05, 0.05, 0.05, 1.0, 0.0, 0.0, 0.0, 1.0);
 		CharList:SetSize(240, 400);
 		CharList:SetPoint("BOTTOMLEFT", Frame, "BOTTOMRIGHT", 2, 0);
 		CharList:EnableMouse(true);
@@ -7194,7 +7194,7 @@ local function LF_CreateConfigFrame()
 		-- end);
 		CharList:Hide();
 
-		local ScrollFrame = VT.__scrolllib.CreateScrollFrame(CharList, nil, nil, T_UIDefinition.CharListButtonHeight, LF_ConfigCreateCharListButton, LF_ConfigSetCharListButton);
+		local ScrollFrame = VT.__dep.__scrolllib.CreateScrollFrame(CharList, nil, nil, T_UIDefinition.CharListButtonHeight, LF_ConfigCreateCharListButton, LF_ConfigSetCharListButton);
 		ScrollFrame:SetPoint("BOTTOMLEFT", 4, 12);
 		ScrollFrame:SetPoint("TOPRIGHT", -4, -24);
 		CharList.ScrollFrame = ScrollFrame;
