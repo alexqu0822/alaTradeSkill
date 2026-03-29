@@ -7001,7 +7001,12 @@ end
 		Button:SetScript("OnClick", function(self)
 			backup = VT.SET[self.key];
 			-- ColorPickerFrame.Alpha:Show();
+			ColorPickerFrame.func = nil;
+			ColorPickerFrame.swatchFunc = nil;
+			ColorPickerFrame.cancelFunc = nil;
+			ColorPickerFrame:SetColorRGB(unpack(backup));
 			ColorPickerFrame.func = Button.func;
+			ColorPickerFrame.swatchFunc = Button.func;
 			ColorPickerFrame.hasOpacity = true;
 			ColorPickerFrame.opacityFunc = Button.opacityFunc;
 			ColorPickerFrame.opacity = 1.0 - backup[4];
@@ -7009,7 +7014,6 @@ end
 			ColorPickerFrame.cancelFunc = Button.cancelFunc;
 			ColorPickerFrame:ClearAllPoints();
 			ColorPickerFrame:SetPoint("TOPLEFT", Button, "BOTTOMRIGHT", 12, 12);
-			ColorPickerFrame:SetColorRGB(unpack(backup));
 			ColorPickerFrame:Show();
 		end);
 		function Button:SetVal(val)

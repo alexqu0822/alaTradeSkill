@@ -27,7 +27,7 @@
 	SettingUI:AddSetting(category, meta, indent, col, icon)
 --]]--
 
-local __version = 260301.0;
+local __version = 260326.0;
 
 local _G = _G;
 _G.__ala_meta__ = _G.__ala_meta__ or {  };
@@ -287,11 +287,13 @@ local TWidgetMethod = {  };
 				local key = self.key;
 				local orig = self.get and self.get() or SettingUI.GetConfig(module, key);
 				ColorPickerFrame.func = nil;
+				ColorPickerFrame.swatchFunc = nil;
 				ColorPickerFrame.cancelFunc = nil;
 				ColorPickerFrame:SetColorRGB(unpack(orig));
 				ColorPickerFrame.func = function()
 					SettingUI:SetConfigInner(module, key, { ColorPickerFrame:GetColorRGB() }, false);
 				end
+				ColorPickerFrame.swatchFunc = ColorPickerFrame.func;
 				ColorPickerFrame.cancelFunc = function()
 					SettingUI:SetConfigInner(module, key, orig, false);
 				end
