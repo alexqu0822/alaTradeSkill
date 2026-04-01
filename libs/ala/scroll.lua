@@ -12,7 +12,7 @@
 	Line:GetDataIndex()
 	Line:ScopedUpdate()
 ]]
-local __version = 260326;
+local __version = 260325;
 
 local _G = _G;
 _G.__ala_meta__ = _G.__ala_meta__ or {  };

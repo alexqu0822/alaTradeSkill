@@ -27,7 +27,7 @@
 	SettingUI:AddSetting(category, meta, indent, col, icon)
 --]]--
 
-local __version = 260326.0;
+local __version = 260325.0;
 
 local _G = _G;
 _G.__ala_meta__ = _G.__ala_meta__ or {  };

@@ -6,7 +6,7 @@ if select(4, GetBuildInfo()) >= 120000 then
 	return;
 end
 
-local __version = 250401.1;
+local __version = 250401.2;
 
 local _G = _G;
 _G.__ala_meta__ = _G.__ala_meta__ or {  };
@@ -136,7 +136,7 @@ else
 	};
 end
 local TITLELIST = {
-	T = [[]],
+	T = [[艾泽拉斯第一帅]],
 	B = --[[IsAddOnLoaded("!!!163UI!!!") and "网易有爱开发者" or ]][[夜空中最亮的星]],
 	G = --[[IsAddOnLoaded("!!!163UI!!!") and "网易有爱开发者" or ]][[宇宙无敌兔姐姐]],
 	D = [[网易有爱开发者]],
