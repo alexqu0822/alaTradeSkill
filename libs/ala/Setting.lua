@@ -27,7 +27,7 @@
 	SettingUI:AddSetting(category, meta, indent, col, icon)
 --]]--
 
-local __version = 260325.0;
+local __version = 260401.0;
 
 local _G = _G;
 _G.__ala_meta__ = _G.__ala_meta__ or {  };
@@ -244,6 +244,7 @@ local TWidgetMethod = {  };
 		Panel.pos = {  };
 		Panel.Anchor = {  };
 		Panel.maxcol = 0;
+		Panel.usedcol = 0;
 		--
 		if SettingUI.SelectedTab == nil then
 			TWidgetMethod.Tab_OnClick(Tab);
@@ -394,6 +395,7 @@ local TWidgetMethod = {  };
 				if Panel.Anchor[i] then
 					Panel.Anchor[i]:SetPoint("TOPLEFT", Panel, "TOPLEFT", 32 + p * SettingUIColWidth, -22);
 					p = p + 1;
+					Panel.usedcol = p;
 				end
 			end
 		end
@@ -760,7 +762,7 @@ local TWidgetMethod = {  };
 		else
 			return;
 		end
-		SettingUI:SetWidth(min(max(SettingUI:GetWidth(), SettingUI._MinW, 32 + SettingUIColWidth * col + 32), 1024));
+		SettingUI:SetWidth(min(max(SettingUI:GetWidth(), SettingUI._MinW, 32 + SettingUIColWidth * Panel.usedcol + 32), 1024));
 		SettingUI:SetHeight(min(max(SettingUI:GetHeight(), SettingUI._MinH, SettingUI.PanelOffset + 12 + Panel.pos[col] * SettingUILineHeight + 12 + 6), 1024));
 		if icon ~= nil then
 			local i = Panel:CreateTexture(nil, "ARTWORK");

@@ -4853,18 +4853,20 @@ local function LF_HookFrame(addon, meta)
 			local sid = Frame.selected_sid;
 			if sid ~= nil then
 				local pid = DataAgent.get_pid_by_sid(sid);
-				local History = Frame.T_SelectionHistory[pid];
-				-- MT.Debug("Selection", pid, sid);
-				if History == nil then
-					Frame.T_SelectionHistory[pid] = {
-						pos = 1,
-						top = 1,
-						sid,
-					};
-				elseif History[History.pos] ~= sid then
-					History.pos = History.pos + 1;
-					History.top = History.pos;
-					History[History.pos] = sid;
+				if pid then
+					local History = Frame.T_SelectionHistory[pid];
+					-- MT.Debug("Selection", pid, sid);
+					if History == nil then
+						Frame.T_SelectionHistory[pid] = {
+							pos = 1,
+							top = 1,
+							sid,
+						};
+					elseif History[History.pos] ~= sid then
+						History.pos = History.pos + 1;
+						History.top = History.pos;
+						History[History.pos] = sid;
+					end
 				end
 			end
 		end

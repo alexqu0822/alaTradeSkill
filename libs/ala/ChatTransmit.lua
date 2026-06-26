@@ -305,7 +305,7 @@ end);
 
 function __ctranslib:Halt()
 	_Driver:UnregisterAllEvents();
-	self.Dead = true;
+	self.IsDead = true;
 	return Private;
 end
 
