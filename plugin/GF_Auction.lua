@@ -24,16 +24,22 @@ MT.BuildEnv("GF_Auction");
 
 local mod = {  };
 
+local function GetDatabase()
+	local gf = _G.GFAuction or _G.GF_Auction;
+	if not gf or not gf.GetModule then return nil; end
+	local Database = gf:GetModule("Database");
+	if not Database or not Database.GetPriceStats then return nil; end
+	return Database;
+end
+
 function mod.F_QueryPriceByID(id, num)
 	id = tonumber(id);
 	if not id or id <= 0 then return nil; end
 	num = tonumber(num) or 1;
 	if num <= 0 then num = 1; end
 
-	local gf = _G.GF_Auction;
-	if not gf or not gf.GetModule then return nil; end
-	local Database = gf:GetModule("Database");
-	if not Database or not Database.GetPriceStats then return nil; end
+	local Database = GetDatabase();
+	if not Database then return nil; end
 
 	local stats = Database:GetPriceStats(id);
 	local unit = stats and tonumber(stats.minUnit) or nil;
@@ -43,21 +49,22 @@ function mod.F_QueryPriceByID(id, num)
 	return nil;
 end
 
-function mod.F_QueryNameByID(id)
-	id = tonumber(id);
-	if not id or id <= 0 then return nil; end
-	local name = mod.F_QueryNameByID(id);
-	return name;
+function mod.F_QueryPriceByName(name, num)
+	if not name then return nil; end
+	local Database = GetDatabase();
+	if not Database or not Database.FindItemIDByName then return nil; end
+	local id = Database:FindItemIDByName(name);
+	if not id then return nil; end
+	return mod.F_QueryPriceByID(id, num);
 end
-function mod.F_QueryQualityByID(id)
-	id = tonumber(id);
-	if not id or id <= 0 then return nil; end
-	local _, _, quality = mod.F_QueryNameByID(id);
-	return quality;
+
+function mod.F_OnDBUpdate(callback)
+	local Database = GetDatabase();
+	if Database and Database.RegisterUpdate then
+		Database:RegisterUpdate(callback);
+	end
 end
 
 MT.RegsiterAuctionModOnLoad("GF_Auction", function()
 	MT.AddAuctionMod("GF_Auction", mod);
 end);
-
-
