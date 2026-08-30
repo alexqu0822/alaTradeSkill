@@ -43,6 +43,7 @@ local GetRegisteredAddonMessagePrefixes = C_ChatInfo ~= nil and C_ChatInfo.GetRe
 local SendAddonMessage = C_ChatInfo ~= nil and C_ChatInfo.SendAddonMessage or SendAddonMessage;
 local _G = _G;
 
+local IsDead = false;
 local SELFGUID = UnitGUID('player');
 local DELIMITER = "\255";
 local COMM_PREFIX = "CTRANS";
@@ -215,7 +216,7 @@ function Private.OnEvent(Driver, event, ...)
 	end
 end
 function Private.PeriodicProc()
-	if Private.IsDead then
+	if IsDead then
 		return;
 	end
 	Private.After(0.1, Private.PeriodicProc);
@@ -272,7 +273,7 @@ end
 --	拆分发送以 "\00x" 开头，倒序
 --	\00x\255GUID\255magic\255reserved8\255part
 function Private.OnSendChatMessage(msg, ctype, languageID, target)
-	if Private.IsDead then
+	if IsDead then
 		return;
 	end
 	if ValidChatType[ctype] ~= nil then
@@ -305,7 +306,7 @@ end);
 
 function __ctranslib:Halt()
 	_Driver:UnregisterAllEvents();
-	self.IsDead = true;
+	IsDead = true;
 	return Private;
 end
 

@@ -1,4 +1,4 @@
-## Interface: 20505
+## Interface: 20505, 20506
 ## Title: ala's Trade Skill
 ## Title-zhCN: ala商业技能助手
 ## Title-zhTW: ala商業技能助手
@@ -12,7 +12,7 @@
 ## Author: |cff00ff00ALA|r
 ## Author-zhCN: |cff00ff00ALA|r
 ## Author-zhTW: |cff00ff00ALA|r
-## Version: 205r.260701
+## Version: 205r.260830
 
 load.xml
 

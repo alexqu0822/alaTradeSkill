@@ -1,3 +1,6 @@
+2026-08-30
+[Vanilla] Bump TOC
+
 2026-07-01
 [WLK Titan] GF_Auction module update
 
