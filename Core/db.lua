@@ -15,6 +15,7 @@ local DT = __private.DT;
 	local bitband = bit.band;
 	local strlower = string.lower;
 	local wipe = table.wipe;
+	local sort = table.sort;
 
 	local RequestLoadSpellData = RequestLoadSpellData or C_Spell.RequestLoadSpellData;
 	local RequestLoadItemDataByID = RequestLoadItemDataByID or C_Item.RequestLoadItemDataByID;
@@ -1597,6 +1598,19 @@ MT.RegisterOnInit('db', function(LoggedIn)
 	for pid = DataAgent.DBMINPID, DataAgent.DBMAXPID do
 		local list = T_TradeSkill_RecipeList[pid];
 		if list ~= nil then
+			sort(list, function(s1, s2)
+				local info1 = T_Recipe_Data[s1];
+				local info2 = T_Recipe_Data[s2];
+				return (info1[index_learn_rank] < info1[index_learn_rank]) or (
+						(info1[index_learn_rank] == info1[index_learn_rank]) and (
+							(info1[index_yellow_rank] < info2[index_yellow_rank]) or (
+								(info1[index_yellow_rank] == info2[index_yellow_rank]) and (
+									(info1[index_green_rank] < info2[index_green_rank]) or (
+										(info1[index_green_rank] == info2[index_green_rank]) and (
+											(info1[index_grey_rank] < info1[index_grey_rank]) or (
+												(info1[index_grey_rank] == info1[index_grey_rank]) and (s1 < s2)
+											)))))));
+			end);
 			T_sname2sid[pid] = {  };
 			T_cidpid2sid[pid] = T_cidpid2sid[pid] or {  };
 			for index = 1, #list do

@@ -1,3 +1,6 @@
+2026-09-09
+[WLK Titan] Correct Titan specified recipes data
+
 2026-08-30
 [Vanilla] Bump TOC
 
