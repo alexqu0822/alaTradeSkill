@@ -89,7 +89,7 @@ l10n["ITEMS_UNK"] = "项未知";
 l10n["NEED_UPDATE"] = "|cffff0000!!需要刷新!!|r";
 --
 l10n["QueueToggleButton"] = "队列";
-l10n["AddQueue"] = "Add";
+l10n["AddQueue"] = "添加";
 --
 l10n["TIP_SEARCH_NAME_ONLY_INFO"] = "|cffffffff只搜索名字，而不是物品链接|r";
 l10n["TIP_HAVE_MATERIALS_INFO"] = "|cffffffff只显示有足够材料的配方|r";
@@ -128,11 +128,11 @@ l10n.ITEM_TYPE_LIST = {
 	[CT._ITEM_CLASS_QUIVER] = "箭袋",					--	11	Quiver Obsolete
 	[CT._ITEM_CLASS_QUESTITEM] = "任务",					--	12	Quest
 	[CT._ITEM_CLASS_KEY] = "钥匙",						--	13	Key Obsolete
-	[CT._ITEM_CLASS_PERMANENT] = "Permanent",									--	14	Permanent(OBSOLETE)
+	[CT._ITEM_CLASS_PERMANENT] = "永久",									--	14	Permanent(OBSOLETE)
 	[CT._ITEM_CLASS_MISCELLANEOUS] = "其它",				--	15	Miscellaneous
-	[CT._ITEM_CLASS_GLYPH] = "铭文",						--	16	Glyph
+	[CT._ITEM_CLASS_GLYPH] = "雕文",						--	16	Glyph
 	[CT._ITEM_CLASS_BATTLEPET] = "战斗宠物",				--	17	Battle Pets
-	[CT._ITEM_CLASS_WOW_TOKEN] = "WoW Token",			--	18	WoW Token
+	[CT._ITEM_CLASS_WOW_TOKEN] = "魔兽世界时光徽章",			--	18	WoW Token
 };
 l10n.ITEM_SUB_TYPE_LIST = {
 	[CT._ITEM_CLASS_CONSUMABLE] = {			--	0	Consumable
@@ -178,7 +178,7 @@ l10n.ITEM_SUB_TYPE_LIST = {
 		[CT._ITEM_WEAPON_GENERIC] = "其它",			--	14	--	Miscellaneous
 		[CT._ITEM_WEAPON_DAGGER] = "匕首",			--	15	--	Daggers
 		[CT._ITEM_WEAPON_THROWN] = "投掷武器",		--	16	--	Thrown
-		[CT._ITEM_WEAPON_SPEAR] = "Spears",			--	17	--	Spears
+		[CT._ITEM_WEAPON_SPEAR] = "矛",			--	17	--	Spears
 		[CT._ITEM_WEAPON_CROSSBOW] = "弩",			--	18	--	Crossbows
 		[CT._ITEM_WEAPON_WAND] = "魔杖",				--	19	--	Wands
 		[CT._ITEM_WEAPON_FISHINGPOLE] = "钓鱼竿",	--	20	--	Fishing Poles
@@ -213,20 +213,20 @@ l10n.ITEM_SUB_TYPE_LIST = {
 		[CT._ITEM_ARMOR_LEATHER] = "皮甲",		--	2	--	Leather
 		[CT._ITEM_ARMOR_MAIL] = "锁甲",			--	3	--	Mail
 		[CT._ITEM_ARMOR_PLATE] = "板甲",			--	4	--	Plate
-		[CT._ITEM_ARMOR_COSMETIC] = "Cosmetic",	--	5	--	Cosmetic
+		[CT._ITEM_ARMOR_COSMETIC] = "装饰品",	--	5	--	Cosmetic
 		[CT._ITEM_ARMOR_SHIELD] = "盾牌",		--	6	--	Shields
 		[CT._ITEM_ARMOR_LIBRAM] = "圣契",		--	7	--	Librams
 		[CT._ITEM_ARMOR_IDOL] = "神像",			--	8	--	Idols
 		[CT._ITEM_ARMOR_TOTEM] = "图腾",			--	9	--	Totems
 		[CT._ITEM_ARMOR_SIGIL] = "魔印",			--	10	--	Sigils
-		[CT._ITEM_ARMOR_RELIC] = "Relic",		--	11	--	Relic
+		[CT._ITEM_ARMOR_RELIC] = "遗物",		--	11	--	Relic
 	},
 	[CT._ITEM_CLASS_REAGENT] = {				--	5	Reagent Obsolete
 		[0] = "材料",		--	Reagent
-		[1] = "Keystone",	--	Keystone
+		[1] = "钥石",	--	Keystone
 	},
 	[CT._ITEM_CLASS_PROJECTILE] = {			--	6	Projectile Obsolete
-		[0] = "Wand",		--	Wand(OBSOLETE)
+		[0] = "魔杖",		--	Wand(OBSOLETE)
 		[1] = "Bolt",		--	Bolt(OBSOLETE)
 		[2] = "箭",		--	Arrow
 		[3] = "子弹",		--	Bullet
@@ -237,19 +237,19 @@ l10n.ITEM_SUB_TYPE_LIST = {
 		[1] = "零件",						--	Parts
 		[2] = "爆炸物",						--	Explosives (OBSOLETE)
 		[3] = "装置",						--	Devices (OBSOLETE)
-		[4] = "Jewelcrafting",				--	Jewelcrafting
-		[5] = "Cloth",						--	Cloth
-		[6] = "Leather",					--	Leather
-		[7] = "Metal & Stone",				--	Metal & Stone
-		[8] = "Cooking",					--	Cooking
-		[9] = "Herb",						--	Herb
-		[10] = "Elemental",					--	Elemental
-		[11] = "Other",						--	Other
-		[12] = "Enchanting",				--	Enchanting
-		[13] = "Materials",					--	Materials (OBSOLETE)
-		[14] = "Item Enchantment",			--	Item Enchantment (OBSOLETE)
-		[15] = "Weapon Enchantment",		--	Weapon Enchantment - Obsolete
-		[16] = "Inscription",				--	Inscription
+		[4] = "珠宝加工",				--	Jewelcrafting
+		[5] = "布料",						--	Cloth
+		[6] = "皮革",					--	Leather
+		[7] = "金属和矿石",				--	Metal & Stone
+		[8] = "肉类",					--	Cooking
+		[9] = "草药",						--	Herb
+		[10] = "元素",					--	Elemental
+		[11] = "其它",						--	Other
+		[12] = "附魔",				--	Enchanting
+		[13] = "原料",					--	Materials (OBSOLETE)
+		[14] = "护甲强化",			--	Item Enchantment (OBSOLETE)
+		[15] = "武器强化",		--	Weapon Enchantment - Obsolete
+		[16] = "铭文",				--	Inscription
 		[17] = "Explosives and Devices",	--	Explosives and Devices (OBSOLETE)
 	},
 	[CT._ITEM_CLASS_ITEM_ENHANCEMENT] = {	--	8	Item Enhancement
@@ -297,18 +297,18 @@ l10n.ITEM_SUB_TYPE_LIST = {
 	},
 	[CT._ITEM_CLASS_KEY] = {					--	13	Key Obsolete
 		[0] = "钥匙",			--	Key
-		[1] = "Lockpick",		--	Lockpick
+		[1] = "开锁工具",		--	Lockpick
 	},
 	[14] = {								--	14	Permanent(OBSOLETE)
-		[0] = "Permanent",		--	Permanent
+		[0] = "永久",		--	Permanent
 	},
 	[CT._ITEM_CLASS_MISCELLANEOUS] = {		--	15	Miscellaneous
 		[CT._ITEM_MISCELLANEOUS_JUNK] = "垃圾",							--	0	--	Junk
-		[CT._ITEM_MISCELLANEOUS_REAGENT] = "Reagent",					--	1	--	Reagent	Mainly spell reagents. For crafting reagents see 7: Tradeskill.
-		[CT._ITEM_MISCELLANEOUS_COMPANION_PET] = "Companion Pets",		--	2	--	Companion Pets
-		[CT._ITEM_MISCELLANEOUS_HOLIDAY] = "Holiday",					--	3	--	Holiday
-		[CT._ITEM_MISCELLANEOUS_OTHER] = "Other",						--	4	--	Other
-		[CT._ITEM_MISCELLANEOUS_MOUNT] = "Mount",						--	5	--	Mount
+		[CT._ITEM_MISCELLANEOUS_REAGENT] = "材料",					--	1	--	Reagent	Mainly spell reagents. For crafting reagents see 7: Tradeskill.
+		[CT._ITEM_MISCELLANEOUS_COMPANION_PET] = "宠物",		--	2	--	Companion Pets
+		[CT._ITEM_MISCELLANEOUS_HOLIDAY] = "节日",					--	3	--	Holiday
+		[CT._ITEM_MISCELLANEOUS_OTHER] = "其它",						--	4	--	Other
+		[CT._ITEM_MISCELLANEOUS_MOUNT] = "坐骑",						--	5	--	Mount
 		-- [CT._ITEM_MISCELLANEOUS_MOUNT_EQUIPMENT] = "Mount Equipment",	--	6	--	Mount Equipment
 	},
 	[CT._ITEM_CLASS_GLYPH] = {				--	16	Glyph
@@ -326,19 +326,19 @@ l10n.ITEM_SUB_TYPE_LIST = {
 		[12] = "恶魔猎手",	--	Demon Hunter
 	},
 	[CT._ITEM_CLASS_BATTLEPET] = {			--	17	Battle Pets
-		[0] = "Humanoid",		--	Humanoid
-		[1] = "Dragonkin",		--	Dragonkin
-		[2] = "Flying",			--	Flying
-		[3] = "Undead",			--	Undead
-		[4] = "Critter",		--	Critter
-		[5] = "Magic",			--	Magic
-		[6] = "Elemental",		--	Elemental
-		[7] = "Beast",			--	Beast
-		[8] = "Aquatic",		--	Aquatic
-		[9] = "Mechanical",		--	Mechanical
+		[0] = "人形",		--	Humanoid
+		[1] = "龙类",		--	Dragonkin
+		[2] = "飞行",			--	Flying
+		[3] = "亡灵",			--	Undead
+		[4] = "小动物",		--	Critter
+		[5] = "魔法",			--	Magic
+		[6] = "元素",		--	Elemental
+		[7] = "野兽",			--	Beast
+		[8] = "水栖",		--	Aquatic
+		[9] = "机械",		--	Mechanical
 	},
 	[CT._ITEM_CLASS_WOW_TOKEN] = {			--	18	WoW Token
-		[0] = "WoW Token",		--	WoW Token
+		[0] = "魔兽世界时光徽章",		--	WoW Token
 	},
 };
 l10n.ITEM_EQUIP_LOC = {
