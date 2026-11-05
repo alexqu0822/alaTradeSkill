@@ -44,16 +44,9 @@ local DT = __private.DT;
 	local GetBestMapForUnit = C_Map.GetBestMapForUnit;
 	local UnitPosition = UnitPosition;
 	local IsInInstance = IsInInstance;
-	local GetNumSkillLines = GetNumSkillLines;
-	local GetSkillLineInfo = GetSkillLineInfo;
 	-- local IsSpellKnown = IsSpellKnown;
-	local GetSpellInfo = GetSpellInfo;
-	local GetSpellCooldown = GetSpellCooldown;
-	local GetItemInfo = GetItemInfo;
-	local GetItemCount = GetItemCount;
 	local GetTradeTargetItemLink = GetTradeTargetItemLink;
 	local GetPlayerInfoByGUID = GetPlayerInfoByGUID;
-	local GetItemQualityColor = GetItemQualityColor;
 	local CastSpellByName = CastSpellByName;
 	local RAID_CLASS_COLORS = RAID_CLASS_COLORS;
 	local CLASS_ICON_TCOORDS = CLASS_ICON_TCOORDS;
@@ -857,8 +850,10 @@ end
 						local _subType = DataAgent.item_subTypeID(cid);
 						local _eqLoc = DataAgent.item_loc(cid);
 						local _eqLid = T_EquipLoc2ID[_eqLoc];
-						Type_Hash[_type] = 1;
-						SubType_Hash[_subType] = 1;
+						if _type and _subType then
+							Type_Hash[_type] = 1;
+							SubType_Hash[_subType] = 1;
+						end
 						if _eqLid then
 							EquipLoc_Hash[_eqLid] = 1;
 						end
@@ -931,7 +926,7 @@ end
 		local avl = cap or CT.BIGNUMBER;
 		local ids, counts = DataAgent.get_reagents_by_sid(sid);
 		for i = 1, #ids do
-			local n = GetItemCount(ids[i]);
+			local n = VT._comptb.GetItemCount(ids[i]);
 			avl = min(avl, n / counts[i]);
 		end
 		avl = avl - avl % 1.0;
@@ -1951,7 +1946,7 @@ end
 					Button.Title:SetWidth(230);
 					Button.Note:SetText(MT.GetMoneyString(val[2]));
 					if quality ~= nil then
-						local r, g, b, code = GetItemQualityColor(quality);
+						local r, g, b, code = VT._comptb.GetItemQualityColor(quality);
 						Button.QualityGlow:SetVertexColor(r, g, b);
 						Button.QualityGlow:Show();
 					else
@@ -1992,7 +1987,7 @@ end
 						end
 						Button.Note:SetText(MT.GetMoneyString(val[2]));
 						if quality ~= nil then
-							local r, g, b, code = GetItemQualityColor(quality);
+							local r, g, b, code = VT._comptb.GetItemQualityColor(quality);
 							Button.QualityGlow:SetVertexColor(r, g, b);
 							Button.QualityGlow:Show();
 						else
@@ -2045,7 +2040,7 @@ end
 				Button.Num:SetText("");
 				Button.Note:SetText(MT.GetMoneyString(val[2]));
 				if quality ~= nil then
-					local r, g, b, code = GetItemQualityColor(quality);
+					local r, g, b, code = VT._comptb.GetItemQualityColor(quality);
 					Button.QualityGlow:SetVertexColor(r, g, b);
 					Button.QualityGlow:Show();
 				else
@@ -2194,7 +2189,7 @@ end
 						Button.Note:SetText("");
 					end
 					if quality ~= nil then
-						local r, g, b, code = GetItemQualityColor(quality);
+						local r, g, b, code = VT._comptb.GetItemQualityColor(quality);
 						Button.QualityGlow:SetVertexColor(r, g, b);
 						Button.QualityGlow:Show();
 					else
@@ -2244,7 +2239,7 @@ end
 					Button.Note:SetText("");
 				end
 				if quality ~= nil then
-					local r, g, b, code = GetItemQualityColor(quality);
+					local r, g, b, code = VT._comptb.GetItemQualityColor(quality);
 					Button.QualityGlow:SetVertexColor(r, g, b);
 					Button.QualityGlow:Show();
 				else
@@ -2379,7 +2374,7 @@ end
 				Button.Note:SetText("");
 			end
 			if quality then
-				local r, g, b, code = GetItemQualityColor(quality);
+				local r, g, b, code = VT._comptb.GetItemQualityColor(quality);
 				Button.QualityGlow:SetVertexColor(r, g, b);
 				Button.QualityGlow:Show();
 			else
@@ -2562,7 +2557,7 @@ end
 			end
 			Button.Icon:SetTexture(icon);
 			Button.Title:SetText(DataAgent.spell_name_s(sid));
-			local start, duration, enabled, modRate = GetSpellCooldown(sid);
+			local start, duration, enabled, modRate = VT._comptb.GetSpellCooldown(sid);
 			if start == nil or start <= 0 then
 				Button.CD:Hide();
 			else
@@ -2570,7 +2565,7 @@ end
 			end
 			Button.Num:SetText(num);
 			if quality then
-				local r, g, b, code = GetItemQualityColor(quality);
+				local r, g, b, code = VT._comptb.GetItemQualityColor(quality);
 				Button.QualityGlow:SetVertexColor(r, g, b);
 				Button.QualityGlow:Show();
 			else
@@ -3915,7 +3910,7 @@ end
 				local sid = list[index];
 				local pid = DataAgent.get_pid_by_sid(sid);
 				if LT_SharedMethod.IsSkillLearned(pid) then
-					local start, duration, enabled, modRate = GetSpellCooldown(sid);
+					local start, duration, enabled, modRate = VT._comptb.GetSpellCooldown(sid);
 					if start == nil or start <= 0 then
 						local available = LT_SharedMethod.GetAvaiableCraftCount(sid, todo[index]);
 						if available > 0 then
@@ -4053,7 +4048,7 @@ end
 				self.CraftingID = nil;
 				self.IsCrafting = false;
 				self.Focus:Hide();
-				local start, duration, enabled, modRate = GetSpellCooldown(sid);
+				local start, duration, enabled, modRate = VT._comptb.GetSpellCooldown(sid);
 				if start == nil or start <= 0 then
 					local available = LT_SharedMethod.GetAvaiableCraftCount(sid);
 					if available > 0 then
@@ -4892,7 +4887,7 @@ local function LF_HookFrame(addon, meta)
 
 	ALA_HOOK_ChatEdit_InsertLink(function(link, addon)
 		if Frame:IsVisible() and addon ~= __addon and not MT.IsOverridedByAuction() then
-			local name, _, _, _, _, _, _, _, loc = GetItemInfo(link);
+			local name, _, _, _, _, _, _, _, loc = VT._comptb.GetItemInfo(link);
 			if name ~= nil and name ~= "" then
 				local pid = Frame.flag or Frame.F_GetPID();
 				Frame.SearchEditBox:ClearFocus();
@@ -5388,7 +5383,7 @@ local function LF_AddOnCallback_Blizzard_TradeSkillUI(addon)
 			if Frame.flag == 10 then
 				local link = GetTradeTargetItemLink(7);
 				if link ~= nil then
-					local loc = select(9, GetItemInfo(link));
+					local loc = select(9, VT._comptb.GetItemInfo(link));
 					if loc ~= nil and ENCHANT_FILTER[loc] then
 						Frame.SearchEditBox:SetText(ENCHANT_FILTER[loc]);
 						Frame:F_Search(ENCHANT_FILTER[loc]);
@@ -5746,7 +5741,7 @@ local function LF_AddOnCallback_Blizzard_CraftUI(addon)
 		local function LF_ProcessTradeTargetItemLink()
 			local link = GetTradeTargetItemLink(7);
 			if link ~= nil then
-				local loc = select(9, GetItemInfo(link));
+				local loc = select(9, VT._comptb.GetItemInfo(link));
 				if loc ~= nil and ENCHANT_FILTER[loc] then
 					Frame.SearchEditBox:SetText(ENCHANT_FILTER[loc]);
 					Frame:F_Search(ENCHANT_FILTER[loc]);
@@ -6124,7 +6119,7 @@ local function LF_CreateExplorerFrame()
 
 	ALA_HOOK_ChatEdit_InsertLink(function(link, addon)
 		if Frame:IsShown() and addon ~= __addon and not MT.IsOverridedByAuction() then
-			local name = GetItemInfo(link);
+			local name = VT._comptb.GetItemInfo(link);
 			if name and name ~= "" then
 				Frame.SearchEditBox:SetText(name);
 				Frame.SearchEditBox:ClearFocus();
@@ -7518,13 +7513,13 @@ function F.SKILL_LINES_CHANGED_Alt()
 	for pid = DataAgent.DBMINPID, DataAgent.DBMAXPID do
 		local cpname = check_name[pid];
 		if cpname ~= nil then
-			if GetSpellInfo(cpname) == nil then
+			if VT._comptb.GetSpellInfo(cpname) == nil then
 				rawset(VT.VAR, pid, nil);
 			end
 		end
 	end
-	for index = 1, GetNumSkillLines() do
-		local pname, header, expanded, cur_rank, _, _, max_rank  = GetSkillLineInfo(index);
+	for index = 1, VT._comptb.GetNumSkillLines() do
+		local pname, header, expanded, cur_rank, _, _, max_rank  = VT._comptb.GetSkillLineInfo(index);
 		if not header then
 			local pid = DataAgent.get_pid_by_pname(pname);
 			if pid ~= nil then

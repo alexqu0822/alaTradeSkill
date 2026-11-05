@@ -8,7 +8,7 @@ local CT = __private.CT;
 local VT = __private.VT;
 local DT = __private.DT;
 
-if not CT.ISCLASSIC then
+if not CT.ISCLASSIC or CT.ISFOREVER then
 	return;
 end
 

@@ -25,7 +25,6 @@ local DT = __private.DT;
 	local format = string.format;
 
 	local IsShiftKeyDown = IsShiftKeyDown;
-	local GetItemQualityColor = GetItemQualityColor;
 	local GetPlayerInfoByGUID = GetPlayerInfoByGUID;
 	local GetMerchantItemID = GetMerchantItemID;
 	local GetBuybackItemLink = GetBuybackItemLink;
@@ -214,7 +213,7 @@ local function GetPriceInfoBySID(phase, sid, num, lines, stack_level, is_enchant
 						local name = VT.AuctionMod.F_QueryNameByID(iid) or DataAgent.item_name_s(iid);
 						local quality = VT.AuctionMod.F_QueryQualityByID(iid) or DataAgent.item_rarity(iid);
 						if quality ~= nil then
-							local _, _, _, code = GetItemQualityColor(quality);
+							local _, _, _, code = VT._comptb.GetItemQualityColor(quality);
 							name = "|c" .. code .. name .. "|r";
 						end
 						if iid ~= cid then
@@ -286,7 +285,7 @@ local function GetPriceInfoBySID(phase, sid, num, lines, stack_level, is_enchant
 		local name = cid and (VT.AuctionMod.F_QueryNameByID(cid) or DataAgent.item_name_s(cid));
 		local quality = cid and (VT.AuctionMod.F_QueryQualityByID(cid) or DataAgent.item_rarity(cid));
 		if quality ~= nil then
-			local _, _, _, code = GetItemQualityColor(quality);
+			local _, _, _, code = VT._comptb.GetItemQualityColor(quality);
 			name = name and ("|c" .. code .. name .. "|r") or "";
 		else
 			name = name or "";
@@ -771,13 +770,17 @@ local function HookTooltip(Tooltip)
 	hooksecurefunc(Tooltip, "SetHyperlink", LF_TooltipSetHyperlink);
 	hooksecurefunc(Tooltip, "SetSpellByID", LF_TooltipSetSpellByID);
 	hooksecurefunc(Tooltip, "SetItemByID", LF_TooltipSetItemByID);
-	hooksecurefunc(Tooltip, "SetCraftSpell", LF_TooltipSetCraftSpell);
+	if not CT.ISFOREVER then
+		hooksecurefunc(Tooltip, "SetCraftSpell", LF_TooltipSetCraftSpell);
+	end
 	--
 	hooksecurefunc(Tooltip, "SetMerchantItem", LF_TooltipSetMerchantItem);
 	hooksecurefunc(Tooltip, "SetBuybackItem", LF_TooltipSetBuybackItem);
 	hooksecurefunc(Tooltip, "SetBagItem", LF_TooltipSetBagItem);
-	hooksecurefunc(Tooltip, "SetAuctionItem", LF_TooltipSetAuctionItem);
-	hooksecurefunc(Tooltip, "SetAuctionSellItem", LF_TooltipSetAuctionSellItem);
+	if not CT.ISFOREVER then
+		hooksecurefunc(Tooltip, "SetAuctionItem", LF_TooltipSetAuctionItem);
+		hooksecurefunc(Tooltip, "SetAuctionSellItem", LF_TooltipSetAuctionSellItem);
+	end
 	hooksecurefunc(Tooltip, "SetLootItem", LF_TooltipSetLootItem);
 	hooksecurefunc(Tooltip, "SetLootRollItem", LF_TooltipSetLootRollItem);
 	hooksecurefunc(Tooltip, "SetInventoryItem", LF_TooltipSetInventoryItem);
@@ -787,8 +790,10 @@ local function HookTooltip(Tooltip)
 	hooksecurefunc(Tooltip, "SetQuestLogItem", LF_TooltipSetQuestLogItem);
 	hooksecurefunc(Tooltip, "SetInboxItem", LF_TooltipSetInboxItem);
 	hooksecurefunc(Tooltip, "SetSendMailItem", LF_TooltipSetSendMailItem);
-	hooksecurefunc(Tooltip, "SetTradeSkillItem", LF_TooltipSetTradeSkillItem);
-	hooksecurefunc(Tooltip, "SetCraftItem", LF_TooltipSetCraftItem);
+	if not CT.ISFOREVER then
+		hooksecurefunc(Tooltip, "SetTradeSkillItem", LF_TooltipSetTradeSkillItem);
+		hooksecurefunc(Tooltip, "SetCraftItem", LF_TooltipSetCraftItem);
+	end
 	if CT.ISCLASSIC then
 		hooksecurefunc(Tooltip, "SetTrainerService", LF_TooltipGUISetItem);
 	elseif CT.VGE2X then
@@ -797,14 +802,16 @@ local function HookTooltip(Tooltip)
 		hooksecurefunc(Tooltip, "SetSocketGem", LF_TooltipGUISetItem);
 		hooksecurefunc(Tooltip, "SetExistingSocketGem", LF_TooltipGUISetItem);
 	end
-	hooksecurefunc(Tooltip, "SetCompareItem", function(Tooltip1, Tooltip2, service)
-		if Tooltip1:IsShown() then
-			LF_TooltipGUISetItem(Tooltip1);
-		end
-		if Tooltip2:IsShown() then
-			LF_TooltipGUISetItem(Tooltip2);
-		end
-	end);
+	if not CT.ISFOREVER then
+		hooksecurefunc(Tooltip, "SetCompareItem", function(Tooltip1, Tooltip2, service)
+			if Tooltip1:IsShown() then
+				LF_TooltipGUISetItem(Tooltip1);
+			end
+			if Tooltip2:IsShown() then
+				LF_TooltipGUISetItem(Tooltip2);
+			end
+		end);
+	end
 end
 
 MT.HookTooltip = HookTooltip;

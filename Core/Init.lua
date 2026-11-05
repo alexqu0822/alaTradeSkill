@@ -24,8 +24,6 @@ local DT = {  }; __private.DT = DT;		--	data
 	local strupper, strsub, strrep, format = string.upper, string.sub, string.rep, string.format;
 	local IsLoggedIn = IsLoggedIn;
 	local SendChatMessage = SendChatMessage;
-	local GetSpellInfo = GetSpellInfo;
-	local GetSpellCooldown = GetSpellCooldown;
 	local IsAddOnLoaded = C_AddOns and C_AddOns.IsAddOnLoaded or IsAddOnLoaded;
 	local CreateFrame = CreateFrame;
 	local GetTime = GetTime;
@@ -41,16 +39,112 @@ local DT = {  }; __private.DT = DT;		--	data
 -->		Compatible
 	local _comptb = {  };
 	VT._comptb = _comptb;
-	if GetMouseFocus then
-		_comptb.GetMouseFocus = GetMouseFocus;
-	elseif GetMouseFoci then
-		local GetMouseFoci = GetMouseFoci;
+	local Noop = function() end;
+
+	if  _G.GetMouseFoci then
+		local GetMouseFoci = _G.GetMouseFoci;
 		_comptb.GetMouseFocus = function()
 			return GetMouseFoci()[1];
 		end
 	else
-		_comptb.GetMouseFocus = function()
+		_comptb.GetMouseFocus = GetMouseFocus or Noop;
+	end
+
+	if C_Spell then
+		if C_Spell.GetSpellInfo then
+			local GetSpellInfo_ = C_Spell.GetSpellInfo;
+			_comptb.GetSpellInfo = function(id)
+				local info = GetSpellInfo_(id)
+				if info then
+					return info.name, nil, info.iconID, info.castTime, info.minRange, info.maxRange, info.spellID, info.originalIconID;
+				end
+			end
+		else
+			_comptb.GetSpellInfo = GetSpellInfo or Noop;
 		end
+		_comptb.GetSpellName = C_Spell.GetSpellName or _comptb.GetSpellInfo or Noop;
+		if C_Spell.GetSpellCooldown then
+			local GetSpellCooldown_ = C_Spell.GetSpellCooldown;
+			_comptb.GetSpellCooldown = function(id)
+				local info = GetSpellCooldown_(id);
+				return info.startTime, info.duration, info.enabled, info.modRate;
+			end
+		else
+			_comptb.GetSpellCooldown = GetSpellCooldown or Noop;
+		end
+		_comptb.RequestLoadSpellData = C_Spell.RequestLoadSpellData or RequestLoadSpellData or Noop;
+		_comptb.GetSpellLink = C_Spell.GetSpellLink or GetSpellLink or Noop;
+	else
+		_comptb.GetSpellInfo = GetSpellInfo or Noop;
+		_comptb.GetSpellName = _comptb.GetSpellInfo or Noop;
+		_comptb.GetSpellCooldown = GetSpellCooldown or Noop;
+		_comptb.RequestLoadSpellData = RequestLoadSpellData or Noop;
+		_comptb.GetSpellLink = GetSpellLink or Noop;
+		if CT.TOCVERSION < 20000 then
+			_comptb.GetSpellLink = GetSpellLink or function(id, name)
+				--|cff71d5ff|Hspell:id|h[name]|h|r
+				name = name or VT._comptb.GetSpellName(id);
+				if name then
+					if __ala_meta__.chat and __ala_meta__.chat.alac_hyperLink and __ala_meta__.chat.alac_hyperLink() then
+						return "|cff71d5ff|Hspell:" .. id .. "|h[" .. name .. "]|h|r";
+					else
+						return name;
+					end
+				else
+					return nil;
+				end
+			end
+		elseif CT.TOCVERSION < 50000 then
+			_comptb.GetSpellLink = GetSpellLink or function(id, name)
+				--|cff71d5ff|Hspell:id|h[name]|h|r
+				name = name or VT._comptb.GetSpellName(id);
+				if name then
+					return "|cff71d5ff|Hspell:" .. id .. "|h[" .. name .. "]|h|r";
+				else
+					return nil;
+				end
+			end
+		end
+	end
+
+	if C_Item then
+		_comptb.GetItemInfoInstant = C_Item.GetItemInfoInstant or GetItemInfoInstant or Noop;
+		_comptb.GetItemInfo = C_Item.GetItemInfo or GetItemInfo or Noop;
+		_comptb.GetItemNameByID = C_Item.GetItemNameByID or GetItemNameByID or Noop;
+		_comptb.GetItemCount = C_Item.GetItemCount or GetItemCount or Noop;
+		_comptb.GetItemQualityColor = C_Item.GetItemQualityColor or GetItemQualityColor or Noop;
+		_comptb.GetItemSetInfo = C_Item.GetItemSetInfo or GetItemSetInfo or Noop;
+		_comptb.GetItemInventoryTypeByID = C_Item.GetItemInventoryTypeByID or GetItemInventoryTypeByID or Noop;
+		_comptb.RequestLoadItemDataByID = C_Item.RequestLoadItemDataByID or RequestLoadItemDataByID or Noop;
+	else
+		_comptb.GetItemInfoInstant = GetItemInfoInstant or Noop;
+		_comptb.GetItemInfo = GetItemInfo or Noop;
+		_comptb.GetItemNameByID = GetItemNameByID or _comptb.GetItemInfo or Noop;
+		_comptb.GetItemCount = GetItemCount or Noop;
+		_comptb.GetItemQualityColor = GetItemQualityColor or Noop;
+		_comptb.GetItemSetInfo = GetItemSetInfo or Noop;
+		_comptb.GetItemInventoryTypeByID = GetItemInventoryTypeByID or Noop;
+		_comptb.RequestLoadItemDataByID = RequestLoadItemDataByID or Noop;
+	end
+
+	if C_SkillInfo then
+		--C_SkillInfo.GetNumSkillLines
+		--C_SkillInfo.GetSkillLineInfo
+		_comptb.GetNumSkillLines = C_SkillInfo.GetNumSkillLines or GetNumSkillLines or Noop;
+		if C_SkillInfo.GetSkillLineInfo then
+			local GetSkillLineInfo_ = C_SkillInfo.GetSkillLineInfo;
+			_comptb.GetSkillLineInfo = function(i)
+				local info = GetSkillLineInfo_(i);
+				if info then
+					return info.name, info.isHeader, not info.isCollapsed, info.rank, info.tempPoints, info.modifier, info.maxRank, info.isAbandonable, info.stepCost, info.rankCost, info.minLevel, info.costType, info.description;
+				end
+			end
+		else
+			_comptb.GetSkillLineInfo = GetSkillLineInfo or Noop;
+		end
+	else
+		_comptb.GetNumSkillLines = GetNumSkillLines or Noop;
+		_comptb.GetSkillLineInfo = GetSkillLineInfo or Noop;
 	end
 
 -->		Dev
@@ -127,6 +221,7 @@ local DT = {  }; __private.DT = DT;		--	data
 	CT.ISWLKTT = CT.TOCVERSION >= 30800 and CT.TOCVERSION < 40000;
 	CT.ISCATA = CT.TOCVERSION >= 40400 and CT.TOCVERSION < 50000;
 	CT.ISMOP = CT.TOCVERSION >= 50500 and CT.TOCVERSION < 90000;
+	CT.ISFOREVER = CT.TOCVERSION >= 16000 and CT.TOCVERSION < 20000;
 	CT.VGE2X = CT.ISBCC or CT.ISWLK or CT.ISCATA or CT.ISMOP;
 	CT.VGE3X = CT.ISWLK or CT.ISCATA or CT.ISMOP;
 	CT.VGE5X = CT.ISMOP;
@@ -422,7 +517,7 @@ MT.BuildEnv('Init');
 
 	if CT.ISCLASSIC then
 		function MT.GetSkillLink(sid)
-			local name = GetSpellInfo(sid);
+			local name = VT._comptb.GetSpellName(sid);
 			if name then
 				return "|cffffffff|Henchant:" .. sid .. "|h[" .. name .. "]|h|r";
 			else
@@ -444,7 +539,7 @@ MT.BuildEnv('Init');
 		end
 	elseif CT.VGE2X then
 		function MT.GetSkillLink(sid)
-			local name = GetSpellInfo(sid);
+			local name = VT._comptb.GetSpellName(sid);
 			if name then
 				return "|cffffd000|Henchant:" .. sid .. "|h[" .. name .. "]|h|r";
 			else
@@ -473,7 +568,7 @@ MT.BuildEnv('Init');
 	end
 
 	function MT.GetTradeSkillSpellModifiedCooldown(sid, formatStr)
-		local start, duration, enabled, modRate = GetSpellCooldown(sid);
+		local start, duration, enabled, modRate = VT._comptb.GetSpellCooldown(sid);
 		if start ~= nil and start > 0 then
 			local now = GetTime();
 			if start > now then

@@ -2,6 +2,7 @@
 ..\FrameXML\UI.xsd">
 
 	<script file = "classic-1vanilla.lua" />
+	<script file = "classic-1forever.lua" />
 	<script file = "classic-2bcc.lua" />
 	<script file = "classic-3wotlk.lua" />
 	<script file = "classic-4cata.lua" />

@@ -17,10 +17,8 @@ local DT = __private.DT;
 	local wipe = table.wipe;
 	local sort = table.sort;
 
-	local RequestLoadSpellData = RequestLoadSpellData or C_Spell.RequestLoadSpellData;
-	local RequestLoadItemDataByID = RequestLoadItemDataByID or C_Item.RequestLoadItemDataByID;
-	local GetSpellInfo = GetSpellInfo;
-	local GetItemInfo = GetItemInfo;
+	local RequestLoadSpellData = VT._comptb.RequestLoadSpellData;
+	local RequestLoadItemDataByID = VT._comptb.RequestLoadItemDataByID;
 	local IsSpellKnown = IsSpellKnown;
 	local IsInRaid = IsInRaid;
 	local IsInGroup = IsInGroup;
@@ -175,7 +173,7 @@ local function LF_HashSpell(sid, sname, sname_lower)
 	end
 end
 local function LF_CacheSpell(sid)
-	local sname = GetSpellInfo(sid);
+	local sname = VT._comptb.GetSpellName(sid);
 	if sname ~= nil then
 		local sname_lower = strlower(sname);
 		local sinfo = {
@@ -195,7 +193,7 @@ local function LF_CacheSpell(sid)
 end
 local function LF_CacheItem(iid)
 	local iname, ilink, rarity, level, pLevel, type, subType, stackCount, loc, icon, sellPrice,
-			typeID, subTypeID, bindType, expacID, setID, isReagent = GetItemInfo(iid); 
+			typeID, subTypeID, bindType, expacID, setID, isReagent = VT._comptb.GetItemInfo(iid); 
 	if iname ~= nil and ilink ~= nil then
 		local iname_lower = strlower(iname);
 		local ilink_lower = strlower(ilink);
@@ -242,7 +240,7 @@ function F.SPELL_DATA_LOAD_RESULT(sid, success)
 		--	trade skill line
 		local pid = T_Temp_pid[sid];
 		if pid ~= nil then
-			local pname = GetSpellInfo(sid);
+			local pname = VT._comptb.GetSpellName(sid);
 			if pname ~= nil then
 				local pname_lower = strlower(pname);
 				T_Temp_pid[sid] = nil;
