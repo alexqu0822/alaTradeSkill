@@ -34,7 +34,6 @@ local DT = __private.DT;
 	local wipe = table.wipe;
 
 	local CreateFrame = CreateFrame;
-	local GetMouseFocus = VT._comptb.GetMouseFocus;
 	local IsShiftKeyDown = IsShiftKeyDown;
 	local IsAltKeyDown = IsAltKeyDown;
 	local IsControlKeyDown = IsControlKeyDown;
@@ -1998,7 +1997,7 @@ end
 						else
 							Button.Star:Hide();
 						end
-						if GetMouseFocus() == Button then
+						if VT._comptb.GetMouseFocus() == Button then
 							LT_SharedMethod.SkillListButton_OnEnter(Button);
 						end
 						if sid == Frame.selected_sid then
@@ -2053,7 +2052,7 @@ end
 				end
 				Button:Deselect();
 			end
-			if GetMouseFocus() == Button then
+			if VT._comptb.GetMouseFocus() == Button then
 				LT_SharedMethod.SkillListButton_OnEnter(Button);
 			end
 			if Button.prev_sid ~= sid then
@@ -2252,7 +2251,7 @@ end
 				end
 				Button:Deselect();
 			end
-			if GetMouseFocus() == Button then
+			if VT._comptb.GetMouseFocus() == Button then
 				LT_SharedMethod.SkillListButton_OnEnter(Button);
 			end
 			if Button.prev_sid ~= sid then
@@ -2385,7 +2384,7 @@ end
 			else
 				Button.Star:Hide();
 			end
-			if GetMouseFocus() == Button then
+			if VT._comptb.GetMouseFocus() == Button then
 				LT_SharedMethod.SkillListButton_OnEnter(Button);
 			end
 			Button:Deselect();
@@ -2576,7 +2575,7 @@ end
 			else
 				Button.Star:Hide();
 			end
-			if GetMouseFocus() == Button then
+			if VT._comptb.GetMouseFocus() == Button then
 				LT_SharedMethod.SkillListButton_OnEnter(Button);
 			end
 			Button:Deselect();

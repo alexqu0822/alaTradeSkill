@@ -72,12 +72,14 @@ local DT = {  }; __private.DT = DT;		--	data
 		else
 			_comptb.GetSpellCooldown = GetSpellCooldown or Noop;
 		end
+		_comptb.GetSpellLevelLearned = C_Spell.GetSpellLevelLearned or GetSpellLevelLearned or Noop;
 		_comptb.RequestLoadSpellData = C_Spell.RequestLoadSpellData or RequestLoadSpellData or Noop;
 		_comptb.GetSpellLink = C_Spell.GetSpellLink or GetSpellLink or Noop;
 	else
 		_comptb.GetSpellInfo = GetSpellInfo or Noop;
 		_comptb.GetSpellName = _comptb.GetSpellInfo or Noop;
 		_comptb.GetSpellCooldown = GetSpellCooldown or Noop;
+		_comptb.GetSpellLevelLearned = GetSpellLevelLearned or Noop;
 		_comptb.RequestLoadSpellData = RequestLoadSpellData or Noop;
 		_comptb.GetSpellLink = GetSpellLink or Noop;
 		if CT.TOCVERSION < 20000 then
