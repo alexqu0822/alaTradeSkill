@@ -544,13 +544,15 @@ end
 				if VT.SET.show_call then
 					Frame.ToggleButton:Show();
 				end
-				if CT.VGE3X then
+				if Frame.FilterDropdown then
 					if pid == 10 then
 						Frame.FilterDropdown:Show();
-						Frame.SearchEditBox:SetPoint("TOPLEFT", Frame, "TOPLEFT", 18, -6);
+						LT_SharedMethod.SetPoint(Frame.SearchEditBox, Frame.T_WidgetsLayout.SearchEditBoxF);
+						Frame.SearchEditBox:SetPoint("RIGHT", Frame.SearchEditBoxOK, "LEFT", -4, 0);
 					else
 						Frame.FilterDropdown:Hide();
-						Frame.SearchEditBox:SetPoint("TOPLEFT", Frame, "TOPLEFT", 6, -6);
+						LT_SharedMethod.SetPoint(Frame.SearchEditBox, Frame.T_WidgetsLayout.SearchEditBox);
+						Frame.SearchEditBox:SetPoint("RIGHT", Frame.SearchEditBoxOK, "LEFT", -4, 0);
 					end
 				end
 				Frame:F_ToggleOnSkill(true);
@@ -561,11 +563,12 @@ end
 						local hash = var[2];
 						if update_var then
 							-- MT.Debug("UpdateFrame|cff00ff00#1L1|r");
+							Frame.F_NewContext();
 							local num = Frame.F_GetRecipeNumAvailable();
-							if num <= 0 then
-								-- Frame.mute_update = false;
-								return;
-							end
+							-- if num <= 0 then
+							-- 	-- Frame.mute_update = false;
+							-- 	return;
+							-- end
 							var.cur_rank = cur_rank;
 							for index = 1, #sids do
 								DataAgent.CancelMarkKnown(sids[index], CT.SELFGUID);
@@ -588,24 +591,18 @@ end
 												DataAgent.MarkKnown(sid, CT.SELFGUID);
 											end
 											DataAgent.DynamicCreateInfo(Frame, pid, cur_rank, index, sid, srank);
-											if index == Frame.F_GetSelection() then
-												Frame.selected_sid = sid;
-											end
 										end
 									end
 								end
 							end
+							Frame.selected_sid = Frame.F_GetSelectionSID();
 							var.update = nil;
 							Frame.update = nil;
 							Frame.IsDirty = false;
-							if Frame.prev_pid ~= pid then
-								Frame.prev_selected_sid = nil;
-								Frame.F_SetSelection(Frame.F_GetSelection());
-							end
 						else
 							-- MT.Debug("UpdateFrame|cff00ff00#1L2|r");
 						end
-						if #sids > 0 then
+						-- if #sids > 0 then
 							if Frame.prev_pid ~= pid then
 								if set.showProfit then
 									Frame:F_ShowProfitFrame();
@@ -631,6 +628,8 @@ end
 									end
 								end
 								Frame.SearchEditBoxNameOnly:SetChecked(set.searchNameOnly);
+								Frame.F_SetSelection(Frame.F_GetSelection());
+								Frame.F_OnSelection();
 							end
 							Frame.prev_pid = pid;
 							Frame.hash = hash;
@@ -672,10 +671,10 @@ end
 							LT_SharedMethod.UpdateProfitFrame(Frame);
 							set.update = nil;
 							MT.FireCallback("USER_EVENT_RECIPE_LIST_UPDATE");
-						else
-							var.update = true;
-							-- Frame.mute_update = false;
-						end
+						-- else
+						-- 	var.update = true;
+						-- 	-- Frame.mute_update = false;
+						-- end
 					else
 						-- MT.Debug("UpdateFrame|cff00ff00#2L1|r");
 						if #var[1] > 0 then
@@ -697,6 +696,7 @@ end
 						local hash = var[2];
 						if update_var then
 							-- MT.Debug("UpdateFrame|cff00ff00#1L1|r");
+							Frame.F_NewContext();
 							local num = Frame.F_GetRecipeNumAvailable();
 							if num <= 0 then
 								-- Frame.mute_update = false;
@@ -719,13 +719,11 @@ end
 												DataAgent.MarkKnown(sid, CT.SELFGUID);
 											end
 											DataAgent.DynamicCreateInfo(Frame, pid, cur_rank, index, sid, srank);
-											if index == Frame.F_GetSelection() then
-												Frame.selected_sid = sid;
-											end
 										end
 									end
 								end
 							end
+							Frame.selected_sid = Frame.F_GetSelectionSID();
 						end
 					end
 				end
@@ -903,14 +901,16 @@ end
 			Frame.selected_sid = sid;
 			Frame.F_Update();
 			Frame.SearchEditBox:ClearFocus();
-			local HookedListBar = Frame.HookedListBar;
-			local num = Frame.F_GetRecipeNumAvailable();
-			local minVal, maxVal = HookedListBar:GetMinMaxValues();
-			local step = HookedListBar:GetValueStep();
-			local cur = HookedListBar:GetValue() + step;
-			local value = step * (recipeindex - 1);
-			if value < cur or value > (cur + num * step - maxVal) then
-				HookedListBar:SetValue(min(maxVal, value));
+			if not CT.ISMORDERNUI then
+				local HookedListBar = Frame.HookedListBar;
+				local num = Frame.F_GetRecipeNumAvailable();
+				local minVal, maxVal = HookedListBar:GetMinMaxValues();
+				local step = HookedListBar:GetValueStep();
+				local cur = HookedListBar:GetValue() + step;
+				local value = step * (recipeindex - 1);
+				if value < cur or value > (cur + num * step - maxVal) then
+					HookedListBar:SetValue(min(maxVal, value));
+				end
 			end
 			Frame.ScrollFrame:Update();
 			if Frame.ProfitFrame:IsShown() then
@@ -1030,6 +1030,9 @@ end
 			if Button.Middle then
 				Button.Middle:SetAlpha(0.0);
 			end
+			if Button.Center then
+				Button.Center:SetAlpha(0.0);
+			end
 			if Button.Right then
 				Button.Right:SetAlpha(0.0);
 			end
@@ -1082,6 +1085,9 @@ end
 			if Button.Middle then
 				Button.Middle:SetAlpha(1.0);
 			end
+			if Button.Center then
+				Button.Center:SetAlpha(1.0);
+			end
 			if Button.Right then
 				Button.Right:SetAlpha(1.0);
 			end
@@ -1119,6 +1125,9 @@ end
 			if dtex then dtex:SetVertexColor(1.0, 1.0, 1.0, 1.0); end
 		end
 		function LT_SharedMethod.StyleModernScrollFrame(ScrollFrame)
+			if CT.ISMORDERNUI then
+				return;
+			end
 			local regions = { ScrollFrame:GetRegions() };
 			for index = 1, #regions do
 				local obj = regions[index];
@@ -1167,6 +1176,9 @@ end
 			down:GetDisabledTexture():SetVertexColor(unpack(T_UIDefinition.TextureButtonColorDisabled));
 		end
 		function LT_SharedMethod.StyleBLZScrollFrame(ScrollFrame)
+			if CT.ISMORDERNUI then
+				return;
+			end
 			local regions = { ScrollFrame:GetRegions() };
 			for index = 1, #regions do
 				local obj = regions[index];
@@ -2588,6 +2600,14 @@ end
 			Button:Hide();
 		end
 	end
+	--
+	function LT_SharedMethod.SetPoint(Widget, Points)
+		Widget:ClearAllPoints();
+		for i = 1, #Points do
+			local point = Points[i];
+			Widget:SetPoint(point[1], point[2], point[3], point[4], point[5]);
+		end
+	end
 --
 --
 --	Method
@@ -2692,24 +2712,27 @@ end
 	end
 	--
 	function LT_WidgetMethod.F_Expand(Frame, expanded)
+		if CT.ISMORDERNUI then
+			return;
+		end
 		local T_StyleLayout = Frame.T_StyleLayout;
 		local layout = T_StyleLayout[expanded and 'expand' or 'normal'];
 		Frame:ClearAllPoints();
-		for index = 1, #layout.anchor do
-			Frame:SetPoint(unpack(layout.anchor[index]));
+		for index = 1, #layout.anchor.frame do
+			Frame:SetPoint(unpack(layout.anchor.frame[index]));
 		end
-		Frame:SetSize(unpack(layout.size));
-		Frame.HookedFrame:SetSize(unpack(layout.frame_size));
+		Frame:SetSize(unpack(layout.size.frame));
+		Frame.HookedFrame:SetSize(unpack(layout.size.hooked));
 		Frame.HookedListFrame:ClearAllPoints();
-		for index = 1, #layout.list_anchor do
-			Frame.HookedListFrame:SetPoint(unpack(layout.list_anchor[index]));
+		for index = 1, #layout.anchor.list do
+			Frame.HookedListFrame:SetPoint(unpack(layout.anchor.list[index]));
 		end
-		Frame.HookedListFrame:SetSize(unpack(layout.list_size));
+		Frame.HookedListFrame:SetSize(unpack(layout.size.list));
 		Frame.HookedDetailFrame:ClearAllPoints();
-		for index = 1, #layout.detail_anchor do
-			Frame.HookedDetailFrame:SetPoint(unpack(layout.detail_anchor[index]));
+		for index = 1, #layout.anchor.detail do
+			Frame.HookedDetailFrame:SetPoint(unpack(layout.anchor.detail[index]));
 		end
-		Frame.HookedDetailFrame:SetSize(unpack(layout.detail_size));
+		Frame.HookedDetailFrame:SetSize(unpack(layout.size.detail));
 		Frame.HookedDetailFrame:UpdateScrollChildRect();
 		if expanded then
 			Frame.ExpandButton:Hide();
@@ -2717,7 +2740,7 @@ end
 			Frame.LineBottom:Hide();
 			Frame.HookedRankFrame:SetWidth(360);
 			SetUIPanelAttribute(Frame.HookedFrame, 'width', 684);
-			_G[T_StyleLayout.C_VariableName_NumSkillListButton] = layout.scroll_button_num;
+			Frame.F_SetNumSkillListButtons(layout.scroll_button_num);
 			Frame.F_HookedFrameUpdate();
 		else
 			Frame.ExpandButton:Show();
@@ -2725,7 +2748,7 @@ end
 			Frame.LineBottom:Show();
 			Frame.HookedRankFrame:SetWidth(210);
 			SetUIPanelAttribute(Frame.HookedFrame, 'width', 353);
-			_G[T_StyleLayout.C_VariableName_NumSkillListButton] = layout.scroll_button_num;
+			Frame.F_SetNumSkillListButtons(layout.scroll_button_num);
 			for index = layout.scroll_button_num + 1, T_StyleLayout.expand.scroll_button_num do
 				Frame.T_SkillListButtons[index]:Hide();
 			end
@@ -2733,7 +2756,7 @@ end
 		Frame.ScrollFrame:Update();
 	end
 	function LT_WidgetMethod.F_SetStyle(Frame, blz_style, loading)
-		if blz_style then
+		if not CT.ISMORDERNUI and blz_style then
 			LT_SharedMethod.StyleBLZScrollFrame(Frame.ScrollFrame);
 			if Frame.FilterDropdown ~= nil then
 				LT_SharedMethod.StyleBLZALADropButton(Frame.FilterDropdown, not loading and Frame.FilterDropdown.backup or nil);
@@ -2772,9 +2795,7 @@ end
 
 			Frame.HookedFrame:SetHitRectInsets(11, 29, 9, 67);
 			local Background = Frame.Background;
-			Background:ClearAllPoints();
-			Background:SetPoint("TOPLEFT", 11, -7);
-			Background:SetPoint("BOTTOMRIGHT", -29, 67);
+			LT_SharedMethod.SetPoint(Background, Frame.T_WidgetsLayout.Background_BLZ);
 			LT_SharedMethod.StyleBLZBackdrop(Background);
 			local LineTop = Frame.LineTop;
 			LineTop:SetTexture([[Interface\Dialogframe\UI-Dialogbox-Divider]], "MIRROR");
@@ -2884,9 +2905,7 @@ end
 
 			Frame.HookedFrame:SetHitRectInsets(17, 35, 11, 73);
 			local Background = Frame.Background;
-			Background:ClearAllPoints();
-			Background:SetPoint("TOPLEFT", 11, -12);
-			Background:SetPoint("BOTTOMRIGHT", -32, 76);
+			LT_SharedMethod.SetPoint(Background, Frame.T_WidgetsLayout.Background);
 			LT_SharedMethod.StyleModernBackdrop(Background);
 			local LineTop = Frame.LineTop;
 			LineTop:SetColorTexture(unpack(T_UIDefinition.ModernDividerColor));
@@ -3021,32 +3040,22 @@ end
 			LT_SharedMethod.StyleModernButton(ProfitFrame.CloseButton, ProfitFrame.CloseButton.backup == nil, T_UIDefinition.TEXTURE_MODERN_BUTTON_CLOSE);
 		end
 	end
-	function LT_WidgetMethod.F_FixSkillList(Frame, expanded)
-		local layout = Frame.T_StyleLayout[expanded and 'expand' or 'normal'];
-		local pref = Frame.T_HookedFrameWidgets.C_SkillListButtonNamePrefix;
-		local index = layout.scroll_button_num + 1;
-		while true do
-			local Skill = _G[pref .. index];
-			if Skill == nil then
-				return;
-			end
-			Skill:Hide();
-			Frame.T_SkillListButtons[index] = Frame.T_SkillListButtons[index] or Skill;
-			index = index + 1;
-		end
-	end
 	function LT_WidgetMethod.F_LayoutOnShow(Frame)
 		local HookedFrame = Frame.HookedFrame;
 		local T_HookedFrameWidgets = Frame.T_HookedFrameWidgets;
 		local T_HookedFrameButtons = T_HookedFrameWidgets.T_HookedFrameButtons;
-		T_HookedFrameButtons.CancelButton:SetSize(72, 18);
-		T_HookedFrameButtons.CancelButton:ClearAllPoints();
-		T_HookedFrameButtons.CancelButton:SetPoint("TOPRIGHT", -42, -415);
-		T_HookedFrameButtons.CreateButton:SetSize(72, 18);
-		T_HookedFrameButtons.CreateButton:ClearAllPoints();
-		T_HookedFrameButtons.CreateButton:SetPoint("RIGHT", T_HookedFrameButtons.CancelButton, "LEFT", -7, 0);
-		T_HookedFrameButtons.CloseButton:ClearAllPoints();
-		T_HookedFrameButtons.CloseButton:SetPoint("CENTER", HookedFrame, "TOPRIGHT", -51, -24);
+		local T_WidgetsLayout = Frame.T_WidgetsLayout;
+		if T_HookedFrameButtons.CancelButton then
+			T_HookedFrameButtons.CancelButton:SetSize(72, 18);
+			LT_SharedMethod.SetPoint(T_HookedFrameButtons.CancelButton, T_WidgetsLayout.CancelButton);
+			T_HookedFrameButtons.CreateButton:SetSize(72, 18);
+			T_HookedFrameButtons.CreateButton:ClearAllPoints();
+			T_HookedFrameButtons.CreateButton:SetPoint("RIGHT", T_HookedFrameButtons.CancelButton, "LEFT", -7, 0);
+		else
+			T_HookedFrameButtons.CreateButton:SetSize(72, 18);
+			-- LT_SharedMethod.SetPoint(T_HookedFrameButtons.CreateButton, T_WidgetsLayout.CancelButton);
+		end
+		LT_SharedMethod.SetPoint(T_HookedFrameButtons.CloseButton, T_WidgetsLayout.CloseButton);
 	end
 	function LT_WidgetMethod.F_ToggleOnSkill(Frame, val)
 		val = not val;
@@ -3234,10 +3243,14 @@ end
 		for name, func in next, Frame.T_DisabledFunc do
 			_G[name] = func;
 		end
-		Frame:F_HookedFrameUpdate()
+		Frame:F_HookedFrameUpdate();
 	end
 	function LT_WidgetMethod._OnEvent(Frame, event, _1, ...)
 		Frame.update = true;
+		if event == Frame.C_SwitchingEvent then
+			MT._TimerHalt(Frame.F_Update);
+			return;
+		end
 		if event == Frame.C_SwitchEvent then
 			Frame.switching = true;
 		end
@@ -3369,8 +3382,8 @@ end
 		T_PortraitDropMeta.num = 0;
 		local pname = Frame.F_GetSkillName();
 		for pid = DataAgent.DBMINPID, DataAgent.DBMAXPID do
-			if rawget(VT.VAR, pid) ~= nil and DataAgent.is_pid_has_win(pid) then
-				local name = DataAgent.get_check_name_by_pid(pid);
+			if rawget(VT.VAR, pid) ~= nil and DataAgent.get_ui_sid_by_pid(pid) then
+				local name = DataAgent.get_ui_sname_by_pid(pid);
 				if name ~= nil and name ~= pname then
 					T_PortraitDropMeta.num = T_PortraitDropMeta.num + 1;
 					T_PortraitDropMeta[T_PortraitDropMeta.num] = {
@@ -3478,8 +3491,8 @@ end
 	function LT_WidgetMethod.TabFrame_Update(TabFrame)
 		local numSkill = 0;
 		for pid = DataAgent.DBMINPID, DataAgent.DBMAXPID do
-			if rawget(VT.VAR, pid) ~= nil and DataAgent.is_pid_has_win(pid) then
-				local pname = DataAgent.get_check_name_by_pid(pid);
+			if rawget(VT.VAR, pid) ~= nil and DataAgent.get_ui_sid_by_pid(pid) then
+				local pname = DataAgent.get_ui_sname_by_pid(pid);
 				if pname ~= nil then
 					numSkill = numSkill + 1;
 					TabFrame:F_SetTab(numSkill, pname, DataAgent.get_texture_by_pid(pid));
@@ -3970,88 +3983,88 @@ end
 			return QueueFrame.F_StartCraftQueue();
 		end
 	end
-	function LT_WidgetMethod.QueueFrame_OnShow(self)
-		local Frame = self:GetParent();
+	function LT_WidgetMethod.QueueFrame_OnShow(QueueFrame)
+		local Frame = QueueFrame:GetParent();
 		if Frame ~= nil then
-			self.Parent = Frame;
-			self:SetPoint("BOTTOMLEFT", Frame.Background, "BOTTOMRIGHT", 0, 0);
+			QueueFrame.Parent = Frame;
+			QueueFrame:SetPoint("BOTTOMLEFT", Frame.Background, "BOTTOMRIGHT", 0, 0);
 			-- Frame.QueueToggleButton:GetNormalTexture():SetVertexColor(1.0, 1.0, 1.0, 1.0);
 		end
 	end
-	function LT_WidgetMethod.QueueFrame_OnHide(self)
-		local Frame = self:GetParent();
+	function LT_WidgetMethod.QueueFrame_OnHide(QueueFrame)
+		local Frame = QueueFrame:GetParent();
 		if Frame ~= nil then
-			self.Parent = nil;
+			QueueFrame.Parent = nil;
 			-- Frame.QueueToggleButton:GetNormalTexture():SetVertexColor(0.5, 0.5, 0.5, 1.0);
 		end
 	end
-	function LT_WidgetMethod.QueueFrame_OnSucceededDelay(self)
-		-- MT.Debug("OnSucceed", self.CraftingID, self:IsShown(), self.IsCrafting);
-		if self:IsShown() and self.IsCrafting then
+	function LT_WidgetMethod.QueueFrame_OnSucceededDelay(QueueFrame)
+		-- MT.Debug("OnSucceed", QueueFrame.CraftingID, QueueFrame:IsShown(), QueueFrame.IsCrafting);
+		if QueueFrame:IsShown() and QueueFrame.IsCrafting then
 			local list = VT.QUEUE.list;
 			local todo = VT.QUEUE.todo;
 			for index = 1, #list do
-				if list[index] == self.CraftingID then
-					local available = LT_SharedMethod.GetAvaiableCraftCount(self.CraftingID);
+				if list[index] == QueueFrame.CraftingID then
+					local available = LT_SharedMethod.GetAvaiableCraftCount(QueueFrame.CraftingID);
 					-- MT.Debug(name, "num =", available);
 					if available <= 0 then
-						-- self.F_StartCraftQueue();	--	DoTradeSkill needs hardware event.
-						self.Focus:Hide();
+						-- QueueFrame.F_StartCraftQueue();	--	DoTradeSkill needs hardware event.
+						QueueFrame.Focus:Hide();
 						return;
 					end
-					self.Focus.Num:SetText(available);
+					QueueFrame.Focus.Num:SetText(available);
 					return;
 				end
 			end
-			self.Focus:Hide();
+			QueueFrame.Focus:Hide();
 		end
 	end
-	function LT_WidgetMethod.QueueFrame_OnEvent(self, event, ...)
+	function LT_WidgetMethod.QueueFrame_OnEvent(QueueFrame, event, ...)
 		-- unit, castID, spellID
 		if event == "UNIT_SPELLCAST_SUCCEEDED" then
 			local unit, castID, sid = ...;
-			-- MT.Debug("SUCCEED", sid, self.CraftingID, self:IsShown(), self.IsCrafting);
-			if self.CraftingID == sid then
+			-- MT.Debug("SUCCEED", sid, QueueFrame.CraftingID, QueueFrame:IsShown(), QueueFrame.IsCrafting);
+			if QueueFrame.CraftingID == sid then
 				local list = VT.QUEUE.list;
 				local todo = VT.QUEUE.todo;
 				for index = 1, #list do
-					if list[index] == self.CraftingID then
+					if list[index] == QueueFrame.CraftingID then
 						todo[index] = todo[index] - 1;
-						-- MT.Debug("Sub", self.CraftingID, todo[index]);
+						-- MT.Debug("Sub", QueueFrame.CraftingID, todo[index]);
 						if todo[index] <= 0 then
 							tremove(list, index);
 							tremove(todo, index);
-							if not self.ScrollFrame:SetNumValue(#list) then
-								self.ScrollFrame:Update();
+							if not QueueFrame.ScrollFrame:SetNumValue(#list) then
+								QueueFrame.ScrollFrame:Update();
 							end
-							-- self.F_StartCraftQueue();	--	DoTradeSkill needs hardware event.
-							self.Focus:Hide();
+							-- QueueFrame.F_StartCraftQueue();	--	DoTradeSkill needs hardware event.
+							QueueFrame.Focus:Hide();
 							return;
 						end
-						self.ScrollFrame:Update();
+						QueueFrame.ScrollFrame:Update();
 					end
 				end
-				MT._TimerStart(self.F_OnSucceededDelay, 0.1, 1);
+				MT._TimerStart(QueueFrame.F_OnSucceededDelay, 0.1, 1);
 			end
 		elseif event == "UNIT_SPELLCAST_INTERRUPTED" then
 			local unit, castID, sid = ...;
-			if self.CraftingID == sid then
-				self.CraftingID = nil;
-				self.IsCrafting = false;
-				self.Focus:Hide();
+			if QueueFrame.CraftingID == sid then
+				QueueFrame.CraftingID = nil;
+				QueueFrame.IsCrafting = false;
+				QueueFrame.Focus:Hide();
 			end
 		elseif event == "UNIT_SPELLCAST_FAILED" then
 			local unit, castID, sid = ...;
-			-- MT.Debug("FAILED", sid, self.CraftingID, self:IsShown(), self.IsCrafting);
-			if self.CraftingID == sid then
-				self.CraftingID = nil;
-				self.IsCrafting = false;
-				self.Focus:Hide();
+			-- MT.Debug("FAILED", sid, QueueFrame.CraftingID, QueueFrame:IsShown(), QueueFrame.IsCrafting);
+			if QueueFrame.CraftingID == sid then
+				QueueFrame.CraftingID = nil;
+				QueueFrame.IsCrafting = false;
+				QueueFrame.Focus:Hide();
 				local start, duration, enabled, modRate = VT._comptb.GetSpellCooldown(sid);
 				if start == nil or start <= 0 then
 					local available = LT_SharedMethod.GetAvaiableCraftCount(sid);
 					if available > 0 then
-						local Frame = self.Parent;
+						local Frame = QueueFrame.Parent;
 						local tools = { Frame.F_GetRecipeTools(Frame.hash[sid]) };
 						local check = DataAgent.T_SkillTools[sid];
 						if check ~= nil then
@@ -4068,11 +4081,11 @@ end
 					end
 				end
 				local p = LT_SharedMethod.GetPositionKey();
-				local t = self.BlackPos[p];
+				local t = QueueFrame.BlackPos[p];
 				if t then
 					t[sid] = true;
 				else
-					self.BlackPos[p] = {
+					QueueFrame.BlackPos[p] = {
 						[sid] = true,
 					};
 				end
@@ -4171,28 +4184,20 @@ local function LF_HookFrame(addon, meta)
 	end
 	local T_StyleLayout = meta.T_StyleLayout;
 	for _, layout in next, T_StyleLayout do
-		if layout.anchor ~= nil then
-			for index = 1, #layout.anchor do
-				local point = layout.anchor[index];
-				if point[2] == nil then
+		for which, points in next, layout.anchor do
+			for index = 1, #points do
+				local point = points[index];
+				if point[2] == "ThisFrame" then
 					point[2] = Frame;
 				end
 			end
 		end
-		if layout.list_anchor ~= nil then
-			for index = 1, #layout.list_anchor do
-				local point = layout.list_anchor[index];
-				if point[2] == nil then
-					point[2] = Frame;
-				end
-			end
-		end
-		if layout.detail_anchor ~= nil then
-			for index = 1, #layout.detail_anchor do
-				local point = layout.detail_anchor[index];
-				if point[2] == nil then
-					point[2] = Frame;
-				end
+	end
+	for which, points in next, meta.T_WidgetsLayout do
+		for index = 1, #points do
+			local point = points[index];
+			if point[2] == "ThisFrame" then
+				point[2] = Frame;
 			end
 		end
 	end
@@ -4203,19 +4208,29 @@ local function LF_HookFrame(addon, meta)
 	Frame.T_OnSelection = {  };
 	Frame.prev_selected_sid = nil;
 	function Frame.F_OnSelection()
-		Frame.selected_sid = Frame.F_GetRecipeSpellID(Frame.flag or Frame.F_GetPID(), Frame.F_GetSelection());
+		Frame.selected_sid = Frame.F_GetSelectionSID();
 		-- MT.Debug("OnSelection", Frame.prev_selected_sid, Frame.selected_sid);
 		if Frame.prev_selected_sid ~= Frame.selected_sid then
 			Frame.prev_selected_sid = Frame.selected_sid;
 			for i = 1, #Frame.T_OnSelection do
 				Frame.T_OnSelection[i]();
 			end
+			Frame:TF_CheckReagentButtons();
 		end
 	end
-	hooksecurefunc(Frame.T_FunctionName.F_SetSelection, Frame.F_OnSelection);
+	local TypeSel = type(Frame.T_FunctionName.F_SetSelection);
+	if TypeSel == 'string' then
+		hooksecurefunc(Frame.T_FunctionName.F_SetSelection, Frame.F_OnSelection);
+	elseif TypeSel == 'table' then
+		for _, seldef in next, Frame.T_FunctionName.F_SetSelection do
+			hooksecurefunc(seldef[1], seldef[2], Frame.F_OnSelection);
+		end
+	end
 
+	local T_WidgetsLayout = meta.T_WidgetsLayout;
 	do	--	Frame & HookedFrame
 		--	Frame
+			Frame:TF_RunFirst();
 			Frame:SetFrameStrata("HIGH");
 			Frame:EnableMouse(true);
 			function Frame.F_Update()
@@ -4241,7 +4256,7 @@ local function LF_HookFrame(addon, meta)
 
 			local ToggleButton = CreateFrame('BUTTON', nil, HookedFrame, "UIPanelButtonTemplate");
 			ToggleButton:SetSize(70, 18);
-			ToggleButton:SetPoint("RIGHT", meta.Widget_AnchorTop, "LEFT", -2, 0);
+			LT_SharedMethod.SetPoint(ToggleButton, T_WidgetsLayout.ToggleButton);
 			-- ToggleButton:SetPoint("TOPRIGHT", -2, -42);
 			ToggleButton:SetFrameLevel(127);
 			ToggleButton:SetScript("OnClick", LT_WidgetMethod.ToggleFrame);
@@ -4250,26 +4265,28 @@ local function LF_HookFrame(addon, meta)
 			Frame.ToggleButton = ToggleButton;
 			ToggleButton.Frame = Frame;
 
-			local ExpandButton = CreateFrame('BUTTON', nil, HookedFrame);
-			ExpandButton:SetSize(16, 12);
-			ExpandButton:SetNormalTexture(T_UIDefinition.TEXTURE_EXPAND);
-			ExpandButton:SetPushedTexture(T_UIDefinition.TEXTURE_EXPAND);
-			ExpandButton:SetHighlightTexture(T_UIDefinition.TEXTURE_EXPAND);
-			ExpandButton:SetPoint("CENTER", Frame, "TOPRIGHT", 4, -358);
-			ExpandButton:SetFrameLevel(127);
-			ExpandButton:SetScript("OnClick", LT_WidgetMethod.ExpandButton_OnClick);
-			Frame.ExpandButton = ExpandButton;
-			ExpandButton.Frame = Frame;
-			local ShrinkButton = CreateFrame('BUTTON', nil, HookedFrame);
-			ShrinkButton:SetSize(16, 12);
-			ShrinkButton:SetNormalTexture(T_UIDefinition.TEXTURE_SHRINK);
-			ShrinkButton:SetPushedTexture(T_UIDefinition.TEXTURE_SHRINK);
-			ShrinkButton:SetHighlightTexture(T_UIDefinition.TEXTURE_SHRINK);
-			ShrinkButton:SetPoint("CENTER", Frame, "TOPRIGHT", 4, -358);
-			ShrinkButton:SetFrameLevel(127);
-			ShrinkButton:SetScript("OnClick", LT_WidgetMethod.ShrinkButton_OnClick);
-			Frame.ShrinkButton = ShrinkButton;
-			ShrinkButton.Frame = Frame;
+			if not CT.ISMORDERNUI then
+				local ExpandButton = CreateFrame('BUTTON', nil, HookedFrame);
+				ExpandButton:SetSize(16, 12);
+				ExpandButton:SetNormalTexture(T_UIDefinition.TEXTURE_EXPAND);
+				ExpandButton:SetPushedTexture(T_UIDefinition.TEXTURE_EXPAND);
+				ExpandButton:SetHighlightTexture(T_UIDefinition.TEXTURE_EXPAND);
+				LT_SharedMethod.SetPoint(ExpandButton, T_WidgetsLayout.ExpandButton);
+				ExpandButton:SetFrameLevel(127);
+				ExpandButton:SetScript("OnClick", LT_WidgetMethod.ExpandButton_OnClick);
+				Frame.ExpandButton = ExpandButton;
+				ExpandButton.Frame = Frame;
+				local ShrinkButton = CreateFrame('BUTTON', nil, HookedFrame);
+				ShrinkButton:SetSize(16, 12);
+				ShrinkButton:SetNormalTexture(T_UIDefinition.TEXTURE_SHRINK);
+				ShrinkButton:SetPushedTexture(T_UIDefinition.TEXTURE_SHRINK);
+				ShrinkButton:SetHighlightTexture(T_UIDefinition.TEXTURE_SHRINK);
+				LT_SharedMethod.SetPoint(ShrinkButton, T_WidgetsLayout.ShrinkButton);
+				ShrinkButton:SetFrameLevel(127);
+				ShrinkButton:SetScript("OnClick", LT_WidgetMethod.ShrinkButton_OnClick);
+				Frame.ShrinkButton = ShrinkButton;
+				ShrinkButton.Frame = Frame;
+			end
 		--	DetailFrame
 			if Frame.HookedDetailBar then
 				LT_SharedMethod.ModifyBLZScrollBar(Frame.HookedDetailBar);
@@ -4294,8 +4311,7 @@ local function LF_HookFrame(addon, meta)
 				end
 			end
 		--	Portrait
-			meta.HookedPortrait:ClearAllPoints();
-			meta.HookedPortrait:SetPoint("TOPLEFT", 7, -4);
+			LT_SharedMethod.SetPoint(meta.HookedPortrait, T_WidgetsLayout.HookedPortrait);
 			local PortraitBorder = HookedFrame:CreateTexture(nil, "ARTWORK");
 			PortraitBorder:SetSize(70, 70);
 			PortraitBorder:SetPoint("CENTER", meta.HookedPortrait);
@@ -4305,10 +4321,11 @@ local function LF_HookFrame(addon, meta)
 			Frame.PortraitBorder = PortraitBorder;
 		--	Rank Offset
 			local HookedRankFrame = meta.HookedRankFrame;
+			local HookedRankFrameRight = meta.HookedRankFrameRight;
 
 			local OverrideMinRankButton = CreateFrame('BUTTON', nil, Frame, "UIPanelButtonTemplate");
 			OverrideMinRankButton:SetSize(40, 20);
-			OverrideMinRankButton:SetPoint("CENTER", HookedRankFrame, "LEFT", -20, 0);
+			LT_SharedMethod.SetPoint(OverrideMinRankButton, T_WidgetsLayout.OverrideMinRankButton);
 			OverrideMinRankButton:SetText("0");
 			Frame.OverrideMinRankButton = OverrideMinRankButton;
 			local OverrideMinRankSlider = CreateFrame('SLIDER', nil, Frame);
@@ -4318,8 +4335,7 @@ local function LF_HookFrame(addon, meta)
 			OverrideMinRankThumb:SetWidth(1);
 			OverrideMinRankThumb:SetHeight(16);
 			OverrideMinRankThumb:SetColorTexture(1.0, 0.8, 0.6, 1.0);
-			OverrideMinRankSlider:SetPoint("LEFT", HookedRankFrame, "LEFT", 0, 0);
-			OverrideMinRankSlider:SetPoint("RIGHT", HookedRankFrame:GetStatusBarTexture(), "RIGHT", 0, 0);
+			LT_SharedMethod.SetPoint(OverrideMinRankSlider, T_WidgetsLayout.OverrideMinRankSlider);
 			OverrideMinRankSlider:SetHeight(16);
 			OverrideMinRankSlider:SetMinMaxValues(1, 450);
 			OverrideMinRankSlider:SetValueStep(1);
@@ -4331,7 +4347,7 @@ local function LF_HookFrame(addon, meta)
 
 			local RankOffsetButton = CreateFrame('BUTTON', nil, Frame, "UIPanelButtonTemplate");
 			RankOffsetButton:SetSize(40, 20);
-			RankOffsetButton:SetPoint("CENTER", HookedRankFrame, "RIGHT", 20, 0);
+			LT_SharedMethod.SetPoint(RankOffsetButton, T_WidgetsLayout.RankOffsetButton);
 			RankOffsetButton:SetText("+0");
 			Frame.RankOffsetButton = RankOffsetButton;
 			local RankOffsetSlider = CreateFrame('SLIDER', nil, Frame);
@@ -4341,8 +4357,7 @@ local function LF_HookFrame(addon, meta)
 			RankOffsetThumb:SetWidth(1);
 			RankOffsetThumb:SetHeight(16);
 			RankOffsetThumb:SetColorTexture(0.6, 1.0, 0.8, 1.0);
-			RankOffsetSlider:SetPoint("LEFT", HookedRankFrame:GetStatusBarTexture(), "RIGHT", 0, 0);
-			RankOffsetSlider:SetPoint("RIGHT", HookedRankFrame, "RIGHT", 0, 0);
+			LT_SharedMethod.SetPoint(RankOffsetSlider, T_WidgetsLayout.RankOffsetSlider);
 			RankOffsetSlider:SetHeight(16);
 			RankOffsetSlider:SetMinMaxValues(1, 450);
 			RankOffsetSlider:SetValueStep(1);
@@ -4355,6 +4370,7 @@ local function LF_HookFrame(addon, meta)
 			local T_HookedFrameDropdowns = T_HookedFrameWidgets.T_HookedFrameDropdowns;
 			local T_HookedFrameButtons = T_HookedFrameWidgets.T_HookedFrameButtons;
 			local T_HookedFrameEditboxes = T_HookedFrameWidgets.T_HookedFrameEditboxes;
+			local T_HookedFrameEditboxesChild = T_HookedFrameWidgets.T_HookedFrameEditboxesChild;
 			if T_HookedFrameDropdowns ~= nil then
 				local InvSlotDropDown = T_HookedFrameDropdowns.InvSlotDropDown;
 				if InvSlotDropDown ~= nil then
@@ -4374,59 +4390,58 @@ local function LF_HookFrame(addon, meta)
 					SubClassDropDown:SetPoint("RIGHT", InvSlotDropDown, "LEFT", -4 / 0.9, 0);
 				end
 			end
-			T_HookedFrameButtons.CancelButton:SetSize(72, 18);
-			T_HookedFrameButtons.CancelButton:ClearAllPoints();
-			T_HookedFrameButtons.CancelButton:SetPoint("TOPRIGHT", -42, -415);
-			T_HookedFrameButtons.CreateButton:SetSize(72, 18);
-			T_HookedFrameButtons.CreateButton:ClearAllPoints();
-			T_HookedFrameButtons.CreateButton:SetPoint("RIGHT", T_HookedFrameButtons.CancelButton, "LEFT", -7, 0);
-			T_HookedFrameButtons.CloseButton:ClearAllPoints();
-			T_HookedFrameButtons.CloseButton:SetPoint("CENTER", HookedFrame, "TOPRIGHT", -51, -24);
+			if T_HookedFrameButtons.CancelButton then
+				T_HookedFrameButtons.CancelButton:SetSize(72, 18);
+				LT_SharedMethod.SetPoint(T_HookedFrameButtons.CancelButton, T_WidgetsLayout.CancelButton);
+				T_HookedFrameButtons.CreateButton:SetSize(72, 18);
+				T_HookedFrameButtons.CreateButton:ClearAllPoints();
+				T_HookedFrameButtons.CreateButton:SetPoint("RIGHT", T_HookedFrameButtons.CancelButton, "LEFT", -7, 0);
+			else
+				T_HookedFrameButtons.CreateButton:SetSize(72, 18);
+				-- LT_SharedMethod.SetPoint(T_HookedFrameButtons.CreateButton, T_WidgetsLayout.CancelButton);
+			end
+			LT_SharedMethod.SetPoint(T_HookedFrameButtons.CloseButton, T_WidgetsLayout.CloseButton);
 			if T_HookedFrameEditboxes ~= nil and T_HookedFrameEditboxes.InputBox then
-				local Left = _G[T_HookedFrameEditboxes.InputBox:GetName() .. "Left"];
-				Left:ClearAllPoints();
-				Left:SetPoint("LEFT", 0, 0);
+				LT_SharedMethod.SetPoint(T_HookedFrameEditboxesChild.InputBoxLeft, T_WidgetsLayout.InputBoxLeft);
 				T_HookedFrameEditboxes.InputBox:SetTextInsets(3, 0, 0, 0);
-				T_HookedFrameButtons.CreateAllButton:SetSize(72, 18);
-				T_HookedFrameButtons.IncrementButton:ClearAllPoints();
 				T_HookedFrameEditboxes.InputBox:ClearAllPoints();
 				T_HookedFrameButtons.DecrementButton:ClearAllPoints();
 				T_HookedFrameButtons.CreateAllButton:ClearAllPoints();
-				T_HookedFrameButtons.IncrementButton:SetPoint("CENTER", T_HookedFrameButtons.CreateButton, "LEFT", -16, 0);
+				LT_SharedMethod.SetPoint(T_HookedFrameButtons.IncrementButton, T_WidgetsLayout.IncrementButton);
 				T_HookedFrameEditboxes.InputBox:SetHeight(18);
 				T_HookedFrameEditboxes.InputBox:SetPoint("RIGHT", T_HookedFrameButtons.IncrementButton, "CENTER", -16, 0);
 				T_HookedFrameButtons.DecrementButton:SetPoint("CENTER", T_HookedFrameEditboxes.InputBox, "LEFT", -16, 0);
+				T_HookedFrameButtons.CreateAllButton:SetSize(72, 18);
 				T_HookedFrameButtons.CreateAllButton:SetPoint("RIGHT", T_HookedFrameButtons.DecrementButton, "LEFT", -7, 0);
 			end
 			local CollapseAllButton = T_HookedFrameWidgets.CollapseAllButton;
 			if CollapseAllButton ~= nil then
 				CollapseAllButton:SetParent(HookedFrame);
-				CollapseAllButton:ClearAllPoints();
-				CollapseAllButton:SetPoint("BOTTOMLEFT", meta.HookedListFrame, "TOPLEFT", 0, 4);
+				LT_SharedMethod.SetPoint(CollapseAllButton, T_WidgetsLayout.CollapseAllButton);
 			end
 			local HookedRankFrame = meta.HookedRankFrame;
-			HookedRankFrame:ClearAllPoints();
-			HookedRankFrame:SetPoint("TOP", 16, -42);
+			LT_SharedMethod.SetPoint(HookedRankFrame, T_WidgetsLayout.HookedRankFrame);
 			local HookedRankFrameName = HookedRankFrame:GetName();
-			local HookedRankFrameSkillName = _G[HookedRankFrameName .. "SkillName"];
-			if HookedRankFrameSkillName ~= nil then HookedRankFrameSkillName:Hide(); end
-			local HookedRankFrameSkillRank = _G[HookedRankFrameName .. "SkillRank"];
-			if HookedRankFrameSkillRank ~= nil then
-				HookedRankFrameSkillRank:ClearAllPoints();
-				HookedRankFrameSkillRank:SetPoint("CENTER");
-				HookedRankFrameSkillRank:SetJustifyH("CENTER");
+			if HookedRankFrameName then
+				local HookedRankFrameSkillName = _G[HookedRankFrameName .. "SkillName"];
+				if HookedRankFrameSkillName ~= nil then HookedRankFrameSkillName:Hide(); end
+				local HookedRankFrameSkillRank = _G[HookedRankFrameName .. "SkillRank"];
+				if HookedRankFrameSkillRank ~= nil then
+					HookedRankFrameSkillRank:ClearAllPoints();
+					HookedRankFrameSkillRank:SetPoint("CENTER");
+					HookedRankFrameSkillRank:SetJustifyH("CENTER");
+				end
+				local HookedRankFrameBorder = _G[HookedRankFrameName .. "Border"];
+				if HookedRankFrameBorder ~= nil then
+					HookedRankFrameBorder:ClearAllPoints();
+					HookedRankFrameBorder:SetPoint("TOPLEFT", -5, 8);
+					HookedRankFrameBorder:SetPoint("BOTTOMRIGHT", 5, -8);
+				end
+				HookedRankFrame.Border = HookedRankFrameBorder;
 			end
-			local HookedRankFrameBorder = _G[HookedRankFrameName .. "Border"];
-			if HookedRankFrameBorder ~= nil then
-				HookedRankFrameBorder:ClearAllPoints();
-				HookedRankFrameBorder:SetPoint("TOPLEFT", -5, 8);
-				HookedRankFrameBorder:SetPoint("BOTTOMRIGHT", 5, -8);
-			end
-			HookedRankFrame.Border = HookedRankFrameBorder;
 		--	BACKGROUND and DEVIDER
 			local Background = CreateFrame('FRAME', nil, HookedFrame);
-			Background:SetPoint("TOPLEFT", 11, -12);
-			Background:SetPoint("BOTTOMRIGHT", -32, 76);
+			LT_SharedMethod.SetPoint(Background, T_WidgetsLayout.Background);
 			Background:SetFrameLevel(0);
 			Frame.Background = Background;
 
@@ -4434,70 +4449,32 @@ local function LF_HookFrame(addon, meta)
 			LineTop:SetDrawLayer("BACKGROUND", 7);
 			LineTop:SetHorizTile(true);
 			LineTop:SetHeight(4);
-			LineTop:SetPoint("LEFT", 2, 0);
-			LineTop:SetPoint("RIGHT", -2, 0);
-			LineTop:SetPoint("BOTTOM", HookedFrame, "TOP", 0, -38);
+			LT_SharedMethod.SetPoint(LineTop, T_WidgetsLayout.LineTop);
 			Frame.LineTop = LineTop;
 
 			local LineMiddle = Background:CreateTexture(nil, "BACKGROUND");
 			LineMiddle:SetDrawLayer("BACKGROUND", 7);
 			LineMiddle:SetHorizTile(true);
 			LineMiddle:SetHeight(4);
-			LineMiddle:SetPoint("LEFT", 2, 0);
-			LineMiddle:SetPoint("RIGHT", -2, 0);
-			LineMiddle:SetPoint("TOP", HookedFrame, "TOP", 0, -61);
+			LT_SharedMethod.SetPoint(LineMiddle, T_WidgetsLayout.LineMiddle);
 			Frame.LineMiddle = LineMiddle;
 
 			local LineBottom = Background:CreateTexture(nil, "BACKGROUND");
 			LineBottom:SetDrawLayer("BACKGROUND", 7);
 			LineBottom:SetHorizTile(true);
 			LineBottom:SetHeight(4);
-			LineBottom:SetPoint("LEFT", 2, 0);
-			LineBottom:SetPoint("RIGHT", -2, 0);
-			LineBottom:SetPoint("BOTTOM", meta.HookedDetailFrame, "TOP", 0, 2);
+			LT_SharedMethod.SetPoint(LineBottom, T_WidgetsLayout.LineBottom);
 			Frame.LineBottom = LineBottom;
 		--	SkillListButtons
-			local T_SkillListButtons = {  };
-			Frame.T_SkillListButtons = T_SkillListButtons;
-			local NumDisplayed = _G[T_StyleLayout.C_VariableName_NumSkillListButton];
-			for index = 1, NumDisplayed do
-				T_SkillListButtons[index] = _G[T_HookedFrameWidgets.C_SkillListButtonNamePrefix .. index];
-			end
-			for index = NumDisplayed + 1, T_StyleLayout.expand.scroll_button_num do
-				local name = T_HookedFrameWidgets.C_SkillListButtonNamePrefix .. index;
-				local Button = _G[name] or CreateFrame('BUTTON', name, HookedFrame, T_HookedFrameWidgets.C_SkillListButtonTemplate);
-				Button:SetPoint("TOPLEFT", T_SkillListButtons[index - 1], "BOTTOMLEFT", 0, 0);
-				Button:Hide();
-				T_SkillListButtons[index] = Button;
-			end
-			T_SkillListButtons[1]:ClearAllPoints();
-			T_SkillListButtons[1]:SetPoint("TOPLEFT", meta.HookedListFrame);
-			local FrameLevel = meta.HookedListFrame:GetFrameLevel() + 2;
-			for index = 1, #T_SkillListButtons do
-				local Button = T_SkillListButtons[index];
-				Button:SetScript("OnEnter", LT_WidgetMethod.BLZSkillListButton_OnEnter);
-				Button:SetScript("OnLeave", LT_SharedMethod.SkillListButton_OnLeave);
-				Button:SetID(index);
-				Button:SetFrameLevel(FrameLevel);
-				Button.Frame = Frame;
-				Button.ScrollFrame = meta.HookedListFrame;
-			end
+			Frame:TF_InitSkillListButtons();
 		--	reagentButton & ProductionIcon
-			local T_ReagentButtons = {  };
-			Frame.T_ReagentButtons = T_ReagentButtons;
-			for index = 1, 8 do
-				local Button = _G[T_HookedFrameWidgets.C_ReagentButtonNamePrefix .. index];
-				T_ReagentButtons[index] = Button;
-				Button.Frame = Frame;
-				Button:HookScript("OnClick", LT_WidgetMethod.ReagentButton__OnClick);
-			end
+			Frame:TF_HookReagentButtons();
 			T_HookedFrameWidgets.ProductionIcon.Frame = Frame;
 			T_HookedFrameWidgets.ProductionIcon:HookScript("OnClick", LT_WidgetMethod.ProductionIcon__OnClick);
 		--
 
 		Frame.F_LayoutOnShow = LT_WidgetMethod.F_LayoutOnShow;
 		Frame.F_Expand = LT_WidgetMethod.F_Expand;
-		Frame.F_FixSkillList = LT_WidgetMethod.F_FixSkillList;
 		Frame.F_SetStyle = LT_WidgetMethod.F_SetStyle;
 		if meta.T_ToggleOnSkill == nil then
 			Frame.F_ToggleOnSkill = MT.noop;
@@ -4533,9 +4510,7 @@ local function LF_HookFrame(addon, meta)
 		local TabFrame = CreateFrame('FRAME', nil, HookedFrame);
 		TabFrame:SetFrameStrata("HIGH");
 		TabFrame:SetHeight(T_UIDefinition.TabSize + T_UIDefinition.TabInterval * 2);
-		TabFrame:SetPoint("LEFT", Frame, "LEFT", 60, 0);
-		TabFrame:SetPoint("BOTTOM", meta.Widget_AnchorTop, "TOP", 0, 0);
-		-- TabFrame:SetPoint("LEFT", meta.Widget_AnchorLeftOfTabFrame, "LEFT", 0, 0);
+		LT_SharedMethod.SetPoint(TabFrame, T_WidgetsLayout.TabFrame);
 		TabFrame:Show();
 		TabFrame.T_Tabs = {  };
 		TabFrame.F_CreateTab = LT_WidgetMethod.TabFrame_CreateTab;
@@ -4549,10 +4524,10 @@ local function LF_HookFrame(addon, meta)
 
 	do	--	search_box
 		local SearchEditBox, SearchEditBoxOK, SearchEditBoxNameOnly = LT_SharedMethod.UICreateSearchBox(Frame);
-		SearchEditBox:SetPoint("TOPLEFT", Frame, "TOPLEFT", 6, -6);
+		LT_SharedMethod.SetPoint(SearchEditBox, T_WidgetsLayout.SearchEditBox);
 		SearchEditBox:SetPoint("RIGHT", SearchEditBoxOK, "LEFT", -4, 0);
 		SearchEditBoxOK:SetPoint("RIGHT", SearchEditBoxNameOnly, "LEFT", -4, 0);
-		SearchEditBoxNameOnly:SetPoint("TOPRIGHT", Frame, "TOPRIGHT", -68, -7);
+		LT_SharedMethod.SetPoint(SearchEditBoxNameOnly, T_WidgetsLayout.SearchEditBoxNameOnly);
 	end
 
 	do	--	HaveMaterialsCheck
@@ -4561,7 +4536,7 @@ local function LF_HookFrame(addon, meta)
 		HaveMaterialsCheck:SetHitRectInsets(0, 0, 0, 0);
 		HaveMaterialsCheck:Show();
 		HaveMaterialsCheck:SetChecked(false);
-		HaveMaterialsCheck:SetPoint("CENTER", Frame, "TOPRIGHT", -54, -14);
+		LT_SharedMethod.SetPoint(HaveMaterialsCheck, T_WidgetsLayout.HaveMaterialsCheck);
 		HaveMaterialsCheck:SetScript("OnClick", LT_WidgetMethod.HaveMaterialsCheck_OnClick);
 		HaveMaterialsCheck.info_lines = { l10n["TIP_HAVE_MATERIALS_INFO"], };
 		HaveMaterialsCheck:SetScript("OnEnter", LT_SharedMethod.ButtonInfoOnEnter);
@@ -4578,7 +4553,7 @@ local function LF_HookFrame(addon, meta)
 		ToggleButton:GetPushedTexture():SetVertexColor(unpack(T_UIDefinition.TextureButtonColorPushed));
 		ToggleButton:SetHighlightTexture(T_UIDefinition.TEXTURE_PROFIT);
 		ToggleButton:GetHighlightTexture():SetVertexColor(unpack(T_UIDefinition.TextureButtonColorHighlight));
-		ToggleButton:SetPoint("TOPRIGHT", Frame, "TOPRIGHT", -24, -6);
+		LT_SharedMethod.SetPoint(ToggleButton, T_WidgetsLayout.ProfitToggleButton);
 		ToggleButton:SetScript("OnEnter", LT_SharedMethod.ButtonInfoOnEnter);
 		ToggleButton:SetScript("OnLeave", LT_SharedMethod.ButtonInfoOnLeave);
 		ToggleButton.info_lines = { l10n["TIP_PROFIT_FRAME_CALL_INFO"] };
@@ -4590,7 +4565,7 @@ local function LF_HookFrame(addon, meta)
 		ProfitFrame:SetFrameStrata("HIGH");
 		ProfitFrame:EnableMouse(true);
 		ProfitFrame:SetSize(400, 360);
-		ProfitFrame:SetPoint("TOPLEFT", HookedFrame, "TOPRIGHT", -30, -76);
+		LT_SharedMethod.SetPoint(ProfitFrame, T_WidgetsLayout.ProfitFrame);
 		ProfitFrame:Hide();
 		ProfitFrame.list = {  };
 		Frame.ProfitFrame = ProfitFrame;
@@ -4660,7 +4635,7 @@ local function LF_HookFrame(addon, meta)
 		ToggleButton:GetPushedTexture():SetVertexColor(unpack(T_UIDefinition.TextureButtonColorPushed));
 		ToggleButton:SetHighlightTexture(T_UIDefinition.TEXTURE_CONFIG);
 		ToggleButton:GetHighlightTexture():SetVertexColor(unpack(T_UIDefinition.TextureButtonColorHighlight));
-		ToggleButton:SetPoint("TOPRIGHT", Frame, "TOPRIGHT", -4, -6);
+		LT_SharedMethod.SetPoint(ToggleButton, T_WidgetsLayout.SetToggleButton);
 		ToggleButton:SetScript("OnClick", LT_WidgetMethod.SetFrameToggleButton_OnClick);
 		Frame.SetToggleButton = ToggleButton;
 		ToggleButton.Frame = Frame;
@@ -4765,7 +4740,7 @@ local function LF_HookFrame(addon, meta)
 	do	--	InfoInFrame
 		local RankInfoInFrame = Frame.HookedDetailChild:CreateFontString(nil, "OVERLAY");
 		RankInfoInFrame:SetFont(T_UIDefinition.FrameNormalFont, T_UIDefinition.FrameNormalFontSize, T_UIDefinition.FrameNormalFontFlag);
-		RankInfoInFrame:SetPoint("TOPLEFT", Frame.HookedDetailChild, "TOPLEFT", 5, -50);
+		LT_SharedMethod.SetPoint(RankInfoInFrame, T_WidgetsLayout.RankInfoInFrame);
 		Frame.RankInfoInFrame = RankInfoInFrame;
 
 		local T_PriceInfoInFrame = {  };
@@ -4784,7 +4759,11 @@ local function LF_HookFrame(addon, meta)
 		Frame.T_PriceInfoInFrame = T_PriceInfoInFrame;
 
 		Frame.Widget_PositionSkippedByInfoInFrame:ClearAllPoints();
-		Frame.Widget_PositionSkippedByInfoInFrame:SetPoint("TOPLEFT", T_PriceInfoInFrame[3], "BOTTOMLEFT", 0, -3);
+		Frame.Widget_PositionSkippedByInfoInFrame:SetPoint("TOPLEFT", T_PriceInfoInFrame[3], "BOTTOMLEFT", 0, -12);
+		Frame.Widget_PositionSkippedByInfoInFrame._SetPoint = Frame.Widget_PositionSkippedByInfoInFrame.SetPoint;
+		Frame.Widget_PositionSkippedByInfoInFrame._ClearAllPoints = Frame.Widget_PositionSkippedByInfoInFrame.ClearAllPoints;
+		Frame.Widget_PositionSkippedByInfoInFrame.SetPoint = function() end;
+		Frame.Widget_PositionSkippedByInfoInFrame.ClearAllPoints = function() end;
 
 		local function LF_DelayUpdateInfoInFrame()
 			Frame:F_UpdatePriceInfo();
@@ -4811,7 +4790,7 @@ local function LF_HookFrame(addon, meta)
 
 		local HistoryFrame = CreateFrame('FRAME', nil, HookedDetailFrame);
 		HistoryFrame:SetSize(32, 20);
-		HistoryFrame:SetPoint("TOPRIGHT", HookedDetailFrame, "TOPRIGHT", 4, -2);
+		LT_SharedMethod.SetPoint(HistoryFrame, T_WidgetsLayout.HistoryFrame);
 		Frame.HistoryFrame = HistoryFrame;
 		HistoryFrame.Frame = Frame;
 
@@ -4871,7 +4850,7 @@ local function LF_HookFrame(addon, meta)
 			local ToggleButton = CreateFrame('BUTTON', nil, Frame, "UIPanelButtonTemplate");
 			ToggleButton:SetWidth(72);
 			ToggleButton:SetHeight(18);
-			ToggleButton:SetPoint("TOPRIGHT", Frame.Background, "BOTTOMRIGHT", -10, -2);
+			LT_SharedMethod.SetPoint(ToggleButton, T_WidgetsLayout.QueueToggleButton);
 			ToggleButton:SetText(l10n["QueueToggleButton"]);
 			ToggleButton:SetScript("OnClick", LT_WidgetMethod.QueueFrameToggleButton_OnClick);
 			Frame.QueueToggleButton = ToggleButton;
@@ -4882,7 +4861,13 @@ local function LF_HookFrame(addon, meta)
 	end
 
 	--	Update after all hooks
-	Frame.F_SetSelection = _G[Frame.T_FunctionName.F_SetSelection];
+	if meta.IsSelMaintain ~= true then
+		if TypeSel == 'string' then
+			Frame.F_SetSelection = _G[Frame.T_FunctionName.F_SetSelection];
+		elseif TypeSel == 'table' then
+			Frame.F_SetSelection = Frame.T_FunctionName.F_SetSelection[1][1][Frame.T_FunctionName.F_SetSelection[1][2]];
+		end
+	end
 
 	ALA_HOOK_ChatEdit_InsertLink(function(link, addon)
 		if Frame:IsVisible() and addon ~= __addon and not MT.IsOverridedByAuction() then
@@ -4952,8 +4937,12 @@ local function LF_FrameApplySetting(Frame)
 	--
 	Frame.TabFrame:F_Update();
 	Frame.PortraitButton:F_Update();
-	Frame:F_Expand(VT.SET.expand);
-	Frame:F_FixSkillList(VT.SET.expand);
+	if CT.ISMORDERNUI then
+		Frame:SetAllPoints(Frame.HookedListFrame);
+	else
+		Frame:F_Expand(VT.SET.expand);
+		Frame:TF_HideAdditionalSkillListButtons(VT.SET.expand);
+	end
 	Frame:F_SetStyle(VT.SET.blz_style, true);
 	if VT.SET.show_call then
 		Frame.ToggleButton:Show();
@@ -4978,16 +4967,712 @@ local function LF_FrameApplySetting(Frame)
 		end
 	end
 	--
-	local function Ticker()
-		if Frame.HookedPortrait:GetTexture() == nil then
-			SetPortraitTexture(Frame.HookedPortrait, "player");
-		else
-			MT._TimerHalt(Ticker);
+	if not CT.ISMORDERNUI then
+		local function Ticker()
+			if Frame.HookedPortrait:GetTexture() == nil then
+				SetPortraitTexture(Frame.HookedPortrait, "player");
+			else
+				MT._TimerHalt(Ticker);
+			end
 		end
+		MT._TimerStart(Ticker, 0.1);
 	end
-	MT._TimerStart(Ticker, 0.1);
 end
 --
+local function LF_AddOnCallback_Blizzard_Professions(addon)
+	-->
+		local C_TradeSkillUI = _G.C_TradeSkillUI;
+		local GetAllRecipeIDs = C_TradeSkillUI.GetAllRecipeIDs;
+		local GetFilteredRecipeIDs = C_TradeSkillUI.GetFilteredRecipeIDs;
+		local GetRecipeInfo = C_TradeSkillUI.GetRecipeInfo;
+		local GetCraftableCount = C_TradeSkillUI.GetCraftableCount;
+		local GetRecipeSchematic = C_TradeSkillUI.GetRecipeSchematic;
+		local CraftRecipe = C_TradeSkillUI.CraftRecipe;
+		local GetProfessionInfoBySkillLineID = C_TradeSkillUI.GetProfessionInfoBySkillLineID;
+		local GetTradeSkillLineForRecipe = C_TradeSkillUI.GetTradeSkillLineForRecipe;
+		local GetRecipeCooldown = C_TradeSkillUI.GetRecipeCooldown;
+		local GetRecipeTools = C_TradeSkillUI.GetRecipeTools;
+		local GetRecipeItemLink = C_TradeSkillUI.GetRecipeItemLink;
+		local GetRecipeOutputItemData = C_TradeSkillUI.GetRecipeOutputItemData;
+		local GetRecipeRequirements = C_TradeSkillUI.GetRecipeRequirements;
+
+		local Professions = _G.Professions;
+		local GetProfessionInfo = Professions.GetProfessionInfo;
+
+		local ProfessionsUtil = _G.ProfessionsUtil;
+		local OpenProfessionFrameToRecipe = ProfessionsUtil.OpenProfessionFrameToRecipe;
+
+		local ProfessionsFrame = _G.ProfessionsFrame;
+		local CraftingPage = ProfessionsFrame.CraftingPage;
+		local RecipeList = ProfessionsFrame.CraftingPage.RecipeList;
+		local SchematicForm = ProfessionsFrame.CraftingPage.SchematicForm;
+
+		local CloseButton = ProfessionsFrame.CloseButton or _G.ProfessionsFrameCloseButton;
+		local RankFrame = ProfessionsFrame.CraftingPage.RankBar;
+		local SearchBox = ProfessionsFrame.CraftingPage.RecipeList.SearchBox;
+		local CreateButton = ProfessionsFrame.CraftingPage.CreateButton;
+		local CreateAllButton = ProfessionsFrame.CraftingPage.CreateAllButton;
+		local CreateMultipleInputBox = ProfessionsFrame.CraftingPage.CreateMultipleInputBox;
+	-->
+
+	local Context = nil;
+	local CtxSize = 0;
+	local BackCtx = {  };
+	local meta; meta = {
+		NoExpand = true,
+
+		HookedFrame = ProfessionsFrame,
+		HookedDetailFrame = SchematicForm,
+		HookedDetailChild = SchematicForm,
+		HookedListFrame = RecipeList,
+		HookedRankFrame = RankFrame,
+		HookedRankFrameRight = RankFrame.Mask,
+		HookedPortrait = ProfessionsFrame.PortraitContainer,
+		T_StyleLayout = {
+			normal = {
+				anchor = {
+					frame = {
+						{ "TOPLEFT", ProfessionsFrame, "TOPLEFT", 16, -72 },
+					},
+					list = {
+						{ "TOPLEFT", ProfessionsFrame, "TOPLEFT", 20, -100 },
+					},
+					detail = {
+						{ "TOPLEFT", ProfessionsFrame, "TOPLEFT", 20, -250 },
+					},
+				},
+				size = {
+					hooked = { 400, 560 },          -- ProfessionsFrame 标准尺寸
+					frame = { 340, 180 },
+					list = { 310, 140 },
+					detail = { 310, 200 },
+				},
+				scroll_button_num = 8,
+			},
+			expand = {
+				anchor = {
+					frame = {
+						{ "TOPLEFT", ProfessionsFrame, "TOPLEFT", 16, -72 },
+					},
+					list = {
+						{ "TOPLEFT", ProfessionsFrame, "TOPLEFT", 20, -100 },
+					},
+					detail = {
+						{ "TOPLEFT", nil, "TOPRIGHT", 2, -4 },
+					},
+				},
+				size = {
+					hooked = { 760, 560 },          -- 双栏展开
+					frame = { 340, 400 },
+					list = { 310, 21 * 17 },
+					detail = { 340, 350 },
+				},
+				scroll_button_num = 21,
+			},
+		},
+		Widget_AnchorTop = CloseButton,
+		Widget_AnchorLeftOfTabFrame = RankFrame,
+		Widget_PositionSkippedByInfoInFrame = SchematicForm.Description,
+		T_HookedFrameWidgets = {
+			backup = { },
+			ProductionIcon = SchematicForm.OutputIcon,
+			T_HookedFrameButtons = {
+				CreateButton = CreateButton,
+				IncrementButton = CreateMultipleInputBox.IncrementButton,
+				DecrementButton = CreateMultipleInputBox.DecrementButton,
+				CreateAllButton = CreateAllButton,
+				CloseButton = CloseButton,
+			},
+			T_ButtonModernTexture = {
+				CloseButton = T_UIDefinition.TEXTURE_MODERN_BUTTON_CLOSE,
+				IncrementButton = T_UIDefinition.TEXTURE_MODERN_ARROW_RIGHT,
+				DecrementButton = T_UIDefinition.TEXTURE_MODERN_ARROW_LEFT,
+			},
+			T_HookedFrameDropdowns = { },   -- ProfessionsFrame 无旧式 Dropdown
+			T_HookedFrameEditboxes = {
+				InputBox = CreateMultipleInputBox,
+				SearchInputBox = SearchBox,
+			},
+			T_HookedFrameEditboxesChild = {
+				InputBoxLeft = CreateMultipleInputBox.Left,
+			},
+			T_HookedFrameChecks = { },
+		},
+		T_WidgetsLayout = {
+			HookedPortrait = {
+				{ "TOPLEFT", ProfessionsFrame, "TOPLEFT", 7, -4, },
+			},
+			-- CancelButton = {  },
+			CloseButton = {
+				{ "CENTER", ProfessionsFrame, "TOPRIGHT", -14, -14, },
+			},
+			InputBoxLeft = {
+				{ "LEFT", SearchBox, "LEFT", 0, 0, },
+			},
+			InputBox = {
+				{ "RIGHT", CreateMultipleInputBox.IncrementButton, "CENTER", -16, 0, },
+			},
+			IncrementButton = {
+				{ "CENTER", CreateButton, "LEFT", -16, 0, },
+			},
+			CollapseAllButton = {
+				{ "BOTTOMLEFT", RecipeList, "TOPLEFT", 0, 4, },
+			},
+			HookedRankFrame = {
+				{ "TOP", ProfessionsFrame, "TOP", 16, -42, },
+			},
+			LinkButton = {
+				{ "RIGHT", ProfessionsFrame, "TOPRIGHT", -14, -68, },
+			},
+
+			ToggleButton = {
+				{ "RIGHT", CloseButton, "LEFT", -2, 0, },
+			},
+			ExpandButton = {
+				{ "CENTER", "ThisFrame", "TOPRIGHT", 4, -358, },
+			},
+			ShrinkButton = {
+				{ "CENTER", "ThisFrame", "TOPRIGHT", 4, -358, },
+			},
+			Background = {
+				{ "TOPLEFT", ProfessionsFrame, "TOPLEFT", 0, 0, },
+				{ "BOTTOMRIGHT", ProfessionsFrame, "BOTTOMRIGHT", 0, 0, },
+			},
+			Background_BLZ = {
+				{ "TOPLEFT", ProfessionsFrame, "TOPLEFT", 0, 0, },
+				{ "BOTTOMRIGHT", ProfessionsFrame, "BOTTOMRIGHT", 0, 0, },
+			},
+			LineTop = {
+				{ "LEFT", ProfessionsFrame, "LEFT", 0, 0, },
+				{ "RIGHT", ProfessionsFrame, "RIGHT", 0, 0, },
+				{ "BOTTOM", ProfessionsFrame, "TOP", 0, 0, },
+			},
+			LineMiddle = {
+				{ "LEFT", ProfessionsFrame, "LEFT", 0, 0, },
+				{ "RIGHT", ProfessionsFrame, "RIGHT", 0, 0, },
+				{ "TOP", ProfessionsFrame, "TOP", 0, -28, },
+			},
+			LineBottom = {
+				{ "LEFT", ProfessionsFrame, "LEFT", 0, 0, },
+				{ "RIGHT", ProfessionsFrame, "RIGHT", 0, 0, },
+				{ "BOTTOM", SchematicForm, "TOP", 0, 2, },
+			},
+			OverrideMinRankButton = {
+				{ "CENTER", RankFrame, "LEFT", -20, 0, },
+			},
+			OverrideMinRankSlider = {
+				{ "LEFT", RankFrame, "LEFT", 0, 0, },
+				{ "RIGHT", RankFrame.Mask, "RIGHT", 0, 0, },
+			},
+			RankOffsetButton = {
+				{ "CENTER", RankFrame, "RIGHT", 20, 0, },
+			},
+			RankOffsetSlider = {
+				{ "LEFT", RankFrame.Mask, "RIGHT", 0, 0, },
+				{ "RIGHT", RankFrame, "RIGHT", 0, 0, },
+			},
+			TabFrame = {
+				{ "LEFT", "ThisFrame", "LEFT", 60, 0, },
+				{ "BOTTOM", CloseButton, "TOP", 0, 0, },
+			},
+			SearchEditBox = {
+				{ "TOPLEFT", "ThisFrame", "TOPLEFT", 6, -6, },
+			},
+			SearchEditBoxF = {
+				{ "TOPLEFT", "ThisFrame", "TOPLEFT", 18, -6, },
+			},
+			SearchEditBoxNameOnly = {
+				{ "TOPRIGHT", "ThisFrame", "TOPRIGHT", -68, -7, },
+			},
+			HaveMaterialsCheck = {
+				{ "CENTER", "ThisFrame", "TOPRIGHT", -54, -14, },
+			},
+			ProfitToggleButton = {
+				{ "TOPRIGHT", "ThisFrame", "TOPRIGHT", -24, -6, },
+			},
+			ProfitFrame = {
+				{ "TOPLEFT", ProfessionsFrame, "TOPRIGHT", 0, -76, },
+			},
+			SetToggleButton = {
+				{ "TOPRIGHT", "ThisFrame", "TOPRIGHT", -4, -6, },
+			},
+			RankInfoInFrame = {
+				{ "TOPLEFT", SchematicForm, "TOPLEFT", 28, -28 - 48 - 6, },
+			},
+			HistoryFrame = {
+				{ "TOPRIGHT", SchematicForm, "TOPRIGHT", -16, -2, },
+			},
+			QueueToggleButton = {
+				{ "TOP", CreateButton, "BOTTOM", 0, -4, },
+			},
+		},
+		TF_RunFirst = function(Frame)
+			local PID = Frame.F_GetPID();
+			local function Ticker()
+				local pid = Frame.F_GetPID();
+				if pid == nil then
+					if PID ~= nil then
+						PID = nil;
+						LT_WidgetMethod._OnEvent(Frame, "TRADE_SKILL_DATA_SOURCE_CHANGED");
+					end
+				else
+					if PID == nil then
+						PID = pid;
+						LT_WidgetMethod._OnEvent(Frame, "TRADE_SKILL_DATA_SOURCE_CHANGED");
+					end
+				end
+			end
+			MT._TimerStart(Ticker, 0.1);
+			LT_SharedMethod.WidgetHidePermanently(ProfessionsFrame.NineSlice);
+			LT_SharedMethod.WidgetHidePermanently(ProfessionsFrame.Bg);
+			local Regions = { CraftingPage:GetRegions() };
+			for _, r in next, Regions do
+				if r:GetObjectType() == 'Texture' then
+					LT_SharedMethod.WidgetHidePermanently(r);
+				end
+			end
+			local Regions = { SchematicForm:GetRegions() };
+			for _, r in next, Regions do
+				if r:GetObjectType() == 'Texture' then
+					LT_SharedMethod.WidgetHidePermanently(r);
+				end
+			end
+			if CraftingPage.LinkButton then
+				CraftingPage.LinkButton:ClearAllPoints();
+				CraftingPage.LinkButton:SetPoint("RIGHT", ProfessionsFrame, "TOPRIGHT", -14, -52);
+			end
+		end,
+		F_GetNumSkillListButtons = function() return 0; end,
+		F_SetNumSkillListButtons = function() end,
+		TF_InitSkillListButtons = function(Frame)
+			local T_SkillListButtons = {  };
+			Frame.T_SkillListButtons = T_SkillListButtons;
+			-- local FrameLevel = meta.HookedListFrame:GetFrameLevel() + 2;
+			-- --/dump  ProfessionsFrame.CraftingPage.RecipeList.ScrollBox:GetFrames()[1]:GetData()
+			local cs = RecipeList.ScrollBox:GetFrames();
+			for index = 1, #cs do
+				local Button = cs[index];
+				if Button:GetObjectType() == 'Button' then
+					T_SkillListButtons[index] = Button;
+					T_SkillListButtons[Button] = true;
+					Button:SetScript("OnEnter", LT_WidgetMethod.BLZSkillListButton_OnEnter);
+					Button:SetScript("OnLeave", LT_SharedMethod.SkillListButton_OnLeave);
+					-- Button:SetID(index);
+					-- Button:SetFrameLevel(FrameLevel);
+					Button.Frame = Frame;
+					Button.ScrollFrame = meta.HookedListFrame;
+				end
+			end
+			-- T_SkillListButtons[1]:ClearAllPoints();
+			-- T_SkillListButtons[1]:SetPoint("TOPLEFT", meta.HookedListFrame);
+			return T_SkillListButtons;
+		end,
+		TF_RefreshSkillListButtons = function(Frame)
+			local T_SkillListButtons = Frame.T_SkillListButtons;
+			local cs = RecipeList.ScrollBox:GetFrames();
+			for index = 1, #cs do
+				local Button = cs[index];
+				if Button:GetObjectType() == 'Button' and T_SkillListButtons[Button] ~= true then
+					T_SkillListButtons[#T_SkillListButtons + 1] = Button;
+					T_SkillListButtons[Button] = true;
+					Button:SetScript("OnEnter", LT_WidgetMethod.BLZSkillListButton_OnEnter);
+					Button:SetScript("OnLeave", LT_SharedMethod.SkillListButton_OnLeave);
+					-- Button:SetID(index);
+					-- Button:SetFrameLevel(FrameLevel);
+					Button.Frame = Frame;
+					Button.ScrollFrame = meta.HookedListFrame;
+				end
+			end
+		end,
+		TF_HideAdditionalSkillListButtons = function(Frame, expanded) end,
+		TF_HookReagentButtons = function(Frame)
+			local T_ReagentButtons = {  };
+			Frame.T_ReagentButtons = T_ReagentButtons;
+			local cs = { SchematicForm.Reagents:GetChildren() };
+			for index = 1, #cs do
+				local Button = cs[index].Button;
+				if Button then
+					T_ReagentButtons[index] = Button;
+					T_ReagentButtons[Button] = true;
+					Button.Frame = Frame;
+					Button:HookScript("OnClick", LT_WidgetMethod.ReagentButton__OnClick);
+				end
+			end
+		end,
+		TF_CheckReagentButtons = function(Frame)
+			local T_ReagentButtons = Frame.T_ReagentButtons;
+			local cs = { SchematicForm.Reagents:GetChildren() };
+			for index = 1, #cs do
+				local Button = cs[index].Button;
+				if Button and T_ReagentButtons[Button] ~= true then
+					T_ReagentButtons[#T_ReagentButtons + 1] = Button;
+					T_ReagentButtons[Button] = true;
+					Button.Frame = Frame;
+					Button:HookScript("OnClick", LT_WidgetMethod.ReagentButton__OnClick);
+				end
+			end
+		end,
+
+		F_NewContext = function()
+			wipe(BackCtx);
+			Context = GetFilteredRecipeIDs();
+			if Context then
+				CtxSize = #Context;
+				if Context then
+					for index = 1, CtxSize do
+						BackCtx[Context[index]] = index;
+					end
+				end
+			else
+				CtxSize = 0;
+			end
+		end,
+
+		F_ClearFilter = function()
+			if C_TradeSkillUI.ClearRecipeFilters then
+				C_TradeSkillUI.ClearRecipeFilters();
+			end
+			if C_TradeSkillUI.ClearInventorySlotFilter then
+				C_TradeSkillUI.ClearInventorySlotFilter()
+			end
+			if C_TradeSkillUI.ClearRecipeCategoryFilter then
+				C_TradeSkillUI.ClearRecipeCategoryFilter()
+			end
+			if C_TradeSkillUI.ClearRecipeSourceTypeFilter then
+				C_TradeSkillUI.ClearRecipeSourceTypeFilter()
+			end
+			if C_TradeSkillUI.SetRecipeItemNameFilter then
+				C_TradeSkillUI.SetRecipeItemNameFilter(nil)
+			end
+			if C_TradeSkillUI.SetRecipeItemLevelFilter then
+				C_TradeSkillUI.SetRecipeItemLevelFilter(0, 0)
+			end
+		end,
+
+		F_IsLinked = function()
+			return false;   -- ProfessionsFrame 不再区分“链接的专业”
+		end,
+		F_GetSkillName = function()
+			local info = GetProfessionInfo();
+			if info then
+				return info.professionName;
+			end
+			return nil;
+		end,
+		F_GetSkillInfo = function()
+			local info = GetProfessionInfo();
+			if info then
+				return info.professionName, info.skillLevel, info.maxSkillLevel;
+			end
+			return nil, 0, 0;
+		end,
+
+		F_GetRecipeNumAvailable = function()
+			return CtxSize;
+		end,
+		F_DoTradeCraft = function(index, numCasts)
+			local recipeID = Context[index];
+			if recipeID then
+				CraftRecipe(recipeID, numCasts or 1);
+			end
+		end,
+		F_CloseSkill = function()
+			ProfessionsFrame:Hide();
+		end,
+		F_SetSelection = function(index)
+			local recipeID = Context[index];
+			if recipeID then
+				local recipeInfo = GetRecipeInfo(recipeID);
+				if recipeInfo then
+					RecipeList:SelectRecipe(recipeInfo, true);
+				end
+				-- OpenProfessionFrameToRecipe(recipeID);
+			end
+		end,
+		IsSelMaintain = true,
+		F_GetSelection = function()
+			return BackCtx[RecipeList.previousRecipeID];
+		end,
+		F_GetSelectionSID = function()
+			return RecipeList.previousRecipeID;
+		end,
+
+		F_GetPID = function()
+			local pid = nil;
+			local WhatsTrainingCraftingPage = _G.WhatsTrainingCraftingPage;
+			if not( WhatsTrainingCraftingPage and WhatsTrainingCraftingPage:IsShown()) and SchematicForm:IsVisible() then
+				local info = GetProfessionInfo();
+				if info then
+					pid = DataAgent.T_SkillID2PID[info.professionID];
+				elseif CtxSize > 0 then
+					pid = DataAgent.get_pid_by_sid(Context[1]);
+				end
+				-- 回退：从专业名称反查
+				if pid == nil and info then
+					return DataAgent.get_pid_by_pname(info.professionName);
+				end
+			end
+			return pid;
+		end,
+		F_GetRecipeInfo = function(index)	--	skillName, difficult & header, numAvailable, isExpanded = GetTradeSkillInfo(skillIndex)
+			local recipeID = Context[index];
+			if recipeID then
+				local recipeInfo = GetRecipeInfo(recipeID);
+				if recipeInfo then
+					local num = GetCraftableCount(recipeID) or 0;
+					return recipeInfo.name, recipeInfo.difficulty or 0, num;
+				end
+			end
+			return nil, -1, 0;
+		end,
+		F_GetRecipeSpellID = function(pid, index)
+			return Context[index];
+		end,
+		F_GetRecipeItemID = function(index)
+			local recipeID = Context[index];
+			if recipeID then
+				local info = GetRecipeOutputItemData(recipeID);
+				if info then
+					return info.itemID;
+				end
+			end
+		end,
+		F_GetRecipeItemLink = function(index)
+			local recipeID = Context[index];
+			if recipeID then
+				return GetRecipeItemLink(recipeID);
+			end
+		end,
+		F_GetRecipeIcon = function(index)
+			local recipeID = Context[index];
+			if recipeID then
+				local recipeInfo = GetRecipeInfo(recipeID);
+				if recipeInfo then
+					return recipeInfo.icon;
+				end
+			end
+		end,
+		F_GetRecipeDesc = function() return ""; end,
+		F_GetRecipeTools = function(index)
+			local recipeID = Context[index];
+			if recipeID then
+				local reqs = GetRecipeRequirements(recipeID);
+				if reqs and #reqs > 0 then
+					local temp = {};
+					for i = 1, #reqs do
+						temp[#temp + 1] = reqs[i].name;
+					end
+					return unpack(temp);
+				end
+			end
+		end,
+		F_GetRecipeCooldown = function(index)
+			local recipeID = Context[index];
+			if recipeID then
+				return GetRecipeCooldown(recipeID);
+			end
+		end,
+		F_GetRecipeNumMade = function(index)
+			local recipeID = Context[index];
+			if recipeID then
+				local recipeSchematic = GetRecipeSchematic(recipeID, false);
+				if recipeSchematic then
+					return recipeSchematic.quantityMin, recipeSchematic.quantityMax;
+				end
+			end
+		end,
+
+		F_GetRecipeNumReagents = function(index)
+			local recipeID = Context[index];
+			if recipeID then
+				local recipeSchematic = GetRecipeSchematic(recipeID, false);
+				if recipeSchematic and recipeSchematic.reagentSlotSchematics then
+					return #recipeSchematic.reagentSlotSchematics;
+				end
+			end
+		end,
+		F_GetRecipeReagentLink = function(index, reagentIndex)
+			local recipeID = Context[index];
+			if recipeID then
+				local recipeSchematic = GetRecipeSchematic(recipeID, false);
+				if recipeSchematic and recipeSchematic.reagentSlotSchematics then
+					return select(2, VT._comptb.GetItemInfo(recipeSchematic.reagentSlotSchematics[reagentIndex].reagents[1]));
+				end
+			end
+		end,
+		F_GetRecipeReagentID = function(index, reagentIndex)
+			local recipeID = Context[index];
+			if recipeID then
+				local recipeSchematic = GetRecipeSchematic(recipeID, false);
+				if recipeSchematic and recipeSchematic.reagentSlotSchematics then
+					return recipeSchematic.reagentSlotSchematics[reagentIndex].reagents[1];
+				end
+			end
+		end,
+		F_GetRecipeReagentInfo = function(index, reagentIndex)	--	name, texture, numRequired, numHave = GetTradeSkillReagentInfo(tradeSkillRecipeId, reagentId);
+			local recipeID = Context[index];
+			if recipeID then
+				local recipeSchematic = GetRecipeSchematic(recipeID, false);
+				if recipeSchematic and recipeSchematic.reagentSlotSchematics then
+					local id = recipeSchematic.reagentSlotSchematics[reagentIndex].reagents[1];
+					local name, link, _, _, _, _, _, _, _, icon = VT._comptb.GetItemInfo(id);
+					return name, icon, VT._comptb..GetItemCount(id);
+				end
+			end
+		end,
+
+		F_HookedFrameUpdate = function()
+			RecipeList.ScrollBox:Update();
+		end,
+
+		T_MarkDirtyEvents = {
+			["TRADE_SKILL_SHOW"] = true,
+			["TRADE_SKILL_LIST_UPDATE"] = true,       -- Forever 专业列表更新
+			["TRADE_SKILL_DATA_SOURCE_CHANGED"] = true, -- Forever 数据源切换
+		},
+
+		T_MonitoredEvents = {
+			"TRADE_SKILL_SHOW",
+			-- "TRADE_SKILL_UPDATE",
+			"TRADE_SKILL_LIST_UPDATE",
+			"TRADE_SKILL_DATA_SOURCE_CHANGING",
+			"TRADE_SKILL_DATA_SOURCE_CHANGED",
+			-- "TRADE_SKILL_CLOSE",
+		},
+
+		C_SwitchEvent = "TRADE_SKILL_SHOW",
+		C_SwitchingEvent = "TRADE_SKILL_DATA_SOURCE_CHANGING",
+		C_SwitchedEvent = "TRADE_SKILL_DATA_SOURCE_CHANGED",
+		C_WatiEvent = "TRADE_SKILL_DATA_SOURCE_CHANGING",
+
+		F_WithDisabledFrame = function(self, func)
+			func(RecipeList);
+		end,
+
+		T_DisabledFunc = { },
+		T_DisabledFuncName = {
+			-- ProfessionsFrame 没有需要禁用的全局折叠/过滤函数
+		},
+
+		T_FunctionName = {
+			F_SetSelection = {
+				{ RecipeList, "SelectRecipe", },
+				{ RecipeList, "ClearSelectedRecipe", },
+			}
+		},
+
+		IsQueueEnabled = true,
+	};
+
+	local Frame = LF_HookFrame(addon, meta);
+	VT.UIFrames[addon] = Frame;
+
+	local ENCHANT_FILTER = l10n.ENCHANT_FILTER;
+	--	Dropdown Filter
+		local T_TradeSkillFrameFilterMeta = {
+			handler = function(_, _, key)
+				local text = ENCHANT_FILTER[key];
+				if text ~= nil then
+					Frame:F_Search(text);
+				end
+			end,
+			num = 7,
+			{	--	"披风"
+				text = ENCHANT_FILTER.INVTYPE_CLOAK,
+				param = "INVTYPE_CLOAK",
+			},
+			{	--	"胸甲"
+				text = ENCHANT_FILTER.INVTYPE_CHEST,
+				param = "INVTYPE_CHEST",
+			},
+			{	--	"护腕"
+				text = ENCHANT_FILTER.INVTYPE_WRIST,
+				param = "INVTYPE_WRIST",
+			},
+			{	--	"手套"
+				text = ENCHANT_FILTER.INVTYPE_HAND,
+				param = "INVTYPE_HAND",
+			},
+			{	--	"靴"
+				text = ENCHANT_FILTER.INVTYPE_FEET,
+				param = "INVTYPE_FEET",
+			},
+			{	--	"武器"
+				text = ENCHANT_FILTER.INVTYPE_WEAPON,
+				param = "INVTYPE_WEAPON",
+			},
+			{	--	"盾牌"
+				text = ENCHANT_FILTER.INVTYPE_SHIELD,
+				param = "INVTYPE_SHIELD",
+			},
+			-- {	--	"没有匹配的附魔"
+			-- 	text = ENCHANT_FILTER.NONE,
+			-- 	param = "NONE",
+			-- },
+		};
+		local FilterDropdown = CreateFrame('BUTTON', nil, Frame);
+		FilterDropdown:SetSize(12, 16);
+		FilterDropdown:EnableMouse(true);
+		FilterDropdown:SetNormalTexture([[Interface\MainMenuBar\UI-MainMenu-ScrollDownButton-UP]]);
+		FilterDropdown:GetNormalTexture():SetTexCoord(6 / 32, 26 / 32, 6 / 32, 26 / 32);
+		FilterDropdown:SetPushedTexture([[Interface\MainMenuBar\UI-MainMenu-ScrollDownButton-UP]]);
+		FilterDropdown:GetPushedTexture():SetTexCoord(6 / 32, 26 / 32, 6 / 32, 26 / 32);
+		FilterDropdown:GetPushedTexture():SetVertexColor(unpack(T_UIDefinition.TextureButtonColorPushed));
+		FilterDropdown:SetHighlightTexture([[Interface\MainMenuBar\UI-MainMenu-ScrollDownButton-UP]]);
+		FilterDropdown:GetHighlightTexture():SetTexCoord(6 / 32, 26 / 32, 6 / 32, 26 / 32);
+		FilterDropdown:GetHighlightTexture():SetVertexColor(unpack(T_UIDefinition.TextureButtonColorHighlight));
+		FilterDropdown:SetScript("OnClick", function(self)
+			VT.__dep.__menulib.ShowMenu(self, "BOTTOMRIGHT", T_TradeSkillFrameFilterMeta);
+		end);
+		FilterDropdown:SetPoint("RIGHT", Frame.SearchEditBox, "LEFT", -2, 0);
+		Frame.FilterDropdown = FilterDropdown;
+
+	--	Auto filter recipe when trading
+		local function LF_ProcessTradeTargetItemLink()
+			if Frame.flag == 10 then
+				local link = GetTradeTargetItemLink(7);
+				if link ~= nil then
+					local loc = select(9, VT._comptb.GetItemInfo(link));
+					if loc ~= nil and ENCHANT_FILTER[loc] then
+						Frame.SearchEditBox:SetText(ENCHANT_FILTER[loc]);
+						Frame:F_Search(ENCHANT_FILTER[loc]);
+					else
+						Frame.SearchEditBox:SetText(ENCHANT_FILTER.NONE);
+						Frame:F_Search(ENCHANT_FILTER.NONE);
+					end
+				end
+			end
+		end
+		local EventDriver = CreateFrame('FRAME');
+		EventDriver:SetScript("OnEvent", function(self, event, ...)
+			return self[event](...);
+		end);
+		function EventDriver.TRADE_CLOSED()
+			if Frame.flag == 10 then
+				Frame.SearchEditBox:SetText("");
+			end
+		end
+		function EventDriver.TRADE_TARGET_ITEM_CHANGED(_1)
+			if _1 == 7 then
+				LF_ProcessTradeTargetItemLink();
+			end
+		end
+		function EventDriver.TRADE_UPDATE()
+			LF_ProcessTradeTargetItemLink();
+		end
+		EventDriver:RegisterEvent("TRADE_CLOSED");
+		EventDriver:RegisterEvent("TRADE_UPDATE");
+		EventDriver:RegisterEvent("TRADE_TARGET_ITEM_CHANGED");
+		Frame.EventDriver = EventDriver;
+		Frame:HookScript("OnShow", function()
+			if ProfessionsFrame:IsShown() then
+				MT._TimerStart(LF_ProcessTradeTargetItemLink, 0.2, 1);
+			end
+		end);
+	--
+
+	LF_FrameApplySetting(Frame);
+end
 local function LF_AddOnCallback_Blizzard_TradeSkillUI(addon)
 	-->
 		local ExpandTradeSkillSubClass = _G.ExpandTradeSkillSubClass;
@@ -5063,52 +5748,57 @@ local function LF_AddOnCallback_Blizzard_TradeSkillUI(addon)
 		HookedListFrame = TradeSkillListScrollFrame,
 		HookedListBar = TradeSkillListScrollFrameScrollBar,
 		HookedRankFrame = TradeSkillRankFrame,
+		HookedRankFrameRight = TradeSkillRankFrame:GetStatusBarTexture(),
 		HookedPortrait = TradeSkillFramePortrait,
 		T_StyleLayout = {
 			normal = {
-				frame_size = { 384, 512, },
 				anchor = {
-					{ "TOPLEFT", TradeSkillFrame, "TOPLEFT", 18, -68, },
-					-- { "BOTTOMRIGHT", TradeSkillFrame, "TOPRIGHT", -38, -230, },
+					frame = {
+						{ "TOPLEFT", TradeSkillFrame, "TOPLEFT", 18, -68, },
+						-- { "BOTTOMRIGHT", TradeSkillFrame, "TOPRIGHT", -38, -230, },
+					},
+					list = {
+						{ "TOPLEFT", TradeSkillFrame, "TOPLEFT", 22, -96, },
+					},
+					detail = {
+						{ "TOPLEFT", TradeSkillFrame, "TOPLEFT", 22, -234, },
+					},
 				},
-				size = { 328, 156, },
-				list_anchor = {
-					{ "TOPLEFT", TradeSkillFrame, "TOPLEFT", 22, -96, },
+				size = {
+					hooked = { 384, 512, },
+					frame = { 328, 156, },
+					list = { 298, 128, },
+					detail = { 298, 176 },
 				},
-				list_size = { 298, 128, },
 				scroll_button_num = 8,
-				detail_anchor = {
-					{ "TOPLEFT", TradeSkillFrame, "TOPLEFT", 22, -234, },
-				},
-				detail_size = { 298, 176 },
 			},
 			expand = {
-				frame_size = { 715, 512, },
 				anchor = {
-					{ "TOPLEFT", TradeSkillFrame, "TOPLEFT", 18, -68, },
+					frame = {
+						{ "TOPLEFT", TradeSkillFrame, "TOPLEFT", 18, -68, },
+					},
+					list = {
+						{ "TOPLEFT", TradeSkillFrame, "TOPLEFT", 22, -96, },
+					},
+					detail = {
+						{ "TOPLEFT", "ThisFrame", "TOPRIGHT", 2, -4, },
+					},
 				},
-				size = { 328, 366, },
-				list_anchor = {
-					{ "TOPLEFT", TradeSkillFrame, "TOPLEFT", 22, -96, },
+				size = {
+					hooked = { 715, 512, },
+					frame = { 328, 366, },
+					list = { 298, 21 * 16, },
+					detail = { 328, 318, },
 				},
-				list_size = { 298, 21 * 16, },
 				scroll_button_num = 21,
-				detail_anchor = {
-					{ "TOPLEFT", nil, "TOPRIGHT", 2, -4, },
-				},
-				detail_size = { 328, 318, },
 			},
-			C_VariableName_NumSkillListButton = "TRADE_SKILLS_DISPLAYED",
 		},
 		Widget_AnchorTop = TradeSkillFrameCloseButton,
 		Widget_AnchorLeftOfTabFrame = TradeSkillRankFrameBorder,
 		Widget_PositionSkippedByInfoInFrame = TradeSkillDescription or TradeSkillReagentLabel,
 		T_HookedFrameWidgets = {
 			backup = {  },
-			C_SkillListButtonNamePrefix = "TradeSkillSkill",
-			C_SkillListButtonTemplate = "TradeSkillSkillButtonTemplate",
 			ProductionIcon = TradeSkillSkillIcon,
-			C_ReagentButtonNamePrefix = "TradeSkillReagent",
 			T_HookedFrameButtons = {
 				CancelButton = TradeSkillCancelButton,
 				CreateButton = TradeSkillCreateButton,
@@ -5130,11 +5820,182 @@ local function LF_AddOnCallback_Blizzard_TradeSkillUI(addon)
 				InputBox = TradeSkillInputBox,
 				SearchInputBox = TradeSearchInputBox,
 			},
+			T_HookedFrameEditboxesChild = {
+				InputBoxLeft = TradeSkillInputBoxLeft,
+			},
 			T_HookedFrameChecks = {
 				AvailableFilterCheckButton = TradeSkillFrameAvailableFilterCheckButton,
 			},
 			CollapseAllButton = TradeSkillCollapseAllButton,
 		},
+		T_WidgetsLayout = {
+			HookedPortrait = {
+				{ "TOPLEFT", TradeSkillFrame, "TOPLEFT", 7, -4, },
+			},
+			CancelButton = {
+				{ "TOPRIGHT", TradeSkillFrame, "TOPRIGHT", -42, -415, },
+			},
+			CloseButton = {
+				{ "CENTER", TradeSkillFrame, "TOPRIGHT", -51, -24, },
+			},
+			InputBoxLeft = {
+				{ "LEFT", TradeSearchInputBox, "LEFT", 0, 0, },
+			},
+			InputBox = {
+				{ "RIGHT", TradeSkillIncrementButton, "CENTER", -16, 0, },
+			},
+			IncrementButton = {
+				{ "CENTER", TradeSkillCreateButton, "LEFT", -16, 0, },
+			},
+			CollapseAllButton = {
+				{ "BOTTOMLEFT", TradeSkillListScrollFrame, "TOPLEFT", 0, 4, },
+			},
+			HookedRankFrame = {
+				{ "TOP", TradeSkillFrame, "TOP", 16, -42, },
+			},
+
+			ToggleButton = {
+				{ "RIGHT", TradeSkillFrameCloseButton, "LEFT", -2, 0, },
+			},
+			ExpandButton = {
+				{ "CENTER", "ThisFrame", "TOPRIGHT", 4, -358, },
+			},
+			ShrinkButton = {
+				{ "CENTER", "ThisFrame", "TOPRIGHT", 4, -358, },
+			},
+			Background = {
+				{ "TOPLEFT", TradeSkillFrame, "TOPLEFT", 11, -12, },
+				{ "BOTTOMRIGHT", TradeSkillFrame, "BOTTOMRIGHT", -32, 76, },
+			},
+			Background_BLZ = {
+				{ "TOPLEFT", TradeSkillFrame, "TOPLEFT", 11, -7, },
+				{ "BOTTOMRIGHT", TradeSkillFrame, "BOTTOMRIGHT", -29, 67, },
+			},
+			LineTop = {
+				{ "LEFT", TradeSkillFrame, "LEFT", 13, 0, },
+				{ "RIGHT", TradeSkillFrame, "RIGHT", -34, 0, },
+				{ "BOTTOM", TradeSkillFrame, "TOP", 0, -38, },
+			},
+			LineMiddle = {
+				{ "LEFT", TradeSkillFrame, "LEFT", 13, 0, },
+				{ "RIGHT", TradeSkillFrame, "RIGHT", -34, 0, },
+				{ "TOP", TradeSkillFrame, "TOP", 0, -61, },
+			},
+			LineBottom = {
+				{ "LEFT", TradeSkillFrame, "LEFT", 13, 0, },
+				{ "RIGHT", TradeSkillFrame, "RIGHT", -34, 0, },
+				{ "BOTTOM", TradeSkillDetailScrollFrame, "TOP", 0, 2, },
+			},
+			OverrideMinRankButton = {
+				{ "CENTER", TradeSkillRankFrame, "LEFT", -20, 0, },
+			},
+			OverrideMinRankSlider = {
+				{ "LEFT", TradeSkillRankFrame, "LEFT", 0, 0, },
+				{ "RIGHT", TradeSkillRankFrame:GetStatusBarTexture(), "RIGHT", 0, 0, },
+			},
+			RankOffsetButton = {
+				{ "CENTER", TradeSkillRankFrame, "RIGHT", 20, 0, },
+			},
+			RankOffsetSlider = {
+				{ "LEFT", TradeSkillRankFrame:GetStatusBarTexture(), "RIGHT", 0, 0, },
+				{ "RIGHT", TradeSkillRankFrame, "RIGHT", 0, 0, },
+			},
+			TabFrame = {
+				{ "LEFT", "ThisFrame", "LEFT", 60, 0, },
+				{ "BOTTOM", TradeSkillFrameCloseButton, "TOP", 0, 0, },
+			},
+			SearchEditBox = {
+				{ "TOPLEFT", "ThisFrame", "TOPLEFT", 6, -6, },
+			},
+			SearchEditBoxF = {
+				{ "TOPLEFT", "ThisFrame", "TOPLEFT", 18, -6, },
+			},
+			SearchEditBoxNameOnly = {
+				{ "TOPRIGHT", "ThisFrame", "TOPRIGHT", -68, -7, },
+			},
+			HaveMaterialsCheck = {
+				{ "CENTER", "ThisFrame", "TOPRIGHT", -54, -14, },
+			},
+			ProfitToggleButton = {
+				{ "TOPRIGHT", "ThisFrame", "TOPRIGHT", -24, -6, },
+			},
+			ProfitFrame = {
+				{ "TOPLEFT", TradeSkillFrame, "TOPRIGHT", -30, -76, },
+			},
+			SetToggleButton = {
+				{ "TOPRIGHT", "ThisFrame", "TOPRIGHT", -4, -6, },
+			},
+			RankInfoInFrame = {
+				{ "TOPLEFT", TradeSkillDetailScrollChildFrame, "TOPLEFT", 5, -50, },
+			},
+			HistoryFrame = {
+				{ "TOPRIGHT", TradeSkillDetailScrollFrame, "TOPRIGHT", 4, -2, },
+			},
+			QueueToggleButton = {
+				{ "TOP", TradeSkillCancelButton, "BOTTOM", 0, -4, },
+			},
+		},
+		TF_RunFirst = function(Frame)
+		end,
+		F_GetNumSkillListButtons = function() return _G.TRADE_SKILLS_DISPLAYED end;
+		F_SetNumSkillListButtons = function(displayed) _G.TRADE_SKILLS_DISPLAYED = displayed; end,
+		TF_InitSkillListButtons = function(Frame)
+			local T_SkillListButtons = {  };
+			Frame.T_SkillListButtons = T_SkillListButtons;
+			local NumDisplayed = Frame.F_GetNumSkillListButtons();
+			for index = 1, NumDisplayed do
+				T_SkillListButtons[index] = _G["TradeSkillSkill" .. index];
+			end
+			for index = NumDisplayed + 1, meta.T_StyleLayout.expand.scroll_button_num do
+				local name = "TradeSkillSkill" .. index;
+				local Button = _G[name] or CreateFrame('BUTTON', name, Frame.HookedFrame, "TradeSkillSkillButtonTemplate");
+				Button:SetPoint("TOPLEFT", T_SkillListButtons[index - 1], "BOTTOMLEFT", 0, 0);
+				Button:Hide();
+				T_SkillListButtons[index] = Button;
+			end
+			T_SkillListButtons[1]:ClearAllPoints();
+			T_SkillListButtons[1]:SetPoint("TOPLEFT", meta.HookedListFrame);
+			local FrameLevel = meta.HookedListFrame:GetFrameLevel() + 2;
+			for index = 1, #T_SkillListButtons do
+				local Button = T_SkillListButtons[index];
+				Button:SetScript("OnEnter", LT_WidgetMethod.BLZSkillListButton_OnEnter);
+				Button:SetScript("OnLeave", LT_SharedMethod.SkillListButton_OnLeave);
+				Button:SetID(index);
+				Button:SetFrameLevel(FrameLevel);
+				Button.Frame = Frame;
+				Button.ScrollFrame = meta.HookedListFrame;
+			end
+			return T_SkillListButtons;
+		end,
+		TF_RefreshSkillListButtons = function(Frame) end,
+		TF_HideAdditionalSkillListButtons = function(Frame, expanded)
+			local layout = Frame.T_StyleLayout[expanded and 'expand' or 'normal'];
+			local pref = Frame.T_HookedFrameWidgets.C_SkillListButtonNamePrefix;
+			local index = layout.scroll_button_num + 1;
+			while true do
+				local Skill = _G["TradeSkillSkill" .. index];
+				if Skill == nil then
+					return;
+				end
+				Skill:Hide();
+				Frame.T_SkillListButtons[index] = Frame.T_SkillListButtons[index] or Skill;
+				index = index + 1;
+			end
+		end,
+		TF_HookReagentButtons = function(Frame)
+			local T_ReagentButtons = {  };
+			Frame.T_ReagentButtons = T_ReagentButtons;
+			for index = 1, 8 do
+				local Button = _G["TradeSkillReagent" .. index];
+				T_ReagentButtons[index] = Button;
+				Button.Frame = Frame;
+				Button:HookScript("OnClick", LT_WidgetMethod.ReagentButton__OnClick);
+			end
+			return T_ReagentButtons;
+		end,
+		TF_CheckReagentButtons = function(Frame) end,
+
+		F_NewContext = function() end,
 
 		-- expand = ExpandTradeSkillSubClass,
 		-- collapse = CollapseTradeSkillSubClass,
@@ -5180,6 +6041,11 @@ local function LF_AddOnCallback_Blizzard_TradeSkillUI(addon)
 		F_CloseSkill = CloseTradeSkill,
 		F_SetSelection = TradeSkillFrame_SetSelection,		-- SelectTradeSkill
 		F_GetSelection = GetTradeSkillSelectionIndex,
+		F_GetSelectionSID = function()
+			local pid = meta.F_GetPID();
+			local sel = meta.F_GetSelection();
+			return meta.F_GetRecipeSpellID(pid, sel);
+		end,
 
 		F_GetPID = function()
 			if CT.VGE3X then
@@ -5218,8 +6084,7 @@ local function LF_AddOnCallback_Blizzard_TradeSkillUI(addon)
 			end
 			return DataAgent.get_pid_by_pname(GetTradeSkillLine());
 		end,
-		F_GetRecipeInfo = GetTradeSkillInfo,
-			--	skillName, difficult & header, numAvailable, isExpanded = GetTradeSkillInfo(skillIndex)
+		F_GetRecipeInfo = GetTradeSkillInfo,	--	skillName, difficult & header, numAvailable, isExpanded = GetTradeSkillInfo(skillIndex)
 		F_GetRecipeSpellID = CT.VGE3X and
 								function(pid, index)
 									local link = GetTradeSkillRecipeLink(index);
@@ -5241,8 +6106,7 @@ local function LF_AddOnCallback_Blizzard_TradeSkillUI(addon)
 		F_GetRecipeNumReagents = GetTradeSkillNumReagents,
 		F_GetRecipeReagentLink = GetTradeSkillReagentItemLink,
 		F_GetRecipeReagentID = function(i, j) return tonumber(strmatch(GetTradeSkillReagentItemLink(i, j), "[a-zA-Z]:(%d+)")); end,
-		F_GetRecipeReagentInfo = GetTradeSkillReagentInfo,
-			--	name, texture, numRequired, numHave = GetTradeSkillReagentInfo(tradeSkillRecipeId, reagentId);
+		F_GetRecipeReagentInfo = GetTradeSkillReagentInfo,	--	name, texture, numRequired, numHave = GetTradeSkillReagentInfo(tradeSkillRecipeId, reagentId);
 
 		F_HookedFrameUpdate = TradeSkillFrame_Update,
 		T_MarkDirtyEvents = {
@@ -5398,7 +6262,9 @@ local function LF_AddOnCallback_Blizzard_TradeSkillUI(addon)
 			return self[event](...);
 		end);
 		function EventDriver.TRADE_CLOSED()
-			Frame.SearchEditBox:SetText("");
+			if Frame.flag == 10 then
+				Frame.SearchEditBox:SetText("");
+			end
 		end
 		function EventDriver.TRADE_TARGET_ITEM_CHANGED(_1)
 			if _1 == 7 then
@@ -5485,52 +6351,57 @@ local function LF_AddOnCallback_Blizzard_CraftUI(addon)
 		HookedListFrame = CraftListScrollFrame,
 		HookedListBar = CraftListScrollFrameScrollBar,
 		HookedRankFrame = CraftRankFrame,
+		HookedRankFrameRight = CraftRankFrame:GetStatusBarTexture(),
 		HookedPortrait = CraftFramePortrait,
 		T_StyleLayout = {
 			normal = {
-				frame_size = { 384, 512, },
 				anchor = {
-					{ "TOPLEFT", CraftFrame, "TOPLEFT", 18, -68, },
-					-- { "BOTTOMRIGHT", CraftFrame, "TOPRIGHT", -38, -230, },
+					frame = {
+						{ "TOPLEFT", CraftFrame, "TOPLEFT", 18, -68, },
+						-- { "BOTTOMRIGHT", CraftFrame, "TOPRIGHT", -38, -230, },
+					},
+					list = {
+						{ "TOPLEFT", CraftFrame, "TOPLEFT", 22, -96, },
+					},
+					detail = {
+						{ "TOPLEFT", CraftFrame, "TOPLEFT", 22, -234, },
+					},
 				},
-				size = { 328, 156, },
-				list_anchor = {
-					{ "TOPLEFT", CraftFrame, "TOPLEFT", 22, -96, },
+				size = {
+					hooked = { 384, 512, },
+					frame = { 328, 156, },
+					list = { 298, 128, },
+					detail = { 298, 176 },
 				},
-				list_size = { 298, 128, },
 				scroll_button_num = 8,
-				detail_anchor = {
-					{ "TOPLEFT", CraftFrame, "TOPLEFT", 22, -234, },
-				},
-				detail_size = { 298, 176 },
 			},
 			expand = {
-				frame_size = { 715, 512, },
 				anchor = {
-					{ "TOPLEFT", CraftFrame, "TOPLEFT", 18, -68, },
+					frame = {
+						{ "TOPLEFT", CraftFrame, "TOPLEFT", 18, -68, },
+					},
+					list = {
+						{ "TOPLEFT", CraftFrame, "TOPLEFT", 22, -96, },
+					},
+					detail = {
+						{ "TOPLEFT", "ThisFrame", "TOPRIGHT", 2, -4, },
+					},
 				},
-				size = { 328, 366, },
-				list_anchor = {
-					{ "TOPLEFT", CraftFrame, "TOPLEFT", 22, -96, },
+				size = {
+					hooked = { 715, 512, },
+					frame = { 328, 366, },
+					list = { 298, 21 * 16, },
+					detail = { 328, 318, },
 				},
-				list_size = { 298, 21 * 16, },
 				scroll_button_num = 21,
-				detail_anchor = {
-					{ "TOPLEFT", nil, "TOPRIGHT", 2, -4, },
-				},
-				detail_size = { 328, 318, },
 			},
-			C_VariableName_NumSkillListButton = "CRAFTS_DISPLAYED",
 		},
 		Widget_AnchorTop = CraftFrameCloseButton,
 		Widget_AnchorLeftOfTabFrame = CraftRankFrameBorder,
 		Widget_PositionSkippedByInfoInFrame = CraftDescription,
 		T_HookedFrameWidgets = {
 			backup = {  },
-			C_SkillListButtonNamePrefix = "Craft",
-			C_SkillListButtonTemplate = "CraftButtonTemplate",
 			ProductionIcon = CraftIcon,
-			C_ReagentButtonNamePrefix = "CraftReagent",
 			T_HookedFrameButtons = {
 				CancelButton = CraftCancelButton,
 				CreateButton = CraftCreateButton,
@@ -5548,10 +6419,178 @@ local function LF_AddOnCallback_Blizzard_CraftUI(addon)
 				AvailableFilterCheckButton = CraftFrameAvailableFilterCheckButton,
 			},
 		},
+		T_WidgetsLayout = {
+			HookedPortrait = {
+				{ "TOPLEFT", TradeSkillFrame, "TOPLEFT", 7, -4, },
+			},
+			CancelButton = {
+				{ "TOPRIGHT", TradeSkillFrame, "TOPRIGHT", -42, -415, },
+			},
+			CloseButton = {
+				{ "CENTER", TradeSkillFrame, "TOPRIGHT", -51, -24, },
+			},
+			InputBoxLeft = {
+				{ "LEFT", TradeSearchInputBox, "LEFT", 0, 0, },
+			},
+			InputBox = {
+				{ "RIGHT", TradeSkillIncrementButton, "CENTER", -16, 0, },
+			},
+			IncrementButton = {
+				{ "CENTER", TradeSkillCreateButton, "LEFT", -16, 0, },
+			},
+			CollapseAllButton = {
+				{ "BOTTOMLEFT", TradeSkillListScrollFrame, "TOPLEFT", 0, 4, },
+			},
+			HookedRankFrame = {
+				{ "TOP", TradeSkillFrame, "TOP", 16, -42, },
+			},
+
+			ToggleButton = {
+				{ "RIGHT", TradeSkillFrameCloseButton, "LEFT", -2, 0, },
+			},
+			ExpandButton = {
+				{ "CENTER", "ThisFrame", "TOPRIGHT", 4, -358, },
+			},
+			ShrinkButton = {
+				{ "CENTER", "ThisFrame", "TOPRIGHT", 4, -358, },
+			},
+			Background = {
+				{ "TOPLEFT", TradeSkillFrame, "TOPLEFT", 11, -12, },
+				{ "BOTTOMRIGHT", TradeSkillFrame, "BOTTOMRIGHT", -32, 76, },
+			},
+			Background_BLZ = {
+				{ "TOPLEFT", TradeSkillFrame, "TOPLEFT", 11, -7, },
+				{ "BOTTOMRIGHT", TradeSkillFrame, "BOTTOMRIGHT", -29, 67, },
+			},
+			LineTop = {
+				{ "LEFT", TradeSkillFrame, "LEFT", 13, 0, },
+				{ "RIGHT", TradeSkillFrame, "RIGHT", -34, 0, },
+				{ "BOTTOM", TradeSkillFrame, "TOP", 0, -38, },
+			},
+			LineMiddle = {
+				{ "LEFT", TradeSkillFrame, "LEFT", 13, 0, },
+				{ "RIGHT", TradeSkillFrame, "RIGHT", -34, 0, },
+				{ "TOP", TradeSkillFrame, "TOP", 0, -61, },
+			},
+			LineBottom = {
+				{ "LEFT", TradeSkillFrame, "LEFT", 13, 0, },
+				{ "RIGHT", TradeSkillFrame, "RIGHT", -34, 0, },
+				{ "BOTTOM", TradeSkillDetailScrollFrame, "TOP", 0, 2, },
+			},
+			OverrideMinRankButton = {
+				{ "CENTER", TradeSkillRankFrame, "LEFT", -20, 0, },
+			},
+			OverrideMinRankSlider = {
+				{ "LEFT", TradeSkillRankFrame, "LEFT", 0, 0, },
+				{ "RIGHT", TradeSkillRankFrame:GetStatusBarTexture(), "RIGHT", 0, 0, },
+			},
+			RankOffsetButton = {
+				{ "CENTER", TradeSkillRankFrame, "RIGHT", 20, 0, },
+			},
+			RankOffsetSlider = {
+				{ "LEFT", TradeSkillRankFrame:GetStatusBarTexture(), "RIGHT", 0, 0, },
+				{ "RIGHT", TradeSkillRankFrame, "RIGHT", 0, 0, },
+			},
+			TabFrame = {
+				{ "LEFT", "ThisFrame", "LEFT", 60, 0, },
+				{ "BOTTOM", TradeSkillFrameCloseButton, "TOP", 0, 0, },
+			},
+			SearchEditBox = {
+				{ "TOPLEFT", "ThisFrame", "TOPLEFT", 6, -6, },
+			},
+			SearchEditBoxF = {
+				{ "TOPLEFT", "ThisFrame", "TOPLEFT", 18, -6, },
+			},
+			SearchEditBoxNameOnly = {
+				{ "TOPRIGHT", "ThisFrame", "TOPRIGHT", -68, -7, },
+			},
+			HaveMaterialsCheck = {
+				{ "CENTER", "ThisFrame", "TOPRIGHT", -54, -14, },
+			},
+			ProfitToggleButton = {
+				{ "TOPRIGHT", "ThisFrame", "TOPRIGHT", -24, -6, },
+			},
+			ProfitFrame = {
+				{ "TOPLEFT", TradeSkillFrame, "TOPRIGHT", -30, -76, },
+			},
+			SetToggleButton = {
+				{ "TOPRIGHT", "ThisFrame", "TOPRIGHT", -4, -6, },
+			},
+			RankInfoInFrame = {
+				{ "TOPLEFT", TradeSkillDetailScrollChildFrame, "TOPLEFT", 5, -50, },
+			},
+			HistoryFrame = {
+				{ "TOPRIGHT", TradeSkillDetailScrollFrame, "TOPRIGHT", 4, -2, },
+			},
+			QueueToggleButton = {
+				{ "TOP", TradeSkillCancelButton, "BOTTOM", 0, -4, },
+			},
+		},
 		T_ToggleOnSkill = {
 			CraftFramePointsLabel,
 			CraftFramePointsText,
 		},
+		TF_RunFirst = function(Frame)
+		end,
+		F_GetNumSkillListButtons = function() return _G.CRAFTS_DISPLAYED end;
+		F_SetNumSkillListButtons = function(displayed) _G.TRADE_SKILLS_DISPLAYED = displayed; end,
+		TF_InitSkillListButtons = function(Frame)
+			local T_SkillListButtons = {  };
+			Frame.T_SkillListButtons = T_SkillListButtons;
+			local NumDisplayed = Frame.F_GetNumSkillListButtons();
+			for index = 1, NumDisplayed do
+				T_SkillListButtons[index] = _G["Craft" .. index];
+			end
+			for index = NumDisplayed + 1, T_StyleLayout.expand.scroll_button_num do
+				local name = "Craft" .. index;
+				local Button = _G[name] or CreateFrame('BUTTON', name, Frame.HookedFrame, "CraftButtonTemplate");
+				Button:SetPoint("TOPLEFT", T_SkillListButtons[index - 1], "BOTTOMLEFT", 0, 0);
+				Button:Hide();
+				T_SkillListButtons[index] = Button;
+			end
+			T_SkillListButtons[1]:ClearAllPoints();
+			T_SkillListButtons[1]:SetPoint("TOPLEFT", meta.HookedListFrame);
+			local FrameLevel = meta.HookedListFrame:GetFrameLevel() + 2;
+			for index = 1, #T_SkillListButtons do
+				local Button = T_SkillListButtons[index];
+				Button:SetScript("OnEnter", LT_WidgetMethod.BLZSkillListButton_OnEnter);
+				Button:SetScript("OnLeave", LT_SharedMethod.SkillListButton_OnLeave);
+				Button:SetID(index);
+				Button:SetFrameLevel(FrameLevel);
+				Button.Frame = Frame;
+				Button.ScrollFrame = meta.HookedListFrame;
+			end
+			return T_SkillListButtons;
+		end,
+		TF_RefreshSkillListButtons = function(Frame) end,
+		TF_HideAdditionalSkillListButtons = function(Frame, expanded)
+			local layout = Frame.T_StyleLayout[expanded and 'expand' or 'normal'];
+			local pref = Frame.T_HookedFrameWidgets.C_SkillListButtonNamePrefix;
+			local index = layout.scroll_button_num + 1;
+			while true do
+				local Skill = _G["Craft" .. index];
+				if Skill == nil then
+					return;
+				end
+				Skill:Hide();
+				Frame.T_SkillListButtons[index] = Frame.T_SkillListButtons[index] or Skill;
+				index = index + 1;
+			end
+		end,
+		TF_HookReagentButtons = function(Frame)
+			local T_ReagentButtons = {  };
+			Frame.T_ReagentButtons = T_ReagentButtons;
+			for index = 1, 8 do
+				local Button = _G["CraftReagent" .. index];
+				T_ReagentButtons[index] = Button;
+				Button.Frame = Frame;
+				Button:HookScript("OnClick", LT_WidgetMethod.ReagentButton__OnClick);
+			end
+			return T_ReagentButtons;
+		end,
+		TF_CheckReagentButtons = function(Frame) end,
+
+		F_NewContext = function() end,
 
 		-- expand = ExpandCraftSkillLine,
 		-- collapse = CollapseCraftSkillLine,
@@ -5577,6 +6616,11 @@ local function LF_AddOnCallback_Blizzard_CraftUI(addon)
 		F_CloseSkill = CloseCraft,
 		F_SetSelection = CraftFrame_SetSelection,		-- SelectCraft
 		F_GetSelection = GetCraftSelectionIndex,
+        F_GetSelectionSID = function()
+			local pid = meta.F_GetPID();
+			local sel = meta.F_GetSelection();
+            return meta.F_GetRecipeSpellID(pid, sel);
+        end,
 
 		F_GetPID = function()
 			for index = 1, GetNumCrafts() do
@@ -5755,7 +6799,9 @@ local function LF_AddOnCallback_Blizzard_CraftUI(addon)
 			return self[event](...);
 		end);
 		function EventDriver.TRADE_CLOSED()
-			Frame.SearchEditBox:SetText("");
+			if Frame.flag == 10 then
+				Frame.SearchEditBox:SetText("");
+			end
 		end
 		function EventDriver.TRADE_TARGET_ITEM_CHANGED(_1)
 			if _1 == 7 then
@@ -6979,13 +8025,13 @@ end
 		local backup = nil;
 		Button.func = function()
 			local r, g, b = ColorPickerFrame:GetColorRGB();
-			local a = 1.0 - OpacitySliderFrame:GetValue();
+			local a = 1.0 - ColorPickerFrame:GetColorAlpha();
 			OnColor(r, g, b, a);
 			-- ColorPickerFrame.Alpha.bg:SetVertexColor(r, g, b);
 		end
 		Button.opacityFunc = function()
 			local r, g, b = ColorPickerFrame:GetColorRGB();
-			local a = 1.0 - OpacitySliderFrame:GetValue();
+			local a = 1.0 - ColorPickerFrame:GetColorAlpha(); -- OpacitySliderFrame:GetValue()
 			OnColor(r, g, b, a);
 		end
 		Button.cancelFunc = function()
@@ -6997,20 +8043,35 @@ end
 		Button:SetScript("OnClick", function(self)
 			backup = VT.SET[self.key];
 			-- ColorPickerFrame.Alpha:Show();
-			ColorPickerFrame.func = nil;
-			ColorPickerFrame.swatchFunc = nil;
-			ColorPickerFrame.cancelFunc = nil;
-			ColorPickerFrame:SetColorRGB(unpack(backup));
-			ColorPickerFrame.func = Button.func;
-			ColorPickerFrame.swatchFunc = Button.func;
-			ColorPickerFrame.hasOpacity = true;
-			ColorPickerFrame.opacityFunc = Button.opacityFunc;
-			ColorPickerFrame.opacity = 1.0 - backup[4];
-			-- ColorPickerFrame.previousValues = { r = backup[1], g = backup[2], b = backup[3], opacity = backup[4], };
-			ColorPickerFrame.cancelFunc = Button.cancelFunc;
-			ColorPickerFrame:ClearAllPoints();
-			ColorPickerFrame:SetPoint("TOPLEFT", Button, "BOTTOMRIGHT", 12, 12);
-			ColorPickerFrame:Show();
+			if ColorPickerFrame.SetupColorPickerAndShow then
+				local pickerInfo = {
+					r = backup[1],
+					g = backup[2],
+					b = backup[3],
+					hasOpacity = true,
+					opacity = 1.0 - backup[4],
+					swatchFunc = Button.func,
+					opacityFunc = Button.opacityFunc,
+					cancelFunc = Button.cancelFunc,
+				};
+				ColorPickerFrame:SetupColorPickerAndShow(pickerInfo);
+			else
+				-- ColorPickerFrame.Alpha:Show();
+				ColorPickerFrame.func = nil;
+				ColorPickerFrame.swatchFunc = nil;
+				ColorPickerFrame.cancelFunc = nil;
+				ColorPickerFrame:SetColorRGB(unpack(backup));
+				ColorPickerFrame.func = Button.func;
+				ColorPickerFrame.swatchFunc = Button.func;
+				ColorPickerFrame.hasOpacity = true;
+				ColorPickerFrame.opacityFunc = Button.opacityFunc;
+				ColorPickerFrame.opacity = 1.0 - backup[4];
+				-- ColorPickerFrame.previousValues = { r = backup[1], g = backup[2], b = backup[3], opacity = backup[4], };
+				ColorPickerFrame.cancelFunc = Button.cancelFunc;
+				ColorPickerFrame:ClearAllPoints();
+				ColorPickerFrame:SetPoint("TOPLEFT", Button, "BOTTOMRIGHT", 12, 12);
+				ColorPickerFrame:Show();
+			end
 		end);
 		function Button:SetVal(val)
 			valStr:SetColorTexture(val[1], val[2], val[3], val[4] or 1.0);
@@ -7143,31 +8204,39 @@ local function LF_CreateConfigFrame()
 			T_SetWidgets[key] = Slider;
 			px = px + 2;
 			h = max(h, 2);
+		elseif cmd[7] == 'color4' then
+			local color4 = LF_ConfigCreateColor4(Frame, key, l10n.SLASH_NOTE[key], cmd[8]);
+			color4:SetPoint("TOPLEFT", Frame, "TOPLEFT", 10 + 150 * px, -25 - 25 * py);
+			T_SetWidgets[key] = color4;
+			px = px + 1;
+			h = max(h, 1);
 		end
 		local extra_list = cmd[10];
 		if extra_list then
 			local father = T_SetWidgets[key];
-			local children_key = {  };
-			father.children_key = children_key;
-			for val, extra in next, extra_list do
-				local exkey = extra[3];
-				children_key[exkey] = val;
-				if extra[7] == 'bool' then
-					local CheckButton = LF_ConfigCreateCheckButton(Frame, exkey, l10n.SLASH_NOTE[exkey], extra[8]);
-					CheckButton:SetPoint("LEFT", father.Right, "RIGHT", 20, 0);
-					T_SetWidgets[exkey] = CheckButton;
-				elseif extra[7] == 'drop' then
-					local Dropdown = LF_ConfigCreateDrop(Frame, exkey, l10n.SLASH_NOTE[exkey], extra[8]);
-					Dropdown:SetPoint("LEFT", father.Right, "RIGHT", 20, 0);
-					T_SetWidgets[exkey] = Dropdown;
-				elseif extra[7] == 'slider' then
-					local Slider = LF_ConfigCreateSlider(Frame, exkey, l10n.SLASH_NOTE[exkey], extra[9][1], extra[9][2], extra[9][3], extra[8]);
-					Slider:SetPoint("LEFT", father.Right, "RIGHT", 20, 0);
-					T_SetWidgets[exkey] = Slider;
-				elseif extra[7] == 'color4' then
-					local color4 = LF_ConfigCreateColor4(Frame, exkey, l10n.SLASH_NOTE[exkey], extra[8]);
-					color4:SetPoint("LEFT", father.Right, "RIGHT", 40, 0);
-					T_SetWidgets[exkey] = color4;
+			if father then
+				local children_key = {  };
+				father.children_key = children_key;
+				for val, extra in next, extra_list do
+					local exkey = extra[3];
+					children_key[exkey] = val;
+					if extra[7] == 'bool' then
+						local CheckButton = LF_ConfigCreateCheckButton(Frame, exkey, l10n.SLASH_NOTE[exkey], extra[8]);
+						CheckButton:SetPoint("LEFT", father.Right, "RIGHT", 20, 0);
+						T_SetWidgets[exkey] = CheckButton;
+					elseif extra[7] == 'drop' then
+						local Dropdown = LF_ConfigCreateDrop(Frame, exkey, l10n.SLASH_NOTE[exkey], extra[8]);
+						Dropdown:SetPoint("LEFT", father.Right, "RIGHT", 20, 0);
+						T_SetWidgets[exkey] = Dropdown;
+					elseif extra[7] == 'slider' then
+						local Slider = LF_ConfigCreateSlider(Frame, exkey, l10n.SLASH_NOTE[exkey], extra[9][1], extra[9][2], extra[9][3], extra[8]);
+						Slider:SetPoint("LEFT", father.Right, "RIGHT", 20, 0);
+						T_SetWidgets[exkey] = Slider;
+					elseif extra[7] == 'color4' then
+						local color4 = LF_ConfigCreateColor4(Frame, exkey, l10n.SLASH_NOTE[exkey], extra[8]);
+						color4:SetPoint("LEFT", father.Right, "RIGHT", 40, 0);
+						T_SetWidgets[exkey] = color4;
+					end
 				end
 			end
 		end
@@ -7288,6 +8357,11 @@ function MT.MarkSkillToUpdate(pid)
 	VT.SET[pid].update = true;
 end
 
+local ADDONLIST = {
+	"BLIZZARD_PROFESSIONS",
+	"BLIZZARD_TRADESKILLUI",
+	"BLIZZARD_CRAFTUI",
+};
 -->		external
 	function MT.ToggleFrame(key, val)
 		local Frame = VT.UIFrames[key];
@@ -7302,58 +8376,39 @@ end
 		end
 	end
 	function MT.ToggleFrameCall(val)
-		local TFrame = VT.UIFrames["BLIZZARD_TRADESKILLUI"];
-		if TFrame ~= nil then
-			if val then
-				TFrame.ToggleButton:Show();
-			else
-				TFrame.ToggleButton:Hide();
-			end
-		end
-		local CFrame = VT.UIFrames["BLIZZARD_CRAFTUI"];
-		if CFrame ~= nil then
-			if val then
-				CFrame.ToggleButton:Show();
-			else
-				CFrame.ToggleButton:Hide();
+		for _, ADDON in next, ADDONLIST do
+			local TFrame = VT.UIFrames[ADDON];
+			if TFrame ~= nil then
+				if val then
+					TFrame.ToggleButton:Show();
+				else
+					TFrame.ToggleButton:Hide();
+				end
 			end
 		end
 	end
 	function MT.ToggleFrameTab(val)
-		local TFrame = VT.UIFrames["BLIZZARD_TRADESKILLUI"];
-		if TFrame ~= nil then
-			if val then
-				TFrame.TabFrame:Show();
-			else
-				TFrame.TabFrame:Hide();
+		for _, ADDON in next, ADDONLIST do
+			local TFrame = VT.UIFrames[ADDON];
+			if TFrame ~= nil then
+				if val then
+					TFrame.TabFrame:Show();
+				else
+					TFrame.TabFrame:Hide();
+				end
+				TFrame:F_ShowSetFrame(false);
 			end
-			TFrame:F_ShowSetFrame(false);
-		end
-		local CFrame = VT.UIFrames["BLIZZARD_CRAFTUI"];
-		if CFrame ~= nil then
-			if val then
-				CFrame.TabFrame:Show();
-			else
-				CFrame.TabFrame:Hide();
-			end
-			CFrame:F_ShowSetFrame(false);
 		end
 	end
 	function MT.ToggleFramePortraitButton(val)
-		local TFrame = VT.UIFrames["BLIZZARD_TRADESKILLUI"];
-		if TFrame ~= nil then
-			if val then
-				TFrame.PortraitButton:Show();
-			else
-				TFrame.PortraitButton:Hide();
-			end
-		end
-		local CFrame = VT.UIFrames["BLIZZARD_CRAFTUI"];
-		if CFrame ~= nil then
-			if val then
-				CFrame.PortraitButton:Show();
-			else
-				CFrame.PortraitButton:Hide();
+		for _, ADDON in next, ADDONLIST do
+			local TFrame = VT.UIFrames[ADDON];
+			if TFrame ~= nil then
+				if val then
+					TFrame.PortraitButton:Show();
+				else
+					TFrame.PortraitButton:Hide();
+				end
 			end
 		end
 	end
@@ -7365,13 +8420,11 @@ end
 		end
 	end
 	function MT.UpdateAllFrames()
-		local TFrame = VT.UIFrames["BLIZZARD_TRADESKILLUI"];
-		if TFrame ~= nil then
-			TFrame:F_Update();
-		end
-		local CFrame = VT.UIFrames["BLIZZARD_CRAFTUI"];
-		if CFrame ~= nil then
-			CFrame:F_Update();
+		for _, ADDON in next, ADDONLIST do
+			local TFrame = VT.UIFrames[ADDON];
+			if TFrame ~= nil then
+				TFrame:F_Update();
+			end
 		end
 		local EFrame = VT.UIFrames["EXPLORER"];
 		if EFrame ~= nil then
@@ -7379,20 +8432,14 @@ end
 		end
 	end
 	function MT.RefreshAllFrames()
-		local TFrame = VT.UIFrames["BLIZZARD_TRADESKILLUI"];
-		if TFrame ~= nil then
-			TFrame.ScrollFrame:Update();
-			local ProfitFrame = TFrame.ProfitFrame;
-			if ProfitFrame ~= nil then
-				ProfitFrame.ScrollFrame:Update();
-			end
-		end
-		local CFrame = VT.UIFrames["BLIZZARD_CRAFTUI"];
-		if CFrame ~= nil then
-			CFrame.ScrollFrame:Update();
-			local ProfitFrame = CFrame.ProfitFrame;
-			if ProfitFrame ~= nil then
-				ProfitFrame.ScrollFrame:Update();
+		for _, ADDON in next, ADDONLIST do
+			local TFrame = VT.UIFrames[ADDON];
+			if TFrame ~= nil then
+				TFrame.ScrollFrame:Update();
+				local ProfitFrame = TFrame.ProfitFrame;
+				if ProfitFrame ~= nil then
+					ProfitFrame.ScrollFrame:Update();
+				end
 			end
 		end
 		local EFrame = VT.UIFrames["EXPLORER"];
@@ -7405,13 +8452,11 @@ end
 		end
 	end
 	function MT.RefreshFramesStyle(loading)
-		local TFrame = VT.UIFrames["BLIZZARD_TRADESKILLUI"];
-		if TFrame ~= nil then
-			TFrame:F_SetStyle(VT.SET.blz_style, loading);
-		end
-		local CFrame = VT.UIFrames["BLIZZARD_CRAFTUI"];
-		if CFrame ~= nil then
-			CFrame:F_SetStyle(VT.SET.blz_style, loading);
+		for _, ADDON in next, ADDONLIST do
+			local TFrame = VT.UIFrames[ADDON];
+			if TFrame ~= nil then
+				TFrame:F_SetStyle(VT.SET.blz_style, loading);
+			end
 		end
 		local EFrame = VT.UIFrames["EXPLORER"];
 		if EFrame ~= nil then
@@ -7426,70 +8471,59 @@ end
 		VT.UIFrames["CONFIG"]:F_Refresh();
 	end
 	function MT.ToggleFrameExpand(val)
-		local TFrame = VT.UIFrames["BLIZZARD_TRADESKILLUI"];
-		if TFrame ~= nil then
-			TFrame:F_Expand(val);
-		end
-		local CFrame = VT.UIFrames["BLIZZARD_CRAFTUI"];
-		if CFrame ~= nil then
-			CFrame:F_Expand(val);
+		for _, ADDON in next, ADDONLIST do
+			local TFrame = VT.UIFrames[ADDON];
+			if TFrame ~= nil then
+				TFrame:F_Expand(val);
+			end
 		end
 	end
 	function MT.FrameFixSkillList()
-		local TFrame = VT.UIFrames["BLIZZARD_TRADESKILLUI"];
-		if TFrame ~= nil then
-			TFrame:F_FixSkillList(VT.SET.expand);
+		if CT.ISMORDERNUI then
+			return;
 		end
-		local CFrame = VT.UIFrames["BLIZZARD_CRAFTUI"];
-		if CFrame ~= nil then
-			CFrame:F_FixSkillList(VT.SET.expand);
+		for _, ADDON in next, ADDONLIST do
+			local TFrame = VT.UIFrames[ADDON];
+			if TFrame ~= nil then
+				TFrame:TF_HideAdditionalSkillListButtons(VT.SET.expand);
+			end
 		end
 	end
 	function MT.ToggleFrameRankInfo(val)
-		local TFrame = VT.UIFrames["BLIZZARD_TRADESKILLUI"];
-		if TFrame ~= nil then
-			TFrame:F_UpdateRankInfo();
-		end
-		local CFrame = VT.UIFrames["BLIZZARD_CRAFTUI"];
-		if CFrame ~= nil then
-			CFrame:F_UpdateRankInfo();
+		for _, ADDON in next, ADDONLIST do
+			local TFrame = VT.UIFrames[ADDON];
+			if TFrame ~= nil then
+				TFrame:F_UpdateRankInfo();
+			end
 		end
 	end
 	function MT.ToggleFramePriceInfo(val)
-		local TFrame = VT.UIFrames["BLIZZARD_TRADESKILLUI"];
-		if TFrame ~= nil then
-			TFrame:F_UpdatePriceInfo();
-		end
-		local CFrame = VT.UIFrames["BLIZZARD_CRAFTUI"];
-		if CFrame ~= nil then
-			CFrame:F_UpdatePriceInfo();
+		for _, ADDON in next, ADDONLIST do
+			local TFrame = VT.UIFrames[ADDON];
+			if TFrame ~= nil then
+				TFrame:F_UpdatePriceInfo();
+			end
 		end
 	end
 	function MT.ToggleQueueButton(val)
-		local TFrame = VT.UIFrames["BLIZZARD_TRADESKILLUI"];
-		local CFrame = VT.UIFrames["BLIZZARD_CRAFTUI"];
-		local QFrame = VT.UIFrames["QUEUE"];
 		if val then
-			if TFrame ~= nil and TFrame.IsQueueEnabled then
-				TFrame.QueueToggleButton:Show();
-				if VT.SET.show_queue and TFrame:IsShown() then
-					TFrame:F_ShowQueueFrame(true);
-				end
-			end
-			if CFrame ~= nil and CFrame.IsQueueEnabled then
-				CFrame.QueueToggleButton:Show();
-				if VT.SET.show_queue and CFrame:IsShown() then
-					CFrame:F_ShowQueueFrame(true);
+			for _, ADDON in next, ADDONLIST do
+				local TFrame = VT.UIFrames[ADDON];
+				if TFrame ~= nil and TFrame.IsQueueEnabled then
+					TFrame.QueueToggleButton:Show();
+					if VT.SET.show_queue and TFrame:IsShown() then
+						TFrame:F_ShowQueueFrame(true);
+					end
 				end
 			end
 		else
-			if TFrame ~= nil and TFrame.IsQueueEnabled then
-				TFrame.QueueToggleButton:Hide();
+			for _, ADDON in next, ADDONLIST do
+				local TFrame = VT.UIFrames[ADDON];
+				if TFrame ~= nil and TFrame.IsQueueEnabled then
+					TFrame.QueueToggleButton:Hide();
+				end
 			end
-			if CFrame ~= nil and CFrame.IsQueueEnabled then
-				CFrame.QueueToggleButton:Hide();
-			end
-			QFrame:Hide();
+			VT.UIFrames["QUEUE"]:Hide();
 		end
 	end
 -->
@@ -7529,15 +8563,12 @@ function F.SKILL_LINES_CHANGED_Alt()
 			end
 		end
 	end
-	local TFrame = VT.UIFrames.BLIZZARD_TRADESKILLUI;
-	local CFrame = VT.UIFrames.BLIZZARD_CRAFTUI;
-	if TFrame then
-		TFrame.TabFrame:F_Update();
-		TFrame.PortraitButton:F_Update();
-	end
-	if CFrame then
-		CFrame.TabFrame:F_Update();
-		CFrame.PortraitButton:F_Update();
+	for _, ADDON in next, ADDONLIST do
+		local TFrame = VT.UIFrames[ADDON];
+		if TFrame ~= nil then
+			TFrame.TabFrame:F_Update();
+			TFrame.PortraitButton:F_Update();
+		end
 	end
 end
 function F.SKILL_LINES_CHANGED()	--	Donot process at the first trigger. Do it after 1sec.
@@ -7605,8 +8636,12 @@ MT.RegisterOnInit('ui', function(LoggedIn)
 		end
 	end);
 	MT.AddCallback("USER_EVENT_RECIPE_LIST_UPDATE", MT.UpdateAllFrames);
-	MT.RegisterOnAddOnLoaded("BLIZZARD_TRADESKILLUI", LF_AddOnCallback_Blizzard_TradeSkillUI);
-	if not CT.VG3X then
-		MT.RegisterOnAddOnLoaded("BLIZZARD_CRAFTUI", LF_AddOnCallback_Blizzard_CraftUI);
+	if CT.ISMORDERNUI then
+		MT.RegisterOnAddOnLoaded("BLIZZARD_PROFESSIONS", LF_AddOnCallback_Blizzard_Professions);
+	else
+		MT.RegisterOnAddOnLoaded("BLIZZARD_TRADESKILLUI", LF_AddOnCallback_Blizzard_TradeSkillUI);
+		if not CT.VG3X then
+			MT.RegisterOnAddOnLoaded("BLIZZARD_CRAFTUI", LF_AddOnCallback_Blizzard_CraftUI);
+		end
 	end
 end);

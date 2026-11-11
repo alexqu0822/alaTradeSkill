@@ -209,6 +209,7 @@ local DT = {  }; __private.DT = DT;		--	data
 	CT.CLIENTVERSION, CT.BUILDNUMBER, CT.BUILDDATE, CT.TOCVERSION = GetBuildInfo();
 	CT.ISCLASSIC = CT.TOCVERSION >= 11400 and CT.TOCVERSION < 20000;
 	CT.SEASON = C_Seasons and C_Seasons.HasActiveSeason() and C_Seasons.GetActiveSeason() or nil;
+	CT.FOREVER = CT.TOCVERSION >= 16000 and CT.TOCVERSION < 20000;
 	--[=[
 		--	Enum.SeasonID
 		0 = Enum.SeasonID.NoSeason
@@ -230,6 +231,7 @@ local DT = {  }; __private.DT = DT;		--	data
 	CT.VLE5X = CT.ISCLASSIC or CT.ISBCC or CT.ISWLK or CT.ISCATA;
 	CT.VGE2XLE5X = CT.ISBCC or CT.ISWLK or CT.ISCATA;
 	CT.ISRETAIL = CT.TOCVERSION >= 90000;
+	CT.ISMORDERNUI = CT.FOREVER or CT.ISRETAIL;
 	CT.LOCALE = GetLocale();
 	CT.BNTAG = select(2, BNGetInfo());
 	CT.SELFREALM = GetRealmName();
@@ -296,6 +298,12 @@ local DT = {  }; __private.DT = DT;		--	data
 		['medium'] = 2,
 		['easy'] = 3,
 		['trivial'] = 4,
+		-- forever
+		[-1] = 0,
+		[0] = 1,
+		[1] = 2,
+		[2] = 3,
+		[3] = 4,
 	};
 
 -->		control

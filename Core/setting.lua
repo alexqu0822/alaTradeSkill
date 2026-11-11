@@ -359,7 +359,7 @@ do	--	SLASH
 	--	1type, 2pattern, 3key, 4note(string or func), 5proc_func(key, val), 6func_to_mod_val, 7config_type(nil for check), 8cmd_for_config / drop_meta, 9para[slider:{min, max, step}], 10sub_config_on_val
 	VT.SetCommandList = {
 		{	--	expand
-			'bool',
+			CT.ISMORDERNUI and 'ignore' or 'bool',
 			"^expand" .. SEPARATOR .. "(.*)" .. SEPARATOR .. "$",
 			"expand",
 			l10n.SLASH_NOTE["expand"],
@@ -373,7 +373,7 @@ do	--	SLASH
 			end,
 		},
 		{	--	blz_style
-			'bool',
+			CT.ISMORDERNUI and 'ignore' or 'bool',
 			"^blz" .. SEPARATOR .. "style" .. SEPARATOR .. "(.*)" .. SEPARATOR .. "$",
 			"blz_style",
 			l10n.SLASH_NOTE["blz_style"],
@@ -398,6 +398,17 @@ do	--	SLASH
 					end,
 				},
 			},
+		},
+		{	--	bg_color
+			CT.ISMORDERNUI and 'table' or 'ignore',
+			"^$",
+			'bg_color',
+			l10n.SLASH_NOTE["bg_color"],
+			[7] = 'color4',
+			[8] = function(r, g, b, a)
+				VT.SET.bg_color = { r or 1.0, g or 1.0, b or 1.0, a or 1.0, };
+				MT.OnSettingChanged('bg_color', VT.SET.bg_color);
+			end,
 		},
 		{	--	show_tradeskill_frame_price_info
 			'bool',

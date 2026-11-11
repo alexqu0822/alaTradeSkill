@@ -2,7 +2,7 @@
 	by ALA
 --]]--
 
-local __version = 251107;
+local __version = 261108;
 
 local _G = _G;
 _G.__ala_meta__ = _G.__ala_meta__ or {  };
@@ -49,13 +49,16 @@ end
 	local UnitInBattleground = UnitInBattleground;
 	local GetNumTalentGroups = GetNumTalentGroups or function() return 1; end
 	local GetActiveTalentGroup = GetActiveTalentGroup or function() return 1; end
-	local _GetNumTalentGroups = nil;
-	local _GetActiveTalentGroup = nil;
 	local GetNumTalentTabs, GetNumTalents, GetTalentInfo = GetNumTalentTabs, GetNumTalents, GetTalentInfo;
 	local GetNumGlyphSockets, GetGlyphSocketInfo = GetNumGlyphSockets, GetGlyphSocketInfo;
 	local GetInventoryItemLink = GetInventoryItemLink;
-	local GetItemInfo = GetItemInfo;
-	local GetSpellInfo = GetSpellInfo;
+	local GetItemInfo = GetItemInfo or C_Item.GetItemInfo;
+	local GetSpellInfo = GetSpellInfo or function(id)
+		local info = C_Spell.GetSpellInfo(id)
+		if info then
+			return info.name, nil, info.iconID, info.castTime, info.minRange, info.maxRange, info.spellID, info.originalIconID;
+		end
+	end;
 	local GetAddOnInfo, IsAddOnLoaded, GetAddOnEnableState;
 	local C_AddOns = C_AddOns;
 	local _GetAddOnEnableState = _G.GetAddOnEnableState;
@@ -121,6 +124,7 @@ end
 	local SELFCLASSINDEX = __classHash[SELFCLASS];
 	--
 	local CLIENT_MAJOR = floor(TOC_VERSION / 10000);
+	local CLIENT_FOREVER = TOC_VERSION >= 16000 and TOC_VERSION < 20000;
 	local LIB_MAJOR = 2;
 	local SUPPORT_GEM = CLIENT_MAJOR >= 2;
 	local SUPPORT_GLYPH = CLIENT_MAJOR >= 3 and CLIENT_MAJOR <= 6 or false;
@@ -277,8 +281,8 @@ end
 -->		Definition & Notes
 	local Private = {  };
 	--[[
-		numGroup = _GetNumTalentGroups(inspect, pet);
-		activeGroup = _GetActiveTalentGroup(inspect, pet);
+		numGroup = Private.GetNumTalentGroups(inspect, pet);
+		activeGroup = Private.GetActiveTalentGroup(inspect, pet);
 		NumSpecs = GetNumTalentTabs(inspect);
 		NumTalents = GetNumTalents(SpecIndex, inspect);
 		name, iconTexture, tier, column, rank, maxRank, isExceptional, available = GetTalentInfo(SpecIndex, TalentIndex, inspect, pet, group);
@@ -418,148 +422,274 @@ end
 		return class;
 	end
 if CLIENT_MAJOR < 5 then
-	_GetNumTalentGroups = GetNumTalentGroups;
-	_GetActiveTalentGroup = GetActiveTalentGroup;
-	local _TalentMap = {  };
-	function Private._GenerateTalentMap(class, inspect)
-		if not inspect and class ~= SELFCLASS then
-			__emulib.Debug("_GenerateTalentMap", "not inspect and class ~= SELFCLASS", class, inspect, SELFCLASS);
-			return nil;
+	if CLIENT_FOREVER then
+		local MAX_NUM_TIER = 7;
+		local C_SpecializationInfo = C_SpecializationInfo;
+		local C_ClassTalents = C_ClassTalents;
+		local C_Traits = C_Traits;
+		local sort = table.sort;
+		Private.GetNumTalentGroups = GetNumSpecGroups;
+		Private.GetActiveTalentGroup = C_SpecializationInfo.GetActiveSpecGroup;
+		function Private.PeriodicGeneratePlayerTalentMap()
 		end
-		local Map = _TalentMap[class];
-		if Map == nil or Map.initialized == nil then
-			Map = { PMap = {  }, VMap = {  }, RMap = {  }, };
-			_TalentMap[class] = Map;
+		function __emulib.GetTalentMap(class)
 		end
-		local PMap = Map.PMap;
-		local MaxTier = -1;
-		local NumSpecs = GetNumTalentTabs(inspect);
-		for SpecIndex = 1, NumSpecs do
-			local NumTalents = GetNumTalents(SpecIndex, inspect);
-			if NumTalents == nil then
-				__emulib.Debug("_GenerateTalentMap", "NumTalents == nil", class, inspect, SpecIndex);
+		function __emulib.INSPECT_READY(GUID)
+		end
+		-- /run local spec = C_SpecializationInfo.GetSpecialization(); local specID = C_SpecializationInfo.GetSpecializationInfo(spec); local treeID = C_ClassTalents.GetTraitTreeForSpec(specID); print(spec, specID, treeID)
+		--[=[
+			法师		1482	1112
+			德鲁伊		1484	1089
+			猎人		1485	1091
+			圣骑士		1486	1100
+			牧师		1487	1114
+			潜行者		1488	1111
+			萨满		1489	1082
+			术士		1490	1116
+			战士		1491	1117
+			默认		1493	nil
+		--]=]
+		-- 虽然语法上有isInspect字段，但实际只能读取自己的信息
+		-- group = C_SpecializationInfo.GetActiveSpecGroup(isInspect, isPet)
+		-- specIndex = C_SpecializationInfo.GetSpecialization(isInspect, isPet, group)
+		-- C_SpecializationInfo.GetSpecializationInfo(specIndex, isInspect, isPet, inspectTarget, sex, group, classID)
+		--C_Traits.GetConfigInfo(C_ClassTalents.GetActiveConfigID())
+		--local configID = C_Traits.GetConfigIDByTreeID(traitTreeID);
+		function __emulib.GetTalentData(class, inspect, group)
+			if not inspect then
+				local configID = C_ClassTalents.GetActiveConfigID();
+				local specIndex = C_SpecializationInfo.GetSpecialization(false, false, group);
+				if specIndex then
+					local specID = C_SpecializationInfo.GetSpecializationInfo(specIndex);
+					local treeID = C_ClassTalents.GetTraitTreeForSpec(specID);
+					if treeID then
+						local nodeIDs = C_Traits.GetTreeNodes(treeID);
+						local Ds = {};
+						local Xr = {};
+						local Yr = {};
+						do
+							local Xs = {};
+							local Ys = {};
+							local f = false;
+							for i = 1, #nodeIDs do
+								local nodeID = nodeIDs[i];
+								local nodeInfo = C_Traits.GetNodeInfo(configID, nodeID);
+								if nodeInfo and nodeInfo.isVisible then
+									Ds[#Ds + 1] = nodeInfo;
+									local X = nodeInfo.posX;
+									local Y = nodeInfo.posY;
+									-- DB2中的合法数据以600为间隔
+									f = false;
+									for j = 1, #Xs do
+										local x = Xs[j];
+										if X > x - 100 and X < x + 100 then
+											nodeInfo.posX = x;
+											f = true;
+											break;
+										end
+									end
+									if not f then
+										Xs[#Xs + 1] = X;
+									end
+									f = false;
+									for j = 1, #Ys do
+										local y = Ys[j];
+										if Y > y - 100 and Y < y + 100 then
+											nodeInfo.posY = y;
+											f = true;
+											break;
+										end
+									end
+									if not f then
+										Ys[#Ys + 1] = Y;
+									end
+								end
+							end
+							sort(Xs);
+							sort(Ys);
+							for i = 1, #Xs do
+								Xr[Xs[i]] = i;
+							end
+							for i = 1, #Ys do
+								Yr[Ys[i]] = i;
+							end
+						end
+						local T = { {}, {}, {}, };
+						for i = 1, #Ds do
+							local nodeInfo = Ds[i];
+							-- .ranksPurchased	当前实际应用的点数
+							-- .activeRank		该天赋当前已点（预览）的等级
+							-- .currentRank
+							-- .maxRanks		该天赋的最大等级
+							-- .totalMaxRanks
+							-- .entryIDs		如果是选择节点，这里是可选项的ID列表
+							-- .subTreeID
+							local x = Xr[nodeInfo.posX];
+							local y = Yr[nodeInfo.posY];
+							local v = 1 + (x - 1) % 4;
+							local t = 1 + (x - v) / 4;
+							T[t][v + (y - 1) * 4] = nodeInfo.ranksPurchased;
+						end
+						local data = "";
+						local len = 0;
+						for i = 1, 3 do
+							local t = T[i];
+							for j = 1, MAX_NUM_TIER * 4 do
+								if t[j] then
+									data = data .. t[j];
+									len = len + 1;
+								end
+							end
+						end
+						return data, len;
+					end
+				end
+			end
+		end
+	else
+		Private.GetNumTalentGroups = GetNumTalentGroups;
+		Private.GetActiveTalentGroup = GetActiveTalentGroup;
+		local _TalentMap = {  };
+		function Private._GenerateTalentMap(class, inspect)
+			if not inspect and class ~= SELFCLASS then
+				__emulib.Debug("_GenerateTalentMap", "not inspect and class ~= SELFCLASS", class, inspect, SELFCLASS);
 				return nil;
 			end
-			local PM = {  };
-			PMap[SpecIndex] = PM;
-			for TalentIndex = 1, NumTalents do
-				local name, iconTexture, tier, column, rank, maxRank, isExceptional, available = GetTalentInfo(SpecIndex, TalentIndex, inspect);
-				if maxRank == nil then
-					__emulib.Debug("_GenerateTalentMap", "maxRank == nil", class, inspect, SpecIndex, TalentIndex, name, tier, column, rank, maxRank);
+			local Map = _TalentMap[class];
+			if Map == nil or Map.initialized == nil then
+				Map = { PMap = {  }, VMap = {  }, RMap = {  }, };
+				_TalentMap[class] = Map;
+			end
+			local PMap = Map.PMap;
+			local MaxTier = -1;
+			local NumSpecs = GetNumTalentTabs(inspect);
+			for SpecIndex = 1, NumSpecs do
+				local NumTalents = GetNumTalents(SpecIndex, inspect);
+				if NumTalents == nil then
+					__emulib.Debug("_GenerateTalentMap", "NumTalents == nil", class, inspect, SpecIndex);
 					return nil;
 				end
-				if tier == nil or maxRank == 0 then
-					PM["NIL"] = PM["NIL"] or {  };
-					PM["NIL"][column] = TalentIndex;
-				else
-					MaxTier = (tier > MaxTier) and tier or MaxTier;
-					PM[tier] = PM[tier] or {  };
-					PM[tier][column] = TalentIndex;
-				end
-			end
-		end
-		local VMap = Map.VMap;
-		local RMap = Map.RMap;
-		for SpecIndex = 1, NumSpecs do
-			local PM = PMap[SpecIndex];
-			local VM = {  };
-			local RM = {  };
-			local TalentSeq = 0;
-			VMap[SpecIndex] = VM;
-			RMap[SpecIndex] = RM;
-			for tier = 1, MaxTier do
-				local R = PM[tier];
-				if R ~= nil then
-					for col = 1, 4 do
-						local TalentIndex = R[col];
-						if TalentIndex ~= nil then
-							TalentSeq = TalentSeq + 1;
-							VM[TalentSeq] = TalentIndex;
-							RM[TalentIndex] = TalentSeq;
-						end
+				local PM = {  };
+				PMap[SpecIndex] = PM;
+				for TalentIndex = 1, NumTalents do
+					local name, iconTexture, tier, column, rank, maxRank, isExceptional, available = GetTalentInfo(SpecIndex, TalentIndex, inspect);
+					if maxRank == nil then
+						__emulib.Debug("_GenerateTalentMap", "maxRank == nil", class, inspect, SpecIndex, TalentIndex, name, tier, column, rank, maxRank);
+						return nil;
+					end
+					if tier == nil or maxRank == 0 then
+						PM["NIL"] = PM["NIL"] or {  };
+						PM["NIL"][column] = TalentIndex;
+					else
+						MaxTier = (tier > MaxTier) and tier or MaxTier;
+						PM[tier] = PM[tier] or {  };
+						PM[tier][column] = TalentIndex;
 					end
 				end
 			end
-			--	WTF FUCK BLZZ. MAGE Tab1 799 Arcane 实际21个天赋，API获取22个，第22个为nil
-			if PM["NIL"] ~= nil then
-				local R = PM["NIL"];
-					for col = 1, 4 do
-						local TalentIndex = R[col];
-						if TalentIndex ~= nil then
-							TalentSeq = TalentSeq + 1;
-							VM[TalentSeq] = TalentIndex;
-							RM[TalentIndex] = TalentSeq;
+			local VMap = Map.VMap;
+			local RMap = Map.RMap;
+			for SpecIndex = 1, NumSpecs do
+				local PM = PMap[SpecIndex];
+				local VM = {  };
+				local RM = {  };
+				local TalentSeq = 0;
+				VMap[SpecIndex] = VM;
+				RMap[SpecIndex] = RM;
+				for tier = 1, MaxTier do
+					local R = PM[tier];
+					if R ~= nil then
+						for col = 1, 4 do
+							local TalentIndex = R[col];
+							if TalentIndex ~= nil then
+								TalentSeq = TalentSeq + 1;
+								VM[TalentSeq] = TalentIndex;
+								RM[TalentIndex] = TalentSeq;
+							end
 						end
 					end
+				end
+				--	WTF FUCK BLZZ. MAGE Tab1 799 Arcane 实际21个天赋，API获取22个，第22个为nil
+				if PM["NIL"] ~= nil then
+					local R = PM["NIL"];
+						for col = 1, 4 do
+							local TalentIndex = R[col];
+							if TalentIndex ~= nil then
+								TalentSeq = TalentSeq + 1;
+								VM[TalentSeq] = TalentIndex;
+								RM[TalentIndex] = TalentSeq;
+							end
+						end
+				end
+			end
+			Map.initialized = true;
+			return Map;
+		end
+		function Private.PeriodicGeneratePlayerTalentMap()
+			if Private._GenerateTalentMap(SELFCLASS, false) == nil then
+				After(1.0, Private.PeriodicGeneratePlayerTalentMap);
 			end
 		end
-		Map.initialized = true;
-		return Map;
-	end
-	function Private.PeriodicGeneratePlayerTalentMap()
-		if Private._GenerateTalentMap(SELFCLASS, false) == nil then
-			After(1.0, Private.PeriodicGeneratePlayerTalentMap);
+		function __emulib.INSPECT_READY(GUID)
+			local locClass, class, locRace, race, sex, name, realm = GetPlayerInfoByGUID(GUID);
+			-- __emulib.Debug("INSPECT_READY", GUID, class);
+			if class ~= nil then
+				Private._GenerateTalentMap(class, true);
+			end
 		end
-	end
-	function __emulib.INSPECT_READY(GUID)
-		local locClass, class, locRace, race, sex, name, realm = GetPlayerInfoByGUID(GUID);
-		-- __emulib.Debug("INSPECT_READY", GUID, class);
-		if class ~= nil then
-			Private._GenerateTalentMap(class, true);
+		function __emulib.GetTalentMap(class)
+			local Map = _TalentMap[class];
+			if Map == nil and class == SELFCLASS then
+				return Private._GenerateTalentMap(class, false);
+			end
+			return Map;
 		end
-	end
-	function __emulib.GetTalentMap(class)
-		local Map = _TalentMap[class];
-		if Map == nil and class == SELFCLASS then
-			return Private._GenerateTalentMap(class, false);
-		end
-		return Map;
-	end
-	--	return 			UPPER_CLASS, data, level
-	function __emulib.GetTalentData(class, inspect, group)
-		local Map = __emulib.GetTalentMap(class);
-		if Map == nil then
-			__emulib.Debug("GetTalentData", "Map == nil", class);
-			return nil, 0;
-		end
-		local VMap = Map.VMap;
-		local data = "";
-		local len = 0;
-		local NumSpecs = GetNumTalentTabs(inspect);
-		if NumSpecs == nil then
-			__emulib.Debug("GetTalentData", "NumSpecs == nil", inspect, class);
-			return nil, 0;
-		end
-		for SpecIndex = 1, NumSpecs do
-			local VM = VMap[SpecIndex];
-			if VM == nil then
+		--	return 			UPPER_CLASS, data, level
+		function __emulib.GetTalentData(class, inspect, group)
+			local Map = __emulib.GetTalentMap(class);
+			if Map == nil then
+				__emulib.Debug("GetTalentData", "Map == nil", class);
 				return nil, 0;
 			end
-			local NumTalents = GetNumTalents(SpecIndex, inspect);
-			if NumTalents == nil then
-				__emulib.Debug("GetTalentData", "NumTalents == nil", NumSpecs, inspect, class);
+			local VMap = Map.VMap;
+			local data = "";
+			local len = 0;
+			local NumSpecs = GetNumTalentTabs(inspect);
+			if NumSpecs == nil then
+				__emulib.Debug("GetTalentData", "NumSpecs == nil", inspect, class);
 				return nil, 0;
 			end
-			len = len + NumTalents;
-			for TalentSeq = 1, NumTalents do
-				local TalentIndex = VM[TalentSeq];
-				if TalentIndex == nil then
-					__emulib.Debug("GetTalentData", "TalentIndex == nil", SpecIndex, TalentSeq, TalentIndex, NumSpecs, inspect, class);
+			for SpecIndex = 1, NumSpecs do
+				local VM = VMap[SpecIndex];
+				if VM == nil then
 					return nil, 0;
 				end
-				local name, iconTexture, tier, column, rank, maxRank, isExceptional, available = GetTalentInfo(SpecIndex, TalentIndex, inspect, false, group or 1);
-				if rank == nil then
-					__emulib.Debug("GetTalentData", "rank == nil", SpecIndex, TalentSeq, TalentIndex, NumSpecs, inspect, class);
+				local NumTalents = GetNumTalents(SpecIndex, inspect);
+				if NumTalents == nil then
+					__emulib.Debug("GetTalentData", "NumTalents == nil", NumSpecs, inspect, class);
 					return nil, 0;
 				end
-				data = data .. rank;
+				len = len + NumTalents;
+				for TalentSeq = 1, NumTalents do
+					local TalentIndex = VM[TalentSeq];
+					if TalentIndex == nil then
+						__emulib.Debug("GetTalentData", "TalentIndex == nil", SpecIndex, TalentSeq, TalentIndex, NumSpecs, inspect, class);
+						return nil, 0;
+					end
+					local name, iconTexture, tier, column, rank, maxRank, isExceptional, available = GetTalentInfo(SpecIndex, TalentIndex, inspect, false, group or 1);
+					if rank == nil then
+						__emulib.Debug("GetTalentData", "rank == nil", SpecIndex, TalentSeq, TalentIndex, NumSpecs, inspect, class);
+						return nil, 0;
+					end
+					data = data .. rank;
+				end
 			end
+			return data, len;
 		end
-		return data, len;
 	end
 	--	arg			code[, len]
 	--	return		data
-	function __emulib.DecodeTalentBlock(code, len)
+	local function _DecodeTalentBlock(code, len)
 		len = len or #code;
 		local data = "";
 
@@ -607,7 +737,7 @@ if CLIENT_MAJOR < 5 then
 				return nil;
 			end
 
-			return class, __debase64[strsub(code, -2, -2)] + __debase64[strsub(code, -1, -1)] * 64, 1, 1, __emulib.DecodeTalentBlock(strsub(code, 2, -3));
+			return class, __debase64[strsub(code, -2, -2)] + __debase64[strsub(code, -1, -1)] * 64, 1, 1, _DecodeTalentBlock(strsub(code, 2, -3));
 		end,
 		[2] = function(code, nodecoding)
 			local cc = strsub(code, 1, 1);
@@ -642,7 +772,7 @@ if CLIENT_MAJOR < 5 then
 				if nodecoding == true then
 					return class, level, 1, activeGroup, code1;
 				else
-					return class, level, 1, activeGroup, __emulib.DecodeTalentBlock(code1, Len1);
+					return class, level, 1, activeGroup, _DecodeTalentBlock(code1, Len1);
 				end
 			else
 				local Len1 = __debase64[strsub(code, 6, 6)];
@@ -660,7 +790,7 @@ if CLIENT_MAJOR < 5 then
 				if nodecoding == true then
 					return class, level, 2, activeGroup, code1, code2;
 				else
-					return class, level, 2, activeGroup, __emulib.DecodeTalentBlock(code1, Len1), __emulib.DecodeTalentBlock(code2, Len2);
+					return class, level, 2, activeGroup, _DecodeTalentBlock(code1, Len1), _DecodeTalentBlock(code2, Len2);
 				end
 			end
 		end,
@@ -762,42 +892,6 @@ if CLIENT_MAJOR < 5 then
 	--	arg			classIndex, level, {t1}, {t2}, {t3}, n1, n2, n3
 	--	return		code
 	function __emulib.EncodeFrameTalentDataV1(classIndex, level, D1, D2, D3, N1, N2, N3)
-		local TypeClassIndex = type(classIndex);
-		if TypeClassIndex == 'string' then
-			classIndex = __classHash[classIndex];
-		elseif TypeClassIndex == 'number' and __classList[classIndex] then
-		else
-			__emulib.Debug("EncodeFrameTalentDataV1", "type(classIndex)", TypeClassIndex, classIndex);
-			return nil;
-		end
-		local data, len = nil, nil;
-		if type(D1) == 'string' then
-			data, len = D1, D2 + D3 + N1;
-		elseif type(D1) == 'table' then
-			data = { sub = __table_sub, };
-			len = 0;
-			for index = 1, N1 do len = len + 1; data[len] = D1 and D1[index] or 0; end
-			for index = 1, N2 do len = len + 1; data[len] = D2 and D2[index] or 0; end
-			for index = 1, N3 do len = len + 1; data[len] = D3 and D3[index] or 0; end
-		else
-			__emulib.Debug("EncodeFrameData", 1, classIndex);
-			return nil;
-		end
-		local TypeD1 = type(D1);
-		if TypeD1 == 'string' then
-			data, len = D1, D2 + D3 + N1;
-		elseif TypeD1 == 'table' then
-			data = { sub = __table_sub, };
-			len = 0;
-			for index = 1, N1 do len = len + 1; data[len] = D1 and D1[index] or 0; end
-			for index = 1, N2 do len = len + 1; data[len] = D2 and D2[index] or 0; end
-			for index = 1, N3 do len = len + 1; data[len] = D3 and D3[index] or 0; end
-		else
-			__emulib.Debug("EncodeFrameTalentDataV1", "type(D1)", TypeD1, classIndex);
-			return nil;
-		end
-
-		return __base64[classIndex] .. __emulib.EncodeTalentBlock(data, len) .. __base64[LvLow] .. __base64[LvHigh];
 	end
 	function __emulib.EncodeFrameTalentDataV2(classIndex, level, D1, D2, D3, N1, N2, N3)
 		local data, len = nil, nil;
@@ -847,14 +941,14 @@ else
 	local GetSpecializationInfo = C_SpecializationInfo.GetSpecializationInfo;	--	spec, inspect, pet, inspectUnit, sex, group
 	local GetTalentInfo = C_SpecializationInfo.GetTalentInfo;					--	{ specializationIndex, isInspect, isPet, inspectTarget, sex, groupIndex }
 	local GetTalentTierInfo = GetTalentTierInfo;								--	(tier, group)	--	available, selected, level
-	_GetNumTalentGroups = function(inspect, pet)
+	Private.GetNumTalentGroups = function(inspect, pet)
 		if inspect then
 			return 1;
 		else
 			return GetNumSpecGroups(false, pet);
 		end
 	end
-	_GetActiveTalentGroup = function(inspect, pet)
+	Private.GetActiveTalentGroup = function(inspect, pet)
 		if inspect then
 			return 1;
 		else
@@ -1005,6 +1099,8 @@ else
 		len = len or #data;
 		return data, data, len, len;
 	end
+	function __emulib.EncodeFrameTalentDataV1(classIndex, level, D1, D2, D3, N1, N2, N3)
+	end
 	function __emulib.EncodeFrameTalentDataV2(classIndex, level, D1, D2, D3, N1, N2, N3)
 	end
 end
@@ -1019,8 +1115,8 @@ end
 		local level = UnitLevel('player');
 		local LvLow = level % 64;
 		local LvHigh = (level - LvLow) / 64;
-		local numGroup = _GetNumTalentGroups(false, false);
-		local activeGroup = _GetActiveTalentGroup(false, false);
+		local numGroup = Private.GetNumTalentGroups(false, false);
+		local activeGroup = Private.GetActiveTalentGroup(false, false);
 
 		if numGroup < 2 then
 			local code1, data1, lenc1, lend1 = __emulib.EncodeTalentBlock(__emulib.GetTalentData(SELFCLASS, false, 1));
@@ -1057,7 +1153,7 @@ end
 			classIndex = __classHash[classIndex];
 		elseif TypeClassIndex == 'number' and __classList[classIndex] then
 		else
-			__emulib.Debug("EncodeFrameTalentDataV1", "type(classIndex)", TypeClassIndex, classIndex);
+			__emulib.Debug("EncodeInspectTalentDataV1", "type(classIndex)", TypeClassIndex, classIndex);
 			return nil;
 		end
 		local LvLow = level % 64;
@@ -1082,8 +1178,8 @@ end
 		level = level <= 0 and MAX_LEVEL or level;
 		local LvLow = level % 64;
 		local LvHigh = (level - LvLow) / 64;
-		local numGroup = _GetNumTalentGroups(true, false);
-		local activeGroup = _GetActiveTalentGroup(true, false);
+		local numGroup = Private.GetNumTalentGroups(true, false);
+		local activeGroup = Private.GetActiveTalentGroup(true, false);
 
 		if numGroup < 2 then
 			local code1, data1, lenc1, lend1 = __emulib.EncodeTalentBlock(__emulib.GetTalentData(__classList[classIndex], true, 1, unit));
@@ -1143,7 +1239,7 @@ end
 			classIndex = __classHash[classIndex];
 		elseif TypeClassIndex == 'number' and __classList[classIndex] then
 		else
-			__emulib.Debug("EncodeFrameTalentDataV1", "type(classIndex)", TypeClassIndex, classIndex);
+			__emulib.Debug("MergeTalentCodeV2", "type(classIndex)", TypeClassIndex, classIndex);
 			return nil;
 		end
 		local LvLow = level % 64;
@@ -1187,7 +1283,7 @@ end
 			local data = {  };
 			for index = 1, NUMGLYPHSOCKETS do
 				local str = list[index + 1];
-				if str ~= "" then
+				if str ~= nil and str ~= "" then
 					local val = { strsplit(":", str) };
 					local v = DecodeNumber(val[1]);
 					local Enabled = v % 8;
@@ -1310,8 +1406,8 @@ end
 	end
 	function __emulib.EncodePlayerGlyphDataV2()
 		if SUPPORT_GLYPH then
-			local numGroup = _GetNumTalentGroups(false, false);
-			local activeGroup = _GetActiveTalentGroup(false, false);
+			local numGroup = Private.GetNumTalentGroups(false, false);
+			local activeGroup = Private.GetActiveTalentGroup(false, false);
 			if numGroup < 2 then
 				return __emulib.EncodeGlyphDataV2(
 					numGroup,
@@ -1330,8 +1426,8 @@ end
 	end
 	function __emulib.EncodeInspectGlyphDataV2(unit)
 		if SUPPORT_GLYPH and unit and UnitGUID(unit) then
-			local numGroup = _GetNumTalentGroups(true, false);
-			local activeGroup = _GetActiveTalentGroup(true, false);
+			local numGroup = Private.GetNumTalentGroups(true, false);
+			local activeGroup = Private.GetActiveTalentGroup(true, false);
 			if numGroup < 2 then
 				return __emulib.EncodeGlyphDataV2(
 					numGroup,
@@ -1778,8 +1874,10 @@ function __emulib._SendQueryRequest(shortname, realm, talent, glyph, equipment)
 	if talent or glyph or equipment then
 		if UnitInBattleground('player') and realm ~= SELFREALM then
 			SendAddonMessage(COMM_PREFIX, COMM_QUERY_PREFIX .. (talent and "T" or "") .. ((glyph and SUPPORT_GLYPH) and "G" or "") .. (equipment and "E" or "") .. "#" .. shortname .. "-" .. realm, "INSTANCE_CHAT");
-		else
+		elseif realm ~= SELFREALM then
 			SendAddonMessage(COMM_PREFIX, COMM_QUERY_PREFIX .. (talent and "T" or "") .. ((glyph and SUPPORT_GLYPH) and "G" or "") .. (equipment and "E" or ""), "WHISPER", shortname .. "-" .. realm);
+		else
+			SendAddonMessage(COMM_PREFIX, COMM_QUERY_PREFIX .. (talent and "T" or "") .. ((glyph and SUPPORT_GLYPH) and "G" or "") .. (equipment and "E" or ""), "WHISPER", shortname);
 		end
 	end
 end

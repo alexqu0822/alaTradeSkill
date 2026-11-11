@@ -6,7 +6,7 @@ if select(4, GetBuildInfo()) >= 120000 then
 	return;
 end
 
-local __version = 250401.3;
+local __version = 261101.0;
 
 local _G = _G;
 _G.__ala_meta__ = _G.__ala_meta__ or {  };
@@ -37,6 +37,7 @@ local After = C_Timer.After;
 
 local ISRETAIL = __ala_meta__.TOC_VERSION >= 90000;
 local ISCLASSIC = __ala_meta__.TOC_VERSION < 20000;
+local ISFOREVER = __ala_meta__.TOC_VERSION >= 16000 and __ala_meta__.TOC_VERSION < 20000;
 local ISBCC = __ala_meta__.TOC_VERSION >= 20000 and __ala_meta__.TOC_VERSION < 30000;
 local ISWLK = __ala_meta__.TOC_VERSION >= 30000 and __ala_meta__.TOC_VERSION < 40000;
 local ISCATA = __ala_meta__.TOC_VERSION >= 40000 and __ala_meta__.TOC_VERSION < 50000;
@@ -52,28 +53,16 @@ if ISRETAIL then
 		["Player-962-0509E001"] = "B",	--	"燃烧之刃.ALEX.DRUID",
 		["Player-962-0509E049"] = "B",	--	"燃烧之刃.ALEX.PRIEST",
 		--
-		["Player-962-0509ACEF"] = "G",	--	"燃烧之刃.ANDREA.MAGE",
-		["Player-962-0508A77F"] = "G",	--	"燃烧之刃.ANDREA.DRUID",
-		["Player-962-0508A6CC"] = "G",	--	"燃烧之刃.ANDREA.SHAMAN",
-		["Player-962-0508ADA1"] = "G",	--	"燃烧之刃.ANDREA.HUNTER",
-		["Player-962-0508AD8B"] = "G",	--	"燃烧之刃.ANDREA.WARRIOR",
-		["Player-962-0508ADDC"] = "G",	--	"燃烧之刃.ANDREA.PRIEST",
-		["Player-962-0508AD43"] = "G",	--	"燃烧之刃.ANDREA.PALADIN",
-		["Player-962-0508AD11"] = "G",	--	"燃烧之刃.ANDREA.ROGUE",
-		["Player-962-04FF445B"] = "G",	--	"燃烧之刃.ANDREA.PALADIN-MINUS",
-		["Player-962-0509EA70"] = "G",	--	"燃烧之刃.ANDREA.PRIEST-MINUS",
-		--
 		["Player-962-05469808"] = "B",	--	"金色平原.ALEX.WARRIOR"
 		["Player-962-04FEC839"] = "B",	--	"金色平原.ALEX.MAGE"
 		--
-		["Player-962-0509ACEF"] = "G",	--	"金色平原.ANDREA.MAGE"
-		["Player-962-0508A6CC"] = "G",	--	"金色平原.ANDREA.SHAMAN"
-		-- ["Player-962-0509ADA1"] = "G",	--	"金色平原.ANDREA.DRUID"
 	};
 elseif ISCLASSIC then
 	DEVELOPER = {
 		--	Classic
 		["Player-5376-05B22FA4"] = "B",	--	"哈霍兰.ALEX.PALADIN"
+		["Player-7123-035323E0"] = "B",	--	"无限.ALEX.WARRIOR"
+		["Player-7123-060F5FE9"] = "B",	--	"无限.ALEX.MAGE"
 	};
 else
 	DEVELOPER = {
@@ -93,60 +82,19 @@ else
 		["Player-4497-03F0D909"] = "B",	--	"碧玉矿洞.ALEX.HUNTER"
 		["Player-4497-040FF31B"] = "B",	--	"碧玉矿洞.ALEX.WARLOCK"
 		["Player-4497-04105E08"] = "B",	--	"碧玉矿洞.ALEX.ROGUE.MINOR"
-		--
-		["Player-4497-03985947"] = "G",	--	"碧玉矿洞.ANDREA.PRIEST"
-		["Player-4497-03871A80"] = "G",	--	"碧玉矿洞.ANDREA.SHAMAN"
-		["Player-4497-0395C790"] = "G",	--	"碧玉矿洞.ANDREA.HUNTER"
-		["Player-4497-04FE92E9"] = "G",	--	"碧玉矿洞.ANDREA.DEATHKNIGHT"
-		["Player-4497-03C3B443"] = "G",	--	"碧玉矿洞.ANDREA.MAGE"
-		["Player-4497-040C3C57"] = "G",	--	"碧玉矿洞.ANDREA.PALADIN"
-		["Player-4497-04102FBE"] = "G",	--	"碧玉矿洞.ANDREA.WARLOCK"
-		["Player-4497-0516E2C2"] = "G",	--	"碧玉矿洞.ANDREA.WARRIOR"
-		["Player-4497-0410343D"] = "G",	--	"碧玉矿洞.ANDREA.ROGUE"
-		["Player-4497-0519E8E8"] = "G",	--	"碧玉矿洞.ANDREA.DRUID"
-		["Player-4497-03F6B362"] = "G",	--	"碧玉矿洞.ANDREA.DRUID"
-		["Player-4497-04102EFE"] = "G",	--	"碧玉矿洞.ANDREA.WARRIOR.MINOR"
-		["Player-4497-03B5A603"] = "G",	--	"碧玉矿洞.ANDREA.MAGE.MINOR"
-		--
-		["Player-4497-03FC5121"] = "D",	--	"碧玉矿洞.ALA.MAGE.HORDE"
-		["Player-4497-03FBAEC1"] = "D",	--	"碧玉矿洞.ALA.MAGE.HORDE.MINOR"
-		["Player-4497-03F67EA5"] = "D",	--	"碧玉矿洞.ALA.MAGE.ALLIANCE"
-		["Player-4497-040F5394"] = "D",	--	"碧玉矿洞.ALA.WARRIOR"
-		["Player-4497-040FF486"] = "D",	--	"碧玉矿洞.ALA.PALADIN"
-		["Player-4497-040F5184"] = "D",	--	"碧玉矿洞.ALA.ROGUE"
-		--
-		["Player-4497-0393B39E"] = "D",	--	"碧玉矿洞.NETEASEUI"
-		--
-		["Player-4791-00891F9F"] = "B",	--	"碧空之歌.ALEX.WARRIOR"
-		["Player-4791-010E9724"] = "B",	--	"碧空之歌.ALEX.MAGE"
-		["Player-4791-01680518"] = "B",	--	"碧空之歌.ALEX.WARLOCK"
-		["Player-4791-01480730"] = "B",	--	"碧空之歌.ALEX.PALADIN"
-		["Player-4791-010EBD53"] = "B",	--	"碧空之歌.ALEX.DRUID"
-		["Player-4791-0136A10C"] = "B",	--	"碧空之歌.ALEX.ROGUE"
-		["Player-4791-00E26C49"] = "B",	--	"碧空之歌.ALEX.HUNTER"
-		["Player-4791-02840797"] = "B",	--	"碧空之歌.ALEX.WARRIOR.MINOR"
-		["Player-4791-0088F6CB"] = "B",	--	"碧空之歌.ALEX.PALADIN.MINOR"
-		--
-		["Player-4791-0088F61D"] = "G",	--	"碧空之歌.ANDREA.PRIEST"
-		["Player-4791-00DE4CF1"] = "G",	--	"碧空之歌.ANDREA.HUNTER"
-		["Player-4791-010B0B3C"] = "G",	--	"碧空之歌.ANDREA.PALADIN"
-		["Player-4791-0136A0D6"] = "G",	--	"碧空之歌.ANDREA.ROGUE"
-		["Player-4791-02139522"] = "G",	--	"碧空之歌.ANDREA.MAGE"
-		["Player-4791-02139923"] = "G",	--	"碧空之歌.ANDREA.WARLOCK"
 	};
 end
 local TITLELIST = {
-	T = [[艾泽拉斯第一帅]],
-	B = --[[IsAddOnLoaded("!!!163UI!!!") and "网易有爱开发者" or ]][[夜空中最亮的星]],
-	G = --[[IsAddOnLoaded("!!!163UI!!!") and "网易有爱开发者" or ]][[宇宙无敌兔姐姐]],
+	B = --[[IsAddOnLoaded("!!!163UI!!!") and "网易有爱开发者" or ]][[艾泽拉斯第一帅]],
+	C = --[[IsAddOnLoaded("!!!163UI!!!") and "网易有爱开发者" or ]][[夜空中最亮的星]],
 	D = [[网易有爱开发者]],
 };
 if ISCLASSIC then
 	local FILELIST = {
 		--	file, z, x, y, alpha, rotate
-		["*"] = { "spells/creature_spellportal_blue.m2", 4, 0, 1, 1, 0.0, },
-		[1] = { "spells/creature_spellportal_blue.m2", 4, 0, 1, 1, 0.0, },
-		[2] = { "spells/creature_spellportal_purple.m2", 4, 0, 1, 0.75, 0.0, },
+		["*"] = { ISFOREVER and 165826 or "spells/creature_spellportal_blue.m2", 4, 0, 1, 1, 0.0, },	--	165826
+		[1] = { ISFOREVER and 165826 or "spells/creature_spellportal_blue.m2", 4, 0, 1, 1, 0.0, },		--	165826
+		[2] = { ISFOREVER and 165829 or "spells/creature_spellportal_purple.m2", 4, 0, 1, 0.75, 0.0, },	--	165829
 		-- [3] = { "spells/corruption_impactdot_med_base.m2", 3, 0, 0.5, 1, 0.0, },
 	};
 	local FILENUM = #FILELIST;
@@ -158,12 +106,12 @@ if ISCLASSIC then
 elseif not ISRETAIL then
 	local FILELIST = {
 		--	file, z, x, y, alpha, rotate
-		["*"] = { "spells/creature_spellportal_blue.m2", 4, 0, 1, 1, 0.0, },
-		[1] = { "spells/creature_spellportal_blue.m2", 4, 0, 1, 1, 0.0, },
-		[2] = { "spells/creature_spellportal_purple.m2", 4, 0, 1, 0.75, 0.0, },
-		[3] = { "spells/creature_spellportal_green.m2", 4, 0, 1, 0.75, 0.0, },
-		[4] = { "spells/creature_spellportal_white.m2", 4, 0, 1, 1, 0.0, },
-		[5] = { "spells/creature_spellportal_yellow.m2", 4, 0, 1, 0.75, 0.0, },
+		["*"] = { "spells/creature_spellportal_blue.m2", 4, 0, 1, 1, 0.0, },	--	165826
+		[1] = { "spells/creature_spellportal_blue.m2", 4, 0, 1, 1, 0.0, },		--	165826
+		[2] = { "spells/creature_spellportal_purple.m2", 4, 0, 1, 0.75, 0.0, },	--	165829
+		[3] = { "spells/creature_spellportal_green.m2", 4, 0, 1, 0.75, 0.0, },	--	165827
+		[4] = { "spells/creature_spellportal_white.m2", 4, 0, 1, 1, 0.0, },		--	165830
+		[5] = { "spells/creature_spellportal_yellow.m2", 4, 0, 1, 0.75, 0.0, },	--	165831
 		-- [6] = { "spells/flamecircleeffect_blue.m2", 2.5, 0, 0, 1, 0.0, },
 		-- [7] = { "spells/corruption_impactdot_med_base.m2", 3, 0, 0.5, 1, 0.0, },
 		-- [1] = { "spells/blackmagic_precast_base.m2", 3, 0, 0.5, 1.0, 0.0, },
@@ -310,13 +258,14 @@ end
 
 local IsDead = false;
 
+local issecretvalue = issecretvalue or function() return false; end
 local UnitGUID, UnitIsPlayer = UnitGUID, UnitIsPlayer;
 local GameTooltip = GameTooltip;
 
 
 local function ModelWrap_OnUpdate(_F, elasped)
 	local _, unit = GameTooltip:GetUnit();
-	if unit == nil or not UnitIsPlayer(unit) then
+	if unit == nil or issecretvalue(unit) or not UnitIsPlayer(unit) then
 		__coder.Wrap:Hide();
 	else
 		local GUID = UnitGUID(unit);
@@ -362,18 +311,19 @@ end
 
 local function CheckTooltip(tip)
 	local _, unit = tip:GetUnit();
-	if unit ~= nil then
-		local GUID = UnitGUID(unit);
-		local key = DEVELOPER[GUID];
-		if key ~= nil and UnitIsPlayer(unit) and tip:IsVisible() then
-			tip:AddLine(TITLELIST[key] or "", 1, 0, 1);
-			if not tip.fadeOut then
-				tip:Show();
-			end
-			if __coder.GetFile then
-				__coder.Wrap:Show();
-				__coder.Wrap:SetModelFile(__coder.GetFile());
-			end
+	if unit == nil or issecretvalue(unit) then
+		return;
+	end
+	local GUID = UnitGUID(unit);
+	local key = DEVELOPER[GUID];
+	if key ~= nil and UnitIsPlayer(unit) and tip:IsVisible() then
+		tip:AddLine(TITLELIST[key] or "", 1, 0, 1);
+		if not tip.fadeOut then
+			tip:Show();
+		end
+		if __coder.GetFile and not __coder.Wrap:IsShown() then
+			__coder.Wrap:Show();
+			__coder.Wrap:SetModelFile(__coder.GetFile());
 		end
 	end
 end
@@ -385,6 +335,9 @@ local function Hook_OnTooltipSetUnit(tip)
 	if tip == GameTooltip then
 		CheckTooltip(GameTooltip);
 	end
+end
+local function Hook_OnHide(tip)
+	__coder.Wrap:Hide();
 end
 local HookState = {  };
 local function Hook_SetScript(tip, script, method)
@@ -413,13 +366,13 @@ function __coder.Init()
 		end
 	end
 	After(1, HashMap);
-	if TooltipDataProcessor ~= nil then
-		TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Unit, Hook_OnTooltipSetUnit);
-	end
 	if GameTooltip:HasScript("OnTooltipSetUnit") then
 		hooksecurefunc(GameTooltip, "SetScript", Hook_SetScript);
 		hooksecurefunc(GameTooltip, "HookScript", Hook_HookScript);
 		GameTooltip:HookScript("OnTooltipSetUnit", Hook_OnTooltipSetUnit);
+	elseif TooltipDataProcessor ~= nil then
+		TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Unit, Hook_OnTooltipSetUnit);
+		GameTooltip:HookScript("OnHide", Hook_OnHide);
 	end
 end
 if IsLoggedIn() then

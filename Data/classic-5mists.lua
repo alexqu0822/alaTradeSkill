@@ -84,7 +84,7 @@ DataAgent.T_TradeSkill_Texture = {
 	[15] = 134071,
 	[16] = 237171,
 };
-DataAgent.T_TradeSkill_CheckID = {		--	[pid] = p_check_sid
+DataAgent.T_TradeSkill_CheckSID = {		--	[pid] = p_check_sid
 	[1] = 3273,		--	FirstAid
 	[2] = 2018,		--	Blacksmithing
 	[3] = 2108,		--	Leatherworking
@@ -102,23 +102,23 @@ DataAgent.T_TradeSkill_CheckID = {		--	[pid] = p_check_sid
 	[15] = 25229,	--	Jewelcrafting	--	2.0
 	[16] = 45357,	--	Inscription		--	3.0
 };
-DataAgent.T_TradeSkill_HasUI = {		--	[pid] = bool
-	[1] = true,		--	FirstAid
-	[2] = true,		--	Blacksmithing
-	[3] = true,		--	Leatherworking
-	[4] = true,		--	Alchemy
+DataAgent.T_TradeSkill_UISID = {		--	[pid] = bool
+	[1] = 3273,		--	FirstAid
+	[2] = 2018,		--	Blacksmithing
+	[3] = 2108,		--	Leatherworking
+	[4] = 2259,		--	Alchemy
 	[5] = false,	--	Herbalism		--	UNUSED
-	[6] = true,		--	Cooking
-	[7] = true,		--	Mining
-	[8] = true,		--	Tailoring
-	[9] = true,		--	Engineering
-	[10] = true,	--	Enchanting
+	[6] = 2550,		--	Cooking
+	[7] = 2656,		--	Mining
+	[8] = 3908,		--	Tailoring
+	[9] = 4036,		--	Engineering
+	[10] = 7411,	--	Enchanting
 	[11] = false,	--	Fishing			--	UNUSED
 	[12] = false,	--	Skinning		--	UNUSED
-	[13] = true,	--	Poisons			--	Rogue
-	[14] = true,	--	Beast Training	--	UNUSED	--	Hunter
-	[15] = true,	--	Jewelcrafting	--	2.0
-	[16] = true,	--	Inscription		--	3.0
+	[13] = 2842,	--	Poisons			--	Rogue
+	[14] = 5149,	--	Beast Training	--	UNUSED	--	Hunter
+	[15] = 25229,	--	Jewelcrafting	--	2.0
+	[16] = 45357,	--	Inscription		--	3.0
 };
 
 -->		Index

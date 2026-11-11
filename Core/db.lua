@@ -106,9 +106,10 @@ local T_TradeSkill_ID = DataAgent.T_TradeSkill_ID;
 --[[auto]]local T_TradeSkill_Name = {  };								--	[pid] = prof_name
 --[[auto]]local T_TradeSkill_Hash = {  };								--	[prof_name] = pid
 local T_TradeSkill_Texture = DataAgent.T_TradeSkill_Texture;
-local T_TradeSkill_CheckID = DataAgent.T_TradeSkill_CheckID;	--	[pid] = p_check_sid
---[[auto]]local T_TradeSkill_CheckName = {  };						--	[pid] = p_check_sname
-local T_TradeSkill_HasUI = DataAgent.T_TradeSkill_HasUI;		--	[pid] = bool
+local T_TradeSkill_CheckSID = DataAgent.T_TradeSkill_CheckSID;	--	[pid] = p_check_sid
+--[[auto]]local T_TradeSkill_CheckSName = {  };						--	[pid] = p_check_sname
+local T_TradeSkill_UISID = DataAgent.T_TradeSkill_UISID;		--	[pid] = bool
+--[[auto]]local T_TradeSkill_UISName = {  };					--	[pid] = p_win_sname
 local T_TradeSkill_Spec2Pid = DataAgent.T_TradeSkill_Spec2Pid;
 local T_TradeSkill_RecipeList = DataAgent.T_TradeSkill_RecipeList;
 --	Hash
@@ -247,8 +248,11 @@ function F.SPELL_DATA_LOAD_RESULT(sid, success)
 				if T_TradeSkill_ID[pid] == sid then
 					LF_HashTradeSkill(pid, pname, pname_lower);
 				end
-				if T_TradeSkill_CheckID[pid] == sid then
-					T_TradeSkill_CheckName[pid] = pname;
+				if T_TradeSkill_CheckSID[pid] == sid then
+					T_TradeSkill_CheckSName[pid] = pname;
+				end
+				if T_TradeSkill_UISID[pid] == sid then
+					T_TradeSkill_UISName[pid] = pname;
 				end
 				T_SpellData[sid] = {
 					pname,
@@ -291,11 +295,22 @@ local function LF_RequestSpell()
 		end
 	end
 	for pid = DataAgent.DBMINPID, DataAgent.DBMAXPID do
-		local sid = T_TradeSkill_CheckID[pid];
-		if sid ~= nil and T_SpellData[sid] == nil then
-			RequestLoadSpellData(sid);
-			T_Temp_SpellHash[sid] = true;
-			T_Temp_pid[sid] = pid;
+		local csid = T_TradeSkill_CheckSID[pid];
+		if csid ~= nil and T_SpellData[csid] == nil then
+			RequestLoadSpellData(csid);
+			T_Temp_SpellHash[csid] = true;
+			T_Temp_pid[csid] = pid;
+			completed = false;
+			maxonce = maxonce - 1;
+			if maxonce <= 0 then
+				return false;
+			end
+		end
+		local usid = T_TradeSkill_UISID[pid];
+		if usid and usid ~= csid and T_SpellData[usid] == nil then
+			RequestLoadSpellData(usid);
+			T_Temp_SpellHash[usid] = true;
+			T_Temp_pid[usid] = pid;
 			completed = false;
 			maxonce = maxonce - 1;
 			if maxonce <= 0 then
@@ -350,9 +365,13 @@ local function LF_PreloadSpell()
 					end
 				end
 				for pid = DataAgent.DBMINPID, DataAgent.DBMAXPID do
-					local sid = T_TradeSkill_CheckID[pid];
-					if T_SpellData[sid] == nil then
-						MT.Debug("LF_PreloadSpell#1", sid);
+					local csid = T_TradeSkill_CheckSID[pid];
+					if T_SpellData[csid] == nil then
+						MT.Debug("LF_PreloadSpell#1", csid);
+					end
+					local usid = T_TradeSkill_UISID[pid];
+					if usid ~= csid and T_SpellData[usid] == nil then
+						MT.Debug("LF_PreloadSpell#1", usid);
 					end
 				end
 				for sid, info in next, T_Recipe_Data do
@@ -461,12 +480,17 @@ local function _LoadSavedVar()
 			LF_HashTradeSkill(pid, sinfo[1], sinfo[2]);
 		end
 		--
-		local sid = T_TradeSkill_CheckID[pid];
-		local sinfo = T_SpellData[sid];
-		if sinfo ~= nil then
-			T_TradeSkill_CheckName[pid] = sinfo[1];
+		local csid = T_TradeSkill_CheckSID[pid];
+		local csinfo = T_SpellData[csid];
+		if csinfo ~= nil then
+			T_TradeSkill_CheckSName[pid] = csinfo[1];
 		end
 		--
+		local usid = T_TradeSkill_UISID[pid];
+		local usinfo = T_SpellData[usid];
+		if usinfo ~= nil then
+			T_TradeSkill_UISName[pid] = usinfo[1];
+		end
 	end
 	for sid, sinfo in next, T_SpellData do
 		LF_HashSpell(sid, sinfo[1], sinfo[2]);
@@ -493,7 +517,7 @@ end
 MT.AddCallback("USER_EVENT_DATA_LOADED", function()
 	if LB_PreloadSpellFinished and LB_PreloadItemFinished then
 		for pid = DataAgent.DBMINPID, DataAgent.DBMAXPID do
-			local n1, n2 = T_TradeSkill_Name[pid], T_TradeSkill_CheckName[pid];
+			local n1, n2 = T_TradeSkill_Name[pid], T_TradeSkill_CheckSName[pid];
 			if n1 ~= nil and n2 ~= nil then
 				T_TradeSkill_SameSkillName[n1] = n2;
 				T_TradeSkill_SameSkillName[n2] = n1;
@@ -505,13 +529,13 @@ end);
 
 -->		Query
 --	GET TABLE
-	--	| T_TradeSkill_CheckID{ [pid] = p_check_sid }
+	--	| T_TradeSkill_CheckSID{ [pid] = p_check_sid }
 	function DataAgent.table_tradeskill_check_id()
-		return T_TradeSkill_CheckID;
+		return T_TradeSkill_CheckSID;
 	end
-	--	| T_TradeSkill_CheckName{ [pid] = p_check_sname }
+	--	| T_TradeSkill_CheckSName{ [pid] = p_check_sname }
 	function DataAgent.table_tradeskill_check_name()
-		return T_TradeSkill_CheckName;
+		return T_TradeSkill_CheckSName;
 	end
 --	INSERT RECIPE DB
 	function DataAgent.insert_info(sid, info)
@@ -565,22 +589,28 @@ end);
 			return T_TradeSkill_Texture[pid];
 		end
 	end
-	--	pid | has_win
-	function DataAgent.is_pid_has_win(pid)
+	--	pid | ui_sid
+	function DataAgent.get_ui_sid_by_pid(pid)
 		if DataAgent.is_pid(pid) then
-			return T_TradeSkill_HasUI[pid];
+			return T_TradeSkill_UISID[pid];
+		end
+	end
+	--	pid | ui_sname
+	function DataAgent.get_ui_sname_by_pid(pid)
+		if DataAgent.is_pid(pid) then
+			return T_TradeSkill_UISName[pid];
 		end
 	end
 	--	pid | check_id
-	function DataAgent.get_check_id_by_pid(pid)
+	function DataAgent.get_check_sid_by_pid(pid)
 		if pid ~= nil then
-			return T_TradeSkill_CheckID[pid];
+			return T_TradeSkill_CheckSID[pid];
 		end
 	end
-	--	pid | check_name
-	function DataAgent.get_check_name_by_pid(pid)
+	--	pid | check_spellname
+	function DataAgent.get_check_sname_by_pid(pid)
 		if pid ~= nil then
-			return T_TradeSkill_CheckName[pid];
+			return T_TradeSkill_CheckSName[pid];
 		end
 	end
 	--	sid | is_tradeskill
