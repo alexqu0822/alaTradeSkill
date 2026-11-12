@@ -1,3 +1,7 @@
+
+2026-11-12
+[Forever] Difficuty color fix.
+
 2026-11-11
 [Forever] Update. It's really a big task. Hope no bug.
 
