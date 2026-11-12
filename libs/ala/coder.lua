@@ -6,7 +6,7 @@ if select(4, GetBuildInfo()) >= 120000 then
 	return;
 end
 
-local __version = 261101.0;
+local __version = 261112-2.0;
 
 local _G = _G;
 _G.__ala_meta__ = _G.__ala_meta__ or {  };
@@ -224,8 +224,10 @@ local function HashMap()
 			for GUID, _ in next, DEVELOPER do
 				if Hash[GUID] == nil then
 					local name = DATA[GUID];
-					Hash[name] = GUID;
-					Hash[GUID] = name;
+					if name then
+						Hash[name] = GUID;
+						Hash[GUID] = name;
+					end
 				end
 			end
 			for v1, v2 in next, Hash do
