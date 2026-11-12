@@ -1070,7 +1070,7 @@ function DataAgent.get_ordered_list(pid, list, check_hash, phase, rank, minRankO
 						end
 					elseif maxRankOffset ~= nil then
 						local Top = rank + maxRankOffset;
-						for i = 1, #recipe do
+						for i = #recipe, 1, -1 do
 							local sid = recipe[i];
 							local info = T_Recipe_Data[sid];
 							if info[index_phase] <= phase and info[index_learn_rank] > rank and info[index_learn_rank] <= Top then

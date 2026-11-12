@@ -2919,9 +2919,11 @@ end
 
 			LT_SharedMethod.StyleModernScrollFrame(Frame.HookedListFrame);
 			LT_SharedMethod.StyleModernScrollFrame(Frame.HookedDetailFrame);
-			local HookedRankFrame = Frame.HookedRankFrame;
-			HookedRankFrame.Border:Hide();
-			VT.__dep.uireimp._SetSimpleBackdrop(HookedRankFrame, 0, 1, 0.0, 0.0, 0.0, 0.0, 0.25, 0.25, 0.25, 1.0);
+			if not CT.ISMORDERNUI then
+				local HookedRankFrame = Frame.HookedRankFrame;
+				HookedRankFrame.Border:Hide();
+				VT.__dep.uireimp._SetSimpleBackdrop(HookedRankFrame, 0, 1, 0.0, 0.0, 0.0, 0.0, 0.25, 0.25, 0.25, 1.0);
+			end
 			Frame.PortraitBorder:Hide();
 			local T_HookedFrameWidgets = Frame.T_HookedFrameWidgets;
 			local T_HookedFrameButtons = T_HookedFrameWidgets.T_HookedFrameButtons;
@@ -4320,9 +4322,6 @@ local function LF_HookFrame(addon, meta)
 			PortraitBorder:Show();
 			Frame.PortraitBorder = PortraitBorder;
 		--	Rank Offset
-			local HookedRankFrame = meta.HookedRankFrame;
-			local HookedRankFrameRight = meta.HookedRankFrameRight;
-
 			local OverrideMinRankButton = CreateFrame('BUTTON', nil, Frame, "UIPanelButtonTemplate");
 			OverrideMinRankButton:SetSize(40, 20);
 			LT_SharedMethod.SetPoint(OverrideMinRankButton, T_WidgetsLayout.OverrideMinRankButton);
@@ -4419,25 +4418,27 @@ local function LF_HookFrame(addon, meta)
 				CollapseAllButton:SetParent(HookedFrame);
 				LT_SharedMethod.SetPoint(CollapseAllButton, T_WidgetsLayout.CollapseAllButton);
 			end
-			local HookedRankFrame = meta.HookedRankFrame;
-			LT_SharedMethod.SetPoint(HookedRankFrame, T_WidgetsLayout.HookedRankFrame);
-			local HookedRankFrameName = HookedRankFrame:GetName();
-			if HookedRankFrameName then
-				local HookedRankFrameSkillName = _G[HookedRankFrameName .. "SkillName"];
-				if HookedRankFrameSkillName ~= nil then HookedRankFrameSkillName:Hide(); end
-				local HookedRankFrameSkillRank = _G[HookedRankFrameName .. "SkillRank"];
-				if HookedRankFrameSkillRank ~= nil then
-					HookedRankFrameSkillRank:ClearAllPoints();
-					HookedRankFrameSkillRank:SetPoint("CENTER");
-					HookedRankFrameSkillRank:SetJustifyH("CENTER");
+			if not CT.ISMORDERNUI then
+				local HookedRankFrame = meta.HookedRankFrame;
+				LT_SharedMethod.SetPoint(HookedRankFrame, T_WidgetsLayout.HookedRankFrame);
+				local HookedRankFrameName = HookedRankFrame:GetName();
+				if HookedRankFrameName then
+					local HookedRankFrameSkillName = _G[HookedRankFrameName .. "SkillName"];
+					if HookedRankFrameSkillName ~= nil then HookedRankFrameSkillName:Hide(); end
+					local HookedRankFrameSkillRank = _G[HookedRankFrameName .. "SkillRank"];
+					if HookedRankFrameSkillRank ~= nil then
+						HookedRankFrameSkillRank:ClearAllPoints();
+						HookedRankFrameSkillRank:SetPoint("CENTER");
+						HookedRankFrameSkillRank:SetJustifyH("CENTER");
+					end
+					local HookedRankFrameBorder = _G[HookedRankFrameName .. "Border"];
+					if HookedRankFrameBorder ~= nil then
+						HookedRankFrameBorder:ClearAllPoints();
+						HookedRankFrameBorder:SetPoint("TOPLEFT", -5, 8);
+						HookedRankFrameBorder:SetPoint("BOTTOMRIGHT", 5, -8);
+					end
+					HookedRankFrame.Border = HookedRankFrameBorder;
 				end
-				local HookedRankFrameBorder = _G[HookedRankFrameName .. "Border"];
-				if HookedRankFrameBorder ~= nil then
-					HookedRankFrameBorder:ClearAllPoints();
-					HookedRankFrameBorder:SetPoint("TOPLEFT", -5, 8);
-					HookedRankFrameBorder:SetPoint("BOTTOMRIGHT", 5, -8);
-				end
-				HookedRankFrame.Border = HookedRankFrameBorder;
 			end
 		--	BACKGROUND and DEVIDER
 			local Background = CreateFrame('FRAME', nil, HookedFrame);
@@ -5104,7 +5105,7 @@ local function LF_AddOnCallback_Blizzard_Professions(addon)
 			},
 			-- CancelButton = {  },
 			CloseButton = {
-				{ "CENTER", ProfessionsFrame, "TOPRIGHT", -14, -14, },
+				{ "CENTER", ProfessionsFrame, "TOPRIGHT", -16, -16, },
 			},
 			InputBoxLeft = {
 				{ "LEFT", SearchBox, "LEFT", 0, 0, },
@@ -5126,7 +5127,7 @@ local function LF_AddOnCallback_Blizzard_Professions(addon)
 			},
 
 			ToggleButton = {
-				{ "RIGHT", CloseButton, "LEFT", -2, 0, },
+				{ "RIGHT", CloseButton, "LEFT", -6, 0, },
 			},
 			ExpandButton = {
 				{ "CENTER", "ThisFrame", "TOPRIGHT", 4, -358, },
@@ -5150,26 +5151,26 @@ local function LF_AddOnCallback_Blizzard_Professions(addon)
 			LineMiddle = {
 				{ "LEFT", ProfessionsFrame, "LEFT", 0, 0, },
 				{ "RIGHT", ProfessionsFrame, "RIGHT", 0, 0, },
-				{ "TOP", ProfessionsFrame, "TOP", 0, -28, },
+				{ "TOP", ProfessionsFrame, "TOP", 0, -32, },
 			},
 			LineBottom = {
 				{ "LEFT", ProfessionsFrame, "LEFT", 0, 0, },
 				{ "RIGHT", ProfessionsFrame, "RIGHT", 0, 0, },
-				{ "BOTTOM", SchematicForm, "TOP", 0, 2, },
+				{ "BOTTOM", SchematicForm, "TOP", 0, 0, },
 			},
 			OverrideMinRankButton = {
-				{ "CENTER", RankFrame, "LEFT", -20, 0, },
+				{ "CENTER", RankFrame.Fill, "LEFT", -20, 0, },
 			},
 			OverrideMinRankSlider = {
-				{ "LEFT", RankFrame, "LEFT", 0, 0, },
+				{ "LEFT", RankFrame.Fill, "LEFT", 0, 0, },
 				{ "RIGHT", RankFrame.Mask, "RIGHT", 0, 0, },
 			},
 			RankOffsetButton = {
-				{ "CENTER", RankFrame, "RIGHT", 20, 0, },
+				{ "CENTER", RankFrame.Fill, "RIGHT", 20, 0, },
 			},
 			RankOffsetSlider = {
 				{ "LEFT", RankFrame.Mask, "RIGHT", 0, 0, },
-				{ "RIGHT", RankFrame, "RIGHT", 0, 0, },
+				{ "RIGHT", RankFrame.Fill, "RIGHT", 0, 0, },
 			},
 			TabFrame = {
 				{ "LEFT", "ThisFrame", "LEFT", 60, 0, },
@@ -5420,7 +5421,7 @@ local function LF_AddOnCallback_Blizzard_Professions(addon)
 				local recipeInfo = GetRecipeInfo(recipeID);
 				if recipeInfo then
 					local num = GetCraftableCount(recipeID) or 0;
-					return recipeInfo.name, recipeInfo.difficulty or 0, num;
+					return recipeInfo.name, recipeInfo.relativeDifficulty or 0, num;
 				end
 			end
 			return nil, -1, 0;
