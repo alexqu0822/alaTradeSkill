@@ -6,7 +6,7 @@ if select(4, GetBuildInfo()) >= 120000 then
 	return;
 end
 
-local __version = 261112-2.0;
+local __version = 261113.0;
 
 local _G = _G;
 _G.__ala_meta__ = _G.__ala_meta__ or {  };

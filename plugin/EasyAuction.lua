@@ -2,11 +2,9 @@
 	by enpingking (url = https://ngabbs.com/read.php?tid=45700523&_fu=1409755%2C2&rand=83)
 --]]--
 
-local __addon, __private = ...;
+local _, __private = ...;
 local MT = __private.MT;
-local CT = __private.CT;
 local VT = __private.VT;
-local DT = __private.DT;
 
 
 -->		upvalue
@@ -23,6 +21,19 @@ MT.BuildEnv("EasyAuction");
 
 
 local mod = {  };
+
+local function EA_QueryModernPriceByID(api, id, num)
+    if type(id) ~= "number" then return nil end
+    local snapshot, reason = api.GetLatest(id)
+    if reason == "no-data" then
+        -- 商品按 ID 存储，非商品使用带基础物品等级的拍卖键。
+        local _, _, _, level = VT._comptb.GetItemInfo(id)
+        if type(level) == "number" and level > 0 then
+            snapshot = api.GetLatest({ itemID = id, itemLevel = level })
+        end
+    end
+    if snapshot then return snapshot.price * (num or 1) end
+end
 
 -- 按 id 查询，自动拼 name:itemid
 local function EA_DecodePriceHistoryString(raw)
@@ -157,6 +168,21 @@ MT.RegsiterAuctionModOnLoad("EasyAuction", function()
     local GetAddOnMetadata = C_AddOns and C_AddOns.GetAddOnMetadata or GetAddOnMetadata;
     local version = GetAddOnMetadata("EasyAuction", "Version");
     mod.version = version
+
+    local api = _G.EasyAuctionAPI
+    if type(api) == "table" and type(api.GetLatest) == "function" then
+        mod.F_QueryPriceByID = function(id, num)
+            return EA_QueryModernPriceByID(api, id, num)
+        end
+        mod.F_QueryPriceByName = function(name, num)
+            if type(name) ~= "string" or name == "" then return nil end
+            local id = VT._comptb.GetItemInfoInstant(name)
+            return EA_QueryModernPriceByID(api, id, num)
+        end
+        MT.AddAuctionMod("EasyAuction", mod)
+        return
+    end
+
     mod.dbver = 1
     if version then
         local major, minor, patch = strsplit(".", version)
