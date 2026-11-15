@@ -3929,7 +3929,7 @@ end
 						local available = LT_SharedMethod.GetAvaiableCraftCount(sid, todo[index]);
 						if available > 0 then
 							local recipeindex = hash[sid];
-							local tools = { Frame.F_GetRecipeTools(recipeindex) };
+							local tools = Frame.F_GetRecipeTools(recipeindex);
 							if tools[1] ~= nil and (t == nil or t[sid] == nil) then
 								local check = DataAgent.T_SkillTools[sid];
 								if check ~= nil then
@@ -3991,6 +3991,10 @@ end
 			QueueFrame.Parent = Frame;
 			QueueFrame:SetPoint("BOTTOMLEFT", Frame.Background, "BOTTOMRIGHT", 0, 0);
 			-- Frame.QueueToggleButton:GetNormalTexture():SetVertexColor(1.0, 1.0, 1.0, 1.0);
+				local list = VT.QUEUE.list;
+			if not QueueFrame.ScrollFrame:SetNumValue(#list) then
+				QueueFrame.ScrollFrame:Update();
+			end
 		end
 	end
 	function LT_WidgetMethod.QueueFrame_OnHide(QueueFrame)
@@ -4067,7 +4071,7 @@ end
 					local available = LT_SharedMethod.GetAvaiableCraftCount(sid);
 					if available > 0 then
 						local Frame = QueueFrame.Parent;
-						local tools = { Frame.F_GetRecipeTools(Frame.hash[sid]) };
+						local tools = Frame.F_GetRecipeTools(Frame.hash[sid]);
 						local check = DataAgent.T_SkillTools[sid];
 						if check ~= nil then
 							if tools[1] ~= check() then
@@ -5454,7 +5458,7 @@ local function LF_AddOnCallback_Blizzard_Professions(addon)
 			end
 		end,
 		F_GetRecipeDesc = function() return ""; end,
-		F_GetRecipeTools = function(index)
+		F_GetRecipeTools = function(index)		--	@return { tool, ok, ...}
 			local recipeID = Context[index];
 			if recipeID then
 				local reqs = GetRecipeRequirements(recipeID);
@@ -5462,8 +5466,9 @@ local function LF_AddOnCallback_Blizzard_Professions(addon)
 					local temp = {};
 					for i = 1, #reqs do
 						temp[#temp + 1] = reqs[i].name;
+						temp[#temp + 1] = reqs[i].met or false;
 					end
-					return unpack(temp);
+					return temp;
 				end
 			end
 		end,
@@ -6100,7 +6105,9 @@ local function LF_AddOnCallback_Blizzard_TradeSkillUI(addon)
 		F_GetRecipeItemLink = GetTradeSkillItemLink,
 		F_GetRecipeIcon = GetTradeSkillIcon,
 		F_GetRecipeDesc = function() return ""; end,
-		F_GetRecipeTools = GetTradeSkillTools,
+		F_GetRecipeTools = function(index)		--	@return { tool, ok, ... }
+			return { GetTradeSkillTools(index) };
+		end,
 		F_GetRecipeCooldown = GetTradeSkillCooldown,
 		F_GetRecipeNumMade = GetTradeSkillNumMade,	--	@return	num_Made_Min, num_Made_Max
 
@@ -6661,7 +6668,9 @@ local function LF_AddOnCallback_Blizzard_CraftUI(addon)
 		F_GetRecipeItemLink = GetCraftItemLink,
 		F_GetRecipeIcon = GetCraftIcon,
 		F_GetRecipeDesc = GetCraftDescription,
-		F_GetRecipeTools = GetCraftSpellFocus,
+		F_GetRecipeTools = function(index)		--	@return { tool, ok, ... }
+			return { GetCraftSpellFocus(index) };
+		end,
 		F_GetRecipeCooldown = function() return nil; end,
 		F_GetRecipeNumMade = function() return 1, 1; end,
 
