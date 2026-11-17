@@ -57,19 +57,25 @@ if ISRETAIL then
 		["Player-962-04FEC839"] = "B",	--	"金色平原.ALEX.MAGE"
 		--
 	};
+elseif ISFOREVER then
+	DEVELOPER = {
+		--	Forever
+		["Player-7123-035323E0"] = "B",	--	"无限.ALEX.WARRIOR"
+		["Player-7123-15C84F10"] = "B",	--	"无限.ALEX.MAGE"
+		["Player-7123-15D30559"] = "B",	--	"无限.ALEX.PALADIN"
+		["Player-7123-15D47540"] = "B",	--	"无限.ALEX.DRUID"
+	};
 elseif ISCLASSIC then
 	DEVELOPER = {
 		--	Classic
 		["Player-5376-05B22FA4"] = "B",	--	"哈霍兰.ALEX.PALADIN"
-		["Player-7123-035323E0"] = "B",	--	"无限.ALEX.WARRIOR"
-		["Player-7123-060F5FE9"] = "B",	--	"无限.ALEX.MAGE"
 	};
 else
 	DEVELOPER = {
 		--
-		["Player-6379-009490AD"] = "T",	--	"时光I.MAGE"
-		["Player-6379-009490B7"] = "T",	--	"时光I.WARRIOR"
-		["Player-6379-00CC07FB"] = "T",	--	"时光I.SHAMAN"
+		["Player-6379-009490AD"] = "B",	--	"时光I.MAGE"
+		["Player-6379-009490B7"] = "B",	--	"时光I.WARRIOR"
+		["Player-6379-00CC07FB"] = "B",	--	"时光I.SHAMAN"
 		--	BCC
 		["Player-4497-0388473F"] = "B",	--	"碧玉矿洞.ALEX.WARRIOR"
 		["Player-4497-039DF9BC"] = "B",	--	"碧玉矿洞.ALEX.PRIEST"

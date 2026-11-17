@@ -6,7 +6,7 @@ if select(4, GetBuildInfo()) >= 120000 then
 	return;
 end
 
-local __version = 240823.0;
+local __version = 261114.0;
 
 local _G = _G;
 _G.__ala_meta__ = _G.__ala_meta__ or {  };
@@ -30,6 +30,7 @@ local Private = {  };
 
 
 local pcall = pcall;
+local issecretvalue = issecretvalue or function() return false; end
 local tostring = tostring;
 local next = next;
 local strlen, strbyte, strchar, strsplit, strsub = string.len, string.byte, string.char, string.split, string.sub;
@@ -199,19 +200,21 @@ function Private.OnEvent(Driver, event, ...)
 		end
 	-- elseif event == BN_CHAT_MSG_ADDON then
 	-- 	local prefix, msg, ctype, senderID = ...;
-	else
+	elseif not issecretvalue(event) then
 		local ctype = ValidChatEvent[event];
 		if ctype ~= nil then
 			local msg, sender, lang, channelName, player2, Flags, zoneChannelID, channelIndex, channelBaseName, langID, lineID, GUID, bnSenderID = ...;
-			if GUID ~= nil and _TGUIDCache[GUID] == nil then
-				_TGUIDCache[GUID] = Ambiguate(sender, "none");
-				if _TGUIDCache[GUID] == "" then
-					_TGUIDCache[GUID] = nil;
+			if GUID ~= nil and not issecretvalue(GUID) and not issecretvalue(sender) then
+				if _TGUIDCache[GUID] == nil then
+					_TGUIDCache[GUID] = Ambiguate(sender, "none");
+					if _TGUIDCache[GUID] == "" then
+						_TGUIDCache[GUID] = nil;
+					end
 				end
+				_TChatMsgCache[ctype][GUID] = _TChatMsgCache[ctype][GUID] or {  };
+				local cache = _TChatMsgCache[ctype][GUID];
+				cache[msg] = Private.GetTime();
 			end
-			_TChatMsgCache[ctype][GUID] = _TChatMsgCache[ctype][GUID] or {  };
-			local cache = _TChatMsgCache[ctype][GUID];
-			cache[msg] = Private.GetTime();
 		end
 	end
 end

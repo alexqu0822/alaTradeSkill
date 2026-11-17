@@ -1629,14 +1629,14 @@ MT.RegisterOnInit('db', function(LoggedIn)
 			sort(list, function(s1, s2)
 				local info1 = T_Recipe_Data[s1];
 				local info2 = T_Recipe_Data[s2];
-				return (info1[index_learn_rank] < info1[index_learn_rank]) or (
-						(info1[index_learn_rank] == info1[index_learn_rank]) and (
+				return (info1[index_learn_rank] < info2[index_learn_rank]) or (
+						(info1[index_learn_rank] == info2[index_learn_rank]) and (
 							(info1[index_yellow_rank] < info2[index_yellow_rank]) or (
 								(info1[index_yellow_rank] == info2[index_yellow_rank]) and (
 									(info1[index_green_rank] < info2[index_green_rank]) or (
 										(info1[index_green_rank] == info2[index_green_rank]) and (
-											(info1[index_grey_rank] < info1[index_grey_rank]) or (
-												(info1[index_grey_rank] == info1[index_grey_rank]) and (s1 < s2)
+											(info1[index_grey_rank] < info2[index_grey_rank]) or (
+												(info1[index_grey_rank] == info2[index_grey_rank]) and (s1 < s2)
 											)))))));
 			end);
 			T_sname2sid[pid] = {  };
