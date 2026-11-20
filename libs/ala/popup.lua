@@ -2,7 +2,7 @@
 	by ALA
 --]]--
 
-local __version = 241201.0;
+local __version = 261101.0;
 
 local _G = _G;
 _G.__ala_meta__ = _G.__ala_meta__ or {  };
@@ -25,6 +25,7 @@ local __ala_meta__ = _G.__ala_meta__;
 -->
 
 -->			upvalue
+	local issecretvalue = issecretvalue;
 	local type = type;
 	local tinsert = tinsert;
 
@@ -200,9 +201,13 @@ if Menu and MenuUtil then
 			if entrydef.putscript ~= true then
 				entrydef.putscript = true;
 				Menu.ModifyMenu('MENU_UNIT_' .. which, function(owner, rootDescription, contextData)
+					-- print(__isdead, issecretvalue(rootDescription) , issecretvalue(contextData) , issecretvalue(contextData.name) , issecretvalue(contextData.surname) , issecretvalue(contextData.server))
 					if __isdead then
 						return;
-					end 
+					end
+					if issecretvalue and (issecretvalue(rootDescription) or issecretvalue(contextData) or issecretvalue(contextData.name) or issecretvalue(contextData.surname) or issecretvalue(contextData.server)) then
+						return;
+					end
 					local category = nil;
 					local divider = false;
 					local first = true;
