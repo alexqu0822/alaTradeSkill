@@ -47,7 +47,9 @@ function MT.CheckCooldown(pid, var)
 	local list = T_TradeSkill_CooldownList[pid];
 	if list ~= nil then
 		local cool = var[3];
+		local prev = {  };
 		if cool ~= nil then
+			for k, v in next, cool do prev[k] = v; end
 			wipe(cool);
 		else
 			cool = {  };
@@ -58,7 +60,10 @@ function MT.CheckCooldown(pid, var)
 			local sid = data[1];
 			if var.cur_rank ~= nil and var.cur_rank >= data[2] then
 				local cooling, start, duration = GetSpellModifiedCooldown(sid);
-				if cooling then
+				if VT._comptb.GetSpellCooldown(sid) == nil then
+					-- Forever: secret (unknown) cooldown, keep the last known value
+					cool[sid] = prev[sid];
+				elseif cooling then
 					cool[sid] = GetServerTime() + duration + start - GetTime();
 				else
 					cool[sid] = -1;

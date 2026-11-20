@@ -40,6 +40,16 @@ local DT = {  }; __private.DT = DT;		--	data
 	local _comptb = {  };
 	VT._comptb = _comptb;
 	local Noop = function() end;
+	-- Forever: cooldowns can come back as secret values (compare/arithmetic throws). Treat them as unknown.
+	local issecretvalue = issecretvalue or function() return false; end;
+	local function SafeCooldown(start, duration, enabled, modRate)
+		if issecretvalue(start) or issecretvalue(duration) then
+			return nil, nil, nil, nil;
+		end
+		if issecretvalue(enabled) then enabled = nil; end
+		if issecretvalue(modRate) then modRate = nil; end
+		return start, duration, enabled, modRate;
+	end
 
 	if  _G.GetMouseFoci then
 		local GetMouseFoci = _G.GetMouseFoci;
@@ -67,10 +77,11 @@ local DT = {  }; __private.DT = DT;		--	data
 			local GetSpellCooldown_ = C_Spell.GetSpellCooldown;
 			_comptb.GetSpellCooldown = function(id)
 				local info = GetSpellCooldown_(id);
-				return info.startTime, info.duration, info.enabled, info.modRate;
+				if info == nil then return nil; end
+				return SafeCooldown(info.startTime, info.duration, info.enabled, info.modRate);
 			end
 		else
-			_comptb.GetSpellCooldown = GetSpellCooldown or Noop;
+			_comptb.GetSpellCooldown = GetSpellCooldown and function(id) return SafeCooldown(GetSpellCooldown(id)); end or Noop;
 		end
 		_comptb.GetSpellLevelLearned = C_Spell.GetSpellLevelLearned or GetSpellLevelLearned or Noop;
 		_comptb.RequestLoadSpellData = C_Spell.RequestLoadSpellData or RequestLoadSpellData or Noop;
@@ -78,7 +89,7 @@ local DT = {  }; __private.DT = DT;		--	data
 	else
 		_comptb.GetSpellInfo = GetSpellInfo or Noop;
 		_comptb.GetSpellName = _comptb.GetSpellInfo or Noop;
-		_comptb.GetSpellCooldown = GetSpellCooldown or Noop;
+		_comptb.GetSpellCooldown = GetSpellCooldown and function(id) return SafeCooldown(GetSpellCooldown(id)); end or Noop;
 		_comptb.GetSpellLevelLearned = GetSpellLevelLearned or Noop;
 		_comptb.RequestLoadSpellData = RequestLoadSpellData or Noop;
 		_comptb.GetSpellLink = GetSpellLink or Noop;
