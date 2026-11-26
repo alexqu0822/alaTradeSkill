@@ -41,6 +41,8 @@ local DT = {  }; __private.DT = DT;		--	data
 	VT._comptb = _comptb;
 	local Noop = function() end;
 
+	_comptb.issecretvalue = issecretvalue or function() return false; end
+
 	if  _G.GetMouseFoci then
 		local GetMouseFoci = _G.GetMouseFoci;
 		_comptb.GetMouseFocus = function()
@@ -579,6 +581,9 @@ MT.BuildEnv('Init');
 
 	function MT.GetTradeSkillSpellModifiedCooldown(sid, formatStr)
 		local start, duration, enabled, modRate = VT._comptb.GetSpellCooldown(sid);
+		if VT._comptb.issecretvalue(start) then
+			return true;
+		end
 		if start ~= nil and start > 0 then
 			local now = GetTime();
 			if start > now then
@@ -607,9 +612,9 @@ MT.BuildEnv('Init');
 			else
 				formatStr = nil;
 			end
-			return true, start, duration, enabled, modRate, formatStr;
+			return nil, true, start, duration, enabled, modRate, formatStr;
 		else
-			return false, 0, 0, enabled, modRate, nil;
+			return nil, false, 0, 0, enabled, modRate, nil;
 		end
 	end
 	local function ExistAndVisible(obj)

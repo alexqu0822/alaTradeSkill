@@ -24,8 +24,6 @@ local DT = __private.DT;
 MT.BuildEnv("cooldown");
 -->
 
-local GetSpellModifiedCooldown = MT.GetTradeSkillSpellModifiedCooldown;
-
 local F = CreateFrame('FRAME');
 F:SetScript("OnEvent", function(self, event, ...)
 	return self[event](...);
@@ -57,8 +55,10 @@ function MT.CheckCooldown(pid, var)
 			local data = list[index];
 			local sid = data[1];
 			if var.cur_rank ~= nil and var.cur_rank >= data[2] then
-				local cooling, start, duration = GetSpellModifiedCooldown(sid);
-				if cooling then
+				local secret, cooling, start, duration = MT.GetTradeSkillSpellModifiedCooldown(sid);
+				if secret then
+					-- remain previous value
+				elseif cooling then
 					cool[sid] = GetServerTime() + duration + start - GetTime();
 				else
 					cool[sid] = -1;
